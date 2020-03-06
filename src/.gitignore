@@ -1,0 +1,15 @@
+.DS_STORE
+.old
+.idea
+*.pyc
+*.swp
+*.*~
+log
+clean.sh
+ImportedPyModules
+TestFiles
+tmp
+my_locals.py
+resource.py
+x.py
+settings/*
