@@ -7,11 +7,11 @@ services:
       context: ./build/web/
       dockerfile: Dockerfile
     container_name: web
-    environment:
-      http_proxy: "${HTTP_PROXY}"
-      https_proxy: "${HTTP_PROXY}"
-      ftp_proxy: "${HTTP_PROXY}"
-      no_proxy: "${NO_PROXY}"
+    # environment:
+    #   http_proxy: "${HTTP_PROXY}"
+    #   https_proxy: "${HTTP_PROXY}"
+    #   ftp_proxy: "${HTTP_PROXY}"
+    #   no_proxy: "${NO_PROXY}"
     image: "estation2python3docker/web:1.0"
     #command: sleep infinity
     ports:
@@ -19,20 +19,20 @@ services:
     restart: unless-stopped
     volumes: 
     - ./log/web:/var/log/apache2
-    - ./src:/var/www/estation3/src:rw
-    - /data:/data
-    - /eStation2:/eStation2:rw
+    - ./src:/var/www/estation2:rw
+    - c:/data:/data:rw
+    - c:/data/eStation2:/eStation2:rw
 
   mapserver:
     build:
       context: ./build/mapserver/
       dockerfile: Dockerfile
     container_name: mapserver
-    environment:
-      http_proxy: "${HTTP_PROXY}"
-      https_proxy: "${HTTP_PROXY}"
-      ftp_proxy: "${HTTP_PROXY}"
-      no_proxy: "${NO_PROXY}"
+    # environment:
+    #   http_proxy: "${HTTP_PROXY}"
+    #   https_proxy: "${HTTP_PROXY}"
+    #   ftp_proxy: "${HTTP_PROXY}"
+    #   no_proxy: "${NO_PROXY}"
     image: "estation2python3docker/mapserver:1.0"
     #ports:
     #  - 8080:80
@@ -68,7 +68,8 @@ services:
     - 5432:5432
     restart: unless-stopped
     volumes:
-    - docker-postgresql-volume:/var/lib/postgresql:rw
+    - docker-postgresql12-volume:/var/lib/postgresql:rw
+    - ./log/postgres:/var/log/postgresql:rw
     # Starting PostgreSQL 9.6 database server: main[....] 
     # Error: Config owner (postgres:102) and data owner (root:0) do not match, and config owner
     # linix -> NTFS problem! -> https://forums.docker.com/t/trying-to-get-postgres-to-work-on-persistent-windows-mount-two-issues/12456/5
@@ -78,5 +79,5 @@ services:
 
 # create an external docker volume: docker volume create --name docker-postgresql-volume -d local
 volumes:
-  docker-postgresql-volume:
+  docker-postgresql12-volume:
     external: true

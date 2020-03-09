@@ -14,10 +14,10 @@ ARG UID
 ARG GID
 
 ENV DEBIAN_FRONTEND=noninteractive
-ARG http_proxy=http://10.168.209.72:8012
-ARG https_proxy=http://10.168.209.72:8012
-ARG ftp_proxy=http://10.168.209.72:8012
-ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
+# ARG http_proxy=http://10.168.209.72:8012
+# ARG https_proxy=http://10.168.209.72:8012
+# ARG ftp_proxy=http://10.168.209.72:8012
+# ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
 
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends build-essential ca-certificates curl wget \
     git libaio1 make cmake python3-numpy python3-dev software-properties-common  libc6-dev libfreetype6-dev libharfbuzz-dev \

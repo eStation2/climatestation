@@ -7,10 +7,10 @@ USER root
 ARG UID
 ARG GID
 
-ARG http_proxy=http://10.168.209.72:8012
-ARG https_proxy=http://10.168.209.72:8012
-ARG ftp_proxy=http://10.168.209.72:8012
-ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
+#ARG http_proxy=http://10.168.209.72:8012
+#ARG https_proxy=http://10.168.209.72:8012
+#ARG ftp_proxy=http://10.168.209.72:8012
+#ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && apt install -y software-properties-common
@@ -51,11 +51,11 @@ RUN ln -s /etc/apache2/sites-available/00-default.conf /etc/apache2/sites-enable
     
 
 # Add and enable virtualhost site
-ADD estation2.conf /etc/apache2/sites-available/estation3.conf
-RUN ln -s /etc/apache2/sites-available/estation2.conf /etc/apache2/sites-enabled/estation3.conf
+ADD estation2.conf /etc/apache2/sites-available/estation2.conf
+RUN ln -s /etc/apache2/sites-available/estation2.conf /etc/apache2/sites-enabled/estation2.conf
 
 # Configuring web folder tree
-RUN mkdir -p /var/www/estation3/src && mkdir -p /var/log/apache2/
+RUN mkdir -p /var/www/estation2 && mkdir -p /var/log/apache2/
 #ENV APACHE_RUN_USER www-data
 #ENV APACHE_RUN_GROUP www-data
 
@@ -68,19 +68,19 @@ CMD apache2ctl -D FOREGROUND
 EXPOSE  80
 
 # Enable apache mod_proxy
-RUN a2enmod proxy && \
-    a2enmod proxy_http && \
-    a2enmod proxy_balancer && \
-    a2enmod lbmethod_byrequests
+#RUN a2enmod proxy && \
+#    a2enmod proxy_http && \
+#    a2enmod proxy_balancer && \
+#    a2enmod lbmethod_byrequests
 
 # DEVELOPMENT TOOLS
-RUN export UNAME=webtklooju && \
-    useradd $UNAME -u 1004 && \
-    mkdir /home/$UNAME && \
-    cp /etc/skel/.bashrc /home/$UNAME/ && \
-    cp /etc/skel/.profile /home/$UNAME/ && \
-    cp /etc/skel/.profile /home/$UNAME/.bash_profile && \
-    echo "cd /var/www" >> /home/$UNAME/.bashrc && \
-    chown -R $UNAME /home/$UNAME && \
-    echo su -l $UNAME -s /bin/bash >> /root/.bashrc
+#RUN export UNAME=jvantklooster && \
+#    useradd $UNAME -u 1004 && \
+#    mkdir /home/$UNAME && \
+#    cp /etc/skel/.bashrc /home/$UNAME/ && \
+#    cp /etc/skel/.profile /home/$UNAME/ && \
+#    cp /etc/skel/.profile /home/$UNAME/.bash_profile && \
+#    echo "cd /var/www" >> /home/$UNAME/.bashrc && \
+#    chown -R $UNAME /home/$UNAME && \
+#    echo su -l $UNAME -s /bin/bash >> /root/.bashrc
 
