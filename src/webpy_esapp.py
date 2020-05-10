@@ -1,9 +1,4 @@
 #!/usr/bin/python
-
-# if __name__ == '__main__' and __package__ is None:
-#    from os import sys, path
-#    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import division
@@ -11,7 +6,6 @@ from __future__ import print_function
 from builtins import int
 from builtins import open
 from future import standard_library
-standard_library.install_aliases()
 from builtins import map
 from builtins import chr
 from builtins import str
@@ -19,20 +13,13 @@ from builtins import range
 from builtins import object
 import sys
 import os
-
-os.umask(0000)
-
-cur_dir = os.path.dirname(__file__)
-if cur_dir not in sys.path:
-    sys.path.append(cur_dir)
-
 import web
 import datetime
 import json
 import glob
 import time
-import webpy_esapp_helpers
 
+import webpy_esapp_helpers
 from config import es_constants
 from database import querydb
 from database import crud
@@ -41,15 +28,26 @@ from apps.productmanagement.datasets import Dataset
 from apps.es2system import es2system
 from apps.productmanagement.products import Product
 from apps.analysis import generateLegendHTML
+from lib.python import functions
+from lib.python import es_logging as log
+from lib.python import reloadmodules
 # from apps.productmanagement.datasets import Frequency
 # from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
 # from multiprocessing import (Process, Queue)
 # from apps.acquisition import acquisition
 # from apps.processing import processing      # Comment in WINDOWS version!
 
-from lib.python import functions
-from lib.python import es_logging as log
-from lib.python import reloadmodules
+# if __name__ == '__main__' and __package__ is None:
+#    from os import sys, path
+#    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+os.umask(0000)
+
+cur_dir = os.path.dirname(__file__)
+if cur_dir not in sys.path:
+    sys.path.append(cur_dir)
+
+standard_library.install_aliases()
 
 logger = log.my_logger(__name__)
 
@@ -521,8 +519,8 @@ class ImportLogo(object):
                             break
                         ii += 1
 
-                finalfilename = new_name_final.split('/')[
-                    -1]  # splits the and chooses the last part (the filename with extension)
+                # splits the and chooses the last part (the filename with extension)
+                finalfilename = new_name_final.split('/')[-1]
                 success = True
             except:
                 success = False
@@ -1236,7 +1234,7 @@ class GetHelp(object):
             docs_dir = es_constants.es2globals['base_dir'] + '/apps/help/userdocs/'
 
         if getparams['lang'] == '':
-            getparams['lang'] = es_constants.es2globals['default_language'];
+            getparams['lang'] = es_constants.es2globals['default_language']
 
         if getparams['lang'] == 'eng':
             lang_dir = 'EN/'
@@ -1541,11 +1539,11 @@ class GetCategories(object):
 
     def GET(self):
         params = web.input()
-        all = False
+        allrecs = False
         if params['all'] == 'true':
-            all = True
+            allrecs = True
         categories_dict_all = []
-        categories = querydb.get_categories(all=all)
+        categories = querydb.get_categories(allrecs=allrecs)
 
         if hasattr(categories, "__len__") and categories.__len__() > 0:
             for row in categories:
@@ -4088,9 +4086,9 @@ class GetVectorLayer(object):
     def GET(self):
         getparams = web.input()
         filename = getparams['file']
-        layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename.encode('utf-8').decode()
+        layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename  #.encode('utf-8').decode()
         # if isFile(layerfilepath):
-        layerfile = open(layerfilepath, 'r')
+        layerfile = open(layerfilepath, 'rb')
         layerfilecontent = layerfile.read()
         # else:
         #   layerfilecontent = '{"success":false, "message":"Layerfile not found!"}'
@@ -4385,7 +4383,7 @@ class GetBackgroundLayer(object):
         backgroundlayer.status = mapscript.MS_ON
         backgroundlayer.units = mapscript.MS_DD
 
-        coords = list(map(float, inputparams.BBOX.split(",")))
+        coords = list(map(float, inputparams.BBOX.split(',')))
         llx = coords[0]
         lly = coords[1]
         urx = coords[2]
@@ -4866,18 +4864,9 @@ class ProductAcquisition(object):
         self.lang = "eng"
 
     def GET(self, params):
-        # return web.ctx
-        getparams = web.input()
+        params = web.input()
 
-        products = querydb.get_products_acquisition(activated=getparams.activated)
-        # if getparams.activated or not getparams.activated:
-        #     products = querydb.get_products_acquisition(activated=getparams.activated)
-        # else:
-        #     products = querydb.get_products_acquisition()
-        # products = querydb.get_products(activated=getparams.activated)
-        products_json = functions.tojson(products)
-        products_json = '{"success":"true", "total":' + str(products.__len__()) + ',"products":[' + products_json + ']}'
-        return products_json
+        return webpy_esapp_helpers.getProductAcquisition(params.activated)
 
 
 if __name__ == "__main__":

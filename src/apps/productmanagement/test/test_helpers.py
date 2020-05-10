@@ -23,71 +23,71 @@ from ..exceptions import WrongDateParameter
 
 class TestCasters(unittest.TestCase):
     def test_cast_1_0(self):
-        self.assertEquals(1, cast_to_int("1"))
-        self.assertEquals(1, cast_to_int("1.0"))
-        self.assertEquals(1, cast_to_int("1."))
-        self.assertEquals(1, cast_to_int(1))
-        self.assertEquals(1, cast_to_int(1.0))
-        self.assertEquals(1, cast_to_int("1.1"))
-        self.assertEquals(1, cast_to_int(1.1))
-        self.assertEquals(1, cast_to_int(u"1.1"))
-        self.assertEquals("a", cast_to_int(u"a"))
+        self.assertEqual(1, cast_to_int("1"))
+        self.assertEqual(1, cast_to_int("1.0"))
+        self.assertEqual(1, cast_to_int("1."))
+        self.assertEqual(1, cast_to_int(1))
+        self.assertEqual(1, cast_to_int(1.0))
+        self.assertEqual(1, cast_to_int("1.1"))
+        self.assertEqual(1, cast_to_int(1.1))
+        self.assertEqual(1, cast_to_int(u"1.1"))
+        self.assertEqual("a", cast_to_int(u"a"))
 
 
 class TestHelpersDate(unittest.TestCase):
     def test_add_years(self):
-        self.assertEquals(add_years(datetime.date(2000, 3, 4), 4), datetime.date(2004, 3, 4))
+        self.assertEqual(add_years(datetime.date(2000, 3, 4), 4), datetime.date(2004, 3, 4))
 
     def test_add_years_to_leap_year_1(self):
-        self.assertEquals(add_years(datetime.date(2000, 2, 29), 4), datetime.date(2004, 2, 29))
+        self.assertEqual(add_years(datetime.date(2000, 2, 29), 4), datetime.date(2004, 2, 29))
 
     def test_add_years_to_leap_year_2(self):
-        self.assertEquals(add_years(datetime.date(2000, 2, 29), 3), datetime.date(2003, 2, 28))
+        self.assertEqual(add_years(datetime.date(2000, 2, 29), 3), datetime.date(2003, 2, 28))
 
     def test_add_months_1(self):
-        self.assertEquals(add_months(datetime.date(2000, 3, 4), 4), datetime.date(2000, 7, 4))
+        self.assertEqual(add_months(datetime.date(2000, 3, 4), 4), datetime.date(2000, 7, 4))
 
     def test_add_months_2(self):
-        self.assertEquals(add_months(datetime.date(2000, 3, 4), 26), datetime.date(2002, 5, 4))
+        self.assertEqual(add_months(datetime.date(2000, 3, 4), 26), datetime.date(2002, 5, 4))
 
     def test_add_months_3(self):
-        self.assertEquals(add_months(datetime.date(2000, 3, 31), 13), datetime.date(2001, 4, 30))
+        self.assertEqual(add_months(datetime.date(2000, 3, 31), 13), datetime.date(2001, 4, 30))
 
     def test_add_months_4(self):
-        self.assertEquals(add_months(datetime.date(2000, 1, 1), 11), datetime.date(2000, 12, 1))
+        self.assertEqual(add_months(datetime.date(2000, 1, 1), 11), datetime.date(2000, 12, 1))
 
     def test_add_dekad_1(self):
-        self.assertEquals(add_dekads(datetime.date(2000, 1, 1), 2), datetime.date(2000, 1, 21))
+        self.assertEqual(add_dekads(datetime.date(2000, 1, 1), 2), datetime.date(2000, 1, 21))
 
     def test_add_dekad_2(self):
-        self.assertEquals(add_dekads(datetime.date(2000, 1, 28), 1), datetime.date(2000, 2, 8))
+        self.assertEqual(add_dekads(datetime.date(2000, 1, 28), 1), datetime.date(2000, 2, 8))
 
     def test_add_dekad_3(self):
-        self.assertEquals(add_dekads(datetime.date(2000, 1, 30), 3), datetime.date(2000, 3, 10))
+        self.assertEqual(add_dekads(datetime.date(2000, 1, 30), 3), datetime.date(2000, 3, 10))
 
     def test_add_pentad_1(self):
-        self.assertEquals(add_pentads(datetime.date(2000, 1, 1), 2), datetime.date(2000, 1, 11))
+        self.assertEqual(add_pentads(datetime.date(2000, 1, 1), 2), datetime.date(2000, 1, 11))
 
     def test_add_pentad_2(self):
-        self.assertEquals(add_pentads(datetime.date(2000, 1, 28), 1), datetime.date(2000, 2, 3))
+        self.assertEqual(add_pentads(datetime.date(2000, 1, 28), 1), datetime.date(2000, 2, 3))
 
     def test_add_pentad_3(self):
-        self.assertEquals(add_pentads(datetime.date(2000, 1, 30), 3), datetime.date(2000, 2, 15))
+        self.assertEqual(add_pentads(datetime.date(2000, 1, 30), 3), datetime.date(2000, 2, 15))
 
     def test_add_days8_1(self):
-        self.assertEquals(add_days(datetime.date(2000, 1, 1), 2, 8), datetime.date(2000, 1, 17))
+        self.assertEqual(add_days(datetime.date(2000, 1, 1), 2, 8), datetime.date(2000, 1, 17))
 
     def test_add_days8_2(self):
-        self.assertEquals(add_days(datetime.date(2000, 2, 26), 1, 8), datetime.date(2000, 3, 5))
+        self.assertEqual(add_days(datetime.date(2000, 2, 26), 1, 8), datetime.date(2000, 3, 5))
 
     def test_add_days8_3(self):
-        self.assertEquals(add_days(datetime.date(2001, 2, 26), 1, 8), datetime.date(2001, 3, 6))
+        self.assertEqual(add_days(datetime.date(2001, 2, 26), 1, 8), datetime.date(2001, 3, 6))
 
     def test_add_days8_4(self):
-        self.assertEquals(add_days(datetime.date(2000, 12, 25), 1, 8), datetime.date(2001, 1, 1))
+        self.assertEqual(add_days(datetime.date(2000, 12, 25), 1, 8), datetime.date(2001, 1, 1))
 
     def test_add_days16_1(self):
-        self.assertEquals(add_days(datetime.date(2000, 12, 25), 1, 16), datetime.date(2001, 1, 1))
+        self.assertEqual(add_days(datetime.date(2000, 12, 25), 1, 16), datetime.date(2001, 1, 1))
 
 
 class TestHelpersGap(unittest.TestCase):
@@ -152,7 +152,7 @@ class TestHelpersGap(unittest.TestCase):
                 ]
 
     def test_find_gap_dekad_intervals_no_gap(self):
-        intervals = find_gaps(self.files_dekad, 
+        intervals = find_gaps(self.files_dekad,
             frequency=Frequency(dateformat='YYYYMMDD', value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.EVERY),
             only_intervals=True)
@@ -167,17 +167,17 @@ class TestHelpersGap(unittest.TestCase):
         self.assertEqual(intervals[0][2], INTERVAL_TYPE.PRESENT)
 
     def test_find_gap_dekad_no_gap(self):
-        self.assertEqual([], find_gaps(self.files_dekad, 
+        self.assertEqual([], find_gaps(self.files_dekad,
             frequency=Frequency(dateformat='YYYYMMDD', value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.EVERY)))
 
     def test_find_gap_dekad_no_gap_per(self):
-        self.assertEqual([], find_gaps(self.files_dekad, 
+        self.assertEqual([], find_gaps(self.files_dekad,
             frequency=Frequency(dateformat='YYYYMMDD', value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.PER)))
 
     def test_find_gap_dekad_with_gap(self):
-        gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:], 
+        gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:],
             frequency=Frequency(value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.EVERY))
         self.assertEqual(len(gap), 2)
@@ -186,7 +186,7 @@ class TestHelpersGap(unittest.TestCase):
 
     def test_find_gap_dekad_intervals_with_gap(self):
         frequency=Frequency(value=1, unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.EVERY)
-        intervals = find_gaps(self.files_dekad[:10] + self.files_dekad[14:], 
+        intervals = find_gaps(self.files_dekad[:10] + self.files_dekad[14:],
             frequency=frequency, only_intervals=True)
         self.assertEqual(len(intervals), 3)
         self.assertEqual(intervals[0][2], INTERVAL_TYPE.PRESENT)
@@ -195,7 +195,7 @@ class TestHelpersGap(unittest.TestCase):
         self.assertEqual(intervals[2][2], INTERVAL_TYPE.PRESENT)
 
     def test_find_gap_dekad_with_gap_per(self):
-        gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:], 
+        gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:],
             frequency=Frequency(value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.PER))
         self.assertEqual(len(gap), 2)
@@ -214,13 +214,13 @@ class TestHelpersGap(unittest.TestCase):
             frequency=frequency,
             only_intervals=True)
         self.assertEqual(len(intervals), 5)
-        self.assertEqual(intervals[0][2], INTERVAL_TYPE.PRESENT) 
+        self.assertEqual(intervals[0][2], INTERVAL_TYPE.PRESENT)
         self.assertEqual(intervals[0][0], frequency.extract_date(self.files_day_gap[0]))
         self.assertEqual(intervals[0][1], frequency.extract_date(self.files_day_gap[0]))
-        self.assertEqual(intervals[1][2], INTERVAL_TYPE.MISSING) 
-        self.assertEqual(intervals[2][2], INTERVAL_TYPE.PRESENT) 
-        self.assertEqual(intervals[3][2], INTERVAL_TYPE.MISSING) 
-        self.assertEqual(intervals[4][2], INTERVAL_TYPE.PRESENT) 
+        self.assertEqual(intervals[1][2], INTERVAL_TYPE.MISSING)
+        self.assertEqual(intervals[2][2], INTERVAL_TYPE.PRESENT)
+        self.assertEqual(intervals[3][2], INTERVAL_TYPE.MISSING)
+        self.assertEqual(intervals[4][2], INTERVAL_TYPE.PRESENT)
         self.assertEqual(intervals[4][0], frequency.extract_date(self.files_day_gap[-1]))
         self.assertEqual(intervals[4][1], frequency.extract_date(self.files_day_gap[-1]))
 
@@ -231,12 +231,12 @@ class TestHelpersGap(unittest.TestCase):
         self.assertEqual(len(gap), 19)
 
     def test_find_gap_minutes(self):
-        self.assertEqual([], find_gaps(self.files_15minutes, 
+        self.assertEqual([], find_gaps(self.files_15minutes,
             frequency=Frequency(value=4,
                 unit=Frequency.UNIT.HOUR, frequency_type=Frequency.TYPE.PER)))
 
     def test_find_gap_minutes_with_gap(self):
-        gap = find_gaps(self.files_15minutes[:3] + self.files_15minutes[5:], 
+        gap = find_gaps(self.files_15minutes[:3] + self.files_15minutes[5:],
             frequency=Frequency(value=4,
                 unit=Frequency.UNIT.HOUR, frequency_type=Frequency.TYPE.PER))
         self.assertEqual(len(gap), 2)
@@ -244,12 +244,12 @@ class TestHelpersGap(unittest.TestCase):
         self.assertEqual(gap[1], self.files_15minutes[4])
 
     def test_find_gap_months(self):
-        self.assertEqual([], find_gaps(self.files_months, 
+        self.assertEqual([], find_gaps(self.files_months,
             frequency=Frequency(value=1,
                 unit=Frequency.UNIT.MONTH, frequency_type=Frequency.TYPE.EVERY)))
 
     def test_find_gap_months_per(self):
-        self.assertEqual([], find_gaps(self.files_months, 
+        self.assertEqual([], find_gaps(self.files_months,
             frequency=Frequency(value=1,
                 unit=Frequency.UNIT.MONTH, frequency_type=Frequency.TYPE.PER)))
 
@@ -280,7 +280,17 @@ class TestHelpersGap(unittest.TestCase):
             from_date=self.from_date)
         self.assertEqual(len(gap), 6)
 
+    # find_gaps now converts all dates in date.datetime, so test is done the other way around
     def test_find_gap_wrong_parameters(self):
         self.assertRaises(WrongDateParameter, find_gaps,
-            *([], Frequency(value=1, unit=Frequency.UNIT.HOUR, frequency_type=Frequency.TYPE.EVERY),),
-            **{'to_date': datetime.date(2014, 10, 10)})
+            *([], Frequency(value=1, unit=Frequency.UNIT.DAY, frequency_type=Frequency.TYPE.EVERY),),
+            **{'to_date': datetime.datetime(2014, 10, 10), 'from_date':datetime.datetime(2014, 1, 1)})
+
+
+suite_1 = unittest.TestLoader().loadTestsFromTestCase(TestCasters)
+suite_2 = unittest.TestLoader().loadTestsFromTestCase(TestHelpersDate)
+suite_3 = unittest.TestLoader().loadTestsFromTestCase(TestHelpersGap)
+suite_helpers = unittest.TestSuite([suite_1,suite_2,suite_3])
+
+if __name__ == '__main__':
+    unittest.TextTestRunner(verbosity=2).run(suite_helpers)

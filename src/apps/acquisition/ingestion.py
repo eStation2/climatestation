@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from builtins import open
 from builtins import int
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import map
 from builtins import str
@@ -308,11 +309,10 @@ def loop_ingestion(dry_run=False, test_one_product=None):
 
 
 def ingest_archives_eumetcast(dry_run=False):
-
-#    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
-#    disseminated by JRC through EUMETCast.
-#    Gets the list of products/version/subproducts active for ingestion and for processing
-#    Arguments: dry_run -> if 1, read tables and report activity ONLY
+    #    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
+    #    disseminated by JRC through EUMETCast.
+    #    Gets the list of products/version/subproducts active for ingestion and for processing
+    #    Arguments: dry_run -> if 1, read tables and report activity ONLY
 
     logger.info("Entering routine %s" % 'ingest_archives_eumetcast')
     echo_query = False
@@ -406,7 +406,7 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
                     logger.warning("Error in ingesting file %s" % in_file)
 
 
-def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False):
+def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False, test_mode=False):
 #   Manages ingestion of 1/more file/files for a given date
 #   Arguments:
 #       input_files: input file full names
@@ -426,6 +426,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
 #       1 -> ingestion wrong; files to be copied to /data/ingest.wrong
 #       None -> some mandatory files are missing: wait and do not touch files
 #
+    data_dir_out = es_constants.processing_dir
     my_logger.info("Entering routine %s for prod: %s and date: %s" % ('ingestion', product['productcode'], in_date))
 
     preproc_type = datasource_descr.preproc_type
@@ -436,7 +437,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
 
     # Create temp output dir
     try:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0]),
+        # Reduce the length of the tmp_dir: the resulting path was too long for operating in the docker container (see ES2-544)
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0])[0:6],
                                   dir=es_constants.base_tmp_dir)
     except:
         my_logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
@@ -465,14 +467,15 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         except:
             # Error occurred and was NOT detected in pre_process routine
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
-            # Move files to 'error/storage' directory
-            for error_file in input_files:
-                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-                try:
-                    shutil.move(error_file, ingest_error_dir)
-                except:
-                    my_logger.warning("Error in moving file: %s " % error_file)
+            # Move files to 'error/storage' directory (ingest.wrong)
+            if not test_mode:
+                for error_file in input_files:
+                    if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                        shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                    try:
+                        shutil.move(error_file, ingest_error_dir)
+                    except:
+                        my_logger.warning("Error in moving file: %s " % error_file)
 
             shutil.rmtree(tmpdir)
             raise NameError('Caught Error in preprocessing routine')
@@ -481,13 +484,14 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         if str(composed_file_list)=='1':
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
             # Move files to 'error/storage' directory
-            for error_file in input_files:
-                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-                try:
-                    shutil.move(error_file, ingest_error_dir)
-                except:
-                    my_logger.warning("Error in moving file: %s " % error_file)
+            if not test_mode:
+                for error_file in input_files:
+                    if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                        shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                    try:
+                        shutil.move(error_file, ingest_error_dir)
+                    except:
+                        my_logger.warning("Error in moving file: %s " % error_file)
 
             shutil.rmtree(tmpdir)
             raise NameError('Detected Error in preprocessing routine')
@@ -500,13 +504,14 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
     except:
         my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
         # Move files to 'error/storage' directory
-        for error_file in input_files:
-            if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-            try:
-                shutil.move(error_file, ingest_error_dir)
-            except:
-                my_logger.warning("Error in moving file: %s " % error_file)
+        if not test_mode:
+            for error_file in input_files:
+                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                try:
+                    shutil.move(error_file, ingest_error_dir)
+                except:
+                    my_logger.warning("Error in moving file: %s " % error_file)
 
         shutil.rmtree(tmpdir)
         raise NameError('Error in ingestion routine')
@@ -733,13 +738,34 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
         #         pass
         #
         # OUTPUT FILES
-        output_file         = tmpdir+os.path.sep + 'merge_output.tif'
+        output_file = tmpdir + os.path.sep + 'merge_output.tif'
         output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
-        output_file_compressed  = tmpdir+os.path.sep + 'merge_output_compressed.tif'
+        output_file_compressed = tmpdir + os.path.sep + 'merge_output_compressed.tif'
 
         # -------------------------------------------------------------------------
         # STEP 1: Merge all input products into a 'tmp' file
         # -------------------------------------------------------------------------
+        # try:
+        #     input_files_str = ''
+        #     for file_add in input_files:
+        #         input_files_str += ' '
+        #         input_files_str += file_add
+        #     # command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(scaled_no_data, int(no_data),
+        #     #      input_files_str, out_tmp_file_gtiff)
+        #     command = 'gdalwarp '
+        #     command += ' -co \"COMPRESS=LZW\"'
+        #     command += ' -srcnodata '+str(nodata)
+        #     command += ' -dstnodata '+str(nodata)+' '
+        #     command += input_files_str+' ' + output_file
+        #     # command += ' -ot BYTE '
+        #     # for file in input_files:
+        #     #     command += ' '+file
+        #     my_logger.debug('Command for merging is: ' + command)
+        #     os.system(command)
+        #     # inter_processed_list.append(clipped_file)
+        # except:
+        #     pass
+
         try:
             command = es_constants.gdal_merge
             # command += ' -co \"compress=lzw\"'
@@ -747,6 +773,7 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
             command += ' -init '+str(nodata)
             command += ' -o ' + output_file
             command += ' -ot BYTE '
+            command += ' -of GTiff '
             for file in input_files:
                 command += ' '+file
 
@@ -1075,7 +1102,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             # Take gdal_merge.py from es2globals
-            command = es_constants.gdal_merge + ' -init '+ str(nodata_value)+' -co \"compress=lzw\" -ot Float32 -o '
+            command = es_constants.gdal_merge + ' -init '+ str(nodata_value)+' -co \"compress=lzw\" -of GTiff -ot Float32 -o '
             command += out_tmp_file_gtiff
             for file_add in geotiff_files:
                 command += ' '
@@ -1586,7 +1613,7 @@ def pre_process_hdf5_gls(subproducts, tmpdir, input_files, my_logger):
         # Loop over datasets and extract the one in the list
         for output_sds in sds_to_process:
             # Open directly the SDS with the HDF interface (the NETCDF one goes in segfault)
-            my_sds_hdf='HDF5:'+my_unzip_file+'://'+output_sds
+            my_sds_hdf='NETCDF:'+my_unzip_file+'://'+output_sds
             sds_in = gdal.Open(my_sds_hdf)
 
             outputfile = tmpdir + os.path.sep + filename + '.tif'
@@ -1625,9 +1652,8 @@ def pre_process_hdf5_gls_nc(subproducts, tmpdir, input_files, my_logger):
         # Loop over datasets and extract the one in the list
         for output_sds in sds_to_process:
             # Open directly the SDS with the HDF interface (the NETCDF one goes in segfault)
-            my_sds_hdf='HDF5:'+input_file+'://'+output_sds
+            my_sds_hdf='NETCDF:'+input_file+'://'+output_sds
             sds_in = gdal.Open(my_sds_hdf)
-
             outputfile = tmpdir + os.path.sep + os.path.basename(input_file) + '.tif'
             write_ds_to_geotiff(sds_in, outputfile)
             sds_in = None
@@ -1804,7 +1830,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     if len(good_input_files) == 0:
         return []
     # Does check the number of files ?
-    output_file         = tmpdir+os.path.sep + 'merge_output.tif'
+    output_file = tmpdir + os.path.sep + 'merge_output.tif'
     output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
     # output_file_mapset  = tmpdir+os.path.sep + 'merge_output_WD-GEE-'+region+'-AVG.tif'
     output_file_mapset = tmpdir + os.path.sep + file_naming + '.tif'
@@ -1821,7 +1847,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         command += ' -o ' + output_file
         command += ' -ot BYTE '
         for file in good_input_files:
-            command += ' '+file
+            command += ' ' + file
 
         my_logger.debug('Command for merging is: ' + command)
         os.system(command)
@@ -2210,7 +2236,6 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
     pre_processed_list = []
 
     list_input_files = []
-
 
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
@@ -2917,7 +2942,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             return -1
 
         if len(interm_files_list) > 1 :
-            command = es_constants.gdal_merge + ' -n '+ scaled_no_data+' -a_nodata '+ str(int(no_data))+' -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
+            command = es_constants.gdal_merge + ' -of GTiff '+ '-n '+ scaled_no_data+' -a_nodata '+ str(int(no_data))+' -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
 
             out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
 
@@ -3463,6 +3488,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 #                          MUST be specified.
 
     version_undef = 'undefined'
+    data_dir_out = es_constants.processing_dir
     my_logger.info("Entering routine %s for product %s - date %s" % ('ingest_file', product['productcode'], in_date))
 
     # Test the file/files exists  (if the file doesn't exists but if the file list is more than 1 then it proceed to next step
@@ -3634,9 +3660,22 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # -------------------------------------------------------------------------
 
         native_mapset_code = datasource_descr.native_mapset
-        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)           # Why in ROnly !??? it generates an error below
+
+        init_orig_ds = gdal.Open(intermFile, gdal.GF_Write)  #GA_Update
+        if init_orig_ds is None:
+            init_orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)           # Why in ROnly !??? it generates an error below orig_ds = gdal.Open(intermFile, gdal.GA_Update)
         native_mapset = mapset.MapSet()
         native_mapset.assigndb(native_mapset_code)
+
+        # ES-535  Create a copy to assign projection.
+        intermFile_copyname = 'copy_'+os.path.basename(intermFile)
+        intermFile_copy = os.path.join(os.path.dirname(intermFile), intermFile_copyname)
+
+        # Prepare output driver
+        out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+
+        # Open destination dataset # ES-535
+        orig_ds = out_driver.CreateCopy(intermFile_copy, init_orig_ds, 0)
 
         if not native_mapset.is_wbd():
           if native_mapset_code != 'default':
@@ -3676,8 +3715,6 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # -------------------------------------------------------------------------
         # Generate the output file
         # -------------------------------------------------------------------------
-        # Prepare output driver
-        out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
 
         merge_existing_output = False
         # Check if the output file already exists
@@ -3777,7 +3814,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         sds_meta.assign_from_product(product['productcode'], subproducts[ii]['subproduct'], product['version'])
         sds_meta.assign_date(out_date_str_final)
         sds_meta.assign_subdir_from_fullpath(output_directory)
-        sds_meta.assign_comput_time_now()
+        sds_meta.assign_compute_time_now()
 
         # Check not WD-GEE
         if not trg_mapset.is_wbd():
@@ -3788,16 +3825,30 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Close output file
             trg_ds = None
+            out_driver = None
             sds_meta.assign_input_files(in_files)
 
           else:
             # Close output file
             trg_ds = None
+            out_driver = None
 
             # Merge the old and new output products into a 'tmp' file
+            # try:
+            #     command = 'gdalwarp '
+            #     command += ' -co \"COMPRESS=LZW\"'
+            #     command += ' -srcnodata ' + str(out_nodata)
+            #     command += ' -dstnodata ' + str(out_nodata) + ' -of GTiff '
+            #     command += my_output_filename + ' ' + output_filename+ ' ' + tmp_output_file
+            #     my_logger.debug('Command for merging is: ' + command)
+            #     os.system(command)
+            #     # inter_processed_list.append(clipped_file)
+            # except:
+            #     pass
             try:
                 command = es_constants.gdal_merge + ' -n '+str(out_nodata)
                 command += ' -a_nodata '+str(out_nodata)
+                command += ' -of GTiff '
                 command += ' -co \"compress=lzw\" -o '
                 command += tmp_output_file
                 command += ' '+ my_output_filename+ ' '+output_filename
@@ -3992,11 +4043,12 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
     sds_meta.assign_from_product(product_def['productcode'], product_def['subproductcode'], product_def['version'])
     sds_meta.assign_date(out_date_str_final)
     sds_meta.assign_subdir_from_fullpath(output_directory)
-    sds_meta.assign_comput_time_now()
+    sds_meta.assign_compute_time_now()
     sds_meta.assign_input_files(input_file)
 
     sds_meta.write_to_ds(trg_ds)
     trg_ds = None
+    out_driver = None
 
 
 def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete=False):
@@ -4151,13 +4203,14 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
     # -------------------------------------------------------------------------
     # Close dataset
     trg_ds = None
+    out_driver = None
 
     sds_meta_out.assign_es2_version()
     sds_meta_out.assign_mapset(target_mapsetid)
     sds_meta_out.assign_from_product(product_code, sub_product_code, version)
     sds_meta_out.assign_date(str_date)
     sds_meta_out.assign_subdir_from_fullpath(output_dir)
-    sds_meta_out.assign_comput_time_now()
+    sds_meta_out.assign_compute_time_now()
     sds_meta_out.assign_input_files(my_input_file)
 
     # Write metadata to file
@@ -4416,7 +4469,8 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     # Assign to the output array
     # Option 2: ES2-385 Check if Output rescaling has to be done
     if out_scale_factor != 1 or out_offset != 0:
-        trg_data = old_div((phys_value - out_offset), out_scale_factor)
+        # trg_data = old_div((phys_value - out_offset), out_scale_factor)
+        trg_data = (phys_value - out_offset)/ out_scale_factor
     else:
         trg_data = phys_value
 
@@ -4435,9 +4489,9 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     return trg_data
 
 #
-#   Converts the string data type to numpy types
-#   type: data type in wkt-estation format (inherited from 1.X)
-#   Refs. see e.g. http://docs.scipy.org/doc/numpy/user/basics.types.html
+# Converts the string data type to numpy types
+# type: "data type in wkt-estation format (inherited from 1.X)"
+# Refs. see e.g. http://docs.scipy.org/doc/numpy/user/basics.types.html
 #
 def conv_data_type_to_numpy(type):
     if type == 'Byte':

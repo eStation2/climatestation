@@ -7,25 +7,34 @@ from __future__ import division
 from builtins import super
 from builtins import int
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import str
 from builtins import object
-import sys, os, time, atexit
+
+import sys
+import os
+import time
+import atexit
+import io
+# import signal
 import psutil
+
 if sys.platform != 'win32':
     from signal import SIGKILL, SIGTERM
 from lib.python import es_logging as log
+
 logger = log.my_logger("lib.python.daemon")
 from config import es_constants
 
 if not os.path.isdir(es_constants.pid_file_dir):
-        os.makedirs(es_constants.pid_file_dir)
+    os.makedirs(es_constants.pid_file_dir)
 if not os.path.isdir(es_constants.processed_list_base_dir):
-        os.makedirs(es_constants.processed_list_base_dir)
+    os.makedirs(es_constants.processed_list_base_dir)
 if not os.path.isdir(es_constants.processed_list_eum_dir):
-        os.makedirs(es_constants.processed_list_eum_dir)
+    os.makedirs(es_constants.processed_list_eum_dir)
 if not os.path.isdir(es_constants.processed_list_int_dir):
-        os.makedirs(es_constants.processed_list_int_dir)
+    os.makedirs(es_constants.processed_list_int_dir)
 
 
 class Daemon(object):
@@ -34,6 +43,7 @@ class Daemon(object):
 
     Usage: subclass the Daemon class and override the run() method
     """
+
     def __init__(self, pidfile, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
         self.stdin = stdin
         self.stdout = stdout
@@ -73,13 +83,17 @@ class Daemon(object):
         # Now I am a daemon!
         logger.debug("Daemon created")
 
-        if(isinstance(sys.stdout, file)):
+        # if(isinstance(sys.stdout, file)):
+        if isinstance(sys.stdout, io.IOBase):
             # redirect standard file descriptors
             sys.stdout.flush()
             sys.stderr.flush()
-            si = file(self.stdin, 'r')
-            so = file(self.stdout, 'a+')
-            se = file(self.stderr, 'a+', 0)
+            si = open(self.stdin, 'r')
+            so = open(self.stdout, 'a+')
+            se = open(self.stderr, 'a+')
+            # si = file(self.stdin, 'r')
+            # so = file(self.stdout, 'a+')
+            # se = file(self.stderr, 'a+', 0)
             os.dup2(si.fileno(), sys.stdin.fileno())
             os.dup2(so.fileno(), sys.stdout.fileno())
             os.dup2(se.fileno(), sys.stderr.fileno())
@@ -90,26 +104,29 @@ class Daemon(object):
         # write pidfile
         atexit.register(self.delpid)
         pid = str(os.getpid())
-        file(self.pidfile, 'w+').write("%s\n" % pid)
-        logger.debug("Pid %s written into file %s" % (pid,self.pidfile))
+        # file(self.pidfile, 'w+').write("%s\n" % pid)
+        with open(self.pidfile, 'w+') as f:
+            f.write("%s\n" % pid)
+        # open(self.pidfile, 'w+').write("%s\n" % pid)
+        logger.debug("Pid %s written into file %s" % (pid, self.pidfile))
 
     def delpid(self):
         # Change to deal with forking in processing (otherwise the pidfile is deleted by child process)
-        logger = log.my_logger("lib.python.daemon")
-        #my_pid=os.getpgid
-        #logger.info("My Pid: %i" % my_pid)
+        # logger = log.my_logger("lib.python.daemon")
+        # my_pid=os.getpgid
+        # logger.info("My Pid: %i" % my_pid)
 
-        #pid_file=open(self.pidfile)
-        #pid = pid_file.read()
-        #logger.info("Pid: %i" % pid)
-        #if pid == my_pid:
+        # pid_file=open(self.pidfile)
+        # pid = pid_file.read()
+        # logger.info("Pid: %i" % pid)
+        # if pid == my_pid:
         logger.info("Removing the Pid")
         os.remove(self.pidfile)
 
     def status(self):
-        #If : pid exists + process run -> ON - return True
-        #if : pid exists but process not run -> OFF - warning (and remove pid with ERROR message)
-        #if: no pid -> check process (later on -> on production machine)
+        # If : pid exists + process run -> ON - return True
+        # if : pid exists but process not run -> OFF - warning (and remove pid with ERROR message)
+        # if: no pid -> check process (later on -> on production machine)
         pid = self.getpid_from_file()
         if pid and psutil.pid_exists(pid):
             return True
@@ -146,17 +163,45 @@ class Daemon(object):
         # Try killing the daemon process
         try:
             while 1:
-                #os.kill(pid, SIGTERM)
+                # os.kill(pid, SIGTERM)
                 if sys.platform != 'win32':
                     os.kill(pid, SIGKILL)
                 time.sleep(0.1)
+
+            # if sys.platform != 'win32':
+            #     os.kill(pid, SIGKILL)
+            #
+            # trystop = True
+            # while trystop:
+            #     # os.kill(pid, SIGTERM)
+            #     if sys.platform != 'win32':
+            #         # os.kill(pid, SIGKILL)
+            #         os.kill(pid, signal.SIGSTOP)
+            #
+            #         info = os.waitpid(pid, os.WSTOPPED)
+            #         # waitpid() method returns a
+            #         # tuple whose first attribute
+            #         # represents child's pid
+            #         # and second attribute
+            #         # represnting child's status indication
+            #
+            #         # os.WSTOPSIG() returns the signal number
+            #         # which caused the process to stop
+            #         stopSignal = os.WSTOPSIG(info[1])
+            #         print("Child stopped due to signal no:", stopSignal)
+            #         print("Signal name:", signal.Signals(stopSignal).name)
+            #         if stopSignal:
+            #             trystop = False
+            #         else:
+            #             time.sleep(0.1)
+            # return True
         except OSError as err:
             err = str(err)
             if err.find("No such process") > 0:
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
             else:
-                print (str(err))
+                print(str(err))
                 sys.exit(1)
 
     def restart(self):
@@ -179,7 +224,8 @@ class Daemon(object):
         """
         # Get the pid from the pidfile
         try:
-            pf = file(self.pidfile,'r')
+            pf = open(self.pidfile, 'r')
+            # pf = file(self.pidfile, 'r')
             pid = int(pf.read().strip())
             pf.close()
         except:
@@ -192,4 +238,4 @@ class DaemonDryRunnable(Daemon):
     def __init__(self, *args, **kwargs):
         self.dry_run = kwargs.pop('dry_run', True)
         super(DaemonDryRunnable, self).__init__(*args, **kwargs)
-        #Daemon.__init__(self, *args, **kwargs)
+        # Daemon.__init__(self, *args, **kwargs)

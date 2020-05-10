@@ -1,9 +1,5 @@
 #!/usr/bin/python
 
-# if __name__ == '__main__' and __package__ is None:
-#    from os import sys, path
-#    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import unicode_literals
@@ -12,23 +8,12 @@ from builtins import open
 from builtins import round
 from builtins import int
 from future import standard_library
-standard_library.install_aliases()
 from builtins import map
 from builtins import str
 from past.utils import old_div
+
 import sys
 import os
-
-# TODO: This turns of caching, remove!!!
-# import sys
-# sys.dont_write_bytecode = True
-
-os.umask(0000)
-
-cur_dir = os.path.dirname(__file__)
-if cur_dir not in sys.path:
-    sys.path.append(cur_dir)
-
 import shutil
 import datetime
 import json
@@ -40,8 +25,6 @@ import base64
 import configparser
 import subprocess
 from subprocess import *
-from multiprocessing import *
-
 import matplotlib as mpl
 
 mpl.use('Agg')
@@ -53,26 +36,53 @@ from lib.python import reloadmodules
 from config import es_constants
 from database import querydb
 from database import crud
-
-from apps.acquisition import get_eumetcast
 from apps.acquisition import acquisition
-from apps.processing import processing  # Comment in WINDOWS version!
+from apps.processing import processing
 from apps.productmanagement.datasets import Dataset
 from apps.es2system import es2system
-from apps.productmanagement.datasets import Frequency
 from apps.productmanagement.products import Product
 from apps.productmanagement import requests
 from apps.analysis import generateLegendHTML
 from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
-# from multiprocessing import (Process, Queue)
-from apps.tools import ingest_historical_archives as iha
-
 from lib.python import functions
 from lib.python import es_logging as log
+
+# from apps.acquisition import get_eumetcast
+# from apps.productmanagement.datasets import Frequency
+# from multiprocessing import (Process, Queue)
+# from apps.tools import ingest_historical_archives as iha
+# from multiprocessing import *
+
+# TODO: This turns of caching, remove!!!
+# sys.dont_write_bytecode = True
+
+# if __name__ == '__main__' and __package__ is None:
+#    from os import sys, path
+#    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+os.umask(0000)
+
+cur_dir = os.path.dirname(__file__)
+if cur_dir not in sys.path:
+    sys.path.append(cur_dir)
+
+standard_library.install_aliases()
 
 logger = log.my_logger(__name__)
 
 WEBPY_COOKIE_NAME = "webpy_session_id"
+
+
+def getProductAcquisition(activated):
+    products = querydb.get_products_acquisition(activated=activated)
+    # if params.activated or not params.activated:
+    #     products = querydb.get_products_acquisition(activated=params.activated)
+    # else:
+    #     products = querydb.get_products_acquisition()
+    # products = querydb.get_products(activated=params.activated)
+    products_json = functions.tojson(products)
+    products_json = '{"success":"true", "total":' + str(products.__len__()) + ',"products":[' + products_json + ']}'
+    return products_json
 
 
 def GetLogos():
@@ -80,7 +90,8 @@ def GetLogos():
     logos = querydb.get_logos()
     if hasattr(logos, "__len__") and logos.__len__() > 0:
         for logo in logos:
-            logofilepath = es_constants.estation2_logos_dir + os.path.sep + logo['logo_filename'].encode('utf-8').decode()
+            logofilepath = es_constants.estation2_logos_dir + os.path.sep + logo['logo_filename'].encode(
+                'utf-8').decode()
             if os.path.exists(logofilepath):
                 logofile = open(logofilepath, 'rb')
                 logofilecontent = logofile.read()
@@ -93,6 +104,8 @@ def GetLogos():
                     mime = 'jpeg'
                 elif file_extension == '.gif':
                     mime = 'gif'
+                else:
+                    mime = 'png'
                 src = "data:image/" + mime + ";base64," + encoded.decode()
             else:
                 src = ''
@@ -219,9 +232,11 @@ def ChangeThema(thema):
         if PC23_connection:
             setThemaOtherPC = functions.setThemaOtherPC(otherPC, thema)
             if not setThemaOtherPC:
-                message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because of an error on the other pc. Please set the Thema manually on the other pc!'
+                message = '<B>Thema NOT set on other pc</B>, ' + otherPC \
+                          + ' because of an error on the other pc. Please set the Thema manually on the other pc!'
         else:
-            message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because there is no connection. Please set the Thema manually on the other pc!'
+            message = '<B>Thema NOT set on other pc</B>, ' + otherPC \
+                      + ' because there is no connection. Please set the Thema manually on the other pc!'
 
     if themaset:
         changethema_json = '{"success":"true", "message":"Thema changed on this PC!</BR>' + message + '"}'
@@ -288,7 +303,7 @@ def __checkCreateSubproductDir(productcode, version):
 def UpdateProduct(productcode, version, activate):
     result = querydb.activate_deactivate_product(productcode=productcode,
                                                  version=version,
-                                                 activate=activate, force=True)
+                                                 activate=activate)
 
     if result:
         if activate:
@@ -381,10 +396,10 @@ def UpdateUserSettings(params):
                        'get_eumetcast_output_dir', 'get_internet_output_dir', 'proxy_host', 'proxy_port', 'proxy_user',
                        'proxy_userpwd'):
             if setting == 'data_dir' and (
-                    ((config_usersettings.get('USER_SETTINGS', setting, 0) == '' and params['systemsettings'][
-                        setting] != config_factorysettings.get('FACTORY_SETTINGS', setting, 0))
-                     or (config_usersettings.get('USER_SETTINGS', setting, 0) != '' and params['systemsettings'][
-                                setting] != config_usersettings.get('USER_SETTINGS', setting, 0)
+                    ((config_usersettings.get('USER_SETTINGS', setting) == '' and params['systemsettings'][
+                        setting] != config_factorysettings.get('FACTORY_SETTINGS', setting))
+                     or (config_usersettings.get('USER_SETTINGS', setting) != '' and params['systemsettings'][
+                                setting] != config_usersettings.get('USER_SETTINGS', setting)
                      ))):
                 # The data_dir has been changed, delete all completeness_bars
                 completeness_bars_dir = es_constants.base_local_dir + os.path.sep + 'completeness_bars/'
@@ -394,10 +409,10 @@ def UpdateUserSettings(params):
                         if os.path.isfile(file_path):
                             os.unlink(file_path)
                     except Exception as e:
-                        logger.error('UpdateUserSettings - could not delete completeness_bars file: ' + e)
+                        logger.error('UpdateUserSettings - could not delete completeness_bars file')
 
             if config_factorysettings.has_option('FACTORY_SETTINGS', setting) \
-                    and config_factorysettings.get('FACTORY_SETTINGS', setting, 0) == params['systemsettings'][setting]:
+                    and config_factorysettings.get('FACTORY_SETTINGS', setting) == params['systemsettings'][setting]:
                 config_usersettings.set('USER_SETTINGS', setting, '')
             elif config_usersettings.has_option('USER_SETTINGS', setting):
                 config_usersettings.set('USER_SETTINGS', setting, params['systemsettings'][setting])
@@ -438,7 +453,8 @@ def getRunningRequestJobs():
             #     #     list_of_jobs.append(jobstatus)
             #     # deleteJobDir(requestid)
             #     success = False
-            #     message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
+            #     message = 'Error connecting to the server, please check if your network is connected to
+            #     the internet or uses a proxy. Set your proxy settings under the system tab!'
             else:
                 list_of_jobs.append(jobstatus)
 
@@ -482,6 +498,7 @@ def statusRequestJob(requestid):
     totko = 0
     mapsetcode = ''
     subproductcode = ''
+    descriptive_name = ''
 
     requestinfo = requestid.split('_')
     level = requestinfo[len(requestinfo) - 1]
@@ -501,7 +518,6 @@ def statusRequestJob(requestid):
         p5_requestfile = ''  # mandatory but empty for status action
 
         db_product_info = querydb.get_product_native(productcode=productcode, version=version)
-        descriptive_name = ''
         if hasattr(db_product_info, "__len__") and db_product_info.__len__() > 0:
             for row in db_product_info:
                 prod_dict = functions.row2dict(row)
@@ -534,7 +550,7 @@ def statusRequestJob(requestid):
 
             statusresult = job.communicate()
 
-            status = statusresult[0].split(';')
+            status = statusresult[0].split(b';')
             if status[0] == 'Error':
                 jobstatus = 'error'  # status[2]
                 datestatus = status[1]
@@ -542,20 +558,20 @@ def statusRequestJob(requestid):
                 totok = None
                 totko = None
             elif len(status) >= 3:
-                jobstatus = status[0].split(':')[0]
+                jobstatus = status[0].split(b':')[0].decode()
                 datestatus = status[1]
-                totfiles = status[2].split(':')[1]
-                totok = status[3].split(':')[1]
-                totko = status[4].split(':')[1]
+                totfiles = status[2].split(b':')[1].decode()
+                totok = status[3].split(b':')[1].decode()
+                totko = status[4].split(b':')[1].decode()
             else:
-                jobstatus = status[0].split(':')[0]
+                jobstatus = status[0].split(b':')[0].decode()
                 datestatus = status[1]
                 totfiles = None
                 totok = None
                 totko = None
 
             message = 'Status info request: ' + requestid
-
+            # jobstatus = str(jobstatus)
             # statusresult = job.stdout.readline().rstrip("\n\r")   # Not good, creates defunct process with no kill
             # job.poll()
             # job.terminate()
@@ -714,7 +730,8 @@ def restartRequestJob(requestid):
                     message = 'Restarted request: ' + requestid
                 elif jobstatus['status'].lower() in ['error']:
                     restartingjob = False
-                    message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
+                    message = 'Error connecting to the server, please check if your network is connected to ' \
+                              'the internet or uses a proxy. Set your proxy settings under the system tab!'
                 else:
                     message = 'Error restarting request: ' + requestid + ' job status: ' + jobstatus['status'].lower()
         except:
@@ -940,7 +957,8 @@ def createRequestJob(params):
                     # deleteJobDir(requestid)
                     createnewrequest = False
                     creatingjob = False
-                    message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
+                    message = 'Error connecting to the server, please check if your network is connected to ' \
+                              'the internet or uses a proxy. Set your proxy settings under the system tab!'
                 else:
                     createnewrequest = False
                     # todo: Delete job dir?
@@ -1365,6 +1383,7 @@ def execServiceTask(getparams):
             if not status:
                 os.system("python " + system_service_script + " start")
                 message = 'System service started'
+                status = system_daemon.status()
             else:
                 message = 'System service was already up'
 
@@ -1910,28 +1929,38 @@ def importWorkspaces(params):
     return status
 
 
-def importJRCRefWorkspaces():
+def importJRCRefWorkspaces(version=0):
+    success = False
     try:
-        filename = 'jrc_ref_workspaces.json'
+        jrc_ref_settings = functions.getJRCRefSettings()
+        if bool(jrc_ref_settings['update']) and int(jrc_ref_settings['version']) < version:
+            # Delete existing workspaces of user jrc_ref
+            deletestatus = querydb.delete_jrcref_workspaces()
+            if deletestatus:
+                filename = 'jrc_ref_workspaces.json'
 
-        with open(es_constants.es2globals['base_dir'] + '/database/referenceWorkspaces/' + filename, 'r') as f:
-            workspaces_dict = json.load(f)
+                with open(es_constants.es2globals['base_dir'] + '/database/referenceWorkspaces/' + filename, 'r') as f:
+                    workspaces_dict = json.load(f)
 
-        for workspace in workspaces_dict['workspaces']:
-            workspace['isNewWorkspace'] = 'true'
-            workspace['isrefworkspace'] = 'true'
-            workspace['pinned'] = 'false'
-            # workspace['showindefault'] = 'false'
-            workspace['userid'] = es_constants.es2globals['jrc_ref_user']
-            workspace['workspaceid'] = None
-            for wsmap in workspace['maps']:
-                wsmap['userid'] = es_constants.es2globals['jrc_ref_user']
-            for wsgraph in workspace['graphs']:
-                wsgraph['userid'] = es_constants.es2globals['jrc_ref_user']
+                for workspace in workspaces_dict['workspaces']:
+                    workspace['isNewWorkspace'] = 'true'
+                    workspace['isrefworkspace'] = 'true'
+                    workspace['pinned'] = 'false'
+                    # workspace['showindefault'] = 'false'
+                    workspace['userid'] = es_constants.es2globals['jrc_ref_user']
+                    workspace['workspaceid'] = None
+                    for wsmap in workspace['maps']:
+                        wsmap['userid'] = es_constants.es2globals['jrc_ref_user']
+                    for wsgraph in workspace['graphs']:
+                        wsgraph['userid'] = es_constants.es2globals['jrc_ref_user']
 
-            saveWorkspace(workspace)
+                    saveWorkspace(workspace)
 
-        success = True
+                functions.setJRCRefSetting('version', str(version))
+                functions.setJRCRefSetting('update', 'false')
+                success = True
+            else:
+                success = False
     except:
         success = False
 
@@ -1957,12 +1986,13 @@ def saveWorkspacePin(params):
 
         if params['isNewWorkspace'] == 'true':
             if crud_db.create('user_workspaces', workspace):
-                createdWorkspace = querydb.getCreatedUserWorkspace(params['userid'])
+                createdWorkspace = querydb.getCreatedUserWorkspace(params['userid'], params['workspacename'])
                 for row in createdWorkspace:
                     newworkspaceid = row['lastworkspaceid']
 
-                createstatus = '{"success":true, "message":"Workspace created on pin setting change!", "workspaceid": ' + str(
-                    newworkspaceid) + '}'
+                createstatus = '{"success":true, ' \
+                               '"message":"Workspace created on pin setting change!", "workspaceid": ' \
+                               + str(newworkspaceid) + '}'
             else:
                 createstatus = '{"success":false, "message":"Error creating the new Workspace on pin setting change!"}'
         else:
@@ -1980,7 +2010,8 @@ def saveWorkspacePin(params):
 def saveWorkspaceName(params):
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
     # ToDo: Better error handling.
-    createstatus = '{"success":false, "message":"An error occured while saving the Workspace when changing the workspace name!"}'
+    createstatus = '{"success":false, "message":"An error occured while saving ' \
+                   'the Workspace when changing the workspace name!"}'
 
     if 'userid' in params and 'workspaceid' in params:
         workspace = {
@@ -1990,14 +2021,15 @@ def saveWorkspaceName(params):
 
         if params['isNewWorkspace'] == 'true':
             if crud_db.create('user_workspaces', workspace):
-                createdWorkspace = querydb.getCreatedUserWorkspace(params['userid'])
+                createdWorkspace = querydb.getCreatedUserWorkspace(params['userid'], params['workspacename'])
                 for row in createdWorkspace:
                     newworkspaceid = row['lastworkspaceid']
 
-                createstatus = '{"success":true, "message":"Workspace created when changing the workspace name!", "workspaceid": ' + str(
-                    newworkspaceid) + '}'
+                createstatus = '{"success":true, "message":"Workspace created when changing ' \
+                               'the workspace name!", "workspaceid": ' + str(newworkspaceid) + '}'
             else:
-                createstatus = '{"success":false, "message":"Error creating the new Workspace when changing the workspace name!"}'
+                createstatus = '{"success":false, "message":"Error creating the new Workspace ' \
+                               'when changing the workspace name!"}'
         else:
             workspace['workspaceid'] = int(params['workspaceid'])
             if crud_db.update('user_workspaces', workspace):
@@ -2024,13 +2056,15 @@ def saveWorkspaceInDefaultWS(params):
         }
 
         if crud_db.update('user_workspaces', workspace):
-            createstatus = '{"success":true, "message":"Workspace In Default WS setting changed!", "workspaceid": ' + str(
+            createstatus = '{"success":true, "message":"Workspace In Default WS setting changed!", "workspaceid": ' \
+                           + str(
                 params['workspaceid']) + '}'
         else:
             createstatus = '{"success":false, "message":"Error updating the Workspace on In Default WS setting!"}'
 
     else:
-        createstatus = '{"success":false, "message":"No user data given when changing the workspace In Default WS setting!"}'
+        createstatus = '{"success":false, "message":"No user data given when changing the workspace ' \
+                       'In Default WS setting!"}'
 
     return createstatus
 
@@ -2098,7 +2132,7 @@ def getMapTemplates(params):
             maptemplates_json = '{"success":true, "total":' \
                                 + str(usermaptemplates.__len__()) \
                                 + ',"usermaptemplates":[]}'
-            # maptemplates_json = '{"success":true, "error":"No Map Templates defined for user!"}'   # OR RETURN A DEFAULT MAP TEMPLATE?????
+            # maptemplates_json = '{"success":true, "error":"No Map Templates defined for user!"}'
 
     else:
         maptemplates_json = '{"success":false, "error":"Userid not given!"}'
@@ -2239,7 +2273,7 @@ def getGraphTemplates(params):
         else:
             graphtemplates_json = '{"success":"true", "total":0' \
                                   + ',"usergraphtemplates":[]}'
-            # graphtemplates_json = '{"success":true, "error":"No Graph Templates defined for user!"}'  # OR RETURN A DEFAULT GRAPH TEMPLATE?????
+            # graphtemplates_json = '{"success":true, "error":"No Graph Templates defined for user!"}'
 
     else:
         graphtemplates_json = '{"success":false, "error":"Userid not given!"}'
@@ -2296,7 +2330,8 @@ def __getGraphTemplates(params):
             graphtemplates_json = '{"success":"true", "total":' \
                                   + str(usergraphtemplates.__len__()) \
                                   + ',"usergraphtemplates":[]}'
-            # graphtemplates_json = '{"success":true, "error":"No Graph Templates defined for user!"}'  # OR RETURN A DEFAULT GRAPH TEMPLATE?????
+            # graphtemplates_json = '{"success":true, "error":"No Graph Templates defined for user!"}'
+            # OR RETURN A DEFAULT GRAPH TEMPLATE?????
 
     else:
         graphtemplates_json = '{"success":false, "error":"Userid not given!"}'
@@ -2618,8 +2653,8 @@ def getGraphTimeseries(params):
 #     #       surface:    count * PixelArea                                       e.g. Water Bodies
 #     #       percent:    count/Ntot                                              e.g. Vegetation anomalies
 #     #
-#     #   History: 1.0 :  Initial release - since 2.0.1 -> now renamed '_green' from greenwich package
-#     #            1.1 :  Since Feb. 2017, it is based on a different approach (gdal.RasterizeLayer instead of greenwich)
+#     #   History: 1.0 : Initial release - since 2.0.1 -> now renamed '_green' from greenwich package
+#     #            1.1 : Since Feb. 2017, it is based on a different approach (gdal.RasterizeLayer instead of greenwich)
 #     #                   in order to solve the issue with MULTIPOLYGON
 #     #
 #
@@ -2681,7 +2716,8 @@ def getGraphTimeseries(params):
 #         outLayer.CreateFeature(feature)
 #         feature = None
 #
-#         [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, start_date, end_date)
+#         [list_files, dates_list] = getFilesList(productcode, subproductcode, version,
+#                                                 mapsetcode, date_format, start_date, end_date)
 #
 #         # Built a dictionary with filenames/dates
 #         dates_to_files_dict = dict(zip(dates_list, list_files))
@@ -2769,7 +2805,8 @@ def getGraphTimeseries(params):
 #                     # Test ONLY
 #                     # write_ds_to_geotiff(mem_ds, '/data/processing/exchange/Tests/mem_ds.tif')
 #
-#                     if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface':
+#                     if aggregate['aggregation_type'] == 'count' or
+#                        aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface':
 #
 #                         if mxnodata.count() == 0:
 #                             meanResult = None
@@ -2864,7 +2901,8 @@ def getGraphTimeseries(params):
 #         # Return result
 #         return resultDatesValues
 #     else:
-#         logger.debug('ERROR: product not registered in the products table! - %s %s %s' % (productcode, subproductcode, version))
+#         logger.debug('ERROR: product not registered in the products table! - %s %s %s'
+#                      % (productcode, subproductcode, version))
 #         return []
 #
 #
@@ -3053,7 +3091,8 @@ def matrixTimeseries(params):
             y = 0
 
             xAxesYear = yearsToCompare[-1]
-            for year in yearsToCompare:  # Handle Leap year date 29 February. If exists in data then change the year of all data to the leap year.
+            # Handle Leap year date 29 February. If exists in data then change the year of all data to the leap year.
+            for year in yearsToCompare:
                 if calendar.isleap(year):
                     xAxesYear = year
 
@@ -3077,10 +3116,12 @@ def matrixTimeseries(params):
                 x = 0
                 for val in list_values:
                     value = []
-                    # # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                    # # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month)
+                    #             + ',' + str(val['date'].day) + ')'
                     # valdate = functions.unix_time_millis(val['date'])
                     # # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
-                    # date = str(yearsToCompare[-1]) + '-' + str(val['date'].strftime('%m')) + '-' + str(val['date'].strftime('%d'))
+                    # date = str(yearsToCompare[-1]) + '-' + str(val['date'].strftime('%m')) + '-'
+                    #        + str(val['date'].strftime('%d'))
                     # print val['date']
 
                     # if overTwoYears:
@@ -3154,7 +3195,8 @@ def matrixTimeseries(params):
             roundTo = 3
 
         # min = float((legend_steps[0].from_step - legend_steps[0].scale_offset)/legend_steps[0].scale_factor)
-        # max = float((legend_steps[legend_steps.__len__()-1].to_step - legend_steps[legend_steps.__len__()-1].scale_offset)/legend_steps[legend_steps.__len__()-1].scale_factor)
+        # max = float((legend_steps[legend_steps.__len__()-1].to_step
+        #    - legend_steps[legend_steps.__len__()-1].scale_offset)/legend_steps[legend_steps.__len__()-1].scale_factor)
 
         if step_type == 'logarithmic':
             if legend_steps[0].from_step <= 0:
@@ -3180,7 +3222,7 @@ def matrixTimeseries(params):
             from_step = step.from_step
             to_step = step.to_step
 
-            colorRGB = list(map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip())))
+            colorRGB = list(map(int, (color.strip() for color in step.color_rgb.split(' ') if color.strip())))
             colorHex = functions.rgb2html(colorRGB)
 
             if step_type == 'logarithmic':
@@ -3699,8 +3741,10 @@ def classicTimeseries(params):
                 if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
                     to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
-            # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
-            # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+            # [list_files, dates_list] = getFilesList(productcode, subproductcode, version,
+            #                                         mapsetcode, date_format, from_date, to_date)
+            # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+            #         aggregate, mapset_info, product_info, list_files, dates_list]
             # p = Process(target=getTimeseries, args=args)
             # p.start()
             # p.join()
@@ -3713,7 +3757,8 @@ def classicTimeseries(params):
             data = []
             for val in list_values:
                 value = []
-                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ','
+                #           + str(val['date'].day) + ')'
                 valdate = functions.unix_time_millis(val['date'])
                 # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
                 value.append(valdate)
@@ -3787,8 +3832,10 @@ def classicTimeseries(params):
                 colorAdd += 65
                 colorSubstract += 50
 
-                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
-                # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version,
+                #                                         mapsetcode, date_format, from_date, to_date)
+                # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                #         aggregate, mapset_info, product_info, list_files, dates_list]
                 # p = Process(target=getTimeseries, args=args)
                 # p.start()
                 # p.join()
@@ -3800,7 +3847,8 @@ def classicTimeseries(params):
                 data = []
                 for val in list_values:
                     value = []
-                    # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                    # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ','
+                    #           + str(val['date'].day) + ')'
                     valdate = functions.unix_time_millis(val['date'])
                     # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
                     value.append(valdate)
@@ -3841,8 +3889,10 @@ def classicTimeseries(params):
                 timeseries.append(ts)
 
         else:
-            # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
-            # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+            # [list_files, dates_list] = getFilesList(productcode, subproductcode, version,
+            #                                         mapsetcode, date_format, from_date, to_date)
+            # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+            #         aggregate, mapset_info, product_info, list_files, dates_list]
             # p = Process(target=getTimeseries, args=args)
             # p.start()
             # p.join()
@@ -3858,7 +3908,8 @@ def classicTimeseries(params):
             data = []
             for val in list_values:
                 value = []
-                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ','
+                #           + str(val['date'].day) + ')'
                 valdate = functions.unix_time_millis(val['date'])
                 # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
                 value.append(valdate)
@@ -4063,8 +4114,10 @@ def __classicTimeseries(params):
                 if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
                     to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
-            # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
-            # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+            # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format,
+            #                                         from_date, to_date)
+            # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+            #         aggregate, mapset_info, product_info, list_files, dates_list]
             # p = Process(target=getTimeseries, args=args)
             # p.start()
             # p.join()
@@ -4075,7 +4128,8 @@ def __classicTimeseries(params):
             data = []
             for val in list_values:
                 value = []
-                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' \
+                #           + str(val['date'].day) + ')'
                 valdate = functions.unix_time_millis(val['date'])
                 # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
                 value.append(valdate)
@@ -4137,11 +4191,11 @@ def __classicTimeseries(params):
                 else:
                     # print ts_drawprops.color
                     # rgb = ts_drawprops.color.replace("  ", " ").split(' ')
-                    if (functions.isValidRGB(ts_drawprops.color.replace("  ", " "))):
+                    if functions.isValidRGB(ts_drawprops.color.replace("  ", " ")):
                         rgb = ts_drawprops.color.replace("  ", " ").split(' ')
                     else:
                         # RGB value stored in the database is not correct so define as default value BLACK.
-                        rgb = "0 0 0".split(' ')
+                        rgb = '0 0 0'.split(' ')
                 # print rgb
                 rgb = list(map(int, rgb))
                 rgb[-1] = rgb[-1] + colorAdd
@@ -4151,8 +4205,10 @@ def __classicTimeseries(params):
                 colorAdd += 65
                 colorSubstract += 50
 
-                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
-                # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode,
+                #                                         date_format, from_date, to_date)
+                # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                #         aggregate, mapset_info, product_info, list_files, dates_list]
                 # p = Process(target=getTimeseries, args=args)
                 # p.start()
                 # p.join()
@@ -4164,7 +4220,8 @@ def __classicTimeseries(params):
                 data = []
                 for val in list_values:
                     value = []
-                    # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                    # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ','
+                    #           + str(val['date'].day) + ')'
                     valdate = functions.unix_time_millis(val['date'])
                     # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
                     value.append(valdate)
@@ -4204,8 +4261,10 @@ def __classicTimeseries(params):
                 timeseries.append(ts)
 
         else:
-            # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
-            # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
+            # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format,
+            #                                         from_date, to_date)
+            # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+            #         aggregate, mapset_info, product_info, list_files, dates_list]
             # p = Process(target=getTimeseries, args=args)
             # p.start()
             # p.join()
@@ -4216,7 +4275,8 @@ def __classicTimeseries(params):
             data = []
             for val in list_values:
                 value = []
-                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' + str(val['date'].day) + ')'
+                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' \
+                #           + str(val['date'].day) + ')'
                 valdate = functions.unix_time_millis(val['date'])
                 # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
                 value.append(valdate)
@@ -4698,12 +4758,12 @@ def getProductLayer(getparams):
     # buf = StringIO.StringIO()
     # mapscript.msIO_installStdoutToBuffer()
     # map = mapserver.getmap()
-    ##map.save to a file fname.png
-    ##web.header('Content-Disposition', 'attachment; filename="fname.png"')
+    # # map.save to a file fname.png
+    # # web.header('Content-Disposition', 'attachment; filename="fname.png"')
     # contents = buf.getvalue()
     # return contents
 
-    # #logger.debug("MapServer: Installing stdout to buffer.")
+    # # logger.debug("MapServer: Installing stdout to buffer.")
     # mapscript.msIO_installStdoutToBuffer()
     #
     # owsrequest = mapscript.OWSRequest()
@@ -4711,7 +4771,7 @@ def getProductLayer(getparams):
     # inputparams = web.input()
     # for k, v in inputparams.iteritems():
     #     print k + ':' + v
-    #     if k not in ('productcode', 'subproductcode', 'mapsetcode', 'productversion', 'legendid', 'date' 'TRANSPARENT'):
+    #     if k not in ('productcode','subproductcode','mapsetcode','productversion','legendid','date','TRANSPARENT'):
     #         # if k == 'CRS':
     #         #     owsrequest.setParameter('SRS', v)
     #         owsrequest.setParameter(k.upper(), v)
@@ -4758,7 +4818,7 @@ def getProductLayer(getparams):
     productmap.status = mapscript.MS_ON
     productmap.units = mapscript.MS_DD
 
-    coords = list(map(float, inputparams['BBOX'].split(",")))
+    coords = list(map(float, inputparams['BBOX'].split(',')))
     lly = coords[0]
     llx = coords[1]
     ury = coords[2]
@@ -4868,7 +4928,7 @@ def getProductLayer(getparams):
                 max_step = float(old_div((step.to_step - scale_offset), scale_factor))
                 # min_step = float(step.from_step)
                 # max_step = float(step.to_step)
-                colors = list(map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip())))
+                colors = list(map(int, (color.strip() for color in step.color_rgb.split(' ') if color.strip())))
 
                 if stepcount == legend_steps.__len__():  # For the last step use <= max_step
                     expression_string = '([pixel] >= ' + str(min_step) + ' and [pixel] <= ' + str(max_step) + ')'
@@ -5087,7 +5147,8 @@ def SaveLegend(params):
                                            'group_label': legendstep['group_label']
                                            }
                         if not crud_db.create('legend_step', legendstep_dict):
-                            message = '{"success":false, "message":"Error creating for updating a legend class of the legend!"}'
+                            message = '{"success":false, "message":"Error creating for updating ' \
+                                      'a legend class of the legend!"}'
                             break
                 else:
                     message = '{"success":false, "message":"Error deleting the legend steps!"}'
@@ -5179,7 +5240,8 @@ def GetLegends():
             legendname = legendname.replace('<DIV>', ' ')
             legendname = legendname.replace('</DIV>', ' ')
 
-            # colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr><th colspan='+str(len(legend_steps))+'>'+legendname+'</th></tr><tr>'
+            # colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr><th colspan='
+            #                   +str(len(legend_steps))+'>'+legendname+'</th></tr><tr>'
             colorschemeHTML = legendname + '<table cellspacing=0 cellpadding=0 width=100%><tr>'
 
             for step in legend_steps:
@@ -5190,7 +5252,8 @@ def GetLegends():
                 g = color_rgb[1]
                 b = color_rgb[2]
                 color_html = 'rgb(' + r + ',' + g + ',' + b + ')'
-                colorschemeHTML += "<td height=15 style='padding:0; margin:0; background-color: " + color_html + ";'></td>"
+                colorschemeHTML += "<td height=15 style='padding:0; margin:0; background-color: " \
+                                   + color_html + ";'></td>"
             colorschemeHTML += '</tr></table>'
 
             legend_dict = {'legendid': row_dict['legend_id'],
@@ -5231,7 +5294,7 @@ def getAllColorSchemes():
         if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(hours=3):  # seconds=5
             colorschemes_json = ColorSchemes().encode('utf-8')
             try:
-                with open(colorschemes_file, "w") as text_file:
+                with open(colorschemes_file, "wb") as text_file:
                     text_file.write(colorschemes_json)
             except IOError:
                 try:
@@ -5288,8 +5351,7 @@ def ColorSchemes():
                 g = color_rgb[1]
                 b = color_rgb[2]
                 color_html = 'rgb(' + r + ',' + g + ',' + b + ')'
-                colorschemeHTML = colorschemeHTML + \
-                                  "<td height=15 style='padding:0; margin:0; background-color: " + \
+                colorschemeHTML = colorschemeHTML + "<td height=15 style='padding:0; margin:0; background-color: " + \
                                   color_html + ";'></td>"
             colorschemeHTML = colorschemeHTML + '</tr></table>'
 
@@ -5578,7 +5640,8 @@ def DataSets():
                                                   'sub_product_code': subproductcode,
                                                   'from_date': from_date}
 
-                                    # elif dataset_info.frequency_id == 'e1dekad' and dataset_info.date_format == 'YYYYMMDD':
+                                    # elif dataset_info.frequency_id == 'e1dekad'
+                                    #      and dataset_info.date_format == 'YYYYMMDD':
                                     #     today = datetime.date.today()
                                     #     from_date = today - relativedelta(years=5)
                                     #
@@ -5589,7 +5652,8 @@ def DataSets():
                                         kwargs = {'mapset': mapset,
                                                   'sub_product_code': subproductcode}
 
-                                    # if dataset_info.frequency_id == 'e15minute' or dataset_info.frequency_id == 'e30minute':
+                                    # if dataset_info.frequency_id == 'e15minute'
+                                    #    or dataset_info.frequency_id == 'e30minute':
                                     #     dataset_dict['nodisplay'] = 'no_minutes_display'
                                     # # To be implemented in dataset.py
                                     # elif dataset_info.frequency_id == 'e1year':
@@ -5609,7 +5673,8 @@ def DataSets():
                                         dataset_dict['datasetcompletenessimage'] = completeness[
                                             'datasetcompletenessimage']
 
-                                    # dataset_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(completeness, dataset_info.frequency_id)
+                                    # dataset_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(
+                                    #                                           completeness, dataset_info.frequency_id)
                                     dataset_dict['nodisplay'] = 'false'
 
                                     dataset_dict['mapsetcode'] = mapset_info['mapsetcode']
@@ -5643,7 +5708,8 @@ def DataSets():
 def getDatasetCompleteness(dataset, fordatamanagement):
     completeness_dict = {}
     output_dir = es_constants.base_local_dir + os.path.sep + 'completeness_bars/'
-    functions.check_output_dir(output_dir)  # if not exists output_dir -> create output_dir
+    if not os.path.isdir(output_dir):
+        functions.check_output_dir(output_dir)  # if not exists output_dir -> create output_dir
 
     prod_ident = functions.set_path_filename_no_date(dataset._db_product.productcode,
                                                      dataset._db_product.subproductcode,
@@ -5960,7 +6026,8 @@ def TimeseriesProducts():
                                 distinctyears.append(product_date.year)
                         tmp_prod_dict['years'] = distinctyears
 
-                        # If there is data available on disk, include the subproduct with timeseries_role='Initial' in the list!
+                        # If there is data available on disk, include the subproduct with
+                        # timeseries_role='Initial' in the list!
                         if tmp_prod_dict['years'].__len__() > 0:
                             products_dict_all.append(tmp_prod_dict)
                             # tmp_prod_dict = copy.deepcopy(prod_dict)
@@ -6247,7 +6314,8 @@ def __TimeseriesProductsTree():
                                separators=(', ', ': '))
 
         # datamanagement_json = '{"products":'+prod_json+'}'
-        # datamanagement_json = '{"descriptive_name": "", "productid": "root", "parentId": null, "leaf": false, "children": '+prod_json+'}'
+        # datamanagement_json = '{"descriptive_name": "", "productid": "root", "parentId": null,
+        #                         "leaf": false, "children": '+prod_json+'}'
 
         datamanagement_json = '{"success":"true", "total":' \
                               + str(db_products.__len__()) \
@@ -6454,11 +6522,11 @@ def CreateIngestSubProduct(params):
                    'frequency_id': params['frequency_id'],
                    'date_format': params['date_format'],
                    'data_type_id': params['data_type_id'],
-                   'scale_factor': params['scale_factor'] if functions.is_float(params['scale_factor']) else None,
-                   'scale_offset': params['scale_offset'] if functions.is_float(params['scale_offset']) else None,
-                   'nodata': params['nodata'] if functions.is_int(params['nodata']) else None,
-                   'mask_min': params['mask_min'] if functions.is_float(params['mask_min']) else None,
-                   'mask_max': params['mask_max'] if functions.is_float(params['mask_max']) else None,
+                   'scale_factor': params['scale_factor'] if functions.str_is_float(params['scale_factor']) else None,
+                   'scale_offset': params['scale_offset'] if functions.str_is_float(params['scale_offset']) else None,
+                   'nodata': params['nodata'] if functions.str_is_int(params['nodata']) else None,
+                   'mask_min': params['mask_min'] if functions.str_is_float(params['mask_min']) else None,
+                   'mask_max': params['mask_max'] if functions.str_is_float(params['mask_max']) else None,
                    'unit': params['unit'],
                    'masked': params['masked'],
                    'timeseries_role': params['timeseries_role'],
@@ -6493,11 +6561,11 @@ def UpdateIngestSubProduct(params):
                    'frequency_id': params['frequency_id'],
                    'date_format': params['date_format'],
                    'data_type_id': params['data_type_id'],
-                   'scale_factor': params['scale_factor'] if functions.is_float(params['scale_factor']) else 'NULL',
-                   'scale_offset': params['scale_offset'] if functions.is_float(params['scale_offset']) else 'NULL',
-                   'nodata': params['nodata'] if functions.is_int(params['nodata']) else 'NULL',
-                   'mask_min': params['mask_min'] if functions.is_float(params['mask_min']) else 'NULL',
-                   'mask_max': params['mask_max'] if functions.is_float(params['mask_max']) else 'NULL',
+                   'scale_factor': params['scale_factor'] if functions.str_is_float(params['scale_factor']) else 'NULL',
+                   'scale_offset': params['scale_offset'] if functions.str_is_float(params['scale_offset']) else 'NULL',
+                   'nodata': params['nodata'] if functions.str_is_int(params['nodata']) else 'NULL',
+                   'mask_min': params['mask_min'] if functions.str_is_float(params['mask_min']) else 'NULL',
+                   'mask_max': params['mask_max'] if functions.str_is_float(params['mask_max']) else 'NULL',
                    'unit': params['unit'],
                    'masked': params['masked'],
                    'timeseries_role': params['timeseries_role'],
@@ -6565,12 +6633,12 @@ def CreateSubDatasourceDescription(params):
         'subproductcode': params['subproductcode'],
         'version': version,
         'datasource_descr_id': params['datasource_descr_id'],
-        'scale_factor': params['scale_factor'] if functions.is_float(params['scale_factor']) else None,
-        'scale_offset': params['scale_offset'] if functions.is_float(params['scale_offset']) else None,
-        'no_data': params['no_data'] if functions.is_int(params['no_data']) else None,
+        'scale_factor': params['scale_factor'] if functions.str_is_float(params['scale_factor']) else None,
+        'scale_offset': params['scale_offset'] if functions.str_is_float(params['scale_offset']) else None,
+        'no_data': params['no_data'] if functions.str_is_int(params['no_data']) else None,
         'data_type_id': params['data_type_id'],
-        'mask_min': params['mask_min'] if functions.is_float(params['mask_min']) else None,
-        'mask_max': params['mask_max'] if functions.is_float(params['mask_max']) else None,
+        'mask_min': params['mask_min'] if functions.str_is_float(params['mask_min']) else None,
+        'mask_max': params['mask_max'] if functions.str_is_float(params['mask_max']) else None,
         're_process': params['re_process'],
         're_extract': params['re_extract'],
         'scale_type': params['scale_type'],
@@ -6602,12 +6670,12 @@ def UpdateSubDatasourceDescription(params):
         'subproductcode': params['subproductcode'],
         'version': version,
         'datasource_descr_id': params['datasource_descr_id'],
-        'scale_factor': params['scale_factor'] if functions.is_float(params['scale_factor']) else None,
-        'scale_offset': params['scale_offset'] if functions.is_float(params['scale_offset']) else None,
-        'no_data': params['no_data'] if functions.is_int(params['no_data']) else None,
+        'scale_factor': params['scale_factor'] if functions.str_is_float(params['scale_factor']) else None,
+        'scale_offset': params['scale_offset'] if functions.str_is_float(params['scale_offset']) else None,
+        'no_data': params['no_data'] if functions.str_is_int(params['no_data']) else None,
         'data_type_id': params['data_type_id'],
-        'mask_min': params['mask_min'] if functions.is_float(params['mask_min']) else None,
-        'mask_max': params['mask_max'] if functions.is_float(params['mask_max']) else None,
+        'mask_min': params['mask_min'] if functions.str_is_float(params['mask_min']) else None,
+        'mask_max': params['mask_max'] if functions.str_is_float(params['mask_max']) else None,
         're_process': params['re_process'],
         're_extract': params['re_extract'],
         'scale_type': params['scale_type'],
@@ -6637,7 +6705,8 @@ def DeleteSubDatasourceDescription(productcode, version, subproductcode, datasou
                            ' "subproductcode": "' + subproductcode + '", "datasource_id": "' + datasource_id + '",' + \
                            ' "message":"Sub Datasource Description deleted!"}'
         else:
-            deletestatus = '{"success":false, "message":"An error occured while deleting the Sub Datasource Description!"}'
+            deletestatus = '{"success":false, ' \
+                           '"message":"An error occured while deleting the Sub Datasource Description!"}'
     else:
         deletestatus = '{"success":false, "message":"No primary key values given for Sub Datasource Description!"}'
 

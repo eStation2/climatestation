@@ -2,20 +2,18 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
 from future import standard_library
-standard_library.install_aliases()
 from builtins import object
+
 import sys
-from lib.python import es_logging as log
-
-# Import eStation lib modules
-# import locals
-from config import es_constants
-
 import sqlalchemy
 import sqlsoup
 from sqlalchemy.orm import *
+
+from lib.python import es_logging as log
+from config import es_constants
+
+standard_library.install_aliases()
 
 logger = log.my_logger(__name__)
 
@@ -55,6 +53,7 @@ class ConnectDB(object):
             else:
                 self.db = self.get_db_engine()
                 mysession = sessionmaker(bind=self.db, autoflush=False)
+                self.db.session = mysession()
                 self.session = mysession()
 
             self.db.schema = self.schema

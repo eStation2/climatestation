@@ -4,50 +4,45 @@ services:
 
   web:
     build:
-      context: ./build/web/
-      dockerfile: Dockerfile
+      context: ./build-docker/web/
+      dockerfile: DockerfilePython3.7
     container_name: web
-    # environment:
-    #   http_proxy: "${HTTP_PROXY}"
-    #   https_proxy: "${HTTP_PROXY}"
-    #   ftp_proxy: "${HTTP_PROXY}"
-    #   no_proxy: "${NO_PROXY}"
-    image: "estation2python3docker/web:1.0"
-    #command: sleep infinity
+    links:
+      - postgres
+    environment:
+      - PYTHONPATH=${PYTHONPATH}
+      - PROJ_LIB=${PROJ_LIB}
+    image: "climatestation/web:1.0"
     ports:
     - 80:80
     restart: unless-stopped
+#    privileged: true
     volumes: 
+#    - /var/run/docker.sock:/var/run/docker.sock:rw
     - ./log/web:/var/log/apache2
     - ./src:/var/www/estation2:rw
-    - c:/data:/data:rw
-    - c:/data/eStation2:/eStation2:rw
+    - ${DATA_VOLUME}:/data:rw
+    - ${ESTATION2_VOLUME}:/eStation2:rw
+    - ${TMP_VOLUME}:/tmp/eStation2:rw
 
   mapserver:
     build:
-      context: ./build/mapserver/
+      context: build-docker/mapserver/
       dockerfile: Dockerfile
     container_name: mapserver
-    # environment:
-    #   http_proxy: "${HTTP_PROXY}"
-    #   https_proxy: "${HTTP_PROXY}"
-    #   ftp_proxy: "${HTTP_PROXY}"
-    #   no_proxy: "${NO_PROXY}"
-    image: "estation2python3docker/mapserver:1.0"
-    #ports:
-    #  - 8080:80
-    #command: sleep infinity
+    image: "climatestation/mapserver:1.0"
     restart: unless-stopped
     volumes:
-    # - /data/mapserver/cgi-bin:/usr/lib/cgi-bin:rw
     - ./log/mapserver:/var/log/apache2
-    
+#    - /data/mapserver/cgi-bin:/usr/lib/cgi-bin:rw
+
   postgres:
     build:
-      context: ./build/postgres12
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./build-docker/postgres/Dockerfile
     container_name: postgres
     environment:
+      PGPASSWORD: "${PG_PASS}"
       POSTGRES_USER: "${PG_USER}"
       POSTGRES_PASS: "${PG_PASS}"
       POSTGRES_DBNAME: "estationdb"
@@ -62,22 +57,20 @@ services:
       WAL_SEGSIZE: "1024"
       MAINTAINANCE_WORK_MEM: "128MB"
       DB_VERSION: "${DB_VERSION}"
-    image: "estation2python3docker/postgis:12"
-    #command: sleep infinity
+    image: "climatestation/postgis:12"
     ports:
     - 5432:5432
     restart: unless-stopped
+#    privileged: true
     volumes:
+    - ${DBDUMP_VOLUME}:/eStation2/db_dump:rw
+    - ${ESTATION2_VOLUME}:/eStation2:rw
+    - ./src:/var/www/eStation2:rw
     - docker-postgresql12-volume:/var/lib/postgresql:rw
-    - ./log/postgres:/var/log/postgresql:rw
-    # Starting PostgreSQL 9.6 database server: main[....] 
-    # Error: Config owner (postgres:102) and data owner (root:0) do not match, and config owner
-    # linix -> NTFS problem! -> https://forums.docker.com/t/trying-to-get-postgres-to-work-on-persistent-windows-mount-two-issues/12456/5
-    # - c:/data/postgres96/data:/var/lib/postgresql:rw
-    # - /data/postgres12/etc/postgresql:/etc/postgresql:rw
-    # - /data/postgres12/log/postgresql:/var/log/postgresql:rw
+    - ./log/postgres:/var/log/eStation2:rw
+#    - "/var/run/docker.sock:/var/run/docker.sock"-
 
-# create an external docker volume: docker volume create --name docker-postgresql-volume -d local
+# create an external docker volume: docker volume create --name cs-docker-postgresql12-volume -d local
 volumes:
-  docker-postgresql12-volume:
+  cs-docker-postgresql12-volume:
     external: true
