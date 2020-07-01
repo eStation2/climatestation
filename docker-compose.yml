@@ -5,7 +5,7 @@ services:
   web:
     build:
       context: ./build-docker/web/
-      dockerfile: DockerfilePython3.7
+      dockerfile: Dockerfile
     container_name: web
     links:
       - postgres
@@ -14,20 +14,20 @@ services:
       - PROJ_LIB=${PROJ_LIB}
     image: "climatestation/web:1.0"
     ports:
-    - 80:80
+    - 8080:80
     restart: unless-stopped
 #    privileged: true
     volumes: 
 #    - /var/run/docker.sock:/var/run/docker.sock:rw
     - ./log/web:/var/log/apache2
-    - ./src:/var/www/estation2:rw
+    - ./src:/var/www/climatestation:rw
     - ${DATA_VOLUME}:/data:rw
-    - ${ESTATION2_VOLUME}:/eStation2:rw
-    - ${TMP_VOLUME}:/tmp/eStation2:rw
+    - ${CS_VOLUME}:/climatestation:rw
+    - ${TMP_VOLUME}:/tmp/climatestation:rw
 
   mapserver:
     build:
-      context: build-docker/mapserver/
+      context: ./build-docker/mapserver/
       dockerfile: Dockerfile
     container_name: mapserver
     image: "climatestation/mapserver:1.0"
@@ -63,11 +63,11 @@ services:
     restart: unless-stopped
 #    privileged: true
     volumes:
-    - ${DBDUMP_VOLUME}:/eStation2/db_dump:rw
-    - ${ESTATION2_VOLUME}:/eStation2:rw
-    - ./src:/var/www/eStation2:rw
-    - docker-postgresql12-volume:/var/lib/postgresql:rw
-    - ./log/postgres:/var/log/eStation2:rw
+    - ${DBDUMP_VOLUME}:/climatestation/db_dump:rw
+    - ${CS_VOLUME}:/climatestation:rw
+    - ./src:/var/www/climatestation:rw
+    - cs-docker-postgresql12-volume:/var/lib/postgresql:rw
+    - ./log/postgres:/var/log/climatestation:rw
 #    - "/var/run/docker.sock:/var/run/docker.sock"-
 
 # create an external docker volume: docker volume create --name cs-docker-postgresql12-volume -d local

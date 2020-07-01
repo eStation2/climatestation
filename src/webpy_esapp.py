@@ -224,7 +224,7 @@ urls = (
 
     # "/(.+)/(.+)", "EsApp",
     # "/(.+)/", "EsApp",
-    "/", "EsApp")
+    "/", "CSApp")
 
 app = web.application(urls, globals(), autoreload=True)
 application = app.wsgifunc()
@@ -233,7 +233,7 @@ application = app.wsgifunc()
 # session = web.session.Session(app, web.session.DiskStore('../logs/mstmp/webpySessions'))
 
 
-class EsApp(object):
+class CSApp(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -250,8 +250,8 @@ class EsApp(object):
                              'prefered_language': getparams['lang']}
                 crud_db.update('users', user_info)
 
-        # render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/esapp')
-        render = web.template.render(es_constants.es2globals['base_dir'] + '/apps/gui/esapp/build/production/esapp')
+        render = web.template.render(es_constants.es2globals['base_dir']+'/apps/gui/climatestation')
+        # render = web.template.render(es_constants.es2globals['base_dir'] + '/apps/gui/esapp/build/production/esapp')
 
         return render.index()
 
@@ -2585,74 +2585,74 @@ class GetDashboard(object):
         else:
             PC3_DataAutoSync = False
 
-        dashboard_dict = {'type_installation': systemsettings['type_installation'].lower(),
-                          'activePC': systemsettings['role'].lower(),
-                          'PC1_connection': PC1_connection,
-                          'PC1_dvb_status': PC1_dvb_status,
-                          'PC1_tellicast_status': PC1_tellicast_status,
-                          'PC1_fts_status': PC1_fts_status,
+        # dashboard_dict = {'type_installation': systemsettings['type_installation'].lower(),
+        #                   'activePC': systemsettings['role'].lower(),
+        #                   'PC1_connection': PC1_connection,
+        #                   'PC1_dvb_status': PC1_dvb_status,
+        #                   'PC1_tellicast_status': PC1_tellicast_status,
+        #                   'PC1_fts_status': PC1_fts_status,
+        #
+        #                   'PC23_connection': PC23_connection,
+        #
+        #                   'PC2_service_eumetcast': PC2_service_eumetcast,
+        #                   'PC2_service_internet': PC2_service_internet,
+        #                   'PC2_service_ingest': PC2_service_ingest,
+        #                   'PC2_service_processing': PC2_service_processing,
+        #                   'PC2_service_system': PC2_service_system,
+        #                   'PC2_version': PC2_version,
+        #                   'PC2_DBAutoSync': PC2_DBAutoSync,
+        #                   'PC2_DataAutoSync': PC2_DataAutoSync,
+        #                   'PC2_mode': PC2_mode,
+        #                   'PC2_postgresql_status': PC2_postgresql_status,
+        #                   'PC2_internet_status': PC2_internet_status,
+        #                   'PC2_disk_status': PC2_disk_status,
+        #
+        #                   'PC3_service_eumetcast': PC3_service_eumetcast,
+        #                   'PC3_service_internet': PC3_service_internet,
+        #                   'PC3_service_ingest': PC3_service_ingest,
+        #                   'PC3_service_processing': PC3_service_processing,
+        #                   'PC3_service_system': PC3_service_system,
+        #                   'PC3_version': PC3_version,
+        #                   'PC3_DBAutoSync': PC3_DBAutoSync,
+        #                   'PC3_DataAutoSync': PC3_DataAutoSync,
+        #                   'PC3_mode': PC3_mode,
+        #                   'PC3_postgresql_status': PC3_postgresql_status,
+        #                   'PC3_internet_status': PC3_internet_status,
+        #                   'PC3_disk_status': PC3_disk_status}
 
-                          'PC23_connection': PC23_connection,
-
-                          'PC2_service_eumetcast': PC2_service_eumetcast,
-                          'PC2_service_internet': PC2_service_internet,
-                          'PC2_service_ingest': PC2_service_ingest,
-                          'PC2_service_processing': PC2_service_processing,
-                          'PC2_service_system': PC2_service_system,
-                          'PC2_version': PC2_version,
-                          'PC2_DBAutoSync': PC2_DBAutoSync,
-                          'PC2_DataAutoSync': PC2_DataAutoSync,
-                          'PC2_mode': PC2_mode,
-                          'PC2_postgresql_status': PC2_postgresql_status,
-                          'PC2_internet_status': PC2_internet_status,
-                          'PC2_disk_status': PC2_disk_status,
-
-                          'PC3_service_eumetcast': PC3_service_eumetcast,
-                          'PC3_service_internet': PC3_service_internet,
-                          'PC3_service_ingest': PC3_service_ingest,
-                          'PC3_service_processing': PC3_service_processing,
-                          'PC3_service_system': PC3_service_system,
-                          'PC3_version': PC3_version,
-                          'PC3_DBAutoSync': PC3_DBAutoSync,
-                          'PC3_DataAutoSync': PC3_DataAutoSync,
-                          'PC3_mode': PC3_mode,
-                          'PC3_postgresql_status': PC3_postgresql_status,
-                          'PC3_internet_status': PC3_internet_status,
-                          'PC3_disk_status': PC3_disk_status}
-
-        # dashboard_dict = {
-        #     "PC1_connection": True,
-        #     "PC1_dvb_status": True,
-        #     "PC1_fts_status": True,
-        #     "PC1_tellicast_status": True,
-        #     "PC23_connection": True,
-        #     "PC2_DBAutoSync": True,
-        #     "PC2_DataAutoSync": True,
-        #     "PC2_disk_status": True,
-        #     "PC2_internet_status": True,
-        #     "PC2_mode": "nominal",
-        #     "PC2_postgresql_status": True,
-        #     "PC2_service_eumetcast": "true",
-        #     "PC2_service_ingest": "true",
-        #     "PC2_service_internet": "true",
-        #     "PC2_service_processing": "true",
-        #     "PC2_service_system": "true",
-        #     "PC2_version": "2.2.0",
-        #     "PC3_DBAutoSync": False,
-        #     "PC3_DataAutoSync": False,
-        #     "PC3_disk_status": "true",
-        #     "PC3_internet_status": "true",
-        #     "PC3_mode": "nominal",
-        #     "PC3_postgresql_status": "true",
-        #     "PC3_service_eumetcast": "false",
-        #     "PC3_service_ingest": "false",
-        #     "PC3_service_internet": "false",
-        #     "PC3_service_processing": "false",
-        #     "PC3_service_system": "true",
-        #     "PC3_version": "2.2.0",
-        #     "activePC": "pc2",
-        #     "type_installation": "full"
-        # }
+        dashboard_dict = {
+            "PC1_connection": True,
+            "PC1_dvb_status": True,
+            "PC1_fts_status": True,
+            "PC1_tellicast_status": True,
+            "PC23_connection": True,
+            "PC2_DBAutoSync": True,
+            "PC2_DataAutoSync": True,
+            "PC2_disk_status": True,
+            "PC2_internet_status": True,
+            "PC2_mode": "nominal",
+            "PC2_postgresql_status": True,
+            "PC2_service_eumetcast": "true",
+            "PC2_service_ingest": "true",
+            "PC2_service_internet": "true",
+            "PC2_service_processing": "true",
+            "PC2_service_system": "true",
+            "PC2_version": "2.2.0",
+            "PC3_DBAutoSync": False,
+            "PC3_DataAutoSync": False,
+            "PC3_disk_status": "true",
+            "PC3_internet_status": "true",
+            "PC3_mode": "nominal",
+            "PC3_postgresql_status": "true",
+            "PC3_service_eumetcast": "false",
+            "PC3_service_ingest": "false",
+            "PC3_service_internet": "false",
+            "PC3_service_processing": "false",
+            "PC3_service_system": "true",
+            "PC3_version": "2.2.0",
+            "activePC": "pc2",
+            "type_installation": "full"
+        }
 
         # print dashboard_dict
         dashboard_json = json.dumps(dashboard_dict,
