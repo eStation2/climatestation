@@ -72,11 +72,11 @@ Ext.define("climatestation.view.processing.ProcessFinalOutputSubProducts",{
         }, {
             header: '', // 'Mapsetcode',
             dataIndex: 'mapsetcode',
-            width: 200
+            width: 150
         }, {
             header: '', // 'Subproductcode',
             dataIndex: 'subproductcode',
-            width: 180
+            width: 150
             //},{
             //    xtype: 'actioncolumn',
             //    //header: 'Active',
@@ -89,9 +89,9 @@ Ext.define("climatestation.view.processing.ProcessFinalOutputSubProducts",{
             //        // scope: me,
             //        getClass: function(v, meta, rec) {
             //            if (rec.get('subactivated')) {
-            //                return 'activated';
+            //                return 'far fa-check-square green';   // 'activated';
             //            } else {
-            //                return 'deactivated';
+            //                return 'far fa-square green';   // 'deactivated';
             //            }
             //        },
             //        getTip: function(v, meta, rec) {

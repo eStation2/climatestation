@@ -29,7 +29,7 @@ Ext.define("climatestation.view.system.PCModeAdmin",{
     border:true,
     frame:true,
     bodyStyle: 'padding:5px 5px 0',
-    autoScroll: true,
+    scrollable: true,
 
     params: {
        currentmode: null
@@ -52,7 +52,7 @@ Ext.define("climatestation.view.system.PCModeAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('save'),    // 'Save',
                 id: 'changemodebtn',
-                iconCls: 'fa fa-save fa-2x',
+                iconCls: 'far fa-save',
                 style: { color: 'lightblue' },
                 scale: 'medium',
                 disabled: true,

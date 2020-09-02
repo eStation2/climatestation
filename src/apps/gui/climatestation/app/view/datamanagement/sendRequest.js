@@ -1,5 +1,4 @@
-
-Ext.define("climatestation.view.datamanagement.sendRequest",{
+Ext.define("climatestation.view.datamanagement.sendRequest", {
     extend: "Ext.window.Window",
     controller: "datamanagement-sendrequest",
     viewModel: {
@@ -26,20 +25,20 @@ Ext.define("climatestation.view.datamanagement.sendRequest",{
     closable: true,
     closeAction: 'destroy', // 'hide',
     resizable: true,
-    autoScroll: true,
+    scrollable: true,
     maximizable: false,
-    width:600,
+    width: 600,
     height: 650,
     bodyStyle: 'padding:5px 5px 5px 5px',
     defaultAlign: 'c-c',
 
-    border:true,
-    frame:true,
+    border: true,
+    frame: true,
     // layout: 'fit',
 
     params: {
-       level: null,
-       record: null
+        level: null,
+        record: null
     },
 
     listeners: {
@@ -51,22 +50,22 @@ Ext.define("climatestation.view.datamanagement.sendRequest",{
 
         me.title = climatestation.Utils.getTranslation('getmissingfiles');     // 'Get request file',
 
-        me.bbar = ['->', {
-            text: climatestation.Utils.getTranslation('cancel'),    // 'Cancel',
-            scale: 'medium',
-            handler: 'onCancelClick'
-        },{
+        me.bbar = [{
+            //     text: climatestation.Utils.getTranslation('cancel'),    // 'Cancel',
+            //     scale: 'medium',
+            //     handler: 'onCancelClick'
+            // },{
             text: climatestation.Utils.getTranslation('saverequestfile'),    //'Save Request file',
-            iconCls: 'fa fa-floppy-o fa-2x',
-            style: { color: 'lightblue' },
+            iconCls: 'far fa-save lightblue',
+            // style: { color: 'lightblue' },
             scale: 'medium',
             disabled: false,
             handler: 'onSaveClick'
-        },{
+        }, '->', {
             reference: 'getmissingfiles-btn',
             text: climatestation.Utils.getTranslation('getmissingfiles'),
-            iconCls: 'fa fa-cloud-download fa-2x',
-            style: { color: 'lightblue' },
+            iconCls: 'far fa-cloud-download lightblue',
+            // style: { color: 'lightblue' },
             scale: 'medium',
             disabled: true,
             handler: 'createRequestJob'
@@ -78,17 +77,17 @@ Ext.define("climatestation.view.datamanagement.sendRequest",{
                 {name: 'years'}
             ],
             data: [
-                { yearsid:'1', years:'1 ' + climatestation.Utils.getTranslation('year')},
-                { yearsid:'2', years:'2 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'3', years:'3 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'4', years:'4 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'5', years:'5 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'10', years:'10 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'15', years:'15 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'20', years:'20 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'25', years:'25 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'30', years:'30 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'35', years:'35 ' + climatestation.Utils.getTranslation('years')}
+                {yearsid: '1', years: '1 ' + climatestation.Utils.getTranslation('year')},
+                {yearsid: '2', years: '2 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '3', years: '3 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '4', years: '4 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '5', years: '5 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '10', years: '10 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '15', years: '15 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '20', years: '20 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '25', years: '25 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '30', years: '30 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '35', years: '35 ' + climatestation.Utils.getTranslation('years')}
             ]
         });
 
@@ -98,11 +97,11 @@ Ext.define("climatestation.view.datamanagement.sendRequest",{
                 {name: 'years'}
             ],
             data: [
-                { yearsid:'1', years:'1 ' + climatestation.Utils.getTranslation('year')},
-                { yearsid:'2', years:'2 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'3', years:'3 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'4', years:'4 ' + climatestation.Utils.getTranslation('years')},
-                { yearsid:'5', years:'5 ' + climatestation.Utils.getTranslation('years')}
+                {yearsid: '1', years: '1 ' + climatestation.Utils.getTranslation('year')},
+                {yearsid: '2', years: '2 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '3', years: '3 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '4', years: '4 ' + climatestation.Utils.getTranslation('years')},
+                {yearsid: '5', years: '5 ' + climatestation.Utils.getTranslation('years')}
             ]
         });
 
@@ -112,19 +111,19 @@ Ext.define("climatestation.view.datamanagement.sendRequest",{
                 {name: 'days'}
             ],
             data: [
-                { dayid:'1', days:'1 ' + climatestation.Utils.getTranslation('day')},
-                { dayid:'2', days:'2 ' + climatestation.Utils.getTranslation('days')},
-                { dayid:'3', days:'3 ' + climatestation.Utils.getTranslation('days')},
-                { dayid:'4', days:'4 ' + climatestation.Utils.getTranslation('days')},
-                { dayid:'5', days:'5 ' + climatestation.Utils.getTranslation('days')},
-                { dayid:'6', days:'6 ' + climatestation.Utils.getTranslation('days')}
+                {dayid: '1', days: '1 ' + climatestation.Utils.getTranslation('day')},
+                {dayid: '2', days: '2 ' + climatestation.Utils.getTranslation('days')},
+                {dayid: '3', days: '3 ' + climatestation.Utils.getTranslation('days')},
+                {dayid: '4', days: '4 ' + climatestation.Utils.getTranslation('days')},
+                {dayid: '5', days: '5 ' + climatestation.Utils.getTranslation('days')},
+                {dayid: '6', days: '6 ' + climatestation.Utils.getTranslation('days')}
             ]
         });
 
 
         me.items = [{
             xtype: 'fieldset',
-            title: '<b>'+climatestation.Utils.getTranslation('set_time_back_missing_data')+'</b>',    // '<b>Set how much time to go back to get missing data</b>',
+            title: '<b>' + climatestation.Utils.getTranslation('set_time_back_missing_data') + '</b>',    // '<b>Set how much time to go back to get missing data</b>',
             collapsible: false,
             width: 550,
             margin: '10 10 0 5',
@@ -163,8 +162,9 @@ Ext.define("climatestation.view.datamanagement.sendRequest",{
                 msgTarget: 'side',
                 emptyText: climatestation.Utils.getTranslation('selectayear')    // 'Select a year...'
             }, {
+                xtype: 'container',
                 width: 530,
-                items:[{
+                items: [{
                     xtype: 'combobox',
                     fieldLabel: climatestation.Utils.getTranslation('get_data_for_high_frequency_products'),    // 'Days back for high frequency products',
                     labelWidth: 250,
@@ -190,14 +190,14 @@ Ext.define("climatestation.view.datamanagement.sendRequest",{
                     handler: 'getRequest'
                 }]
             }]
-        },{
-            xtype:'box',
+        }, {
+            xtype: 'box',
             reference: 'requestcontent',
             layout: 'fit',
-            autoScroll: true,
+            scrollable: true,
             hidden: false,
             margin: 10,
-            html:'<BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR>'
+            html: '<BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR>'
         }];
 
         me.callParent();

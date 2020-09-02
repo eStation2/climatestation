@@ -23,7 +23,8 @@ Ext.define('climatestation.view.help.helpModel', {
                 }
             },
 
-            autoLoad: false
+            autoLoad: false,
+            loadMask: false
         },
         weblinks: {
             fields: ['name', 'thumb', 'url', 'type'],
@@ -41,7 +42,8 @@ Ext.define('climatestation.view.help.helpModel', {
                 }
             },
 
-            autoLoad: false
+            autoLoad: false,
+            loadMask: false
         },
         notes: {
             fields: ['name', 'thumb', 'url', 'type'],
@@ -58,7 +60,8 @@ Ext.define('climatestation.view.help.helpModel', {
                 }
             },
 
-            autoLoad: false
+            autoLoad: false,
+            loadMask: false
         }
     }
 

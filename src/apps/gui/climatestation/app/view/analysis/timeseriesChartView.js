@@ -212,7 +212,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
                 text: '<div style="font-size: 11px;">' + climatestation.Utils.getTranslation('PRODUCTS').toUpperCase() + '</div>',   // 'Products',
                 reference: 'changeSelectedProductsAndTimeframe_'+me.id.replace(/-/g,'_'),
                 tooltip: climatestation.Utils.getTranslation('change_selected_products'), //  'Change Selected products',
-                iconCls: 'fa fa-calendar fa-2x',
+                iconCls: 'far fa-calendar',
                 style: {color: '#748FFC'},
                 scale: 'medium',
                 disabled: (me.graphtype == 'scatter'),
@@ -221,7 +221,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
             // }, {
             //     xtype: 'button',
             //     tooltip: climatestation.Utils.getTranslation('change_timeframe'),   //  'Change Time frame',
-            //     iconCls: 'fa fa-calendar fa-2x',
+            //     iconCls: 'far fa-calendar',
             //     style: {color: '#748FFC'},
             //     enableToggle: false,
             //     scale: 'medium',
@@ -239,21 +239,21 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
             }, ' ', {
                 // text: climatestation.Utils.getTranslation('values'),    // downloadtimeseries = 'Download timeseries',
                 tooltip: climatestation.Utils.getTranslation('graph_download_values'),   //  'Download time series values',
-                iconCls: 'download-values_excel',   // 'fa fa-file-excel-o fa-2x',    // 'fa fa-download fa-2x',
+                iconCls: 'download-values_excel',   // 'far fa-file-excel-o',    // 'far fa-download',
                 style: { color: 'green' },
                 scale: 'medium'
                 ,handler: 'tsDownload'
             },{
                 // text: climatestation.Utils.getTranslation('savechart'),    // 'Save graph',
                 tooltip: climatestation.Utils.getTranslation('graph_download_png'),   //  'Download graph as PNG',
-                iconCls: 'download_png',    // 'fa fa-floppy-o fa-2x',
+                iconCls: 'download_png',    // 'far fa-floppy-o',
                 scale: 'medium'
                 ,handler: 'saveChartAsPNG'
             },{
                 xtype: 'splitbutton',
                 reference: 'saveGraphTemplate_'+me.id.replace(/-/g,'_'),
                 tooltip: climatestation.Utils.getTranslation('graph_save_graph_tpl'),   //  'Save graph as template',
-                iconCls: 'fa fa-save fa-2x',
+                iconCls: 'far fa-save',
                 style: {color: 'lightblue'},
                 cls: 'nopadding-splitbtn',
                 scale: 'medium',
@@ -286,7 +286,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
                         tooltip: climatestation.Utils.getTranslation('graph_tpl_save_as'),   //  'Save graph as template',
                         glyph: 'xf0c7@FontAwesome',
                         cls:'lightblue',
-                        // iconCls: 'fa fa-save fa-lg lightblue',
+                        // iconCls: 'far fa-save fa-lg lightblue',
                         style: { color: 'lightblue' },
                         //cls: 'x-menu-no-icon button-gray',
                         width: 165,
@@ -302,7 +302,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
             {
                 reference: 'objectsbtn_'+me.id.replace(/-/g,'_'),
                 hidden: false,
-                iconCls: 'fa fa-object-group',
+                iconCls: 'far fa-object-group',
                 style: {
                     "font-size": '1.70em'
                 },
@@ -334,7 +334,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
             {
                 xtype: 'button',
                 tooltip: climatestation.Utils.getTranslation('graph_refresh'),   //  'Refresh graph',
-                iconCls: 'fa fa-refresh fa-2x',
+                iconCls: 'far fa-redo-alt',
                 hidden: false,
                 style: { color: 'gray' },
                 enableToggle: false,

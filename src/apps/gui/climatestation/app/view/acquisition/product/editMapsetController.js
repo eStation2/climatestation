@@ -13,8 +13,8 @@ Ext.define('climatestation.view.acquisition.product.editMapsetController', {
 
         // console.info(me.params.mapsetrecord);
         if (form.isValid()) {
-            if (Ext.data.StoreManager.lookup('MapsetsStore').getUpdatedRecords() !== []){
-                Ext.data.StoreManager.lookup('MapsetsStore').sync({
+            if (Ext.data.StoreManager.lookup('mapsets').getUpdatedRecords() !== []){
+                Ext.data.StoreManager.lookup('mapsets').sync({
                     success: function () {
                         // console.log('success');
                         if (!me.params.edit) {

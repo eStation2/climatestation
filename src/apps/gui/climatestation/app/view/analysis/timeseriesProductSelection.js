@@ -19,7 +19,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
     // layout: 'fit',
 
     scrollable: 'vertical',
-    autoScroll: true,
+    scrollable: true,
 
     defaults: {
         margin: '5 3 5 3'
@@ -90,7 +90,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
             maxWidth: maxwidth,
             minHeight: 100,
             maxHeight: 225,
-            autoScroll: true,
+            scrollable: true,
             hidden: false,
             bind: '{selectedtimeseriesmapsetdatasets}',
             layout: 'fit',
@@ -137,9 +137,9 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     items: [{
                         getClass: function (v, meta, rec) {
                             if (rec.get('selected')) {
-                                return 'activated';
+                                return 'far fa-check-square green';   // 'activated';
                             } else {
-                                return 'deactivated';
+                                return 'far fa-square green';   // 'deactivated';
                             }
                         },
                         getTip: function (v, meta, rec) {
@@ -346,7 +346,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 maxWidth: maxwidth,
                 maxHeight: 170,
                 scrollable: 'vertical',
-                autoScroll: true,
+                scrollable: true,
                 hidden: true,
                 bind: '{productcolorschemes}',
                 layout: 'fit',

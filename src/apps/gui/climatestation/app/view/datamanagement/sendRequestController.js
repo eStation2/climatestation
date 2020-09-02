@@ -10,8 +10,6 @@ Ext.define('climatestation.view.datamanagement.sendRequestController', {
         var me = this.getView();
         var params = {};
 
-        // console.info(me.params.record);
-
         me.dekad_frequency = me.lookupReference('dekad_frequency').getValue();
         me.daily_frequency = me.lookupReference('daily_frequency').getValue();
         me.high_frequency = me.lookupReference('high_frequency').getValue();

@@ -35,12 +35,12 @@ Ext.define("climatestation.view.acquisition.product.editSubDatasourceDescription
     closable: true,
     closeAction: 'destroy', // 'hide',
     resizable: true,
-    autoScroll:true,
+    scrollable:true,
     maximizable: false,
 
     // width: 870,
-    height: Ext.getBody().getViewSize().height < 440 ? Ext.getBody().getViewSize().height-35 : 440,
-    maxHeight: 440,
+    height: Ext.getBody().getViewSize().height < 550 ? Ext.getBody().getViewSize().height-35 : 550,
+    maxHeight: 550,
 
     frame: true,
     border: true,
@@ -69,7 +69,7 @@ Ext.define("climatestation.view.acquisition.product.editSubDatasourceDescription
 
         me.buttons = [
         //{     text: 'TEST',
-        //     // iconCls: 'fa fa-save fa-2x',
+        //     // iconCls: 'far fa-save',
         //     style: {color: 'lightblue'},
         //     scale: 'medium',
         //     disabled: false,
@@ -78,7 +78,7 @@ Ext.define("climatestation.view.acquisition.product.editSubDatasourceDescription
         // },
             '->',{
             text: climatestation.Utils.getTranslation('save'),    // 'Save',
-            iconCls: 'fa fa-save fa-2x',
+            iconCls: 'far fa-save',
             style: { color: 'lightblue' },
             scale: 'medium',
             disabled: false,
@@ -373,10 +373,10 @@ Ext.define("climatestation.view.acquisition.product.editSubDatasourceDescription
                             fieldLabel: climatestation.Utils.getTranslation('native_mapset'),    // 'Native mapset',
                             reference: 'native_mapset',
                             bind: '{theSubDatasourceDescription.native_mapset}',
-                            // store: mapsets,
-                            store: {
-                                type: 'mapsets'
-                            },
+                            store: 'mapsets',
+                            // store: {
+                            //     type: 'mapsets'
+                            // },
                             valueField: 'mapsetcode',
                             displayField: 'descriptive_name',
                             // itemTpl: '<div class=""><span>{mapsetcode}</span>{descriptive_name}</div>',

@@ -29,7 +29,7 @@ Ext.define("climatestation.view.acquisition.logviewer.LogView",{
     closable: true,
     closeAction: 'destroy', // 'hide',
     resizable: true,
-    autoScroll: false,
+    scrollable: false,
     maximizable: false,
     width:1000,
     height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
@@ -91,7 +91,7 @@ Ext.define("climatestation.view.acquisition.logviewer.LogView",{
             },'->', // same as { xtype: 'tbfill' }
             {
                 xtype: 'button',
-                iconCls: 'fa fa-refresh fa-2x',
+                iconCls: 'far fa-redo-alt',
                 style: { color: 'gray' },
                 enableToggle: false,
                 scale: 'medium',
@@ -102,7 +102,7 @@ Ext.define("climatestation.view.acquisition.logviewer.LogView",{
         me.items = [{
             xtype: 'htmleditor',
             id: 'logfilecontent', // + me.logtype + me.params.record.get('productid'),
-            autoScroll: true,
+            scrollable: true,
             border: true,
             frame: true,
             enableAlignments: false,

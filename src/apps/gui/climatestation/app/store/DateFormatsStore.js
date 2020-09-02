@@ -10,7 +10,7 @@ Ext.define('climatestation.store.DateFormatsStore', {
 
     storeId : 'dateformats'
 
-    ,autoLoad: true
+    ,autoLoad: false
 
     ,proxy: {
         type : 'ajax',

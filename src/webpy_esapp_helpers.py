@@ -5782,7 +5782,7 @@ def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completene
 
     # create a figure with size height = yinch and width = xinch (in inches)
     # set the backgound color to white and resolution to dpi=128
-    xinch = 3.4
+    xinch = 2.9
     yinch = 0.38
     fig, ax = plt.subplots(num=fignum, figsize=(xinch, yinch), frameon=False, facecolor='w', dpi=128, tight_layout=True)
     # fignumber = fig.number
@@ -5858,21 +5858,21 @@ def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completene
     font2 = {  # 'family': 'sans-serif',
         'color': 'black',
         'weight': 'bold',
-        'size': 6.5}
+        'size': 6}
 
     font3 = {  # 'family': 'sans-serif',
         'color': '#FF0000',
         'weight': 'bold',
-        'size': 6.5}
+        'size': 6}
 
     # Add and position labels to graph (startdate, files, missing and enddate labels)
     fig.text(0.02, 0.7, firstdate, fontdict=font1)
-    fig.text(0.3, 0.72, totfiles, fontdict=font2)
-    fig.text(0.55, 0.72, missingfiles, fontdict=font3)
+    fig.text(0.28, 0.72, totfiles, fontdict=font2)
+    fig.text(0.50, 0.72, missingfiles, fontdict=font3)
     if len(lastdate) < 6:
         fig.text(0.9, 0.7, lastdate, fontdict=font1)
     else:
-        fig.text(0.83, 0.7, lastdate, fontdict=font1)
+        fig.text(0.80, 0.7, lastdate, fontdict=font1)
 
     ax.axis('off')  # do not show the axes
     # plt.margins(0)  # remove the margins -> creates conflict, replaced with: see above ax.set_xlim(0, 100)
@@ -6509,6 +6509,11 @@ def CreateIngestSubProduct(params):
     else:
         version = params['version']
 
+        if params['masked'] == 'false':
+            masked = False
+        else:
+            masked = True
+
     productinfo = {'productcode': params['productcode'],
                    'version': version,
                    'subproductcode': params['subproductcode'],
@@ -6528,7 +6533,7 @@ def CreateIngestSubProduct(params):
                    'mask_min': params['mask_min'] if functions.str_is_float(params['mask_min']) else None,
                    'mask_max': params['mask_max'] if functions.str_is_float(params['mask_max']) else None,
                    'unit': params['unit'],
-                   'masked': params['masked'],
+                   'masked': masked,
                    'timeseries_role': params['timeseries_role'],
                    'display_index': int(params['display_index']) if params['display_index'].isdigit() else None
                    }

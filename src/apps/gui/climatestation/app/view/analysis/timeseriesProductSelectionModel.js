@@ -136,11 +136,12 @@ Ext.define('climatestation.view.analysis.timeseriesProductSelectionModel', {
                     //console.info('record updated!');
                 },
                 write: function(store, operation){
-                    var result = Ext.JSON.decode(operation.getResponse().responseText);
-                    if (!operation.success) {
-                        //console.info(store);
-                        //console.info(operation);
-                    }
+                    // var result = Ext.JSON.decode(operation.getResponse().responseText);
+                    // var result = operation.getResponse().responseJson;
+                    // if (!operation.success) {
+                    //     //console.info(store);
+                    //     //console.info(operation);
+                    // }
                 }
             }
         },

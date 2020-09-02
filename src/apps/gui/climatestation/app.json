@@ -5,6 +5,11 @@
     "framework": "ext",
 
     /**
+     * The toolkit to use. Select either "classic" or "modern".
+     */
+    "toolkit": "classic",
+
+    /**
      * The list of required packages (with optional versions; default is "latest").
      *
      * For example,
@@ -15,16 +20,17 @@
      */
     "requires": [
         "font-awesome",
+//        "font-awesome-pro",
         "charts",
         "ext-ux",
-        "d3",
-        "pivot",
-        "pivot-locale",
-        "pivot-d3",
-        "calendar",
-        "exporter",
+//        "d3",
+        "pivot"
+//        "pivot-locale",
+//        "pivot-d3",
+//        "calendar",
+//        "exporter",
 //        "froala-editor",  // Gives error: Failed to resolve dependency Ext.field.Container for file Ext.froala.EditorField
-        "google"
+//        "google"
 
 //        ,"ext-ux-colorpick"
 //        "ext-locale"
@@ -342,8 +348,8 @@
             "path": "lib/js/ol3-layerswitcher-master/src/ol3-layerswitcher.css",
             "remote": true
         },{
-//            "path": "resources/fonts/fontawesome-pro-5.13.1-web/css/fontawesome.min.css"
-            "path": "resources/fonts/font-awesome-4.6.3/css/font-awesome.css"
+            "path": "resources/fonts/fontawesome-pro-5.13.1-web/css/all.min.css"
+//            "path": "resources/fonts/font-awesome-4.6.3/css/font-awesome.css"
         }
     ],
 
@@ -601,6 +607,7 @@
     "builds": {
         "classic": {
             "toolkit": "classic",
+//            "theme": "theme-material",
             "theme": "theme-triton",
             "sass": {
                 "generated": {
@@ -608,18 +615,18 @@
                     "src": "classic/sass/save"
                 }
             }
-        },
-
-        "modern": {
-            "toolkit": "modern",
-            "theme": "theme-material",
-            "sass": {
-                "generated": {
-                    "var": "modern/sass/save.scss",
-                    "src": "modern/sass/save"
-                }
-            }
         }
+
+//        "modern": {
+//            "toolkit": "modern",
+//            "theme": "theme-material",
+//            "sass": {
+//                "generated": {
+//                    "var": "modern/sass/save.scss",
+//                    "src": "modern/sass/save"
+//                }
+//            }
+//        }
     },
 
     /**

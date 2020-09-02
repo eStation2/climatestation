@@ -10,7 +10,7 @@ Ext.define('climatestation.store.BboxStore', {
 
     storeId : 'BboxStore'
 
-    ,autoLoad: true
+    ,autoLoad: false
 
     ,proxy: {
         type : 'ajax',

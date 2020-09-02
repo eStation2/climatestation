@@ -13,9 +13,9 @@ Ext.define('climatestation.Application', {
     // appFolder: Ext.manifest.paths['climatestation'],
 
     requires: [
-        'climatestation.view.*',
-        'climatestation.Utils',
-        'Ext.window.Toast',
+        'climatestation.*',
+        // 'climatestation.view.*',
+        // 'climatestation.Utils',
         'Ext.state.CookieProvider',
         'Ext.tip.QuickTipManager'
     ],
@@ -25,11 +25,10 @@ Ext.define('climatestation.Application', {
     //],
 
     stores: [
-         'HeaderLogoImages'
-        ,'i18nStore'
-        ,'LanguagesStore'
+        'i18nStore'             // autoload
+        ,'LanguagesStore'       // autoload
         ,'SystemSettingsStore'
-        ,'CategoriesStore'
+        ,'CategoriesStore'      // autoload
         ,'CategoriesAllStore'
         ,'FrequenciesStore'
         ,'DateFormatsStore'
@@ -39,21 +38,19 @@ Ext.define('climatestation.Application', {
         ,'ResolutionsStore'
         ,'BboxStore'
         ,'RefWorkspacesStore'
-        // ,'LogosMapView'
         ,'LogosStore'
         ,'LayersStore'
         ,'LegendsStore'
         ,'EumetcastSourceStore'
         ,'InternetSourceStore'
         ,'MapsetsStore'             // no autoload
-        ,'ProductsStore'
-        // ,'ProductsInactiveStore' // Not used anymore, instead climatestation.model.Product is used.
+        ,'ProductsStore'            // no autoload
+        // ,'ProductsInactiveStore' // Not used anymore, instead climatestation.model.Product is used. (todo: remove)
         ,'ProductsActiveStore'      // no autoload
         ,'DataAcquisitionsStore'    // no autoload
         ,'IngestionsStore'          // no autoload
         ,'ProcessingStore'          // no autoload
         ,'TimeseriesProductsStore'  // no autoload
-        // ,'TSDrawPropertiesStore'
         ,"ColorSchemesStore"
         ,'DataSetsStore'            // no autoload
         ,'UserWorkspacesStore'      // no autoload
@@ -87,7 +84,8 @@ Ext.define('climatestation.Application', {
         // });
 
 
-        Ext.setGlyphFontFamily('FontAwesome');
+        Ext.setGlyphFontFamily('FontAwesomePro');
+
         Ext.state.Manager.setProvider(Ext.create('Ext.state.CookieProvider'));
 
         Ext.Ajax.timeout = 300000; // 300 seconds
@@ -253,39 +251,39 @@ Ext.define('climatestation.Application', {
         });
         taskMain.delay(1000);
 
-        if (climatestation.globals['typeinstallation'].toLowerCase() == 'windows' ||
-            climatestation.globals['typeinstallation'].toLowerCase() == 'online' ||
-            climatestation.globals['typeinstallation'].toLowerCase() == 'jrc_online')
-        {
-            var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
-
-            if (datasetsstore.isStore) {
-                // datasetsstore.proxy.extraParams = {force: true};
-                datasetsstore.load();
-            }
-            // Ext.data.StoreManager.lookup('DataSetsStore').load();
-        }
-        else {
-            if (climatestation.globals['role'] == 'pc2') {
-                Ext.data.StoreManager.lookup('ProductsStore').load();
-                Ext.data.StoreManager.lookup('ProductsActiveStore').load();
-                Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
-                Ext.data.StoreManager.lookup('IngestionsStore').load();
-            }
-            if (climatestation.globals['role'] == 'pc3' && climatestation.globals['mode'] == 'recovery'){
-                Ext.data.StoreManager.lookup('ProductsStore').load();
-                Ext.data.StoreManager.lookup('ProductsActiveStore').load();
-                Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
-                Ext.data.StoreManager.lookup('IngestionsStore').load();
-            }
-            Ext.data.StoreManager.lookup('ProcessingStore').load();
-            Ext.data.StoreManager.lookup('DataSetsStore').load();
-        }
-
-        // var delay = 500;
-        // if (!Ext.data.StoreManager.lookup('TimeseriesProductsStore').isLoaded()){
-        //     delay = 2000;
+        // if (climatestation.globals['typeinstallation'].toLowerCase() == 'windows' ||
+        //     climatestation.globals['typeinstallation'].toLowerCase() == 'online' ||
+        //     climatestation.globals['typeinstallation'].toLowerCase() == 'jrc_online')
+        // {
+        //     var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+        //
+        //     if (datasetsstore.isStore) {
+        //         // datasetsstore.proxy.extraParams = {force: true};
+        //         datasetsstore.load();
+        //     }
+        //     // Ext.data.StoreManager.lookup('DataSetsStore').load();
         // }
+        // else {
+        //     if (climatestation.globals['role'] == 'pc2') {
+        //         Ext.data.StoreManager.lookup('ProductsStore').load();
+        //         Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+        //         Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
+        //         Ext.data.StoreManager.lookup('IngestionsStore').load();
+        //     }
+        //     if (climatestation.globals['role'] == 'pc3' && climatestation.globals['mode'] == 'recovery'){
+        //         Ext.data.StoreManager.lookup('ProductsStore').load();
+        //         Ext.data.StoreManager.lookup('ProductsActiveStore').load();
+        //         Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
+        //         Ext.data.StoreManager.lookup('IngestionsStore').load();
+        //     }
+        //     Ext.data.StoreManager.lookup('ProcessingStore').load();
+        //     Ext.data.StoreManager.lookup('DataSetsStore').load();
+        // }
+        //
+        // // var delay = 500;
+        // // if (!Ext.data.StoreManager.lookup('TimeseriesProductsStore').isLoaded()){
+        // //     delay = 2000;
+        // // }
 
         this.callParent();
     }

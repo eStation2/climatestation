@@ -17,11 +17,11 @@ Ext.define("climatestation.view.help.help",{
         'climatestation.view.help.helpModel'
     ],
 
-    title: '<span class="dashboard-header-title-style">'+climatestation.Utils.getTranslation('helptitle')+'</span>',
-    titleAlign: 'center',
-    header: {
-        cls: 'dashboard-header-style'
-    },
+    // title: '<span class="panel-title-style">'+climatestation.Utils.getTranslation('helptitle')+'</span>',
+    // titleAlign: 'center',
+    // header: {
+    //     cls: 'dashboard-header-style'
+    // },
 
     width: 1150,
     //height: 650,
@@ -41,31 +41,28 @@ Ext.define("climatestation.view.help.help",{
     initComponent: function () {
         var me = this;
 
-        me.listeners = {
-            beforerender: function(){
-                var documentationstore  = me.getViewModel().getStore('documentation');
-                if (documentationstore.isStore) {
-                    documentationstore.proxy.extraParams = {type: 'docs', lang : climatestation.globals['selectedLanguage']};
-                    documentationstore.load();
-                }
-                var weblinksstore  = me.getViewModel().getStore('weblinks');
-                if (weblinksstore.isStore) {
-                    weblinksstore.proxy.extraParams = {type: 'links', lang : climatestation.globals['selectedLanguage']};
-                    weblinksstore.load();
-                }
-                var notesstore  = me.getViewModel().getStore('notes');
-                if (notesstore.isStore) {
-                    notesstore.proxy.extraParams = {type: 'notes', lang : climatestation.globals['selectedLanguage']};
-                    notesstore.load();
-                }
-            }
-        };
+        // me.listeners = {
+        //     beforerender: function(){
+        //         var documentationstore  = me.getViewModel().getStore('documentation');
+        //         if (documentationstore.isStore) {
+        //             documentationstore.proxy.extraParams = {type: 'docs', lang : climatestation.globals['selectedLanguage']};
+        //             documentationstore.load();
+        //         }
+        //         var weblinksstore  = me.getViewModel().getStore('weblinks');
+        //         if (weblinksstore.isStore) {
+        //             weblinksstore.proxy.extraParams = {type: 'links', lang : climatestation.globals['selectedLanguage']};
+        //             weblinksstore.load();
+        //         }
+        //         var notesstore  = me.getViewModel().getStore('notes');
+        //         if (notesstore.isStore) {
+        //             notesstore.proxy.extraParams = {type: 'notes', lang : climatestation.globals['selectedLanguage']};
+        //             notesstore.load();
+        //         }
+        //     }
+        // };
 
-        // me.setViewModel({
-        //     type: "help-help"
-        // });
-
-        me.title = '<span class="dashboard-header-title-style">'+climatestation.Utils.getTranslation('helptitle')+'</span>';
+        // me.title = '<span class="dashboard-header-title-style">'+climatestation.Utils.getTranslation('helptitle')+'</span>';
+        // me.title = '<span class="panel-title-style">'+climatestation.Utils.getTranslation('helptitle')+'</span>';
 
         me.items = [{
             xtype: 'dataview',

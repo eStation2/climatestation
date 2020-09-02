@@ -50,8 +50,11 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
     },
 
     // selModel: {listeners:{}},
-    //selModel: Ext.create('Ext.selection.Model', { listeners: {} }),
+    // selModel: Ext.create('Ext.selection.Model', { listeners: {} }),
+    // titleAlign: 'center',
 
+    bufferedRenderer: true,
+    scrollable: true,
     collapsible: false,
     suspendLayout: false,
     disableSelection: true,
@@ -62,7 +65,6 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
     rowLines: true,
     frame: false,
     border: false,
-    bufferedRenderer: false,
     focusable: false,
     margin: '0 0 10 0',    // (top, right, bottom, left).
     session: true,
@@ -74,39 +76,13 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
         dirtyStore: false
     },
 
-    // listeners: {
-        // groupclick: function( view, node, group, eOpts ) {
-            //this.getController().renderHiddenColumnsWhenUnlocked();
-        // }
-        //,afterrender: function (view) {
-        //    //this.getView().getFeature('productcategories').collapseAll();
-        //}
-        //,beforerender: function (){
-        //
-        //    //Ext.util.Observable.capture(this, function(e){console.log(this.id + ': ' + e);});
-        //    Ext.util.Observable.capture(this.getSelectionModel(), function(e){ console.log('selModel - ' + this.id + ': ' + e);});
-        //    Ext.util.Observable.capture(this, function(e){ console.log('acquisition-main - ' + this.id + ': ' + e);});
-        //
-        //    //this.getSelectionModel().setLocked(true);
-        //    //this.getSelectionModel().removeListener('focuschange', this.getSelectionModel());
-        //    //this.getSelectionModel().getNavigationModel().removeListener('navigate', this.getSelectionModel().getNavigationModel());
-        //    //console.info(this.getSelectionModel());
-        //}
-    // },
-    //
-    //plugins:[{
-    //    ptype:'lazyitems'
-    //},{
-    //    ptype:'cellediting'
-    //}],
-    // defaultListenerScope: true,
-
-
     initComponent: function () {
         var me = this;
         var user = climatestation.getUser();
 
         // Ext.util.Observable.capture(this, function(e){console.log('Acquisition - ' + this.id + ': ' + e);});
+
+        // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('acquisition') + '</span>');
 
         me.mon(me, {
             loadstore: function() {
@@ -151,6 +127,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                     me.forceStoreLoad = false;
                     me.dirtyStore = false;
                 }
+                me.getController().checkStatusServices();
             }
         });
 
@@ -160,23 +137,62 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
             },
             groupexpand: function(view, node, group){
                 me.hideCompletenessTooltip();
-
-                // var taskRefresh = new Ext.util.DelayedTask(function() {
-                //     view.refresh();
-                // });
-                // taskRefresh.delay(50);
+                me.view.updateLayout();
+                var taskRefresh = new Ext.util.DelayedTask(function() {
+                    view.refresh();
+                    view.updateLayout();
+                });
+                taskRefresh.delay(200);
             },
+            // groupclick: function(view, node, group) {
+            //     var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
+            //     var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
+            //     Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+            //        dataacquisitiongrid.updateLayout();
+            //     });
+            //     Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
+            //        ingestiongrid.updateLayout();
+            //     });
+            //     me.getView().updateLayout();
+            // },
             afterrender: function(){
                 var scroller = me.view.getScrollable();
 
                 scroller.on('scroll', function(){
                     var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
                     Ext.each(completenessTooltips, function(item) {
-                       item.disable();
-                       // item.hide();
+                       // item.disable();
+                       item.hide();
                     });
                 }, scroller, {single: false});
 
+                // var lockbtnstate = Ext.getCmp('lockunlock').pressed ? false : true;
+                // if (!lockbtnstate){
+                //     Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+                //        dataacquisitiongrid.columns[1].show();  // Edit Data Source
+                //        dataacquisitiongrid.columns[2].show();  // Store Native
+                //        //dataacquisitiongrid.columns[3].hide();
+                //        dataacquisitiongrid.updateLayout();
+                //     });
+                //     Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
+                //        ingestiongrid.columns[0].show();    // Add Mapset
+                //        ingestiongrid.columns[3].show();    // Delete Mapset
+                //        ingestiongrid.updateLayout();
+                //     });
+                // }
+                // else {
+                //     Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+                //        dataacquisitiongrid.columns[1].hide();  // Edit Data Source
+                //        dataacquisitiongrid.columns[2].hide();  // Store Native
+                //        //dataacquisitiongrid.columns[3].hide();
+                //        dataacquisitiongrid.updateLayout();
+                //     });
+                //     Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
+                //        ingestiongrid.columns[0].hide();    // Add Mapset
+                //        ingestiongrid.columns[3].hide();    // Delete Mapset
+                //        ingestiongrid.updateLayout();
+                //     });
+                // }
             }
         }
 
@@ -196,178 +212,178 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                 id: 'lockunlock',
                 name: 'lockunlock',
                 hidden: ((climatestation.Utils.objectExists(user) && user.userlevel < 2) ? false : true),
-                iconCls: 'fa fa-lock fa-2x',  // 'fa-unlock' = xf09c  'fa-lock' = xf023
+                iconCls: 'far fa-lock',  // 'fa-unlock' = xf09c  'fa-lock' = xf023
                 enableToggle: true,
                 scale: 'medium',
                 handler:  function(btn) {
-                    //Ext.suspendLayouts();
+                    // Ext.suspendLayouts();
                     //var acq_main = Ext.ComponentQuery.query('panel[name=acquisitionmain]');
-                    //var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
-                    //var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
+                    var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
+                    var ingestiongrids = Ext.ComponentQuery.query('ingestiongrid');
                     //var addproductbtn = Ext.ComponentQuery.query('panel[name=acquisitionmain] > toolbar > button[name=addproduct]');
                     //var checkColumns = Ext.ComponentQuery.query('panel[name=acquisitionmain] checkcolumn, dataacquisitiongrid checkcolumn, ingestiongrid checkcolumn');
                     //var actionColumns = Ext.ComponentQuery.query('panel[name=acquisitionmain] actioncolumn, dataacquisitiongrid actioncolumn, ingestiongrid actioncolumn');
 
                     if (btn.pressed){
 
-                        btn.setIconCls('fa fa-unlock fa-2x');
-                        // Ext.getCmp('addproduct').show();
+                        btn.setIconCls('far fa-unlock');
                         Ext.getCmp('productadmin-acquisition-btn').show();
+                        me.getView().getFeature('productcategories').collapseAll();
 
-                        //me.getColumns()[0].show();  // Edit product action column
                         me.getColumns()[1].show();    // Activate Product column
-                        me.getColumns()[2].setWidth(500);   // GET
+                        me.getColumns()[2].setWidth(483);   // GET
                         me.getColumns()[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 265px; left: 0px;" tabindex="-1">' +
-                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                        '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('type') + '</span>' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
+                        '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('Source') + '</span>' +
                         '           </div>' +
                         '       </div>' +
                         //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 201px; margin: 0px; top: 0px;" tabindex="-1">' +
-                        //'           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        //'           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                         //'               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('lastcopied') + '</span>' +
                         //'           </div>' +
                         //'       </div>' +
                         //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 110px; right: auto; left: 311px; margin: 0px; top: 0px;" tabindex="-1">' +
-                        //'           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        //'           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                         //'               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('lastexecuted') + '</span>' +
                         //'           </div>' +
                         //'       </div>' +
                         '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 105px; left: 265px; margin: 0px; top: 0px;" tabindex="-1">' +
-                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                         '               <span data-ref="textEl" class="x-column-header-text smalltext12">' + climatestation.Utils.getTranslation('storenative') + '</span>' +
                         '           </div>' +
                         '       </div>' +
                         '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 65px; right: auto; left: 370px; margin: 0px; top: 0px;" tabindex="-1">' +
-                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('active') + '</span>' +
                         '           </div>' +
                         '       </div>' +
                         '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px; left: 435px; margin: 0px; top: 0px;" tabindex="-1">' +
-                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('log') + '</span>' +
                         '           </div>' +
                         '       </div>');
 
-                        me.getColumns()[3].setWidth(785+70);   // INGESTION
-                        me.getColumns()[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 195px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
-                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        me.getColumns()[3].setWidth(712+70);   // INGESTION
+                        me.getColumns()[3].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 155px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('subproduct') + '</span>' +
                         '           </div>' +
                         '       </div>' +
-                        '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 235px; right: auto; left: 195px; margin: 0px; top: 0px;" tabindex="-1">' +
-                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 180px; right: auto; left: 155px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('mapset') + '</span>' +
                         '           </div>' +
                         '       </div>' +
-                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 430px; margin: 0px; top: 0px;" tabindex="-1">' +
-                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 380px; right: auto; left: 335px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('completeness') + '</span>' +
                         '           </div>' +
                         '       </div>' +
-                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 790px; margin: 0px; top: 0px;" tabindex="-1">' +
-                        '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 715px; margin: 0px; top: 0px;" tabindex="-1">' +
+                        '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('active') + '</span>' +
                         '           </div>' +
                         //'       </div>' +
                         //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 695px; margin: 0px; top: 0px;" tabindex="-1">' +
-                        //'           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        //'           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                         //'               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('log') + '</span>' +
                         //'           </div>' +
                         '       </div>');
 
-                        me.getView().refresh();
+                        Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+                           dataacquisitiongrid.columns[1].show();  // Edit Data Source
+                           dataacquisitiongrid.columns[2].show();  // Store Native
+                           //dataacquisitiongrid.columns[3].hide();
+                           dataacquisitiongrid.updateLayout();
+                        });
+                        Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
+                           ingestiongrid.columns[0].show();    // Add Mapset
+                           ingestiongrid.columns[3].show();    // Delete Mapset
+                           ingestiongrid.updateLayout();
+                        });
                     }
                     else {
-                        btn.setIconCls('fa fa-lock fa-2x');
-                        // Ext.getCmp('addproduct').hide();
+                        btn.setIconCls('far fa-lock');
                         Ext.getCmp('productadmin-acquisition-btn').hide();
+                        me.getView().getFeature('productcategories').collapseAll();
 
-                        //me.getColumns()[0].hide();
                         me.getColumns()[1].hide();
 
-                        me.getColumns()[2].setWidth(360);   // GET
+                        me.getColumns()[2].setWidth(347);   // GET
                         me.getColumns()[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px;" tabindex="-1">' +
-                                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                                '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('type') + '</span>' +
+                                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
+                                '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('Source') + '</span>' +
                                 '           </div>' +
                                 '       </div>' +
                                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 65px; left: 230px; margin: 0px; top: 0px;" tabindex="-1">' +
-                                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('active') + '</span>' +
                                 '           </div>' +
                                 '       </div>' +
                                 '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px; left: 295px; margin: 0px; top: 0px;" tabindex="-1">' +
-                                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('log') + '</span>' +
                                 '           </div>' +
                                 '       </div>');
 
-                        //me.getColumns()[3].setWidth(785);   // INGESTION      CREATES AN ERROR WHEN RESET BACK TO ORIGINAL WIDTH!!!
-                        me.getColumns()[3].setText('<div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 160px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
-                                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                        me.getColumns()[3].setWidth(712);   // INGESTION      CREATES AN ERROR WHEN RESET BACK TO ORIGINAL WIDTH!!!
+                        me.getColumns()[3].setText('<div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 120px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
+                                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('subproduct') + '</span>' +
                                 '           </div>' +
                                 '       </div>' +
-                                '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 160px; margin: 0px; top: 0px;" tabindex="-1">' +
-                                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                                '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 160px; right: auto; left: 120px; margin: 0px; top: 0px;" tabindex="-1">' +
+                                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('mapset') + '</span>' +
                                 '           </div>' +
                                 '       </div>' +
-                                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 360px; margin: 0px; top: 0px;" tabindex="-1">' +
-                                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 380px; right: auto; left: 280px; margin: 0px; top: 0px;" tabindex="-1">' +
+                                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('completeness') + '</span>' +
                                 '           </div>' +
                                 '       </div>' +
-                                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 720px; margin: 0px; top: 0px;" tabindex="-1">' +
-                                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 660px; margin: 0px; top: 0px;" tabindex="-1">' +
+                                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('active') + '</span>' +
                                 '           </div>' +
                                 //'       </div>' +
                                 //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 695px; margin: 0px; top: 0px;" tabindex="-1">' +
-                                //'           <div data-ref="titleEl" class="x-column-header-inner">' +
+                                //'           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                                 //'               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('log') + '</span>' +
                                 //'           </div>' +
                                 '       </div>');
 
-                        me.getView().refresh();
-
-                        //Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
-                        //    dataacquisitiongrid.columns[1].hide();  // Edit Data Source
-                        //    dataacquisitiongrid.columns[2].hide();  // Store Native
-                        //    //dataacquisitiongrid.columns[3].hide();
-                        //});
-                        //Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
-                        //    ingestiongrid.columns[0].hide();    // Add Mapset
-                        //    //ingestiongrid.columns[0].updateLayout();
-                        //    ingestiongrid.columns[3].hide();    // Delete Mapset
-                        //    //ingestiongrid.columns[3].updateLayout();
-                        //});
+                        Ext.Object.each(dataacquisitiongrids, function(id, dataacquisitiongrid, myself) {
+                           dataacquisitiongrid.columns[1].hide();  // Edit Data Source
+                           dataacquisitiongrid.columns[2].hide();  // Store Native
+                           //dataacquisitiongrid.columns[3].hide();
+                           dataacquisitiongrid.updateLayout();
+                        });
+                        Ext.Object.each(ingestiongrids, function(id, ingestiongrid, myself) {
+                           ingestiongrid.columns[0].hide();    // Add Mapset
+                           ingestiongrid.columns[3].hide();    // Delete Mapset
+                           ingestiongrid.updateLayout();
+                        });
                     }
+                    me.getView().updateLayout();
 
+                    // me.forceStoreLoad = true;
+                    // me.fireEvent('loadstore');
                     //me.getController().renderHiddenColumnsWhenUnlocked();
                     //
-                    //Ext.resumeLayouts(true);
+                    // Ext.resumeLayouts(true);
                     // acq_main.updateLayout();
                     //var toggleFn = newValue ? 'disable' : 'enable';
                     //Ext.each(this.query('button'), function(item) {
                     //    item[toggleFn]();
                     //});
                 }
-            }, ' ', ' ', {
-            //     xtype: 'button',
-            //     text: climatestation.Utils.getTranslation('addproduct'),    // 'Add Product',
-            //     id: 'addproduct',
-            //     name: 'addproduct',
-            //     iconCls: 'fa fa-plus-circle fa-2x',
-            //     style: {color: 'green'},
-            //     hidden: true,
-            //     // glyph: 'xf055@FontAwesome',
-            //     scale: 'medium',
-            //     handler: 'selectProduct'
-            // },{
+            }, ' ', {
                 tooltip:  climatestation.Utils.getTranslation('expandall'),    // 'Expand All',
-                iconCls: 'expand',
+                iconCls: 'far fa-blinds-open',
                 scale: 'medium',
+                margin: 5,
+                padding: 5,
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     //Ext.suspendLayouts();
@@ -379,8 +395,10 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                 }
             }, {
                 tooltip:  climatestation.Utils.getTranslation('collapseall'),    // 'Collapse All',
-                iconCls: 'collapse',
+                iconCls: 'far fa-blinds-raised',
                 scale: 'medium',
+                margin: 5,
+                padding: 5,
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('productcategories').collapseAll();
@@ -392,7 +410,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                 text: climatestation.Utils.getTranslation('PRODUCTS'),    // 'PRODUCTS',
                 id: 'productadmin-acquisition-btn',
                 name: 'productadmin-acquisition-btn',
-                iconCls: 'fa fa-cog fa-2x',
+                iconCls: 'far fa-cog',
                 style: { color: 'gray' },
                 hidden: true,
                 scale: 'medium',
@@ -433,7 +451,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
             '->', // same as { xtype: 'tbfill' }
             {
                 xtype: 'button',
-                iconCls: 'fa fa-refresh fa-2x',
+                iconCls: 'far fa-redo-alt',
                 style: { color: 'gray' },
                 enableToggle: false,
                 scale: 'medium',
@@ -494,7 +512,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                     // eumetcastsourcestore.load();
                     // internetsourcestore.load();
 
-                    me.getController().checkStatusServices();
+                    // me.getController().checkStatusServices();
                     //me.getController().renderHiddenColumnsWhenUnlocked();
                 }
             }]
@@ -511,7 +529,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
 
         me.columns = [
         {
-            header: '<div class="grid-header-style">' + climatestation.Utils.getTranslation('productcategories') + '</div>',
+            text: '<div class="grid-header-style">' + climatestation.Utils.getTranslation('productcategories') + '</div>',
             menuDisabled: true,
             defaults: {
                 menuDisabled: true,
@@ -522,36 +540,8 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                 stopSelection: true
             },
             columns: [{
-            //    xtype: 'actioncolumn',
-            //    hideable: true,
-            //    hidden:true,
-            //    width: 50,
-            //    height: 50,
-            //    align: 'center',
-            //    shrinkWrap: 0,
-            //    items: [{
-            //        //icon: 'resources/img/icons/edit.png',
-            //        getClass: function(v, meta, rec) {
-            //            if (rec.get('defined_by') != 'JRC') {
-            //                return 'editproduct';
-            //            }
-            //            else {
-            //                return 'x-hide-display';
-            //            }
-            //        },
-            //        getTip: function(v, meta, rec) {
-            //            if (rec.get('defined_by') != 'JRC') {
-            //                return climatestation.Utils.getTranslation('editproduct');    // 'Edit Product',
-            //            }
-            //        },
-            //        // iconCls: 'fa fa-edit fa-2x', // xf044
-            //        // cls: 'fa fa-edit fa-2x', // xf044
-            //        //tooltip: climatestation.Utils.getTranslation('editproduct'),   // 'Edit Product',
-            //        handler: 'editProduct'
-            //    }]
-            //}, {
                 xtype:'templatecolumn',
-                header: climatestation.Utils.getTranslation('product'),   // 'Product',
+                text: climatestation.Utils.getTranslation('product'),   // 'Product',
                 tpl: new Ext.XTemplate(
                         '<b>{prod_descriptive_name}</b>' +
                         '<tpl if="version != \'undefined\'">',
@@ -563,12 +553,12 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                         '<b class="smalltext" style="color:darkgrey;">'+climatestation.Utils.getTranslation('provider')+': {provider}</b>' +
                         '</br>'
                     ),
-                width: 330,
+                width: 280,
                 cellWrap:true,
                 variableRowHeight:false
             },{
                 xtype: 'actioncolumn',
-                header: climatestation.Utils.getTranslation('active'),   // 'Active',
+                text: climatestation.Utils.getTranslation('active'),   // 'Active',
                 hideable: true,
                 hidden: Ext.getCmp('lockunlock').pressed ? false : true,
                 width: 65,
@@ -577,9 +567,9 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                 items: [{
                     getClass: function(v, meta, rec) {
                         if (rec.get('activated')) {
-                            return 'activated';
+                            return 'far fa-check-square green';   // 'activated';
                         } else {
-                            return 'deactivated';
+                            return 'far fa-square green';   // 'deactivated';
                         }
                     },
                     getTip: function(v, meta, rec) {
@@ -589,7 +579,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                             return climatestation.Utils.getTranslation('activateproduct');   // 'Activate Product';
                         }
                     },
-                    // isDisabled: function(view, rowIndex, colIndex, item, record) {
+                    // isActionDisabled: function(view, rowIndex, colIndex, item, record) {
                     //     // Returns true if 'editable' is false (, null, or undefined)
                     //     return false // !record.get('editable');
                     // },
@@ -605,7 +595,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                 }]
             }]
         }, {
-            header:  '<div class="grid-header-style">' + climatestation.Utils.getTranslation('get') + '</div>',
+            text:  '<div class="grid-header-style">' + climatestation.Utils.getTranslation('get') + '</div>',
             id:'acquisitioncolumn',
             menuDisabled: true,
             defaults: {
@@ -618,28 +608,30 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
             },
             columns: [{
                 xtype: 'widgetcolumn',
-                width: Ext.getCmp('lockunlock').pressed ? 500 : 360,
+                width: Ext.getCmp('lockunlock').pressed ? 483 : 347,
                 variableRowHeight:false,
-
-                header: ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('type') + '</span>' +
-                '           </div>' +
-                '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 65px; left: 230px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('active') + '</span>' +
-                '           </div>' +
-                '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px; left: 295px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('log') + '</span>' +
-                '           </div>' +
-                '       </div>',
+                text:
+                // 'x-column-header x-column-header-align-start x-group-sub-header x-box-item x-column-header-default x-unselectable x-column-header-first x-column-header-sort-DESC',
+                    // ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px;" tabindex="-1">' +
+                    ' <div class="x-column-header x-column-header-align-start x-group-sub-header x-box-item x-column-header-default x-unselectable x-column-header-first " style="border-top: 0px; width: 230px; left: 0px;" tabindex="-1">' +
+                    '       <div data-ref="titleEl" class="x-column-header-inner x-leaf-column-header x-unselectable">' +
+                    '           <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('Source') + '</span>' +
+                    '       </div>' +
+                    ' </div>' +
+                    ' <div class="x-column-header x-column-header-align-start x-group-sub-header x-box-item x-column-header-default x-unselectable x-column-header-first " style="border-top: 0px; width: 65px; left: 230px; margin: 0px; top: 0px;" tabindex="-1">' +
+                    '     <div data-ref="titleEl" class="x-column-header-inner x-leaf-column-header x-unselectable">' +
+                    '         <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('active') + '</span>' +
+                    '     </div>' +
+                    ' </div>' +
+                    ' <div class="x-column-header x-column-header-align-start x-group-sub-header x-box-item x-column-header-default x-unselectable x-column-header-first " style="border-top: 0px; border-right: 0px; width: 70px; left: 295px; margin: 0px; top: 0px;" tabindex="-1">' +
+                    '     <div data-ref="titleEl" class="x-column-header-inner x-leaf-column-header x-unselectable">' +
+                    '         <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('log') + '</span>' +
+                    '     </div>' +
+                    ' </div>',
 
                 // listeners: {
                 //     render: function(column){
-                //         //column.titleEl.removeCls('x-column-header-inner');
+                //         //column.titleEl.removeCls('x-column-header-inner x-unselectable');
                 //     }
                 // },
                 widget: {
@@ -650,7 +642,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                     //console.info(widget.lookupViewModel());
                     var daStore = widget.getViewModel().get('productdatasources');
                     //Ext.suspendLayouts();
-                    if (!widget.widgetattached) {
+                    // if (!widget.widgetattached) {
                         //if (daStore.getFilters().items.length == 0) {
                         daStore.setFilters({
                             property: 'productid'
@@ -660,11 +652,11 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                         //Ext.resumeLayouts(true);
                         //}
                         widget.widgetattached = true;
-                    }
+                    // }
                 }
             }]
         }, {
-            header:  '<div class="grid-header-style">' + climatestation.Utils.getTranslation('ingestion') + '</div>',
+            text:  '<div class="grid-header-style">' + climatestation.Utils.getTranslation('ingestion') + '</div>',
             menuDisabled: true,
             defaults: {
                 menuDisabled: true,
@@ -676,38 +668,38 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
             }
             ,columns: [{
                 xtype: 'widgetcolumn',
-                width: Ext.getCmp('lockunlock').pressed ? 785+70 : 785,
-                bodyPadding:5,
+                width: Ext.getCmp('lockunlock').pressed ? 712+70 : 712,
+                bodyPadding: 5,
 
-                header:
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 160px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                text:
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 120px; right: auto; left: 0px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('subproduct') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 160px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 160px; left: 120px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('mapset') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 360px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 380px; right: auto; left: 280px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('completeness') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 720px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 660px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('active') + '</span>' +
                 '           </div>' +
                 //'       </div>' +
                 //'       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 695px; margin: 0px; top: 0px;" tabindex="-1">' +
-                //'           <div data-ref="titleEl" class="x-column-header-inner">' +
+                //'           <div data-ref="titleEl" class="x-column-header-inner x-unselectable">' +
                 //'               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('log') + '</span>' +
                 //'           </div>' +
                 '       </div>',
                 // listeners: {
                 //     render: function(column){
-                //         //column.titleEl.removeCls('x-column-header-inner');
+                //         //column.titleEl.removeCls('x-column-header-inner x-unselectable');
                 //     }
                 // },
                 widget: {
@@ -717,7 +709,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                 onWidgetAttach: function(col, widget, record) {
                     var daStore = widget.getViewModel().get('productingestions');
                     // Ext.suspendLayouts();
-                    if (!widget.widgetattached) {
+                    // if (!widget.widgetattached) {
                         //if (daStore.getFilters().items.length == 0) {
                         daStore.setFilters({
                             property: 'productid'
@@ -727,7 +719,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                         //Ext.resumeLayouts(true);
                         //}
                         widget.widgetattached = true;
-                    }
+                    // }
                     // Ext.resumeLayouts(true);
                 }
             }]

@@ -182,7 +182,7 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
                 items : ['->',{
                     text: climatestation.Utils.getTranslation('update_graph'), // 'Update graph',
                     // scope:me,
-                    iconCls: 'fa fa-save fa-2x',    // 'icon-disk',
+                    iconCls: 'far fa-save',    // 'icon-disk',
                     style: { color: 'lightblue' },
                     scale: 'medium',
                     disabled: false,

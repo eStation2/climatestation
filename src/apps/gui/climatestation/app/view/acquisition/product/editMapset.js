@@ -31,13 +31,13 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
     modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
-    resizable: false,
-    autoScroll:true,
+    resizable: true,
+    scrollable: 'y',
     maximizable: false,
 
-    //width: 1100,
-    height: Ext.getBody().getViewSize().height < 825 ? Ext.getBody().getViewSize().height-35 : 825,  // 600,
-    maxHeight: 825,
+    width: 1260,
+    height: Ext.getBody().getViewSize().height < 825 ? Ext.getBody().getViewSize().height-35 : 950,  // 600,
+    maxHeight: 1000,
 
     frame: true,
     border: false,
@@ -69,23 +69,23 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
     initComponent: function () {
         var me = this;
         var user = climatestation.getUser();
-        var labelwidth = 150;
 
         if (me.params.edit){
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('editmapset') + '</span>');
+            // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('editmapset') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('editmapset') + '</span>');
         }
         else if (me.params.view){
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('viewmapset') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('viewmapset') + '</span>');
         }
         else {
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('newmapset') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('newmapset') + '</span>');
         }
 
         // Ext.util.Observable.capture(me, function(e){console.log(e);});
 
         me.bbar = [{
             text: climatestation.Utils.getTranslation('save'),    // 'Save',
-            iconCls: 'fa fa-save fa-2x',
+            iconCls: 'far fa-save',
             style: { color: 'lightblue' },
             scale: 'medium',
             disabled: false,
@@ -158,9 +158,15 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
             },
 
             beforerender: function(){
+                var bboxstore = Ext.data.StoreManager.lookup('BboxStore');
+                bboxstore.load();
+
+                Ext.data.StoreManager.lookup('ProjectionsStore').load();
+                Ext.data.StoreManager.lookup('ResolutionsStore').load();
+
                 var taskBbox = new Ext.util.DelayedTask(function() {
                     var bboxcode = me.params.mapsetrecord.get('bboxcode');
-                    var bboxstore = Ext.data.StoreManager.lookup('BboxStore');
+                    // var bboxstore = Ext.data.StoreManager.lookup('BboxStore');
                     // var bboxstore = me.lookupReference('predefined_bbox').getStore();
 
                     if (bboxstore.findRecord('bboxcode', bboxcode, 0, true, false, false)){
@@ -475,7 +481,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     })
                  });
 
-                me.osmlayer = new ol.layer.Tile({       // Image
+                me.osmlayer = new ol.layer.Tile({
                     // layer_id: 'OSMlayer',
                     // layerorderidx: 100,
                     // type: 'base',
@@ -501,10 +507,10 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
             },
 
             beforeclose: function(){
-                if (Ext.data.StoreManager.lookup('MapsetsStore').getUpdatedRecords() !== []){
-                    Ext.data.StoreManager.lookup('MapsetsStore').rejectChanges();
+                if (Ext.data.StoreManager.lookup('mapsets').getUpdatedRecords() !== []){
+                    Ext.data.StoreManager.lookup('mapsets').rejectChanges();
                 }
-                Ext.data.StoreManager.lookup('MapsetsStore').load();
+                Ext.data.StoreManager.lookup('mapsets').load();
             }
         };
 
@@ -513,29 +519,29 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
             //bind: '{theMapset}',     // NO BIND otherwise does not work with formula on store.
             reference: 'mapsetform',
             border: false,
+            scrollable: 'y',
             // use the Model's validations for displaying form errors
             // modelValidation: true,
             fieldDefaults: {
-                labelAlign: 'left',
+                // labelAlign: 'top',
                 labelStyle: 'font-weight: bold;',
                 msgTarget: 'side',
                 preventMark: false
             },
             layout: {
                 type: 'hbox'
-                ,align: 'stretch'
+                // ,align: 'stretch'
             },
             items: [{
                 xtype: 'fieldset',
                 title: '<b>'+climatestation.Utils.getTranslation('mapsetdefinition')+'</b>',    // '<b>Mapset definition</b>',
                 collapsible: false,
                 width: 610,
-                margin: '10 5 10 10',
-                padding: '10 10 10 10',
+                margin: '0 5 0 10',
+                padding: '10 10 0 10',
                 defaults: {
                     width: 580,
-                    labelWidth: labelwidth,
-                    labelAlign: 'left',
+                    labelAlign: 'top',
                     // disabled: me.params.view ? true : false
                     editable: me.params.view ? false : true
                 },
@@ -543,16 +549,15 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     xtype: 'container',
                     layout: {
                         type: 'hbox'
-                        , align: 'stretch'
+                        ,align: 'stretch'
                     },
                     margin: '0 5 10 0',
                     items: [{
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('mapsetcode'),    // 'Mapset code',
                         reference: 'mapsetcode',
-                        labelWidth: 100,
                         flex: 1.5,
-                        msgTarget: 'side',
+                        anchor: '100%',
                         bind: '{theMapset.mapsetcode}',
                         allowBlank: false,
                         disabled: (me.params.edit &&  climatestation.Utils.objectExists(user) && user.userlevel != 1) ? true : false
@@ -560,8 +565,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                         xtype: 'combobox',
                         fieldLabel: climatestation.Utils.getTranslation('definedby'),
                         reference: 'defined_by',
-                        labelWidth: 100,
-                        width: 100 + 100,
+                        width: 100,
                         flex: 1,
                         margin: '0 0 10 30',
                         allowBlank: false,
@@ -580,29 +584,28 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     xtype: 'textfield',
                     fieldLabel: climatestation.Utils.getTranslation('name'),    // 'Name',
                     reference: 'descriptive_name',
-                    labelWidth: 100,
-                    msgTarget: 'side',
                     bind: '{theMapset.descriptive_name}',
+                    // anchor: '100%',
                     allowBlank: false
                 }, {
-                    xtype: 'htmleditor',
+                    xtype: 'textareafield',
                     fieldLabel: climatestation.Utils.getTranslation('description'),    // 'Description',
                     labelAlign: 'top',
                     reference: 'description',
-                    msgTarget: 'side',
                     bind: {
                         value: '{theMapset.description}'
                     },
-                    height: 130,
-                    minHeight: 130,
+                    height: 80,
+                    // minHeight: 80,
                     scrollable: true,
                     allowBlank: true,
-                    grow: true,
-                    growMax: 130,
-                    layout: 'fit',
+                    // grow: true,
+                    // growMax: 130,
+                    // layout: 'fit',
+                    // anchor: '100%',
                     resizable: true,
                     resizeHandles: 's',
-                    style: 'background: white;',
+                    // style: 'background: white;',
                     hidden: false,
                     enableAlignments: false,
                     enableColors: true,
@@ -617,8 +620,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     xtype: 'combobox',
                     fieldLabel: climatestation.Utils.getTranslation('projection'),
                     reference: 'projection',
-                    labelWidth: 100,
-                    width: 200 + 100,
+                    width: 200,
                     // margin: '0 0 5 80',
                     allowBlank: false,
                     disabled: me.params.view ? true : false,
@@ -664,8 +666,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             fieldLabel: climatestation.Utils.getTranslation('resolution'),
                             reference: 'resolution',
                             labelAlign: 'top',
-                            labelWidth: 100,
-                            width: 190,
+                            width: 200,
                             padding: '0 10 0 0',
                             allowBlank: false,
                             disabled: me.params.view ? true : false,
@@ -724,34 +725,32 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     },{
                         xtype: 'container',
                         layout: {
-                            type: 'vbox'
+                            type: 'hbox'
                             ,align: 'stretch'
                         },
                         margin: '10 0 0 0',
                         items: [{
                             xtype: 'displayfield',
                             fieldLabel: climatestation.Utils.getTranslation('pixel_size_x'),
-                            labelAlign: 'left',
-                            labelWidth: labelwidth,
+                            labelAlign: 'top',
                             reference: 'pixel_size_x',
                             allowBlank: false,
                             padding: '10 10 0 0',
                             margin: '0 0 0 0',
                             cls:'greenbold',
-                            width: 250,
+                            width: 200,
                             bind: '{theMapset.pixel_size_x}'
 
                         }, {
                             xtype: 'displayfield',
                             fieldLabel: climatestation.Utils.getTranslation('pixel_size_y'),
-                            labelAlign: 'left',
-                            labelWidth: labelwidth,
+                            labelAlign: 'top',
                             reference: 'pixel_size_y',
                             allowBlank: false,
                             padding: '5 10 0 0',
                             margin: '0 0 0 0',
                             cls: 'greenbold',
-                            width: 250,
+                            width: 200,
                             bind: '{theMapset.pixel_size_y}'
                         // }, {
                         //     xtype: 'numberfield',
@@ -787,8 +786,9 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     title: climatestation.Utils.getTranslation('boundingbox'),
                     reference: 'boundingbox_fieldset',
                     collapsible: false,
-                    margin: '15 10 5 0',
-                    padding: '0 5 0 10',
+                    // margin: '15 10 5 0',
+                    padding: '0 5 0 0',
+                    width: 585,
                     layout: {
                         type: 'hbox'
                         ,align: 'stretch'
@@ -797,28 +797,30 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                         xtype: 'container',
                         flex: 1,
                         layout: {
-                            type: 'vbox'
+                            type: 'vbox',
+                            align: 'stretch'
                         },
-                        padding: '0 5 0 0',
+                        width: 250,
+                        padding: '10 10 3 10',
                         defaults: {
                             // disabled: me.params.view ? true : false,
                             editable: me.params.view ? false : true,
-                            labelWidth: labelwidth
+                            // width: 150,
+                            labelAlign: 'left',
+                            labelWidth: 150
                         },
 
                         items: [{
                             xtype: 'textfield',
                             fieldLabel: climatestation.Utils.getTranslation('bboxcodename'),    // 'Name',
                             reference: 'bboxcodename',
-                            labelWidth: 100,
-                            labelAlign: 'top',
-                            msgTarget: 'side',
                             bind: '{theMapset.bboxcode}',
-                            allowBlank: false
+                            allowBlank: false,
+                            labelAlign: 'top',
+                            width: 200
                         }, {
                             xtype: 'checkboxfield',
                             boxLabel: climatestation.Utils.getTranslation('set_as_predefinedbbox'),
-                            labelAlign: 'top',
                             reference: 'predefinedbbox',
                             inputValue: '0',
                             width: 200,
@@ -828,8 +830,8 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             xtype: 'numberfield',
                             reference: 'upper_left_long',
                             fieldLabel: climatestation.Utils.getTranslation('upper_left_long'),
-                            width: 100 + labelwidth,
-                            margin: '20 10 5 0',
+                            // width: 100,
+                            // margin: '20 10 5 0',
                             allowBlank: false,
                             maxValue: 99999999.999,
                             minValue: -99999999.999,
@@ -859,7 +861,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             xtype: 'numberfield',
                             reference: 'lower_right_long',
                             fieldLabel: climatestation.Utils.getTranslation('lower_right_long'),
-                            width: 100 + labelwidth,
+                            // width: 100,
                             allowBlank: false,
                             maxValue: 99999999.999,
                             minValue: -99999999.999,
@@ -889,7 +891,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             xtype: 'numberfield',
                             reference: 'upper_left_lat',
                             fieldLabel: climatestation.Utils.getTranslation('upper_left_lat'),
-                            width: 100 + labelwidth,
+                            // width: 100,
                             allowBlank: false,
                             maxValue: 99999999.999,
                             minValue: -99999999.999,
@@ -920,7 +922,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             reference: 'lower_right_lat',
                             fieldLabel: climatestation.Utils.getTranslation('lower_right_lat'),
                             allowBlank: false,
-                            width: 100 + labelwidth,
+                            // width: 100,
                             maxValue: 99999999.999,
                             minValue: -99999999.999,
                             allowDecimals: true,
@@ -948,31 +950,36 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                         }]
                     }, {
                         xtype: 'container',
-                        flex: 1.1,
+                        // width: 220,
+                        flex: 1,
                         layout: {
                             type: 'vbox'
+                            ,align: 'stretch'
                         },
-                        padding: '0 10 0 0',
+                        // padding: '0 10 0 0',
                         defaults: {
                             disabled: me.params.view ? true : false,
-                            labelWidth: labelwidth
+                            labelAlign: 'top',
+                            labelWidth: 120
+
                         },
                         items: [{
                             xtype: 'combobox',
                             fieldLabel: climatestation.Utils.getTranslation('predefined_bbox'),
                             reference: 'predefined_bbox',
-                            labelAlign: 'top',
-                            labelWidth: 100,
-                            width: 250,
-                            padding: '0 10 10 0',
+                            width: 200,
+                            // padding: '0 10 10 0',
                             // bind: '{theMapset.bboxcode}',
                             store: {
                                 type: 'bbox'
                             },
-                            editable: true,
+                            // labelAlign: 'top',
+                            // padding: '0 10 0 0',
+
+                            // editable: true,
                             valueField: 'bboxcode',
                             displayField: 'descriptive_name',
-                            allowBlank: true,
+                            allowBlank: false,
                             typeAhead: true,
                             forceSelection: false,
                             queryMode: 'local',
@@ -1001,13 +1008,13 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             xtype: 'fieldset',
                             title: climatestation.Utils.getTranslation('footprint_image'),
                             reference: 'footprint_image_fieldset',
-                            flex: 1.2,
+                            // flex: 1.2,
                             // width: 250,
-                            height: 200,
+                            height: 220,
                             layout: 'center',
                             collapsible: false,
-                            // margin: '5 5 15 5',
-                            padding: '10 10 10 10',
+                            // margin: '5 0 15 0',
+                            padding: 5,
                             items: [{
                                 // xtype: 'imagecomponent',
                                 xtype: 'container',
@@ -1033,7 +1040,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                 title: '<b>'+climatestation.Utils.getTranslation('draw_boundary_box')+'</b>',    // '<b>Draw boundary box</b>',
                 collapsible: false,
                 width: 600,
-                // height: 490,
+                height: 600,
                 layout: 'fit',
                 frame: false,
                 border: true,
@@ -1071,13 +1078,13 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     {
                         xtype: 'button',
                         text: climatestation.Utils.getTranslation('reset'),   // 'Reset',
-                        glyph: 'xf0e2@FontAwesome',
-                        cls: 'red',
-                        // iconCls: 'fa fa-undo',
+                        // glyph: 'xf0e2@Font Awesome Free',
+                        // cls: 'red',
+                        iconCls: 'far fa-undo',
                         style: {color: 'red'},
-                        margin: '5 10 5 5',
+                        // margin: '5 10 5 5',
                         //cls: 'x-menu-no-icon button-gray',
-                        width: 80,
+                        // width: 80,
                         handler: function () {
                             var bboxcodename = me.lookupReference('bboxcodename');
 
@@ -1133,7 +1140,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                         //             text: climatestation.Utils.getTranslation('reset'),   // 'Reset',
                         //             glyph: 'xf0e2@FontAwesome',
                         //             cls: 'red',
-                        //             // iconCls: 'fa fa-undo',
+                        //             // iconCls: 'far fa-undo',
                         //             style: {color: 'red'},
                         //             //cls: 'x-menu-no-icon button-gray',
                         //             width: 60,

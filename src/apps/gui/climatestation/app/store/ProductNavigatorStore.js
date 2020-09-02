@@ -13,7 +13,7 @@ Ext.define('climatestation.store.ProductNavigatorStore', {
 
     storeId : 'ProductNavigatorStore'
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: false
     ,remoteSort: false
     ,remoteGroup: false

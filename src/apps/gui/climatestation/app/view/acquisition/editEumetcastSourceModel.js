@@ -6,10 +6,10 @@ Ext.define('climatestation.view.acquisition.editEumetcastSourceModel', {
         eumetcastsources: {
             source: 'EumetcastSourceStore'
             // ,session: true
-        },
-        mapsets: {
-            source: 'MapsetsStore'
         }
+        // mapsets: {
+        //     source: 'MapsetsStore'
+        // }
         //theEumetcastSource: {
         //    source: '{eumetcastsources}',
         //    filters: [{
@@ -18,9 +18,9 @@ Ext.define('climatestation.view.acquisition.editEumetcastSourceModel', {
         //        anyMatch: false
         //    }],
         //}
-    }
+    },
 
-    ,formulas: {
+    formulas: {
         theEumetcastSource: {
             get: function(get) {
                 if (this.getView().params.create){

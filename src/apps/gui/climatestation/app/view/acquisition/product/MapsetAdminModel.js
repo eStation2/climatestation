@@ -9,7 +9,7 @@ Ext.define('climatestation.view.acquisition.product.MapsetAdminModel', {
     ],
     stores: {
         mapsets: {
-            source: 'MapsetsStore'
+            source: 'mapsets'
         },
         mapsetsforingest: {
             model: 'climatestation.model.MapSetForIngest',

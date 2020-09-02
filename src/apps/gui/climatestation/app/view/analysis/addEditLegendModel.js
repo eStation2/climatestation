@@ -53,6 +53,7 @@ Ext.define('climatestation.view.analysis.addEditLegendModel', {
             //     },
             //     write: function(store, operation){
             //         var result = Ext.JSON.decode(operation.getResponse().responseText);
+            //         var result = operation.getResponse().responseJson;
             //         if (operation.success) {
             //
             //         }

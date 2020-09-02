@@ -43,6 +43,18 @@ Ext.define("climatestation.view.analysis.analysisMain",{
 
         me.vectorLayerPool = [];
 
+        me.mon(me, {
+            loadstore: function() {
+                Ext.data.StoreManager.lookup('LayersStore').load();
+                Ext.data.StoreManager.lookup('LegendsStore').load();
+                Ext.data.StoreManager.lookup('LogosStore').load();
+                Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
+                Ext.data.StoreManager.lookup('colorschemes').load();
+                Ext.data.StoreManager.lookup('ProductNavigatorStore').load();
+                // Ext.data.StoreManager.lookup('UserWorkspacesStore').load();
+            }
+        });
+
         me.listeners = {
             // render: function(c){
             //     c.editor = new Ext.Editor(new Ext.form.TextField({
@@ -115,7 +127,7 @@ Ext.define("climatestation.view.analysis.analysisMain",{
                         hidden: (climatestation.getUser() == 'undefined' || climatestation.getUser() == null ? true : false),
                         scale: 'small',
                         // padding: '3px 1px 0px 3px',
-                        // iconCls: 'fa fa-plus-circle fa-2x',
+                        // iconCls: 'far fa-plus-circle',
                         // style: { color: 'gray'},
                         tooltip: climatestation.Utils.getTranslation('add_workspace'),    // 'Add workspace',
                         handler: 'showUserWorkspaceAdmin',

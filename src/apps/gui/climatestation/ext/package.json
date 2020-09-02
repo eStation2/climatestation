@@ -74,6 +74,7 @@
       "packages/google",
       "packages/legacy",
       "packages/font-awesome",
+      "packages/font-awesome-pro",
       "packages/font-pictos",
       "packages/font-ext"
     ]

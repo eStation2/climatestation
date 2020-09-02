@@ -82,7 +82,6 @@ Ext.define("climatestation.view.dashboard.PC2",{
         me.service_ingest_Style = 'gray';
         me.service_processing_Style = 'gray';
         me.service_system_Style = 'gray';
-        //console.info(me);
 
         if (me.service_eumetcast === 'true')
             me.service_eumetcast_Style = 'green';
@@ -117,12 +116,15 @@ Ext.define("climatestation.view.dashboard.PC2",{
                 // pack: 'left',
                 align: 'middle'
             },
-            padding: '5 5 10 5',
+            // padding: '5 5 10 0',
             cls: me.toolbarCls,
             defaults: {
-                width: 160,
-                textAlign: 'left'
-                ,disabled: me.setdisabledAll
+                minWidth: 175,
+                textAlign: 'middle',
+                disabled: me.setdisabledAll,
+                // style: {
+                //     "margin-right": '8px'
+                // },
             },
             items: [
                 {
@@ -181,14 +183,14 @@ Ext.define("climatestation.view.dashboard.PC2",{
                     disabled: me.setdisabledAll ? true : false // me.setdisabledPartial
                 }, '-',
                 {
-                xtype: 'splitbutton',
+                xtype: 'button',
                 name: 'datasyncbtn',
                 text: climatestation.Utils.getTranslation('datasynchronization'),     // 'Data Synchronization',
-                iconCls: 'data-sync',       // 'fa fa-exchange fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
+                iconCls: 'data-sync',       // 'far fa-exchange',  //  fa-spin 'icon-loop', // icomoon fonts
                 //style: { color: 'blue' },
                 scale: 'medium',
                 width: 255,
-                handler: function(){this.showMenu();},
+                // handler: function(){this.showMenu();},
                 menu: Ext.create('Ext.menu.Menu', {
                     width: 230,
                     margin: '0 0 10 0',
@@ -218,14 +220,14 @@ Ext.define("climatestation.view.dashboard.PC2",{
                     ]
                 })
             },{
-                xtype: 'splitbutton',
+                xtype: 'button',
                 name: 'dbsyncbtn',
                 text: climatestation.Utils.getTranslation('dbsynchronization'),     // 'DB Synchronization',
-                iconCls: 'db-sync',       // 'fa fa-database fa-2x',  //  fa-spin 'icon-loop', // icomoon fonts
+                iconCls: 'db-sync',       // 'far fa-database',  //  fa-spin 'icon-loop', // icomoon fonts
                 //style: { color: 'blue' },
                 scale: 'medium',
                 width: 255,
-                handler: function(){this.showMenu();},
+                // handler: function(){this.showMenu();},
                 menu: Ext.create('Ext.menu.Menu', {
                     width: 230,
                     margin: '0 0 10 0',
@@ -321,7 +323,7 @@ Ext.define("climatestation.view.dashboard.PC2",{
         //    collapsed: true,
         //    hideCollapseTool: me.diskstatus == null ? true : false,
         //    // flex:1.5,
-        //    iconCls: me.diskstatusCls,  // 'x-tool-okay', // 'fa fa-check-circle-o fa-2x', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
+        //    iconCls: me.diskstatusCls,  // 'x-tool-okay', // 'far fa-check-circle-o', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
         //    iconAlign : 'left',
         //    height: 210,
         //    minHeight: 200,
@@ -341,7 +343,7 @@ Ext.define("climatestation.view.dashboard.PC2",{
         if (me.activePC) {
             me.items[0].bodyCls = 'active-panel-body-style';
             //me.bodyCls = 'active-panel-body-style';
-            me.controller.checkStatusServices();
+            // me.controller.checkStatusServices();
         }
         else {
             me.items[0].bodyCls = '';

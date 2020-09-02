@@ -1,6 +1,6 @@
 ﻿
 Ext.define("climatestation.view.system.systemsettings",{
-    extend: "Ext.form.Panel",
+    extend: "Ext.panel.Panel",
     controller: "system-systemsettings",
     viewModel: {
         type: "system-systemsettings"
@@ -23,28 +23,27 @@ Ext.define("climatestation.view.system.systemsettings",{
         'climatestation.view.system.systemsettingsModel'
     ],
 
-    session:true,
+    // session:true,
 
     title: '', // 'System settings',
     titleAlign: 'center',
-    border:true,
-    frame:true,
+    border: false,
+    frame: false,
     //width:850,
     autoWidth: true,
-    autoScroll:false,
+    scrollable: true,
     fieldDefaults: {
         labelWidth: 120,
         labelAlign: 'left'
     },
     bodyPadding:'5 15 5 15',
     viewConfig:{forceFit:true},
-    layout:'hbox',
-
+    layout:'center',
 
     initComponent: function () {
         var me = this;
-        me.session = true;
-        me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('systemsettings') + '</span>');
+        // me.session = true;
+        // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('systemsettings') + '</span>');
 
         me.fieldset_title_database_connection_settings = '<b>'+climatestation.Utils.getTranslation('dbconnectionsettings')+'</b>';
         me.form_fieldlabel_dbhost                      = climatestation.Utils.getTranslation('host');   // 'Host';
@@ -87,9 +86,13 @@ Ext.define("climatestation.view.system.systemsettings",{
             hiddenForWindowsVersion = true;
         }
 
-        me.tools = [
-        {
-            type: 'refresh',
+        me.tbar = [
+        '->', {
+            xtype: 'button',
+            iconCls: 'far fa-redo-alt',
+            style: { color: 'gray' },
+            enableToggle: false,
+            scale: 'medium',
             tooltip: climatestation.Utils.getTranslation('reloadsystemparams'),   // 'Reload system parameters.',
             callback: function (formpanel) {
                 var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
@@ -124,116 +127,41 @@ Ext.define("climatestation.view.system.systemsettings",{
             }
         }];
 
-        //var ip_pc1 = {
-        //    items:[{
-        //        id: 'ip_pc1',
-        //        name: 'ip_pc1',
-        //        bind: '{system_setting.ip_pc1}',
-        //        xtype: 'displayfield',
-        //        fieldLabel: me.form_fieldlabel_ip_pc1,
-        //        vtype: 'IPAddress',
-        //        msgTarget: 'side',
-        //        fieldStyle:'font-weight: bold;',
-        //        allowBlank: false,
-        //        flex: 2.2
-        //    }]
-        //};
-        //
-        //var ip_pc2 = {
-        //    items:[{
-        //        id: 'ip_pc2',
-        //        name: 'ip_pc2',
-        //        bind: '{system_setting.ip_pc2}',
-        //        xtype: 'displayfield',
-        //        fieldLabel: me.form_fieldlabel_ip_pc2,
-        //        vtype: 'IPAddress',
-        //        msgTarget: 'side',
-        //        fieldStyle:'font-weight: bold;',
-        //        allowBlank: false,
-        //        flex: 2.2
-        //    }]
-        //};
-        //var ip_pc3 = {
-        //    items:[{
-        //        id: 'ip_pc3',
-        //        name: 'ip_pc3',
-        //        bind: '{system_setting.ip_pc3}',
-        //        xtype: 'displayfield',
-        //        fieldLabel: me.form_fieldlabel_ip_pc3,
-        //        vtype: 'IPAddress',
-        //        msgTarget: 'side',
-        //        fieldStyle:'font-weight: bold;',
-        //        allowBlank: false,
-        //        flex: 2.2
-        //    }]
-        //};
-
-        //var modify_ips_btn = {
-        //    xtype: 'button',
-        //    text: climatestation.Utils.getTranslation('modify'), // 'Modify',
-        //    align:'right',
-        //    flex: 0.8,
-        //    iconCls: 'fa fa-pencil-square-o',
-        //    style: { color: 'white' },
-        //    // glyph: 'xf055@FontAwesome',
-        //    //scale: 'medium',
-        //    scope:me,
-        //    handler: function(){
-        //        var IPAdminWin = new climatestation.view.system.IPAddressAdmin({
-        //            params: {}
-        //        });
-        //        IPAdminWin.show();
-        //    }
-        //};
-
         var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
-        var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
-            scope: me,
-            failure: function(record, operation) {
-                //console.info('failure');
-            },
-            success: function(record, operation) {
-                me.type_install = record.data.type_installation;
-                me.pcrole = record.data.role;
-                me.thema = record.data.thema;
+        // var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
+        //     scope: me,
+        //     failure: function(record, operation) {
+        //         //console.info('failure');
+        //     },
+        //     success: function(record, operation) {
+        //         me.type_install = record.data.type_installation;
+        //         me.pcrole = record.data.role;
+        //         me.thema = record.data.thema;
+        //
+        //         if (me.pcrole == ''){
+        //             //console.info(Ext.getCmp('modify-role-btn'));
+        //             Ext.getCmp('modify-role-btn').show();
+        //             Ext.getCmp('modify-role-btn').fireHandler();
+        //         }
+        //
+        //         // IN WINDOWS VERSION THEMA MUST BE CHANGEABLE!
+        //         if (climatestation.globals['typeinstallation'] != 'windows'){
+        //             if (me.thema != ''){
+        //                 Ext.getCmp('modify-thema-btn').hide();
+        //             }
+        //         }
+        //     }
+        // });
 
-                if (me.pcrole == ''){
-                    //console.info(Ext.getCmp('modify-role-btn'));
-                    Ext.getCmp('modify-role-btn').show();
-                    Ext.getCmp('modify-role-btn').fireHandler();
-                }
-
-                // IN WINDOWS VERSION THEMA MUST BE CHANGEABLE!
-                if (climatestation.globals['typeinstallation'] != 'windows'){
-                    if (me.thema != ''){
-                        Ext.getCmp('modify-thema-btn').hide();
-                    }
-                }
-
-                //var ipadresses_fieldset = Ext.getCmp('ipaddresses');
-                //if (me.type_install == 'Full'){
-                //    ipadresses_fieldset.add(ip_pc1);
-                //    ipadresses_fieldset.add(ip_pc2);
-                //    ip_pc3.items.push(modify_ips_btn);
-                //    ipadresses_fieldset.add(ip_pc3);
-                //}
-                //else {
-                //    ipadresses_fieldset.add(ip_pc1);
-                //    ip_pc2.items.push(modify_ips_btn);
-                //    ipadresses_fieldset.add(ip_pc2);
-                //}
-            }
-        });
-
-        me.dockedItems=  [{
+        var dockedItems =  [{
             dock: 'bottom',
             xtype: 'toolbar',
             items : [{
                 text: climatestation.Utils.getTranslation('createsystemreport'), // 'Create System Report',
                 scope: me,
                 hidden:  hiddenForWindowsVersion,
-                iconCls: 'fa fa-download fa-2x',
-                style: { color: 'blue' },
+                iconCls: 'far fa-download royalblue',
+                style: { color: 'royalblue' },
                 scale: 'medium',
                 disabled: false,
                 handler: function () {
@@ -253,7 +181,6 @@ Ext.define("climatestation.view.system.systemsettings",{
                     //         target: 'app-upload-frame'
                     //     });
                     // }
-
 
                     if (!Ext.fly('frmExportDummy')) {
                         var frm = document.createElement('form');
@@ -284,8 +211,8 @@ Ext.define("climatestation.view.system.systemsettings",{
                 text: climatestation.Utils.getTranslation('createinstallreport'), // 'Create Install Report',
                 scope:me,
                 hidden:  hiddenForWindowsVersion,
-                iconCls: 'fa fa-download fa-2x',
-                style: { color: 'blue' },
+                iconCls: 'far fa-download royalblue',
+                style: { color: 'royalblue' },
                 scale: 'medium',
                 disabled: false,
                 handler: function(){
@@ -315,7 +242,7 @@ Ext.define("climatestation.view.system.systemsettings",{
             },'->',{
                 text: climatestation.Utils.getTranslation('resettofactorysettings'), // 'Reset to factory settings',
                 scope:me,
-                iconCls: 'fa fa-undo fa-2x',    // 'apply_globals-icon',
+                iconCls: 'far fa-undo orange',    // 'apply_globals-icon',
                 style: { color: 'orange' },
                 scale: 'medium',
                 disabled: false,
@@ -351,7 +278,7 @@ Ext.define("climatestation.view.system.systemsettings",{
             },{
                 text: climatestation.Utils.getTranslation('save'), // 'Save',
                 scope:me,
-                iconCls: 'fa fa-save fa-2x',    // 'icon-disk',
+                iconCls: 'far fa-save lightblue',    // 'icon-disk',
                 style: { color: 'lightblue' },
                 scale: 'medium',
                 disabled: false,
@@ -379,7 +306,7 @@ Ext.define("climatestation.view.system.systemsettings",{
             }]
         }];
 
-        me.items = [{
+        me.formItems = [{
             margin:'0 15 5 0',
             items: [{
                 xtype: 'fieldset',
@@ -426,7 +353,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                             hidden: true,
                             text: climatestation.Utils.getTranslation('modify'),    // 'Modify',
                             flex: 0.8,
-                            iconCls: 'fa fa-pencil-square-o',
+                            iconCls: 'far fa-pencil-square-o',
                             style: { color: 'white' },
                             // glyph: 'xf055@FontAwesome',
                             //scale: 'medium',
@@ -451,6 +378,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                         layout: 'hbox'
                     },
                     items:[{
+                        xtype: 'container',
                        items:[{
                            id: 'current_mode',
                            hidden:  hiddenForWindowsVersion,
@@ -464,7 +392,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                         //    xtype: 'button',
                         //    text: climatestation.Utils.getTranslation('modify'),    // 'Modify',
                         //    flex: 0.8,
-                        //    iconCls: 'fa fa-pencil-square-o',
+                        //    iconCls: 'far fa-pencil-square-o',
                         //    style: { color: 'white' },
                         //    // glyph: 'xf055@FontAwesome',
                         //    //scale: 'medium',
@@ -479,7 +407,8 @@ Ext.define("climatestation.view.system.systemsettings",{
                         //    }
                         }]
                     },{
-                       items:[{
+                       xtype: 'container',
+                        items:[{
                            id: 'active_version',
                            name: 'active_version',
                            hidden:  hiddenForWindowsVersion,
@@ -487,13 +416,13 @@ Ext.define("climatestation.view.system.systemsettings",{
                            xtype: 'displayfield',
                            fieldLabel: me.form_fieldlabel_active_verion,
                            fieldStyle:'font-weight: bold;',
-                           flex: 2.2
+                           flex: 2
                         },{
                             xtype: 'button',
                             hidden:  hiddenForWindowsVersion,
                             text: climatestation.Utils.getTranslation('modify'),    // 'Modify',
-                            flex: 0.8,
-                            iconCls: 'fa fa-pencil-square-o',
+                            flex: 1,
+                            iconCls: 'far fa-edit',
                             style: { color: 'white' },
                             //scale: 'medium',
                             scope:me,
@@ -511,6 +440,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                             }
                         }]
                     },{
+                        xtype: 'container',
                        items:[{
                             id: 'thema',
                             name: 'thema',
@@ -518,13 +448,13 @@ Ext.define("climatestation.view.system.systemsettings",{
                             xtype: 'displayfield',
                             fieldLabel: me.form_fieldlabel_thema,
                             fieldStyle:'font-weight: bold;',
-                            flex: 2.2
+                            flex: 2
                        },{
                             xtype: 'button',
                             id: 'modify-thema-btn',
                             text: climatestation.Utils.getTranslation('modify'),    // 'Modify',
-                            flex: 0.8,
-                            iconCls: 'fa fa-pencil-square-o',
+                            flex: 1,
+                            iconCls: 'far fa-edit',
                             style: { color: 'white' },
                             //scale: 'medium',
                             scope:me,
@@ -538,6 +468,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                             }
                         }]
                     },{
+                        xtype: 'container',
                        items:[{
                            id: 'loglevel',
                            name: 'loglevel',
@@ -545,12 +476,12 @@ Ext.define("climatestation.view.system.systemsettings",{
                            xtype: 'displayfield',
                            fieldLabel: me.form_fieldlabel_loglevel,
                            fieldStyle:'font-weight: bold;',
-                           flex: 2.2
+                           flex: 2
                         },{
                             xtype: 'button',
                             text: climatestation.Utils.getTranslation('modify'),    // 'Modify',
-                            flex: 0.8,
-                            iconCls: 'fa fa-pencil-square-o',
+                            flex: 1,
+                            iconCls: 'far fa-edit',
                             style: { color: 'white' },
                             //scale: 'medium',
                             scope:me,
@@ -627,11 +558,12 @@ Ext.define("climatestation.view.system.systemsettings",{
             items: [{
                 xtype: 'fieldset',
                 title: me.fieldset_title_path_settings,
-                collapsible:false,
+                collapsible: false,
                 defaults: {
                     width: 450,
                     labelWidth: 120,
-                    layout: 'hbox'
+                    layout: 'hbox',
+                    margin: '5 10 5 10'
                 },
                 items:[{
                    id: 'base_dir',
@@ -676,8 +608,9 @@ Ext.define("climatestation.view.system.systemsettings",{
                    style:'font-weight: bold;',
                    allowBlank: false
                 },{
-                   width: 450+145,
-                   defaults: {
+                    xtype: 'container',
+                    width: 600,
+                    defaults: {
                        margin: '0 5 5 0'
                    },
                    items:[{
@@ -690,6 +623,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                         fieldLabel: me.form_fieldlabel_archive_dir,
                         style:'font-weight: bold;',
                         allowBlank: false,
+                        labelWidth: 120,
                         width: 450
                         //,listeners: {
                         //    change: function (cmp, value) {
@@ -726,7 +660,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                     //        //    });
                     //        //}
                     //    },
-                    //    //iconCls: 'fa fa-pencil-square-o',
+                    //    //iconCls: 'far fa-pencil-square-o',
                     //    //style: { color: 'white' },
                     //    //scale: 'medium',
                     //    scope:me,
@@ -738,7 +672,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                         text: climatestation.Utils.getTranslation('ingest_archive'),
                         disabled:  hiddenForWindowsVersion,
                         width: 140,
-                        iconCls: '',    // 'fa fa-spinner',
+                        iconCls: '',    // 'far fa-spinner',
                         style: { color: 'white'},
                         //scale: 'medium',
                         //scope:me,
@@ -763,7 +697,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                                     service: 'ingestarchive',
                                     task: 'run',
                                     // iconCls: 'fa-play-circle-o', // xf01d   // fa-play xf04b
-                                    glyph: 'xf04b@FontAwesome',
+                                    glyph: "xf04b@'Font Awesome 5 Free'",
                                     cls:'menu-glyph-color-green',
                                     // style: { color: 'green' },
                                     handler: 'execServiceTask'
@@ -772,8 +706,8 @@ Ext.define("climatestation.view.system.systemsettings",{
                                     name: 'stop_ingestarchive',
                                     service: 'ingestarchive',
                                     task: 'stop',
-                                    // iconCls: 'fa fa-stop',
-                                    glyph: 'xf04d@FontAwesome',
+                                    // iconCls: 'far fa-stop',
+                                    glyph: "xf04d@'Font Awesome 5 Free'",
                                     cls:'menu-glyph-color-red',
                                     // style: { color: 'red' },
                                     handler: 'execServiceTask'
@@ -782,8 +716,8 @@ Ext.define("climatestation.view.system.systemsettings",{
                                     name: 'restart_ingestarchive',
                                     service: 'ingestarchive',
                                     task: 'restart',
-                                    // iconCls: 'fa fa-refresh',
-                                    glyph: 'xf021@FontAwesome',
+                                    // iconCls: 'far fa-redo-alt',
+                                    glyph: "xf021@'Font Awesome 5 Free'",
                                     cls:'menu-glyph-color-orange',
                                     // style: { color: 'orange' },
                                     handler: 'execServiceTask'
@@ -889,6 +823,12 @@ Ext.define("climatestation.view.system.systemsettings",{
             }]
         }];
 
+        me.items = [{
+            xtype: 'form',
+            layout:'hbox',
+            dockedItems: dockedItems,
+            items: me.formItems
+        }]
         me.callParent();
     }
 

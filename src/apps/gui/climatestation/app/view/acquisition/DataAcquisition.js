@@ -215,7 +215,7 @@ Ext.define("climatestation.view.acquisition.DataAcquisition",{
             //dataIndex: 'type'
             xtype:'templatecolumn',
             tpl: new Ext.XTemplate(
-                    '<b>{type}</b>   ' +
+                    '<b>{descriptive_name}</b>   ' +
                     '</br>' +
                     '<b class="smalltext" style="color:darkgrey;">{data_source_id}</b>' +
                     '</br>' +
@@ -333,9 +333,9 @@ Ext.define("climatestation.view.acquisition.DataAcquisition",{
                 style: {"line-height": "70px"},
                 getClass: function(v, meta, rec) {
                     if (rec.get('store_original_data')) {
-                        return 'activated';
+                        return 'far fa-check-square green';   // 'activated';
                     } else {
-                        return 'deactivated';
+                        return 'far fa-square green';   // 'deactivated';
                     }
                 },
                 getTip: function(v, meta, rec) {
@@ -366,9 +366,9 @@ Ext.define("climatestation.view.acquisition.DataAcquisition",{
                 disabled: false,
                 getClass: function(v, meta, rec) {
                     if (rec.get('activated')) {
-                        return 'activated';
+                        return 'far fa-check-square green';   // 'activated';
                     } else {
-                        return 'deactivated';
+                        return 'far fa-square green';   // 'deactivated';
                     }
                 },
                 getTip: function(v, meta, rec) {
@@ -388,12 +388,12 @@ Ext.define("climatestation.view.acquisition.DataAcquisition",{
         },{
             xtype: 'actioncolumn',
             width: 55,
-            //height:40,
             align:'center',
             stopSelection: false,
             items: [{
                 //icon: 'resources/img/icons/file-extension-log-icon-32x32.png',
-                iconCls:'log-icon',
+                iconCls: 'log-icon',
+                scale: 'medium',
                 width:32,
                 height:32,
                 tooltip: climatestation.Utils.getTranslation('showgetlog'),     // 'Show log of this Get',

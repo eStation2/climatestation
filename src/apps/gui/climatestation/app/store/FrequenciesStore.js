@@ -10,7 +10,7 @@ Ext.define('climatestation.store.FrequenciesStore', {
 
     storeId : 'frequencies'
 
-    ,autoLoad: true
+    ,autoLoad: false
 
     ,proxy: {
         type : 'ajax',

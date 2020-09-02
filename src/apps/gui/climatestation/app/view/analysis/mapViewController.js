@@ -1241,12 +1241,12 @@ Ext.define('climatestation.view.analysis.mapViewController', {
         if (btn.pressed) {
             mapviewwin.map.setView(mapviewwin.mapView);
             mapviewwin.lookupReference('zoomfactorslider_' + mapviewwin.id.replace(/-/g,'_')).setValue(mapviewwin.zoomFactorSliderValue);
-            btn.setIconCls('fa fa-chain-broken fa-2x red');
+            btn.setIconCls('far fa-chain-broken red');
         }
         else {
             mapviewwin.map.setView(mapviewwin.up().commonMapView);
             mapviewwin.lookupReference('zoomfactorslider_' + mapviewwin.id.replace(/-/g,'_')).setValue(mapviewwin.up().zoomFactorSliderValue);
-            btn.setIconCls('fa fa-link fa-2x gray');
+            btn.setIconCls('far fa-link gray');
         }
     }
 
@@ -2912,7 +2912,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             },{
                 xtype: 'splitbutton',
                 reference: 'saveMapTemplate_'+me.id.replace(/-/g,'_'),
-                iconCls: 'fa fa-save fa-2x',
+                iconCls: 'far fa-save',
                 style: {color: 'lightblue'},
                 cls: 'nopadding-splitbtn',
                 scale: 'medium',
@@ -2944,7 +2944,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                             text: climatestation.Utils.getTranslation('save_as'),    // 'Save as...',
                             glyph: 'xf0c7@FontAwesome',
                             cls:'lightblue',
-                            // iconCls: 'fa fa-save fa-lg lightblue',
+                            // iconCls: 'far fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
                             //cls: 'x-menu-no-icon button-gray',
                             width: 200,
@@ -3034,7 +3034,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                             text: climatestation.Utils.getTranslation('save_as_layer'),    // 'Save as layer...',
                             glyph: 'xf0c7@FontAwesome',
                             cls:'lightblue',
-                            // iconCls: 'fa fa-save fa-lg lightblue',
+                            // iconCls: 'far fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
                             // cls: 'x-menu-no-icon button-gray',
                             width: 200,
@@ -3133,7 +3133,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                             text: climatestation.Utils.getTranslation('reset'),   // 'Reset',
                             glyph: 'xf0e2@FontAwesome',
                             cls:'red',
-                            // iconCls: 'fa fa-undo',
+                            // iconCls: 'far fa-undo',
                             style: { color: 'red' },
                             //cls: 'x-menu-no-icon button-gray',
                             width: 60,
@@ -3164,7 +3164,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             },{
                 reference: 'objectsbtn_'+me.id.replace(/-/g,'_'),
                 hidden: false,
-                iconCls: 'fa fa-object-group',
+                iconCls: 'far fa-object-group',
                 style: {
                     "font-size": '1.70em'
                 },
@@ -3203,7 +3203,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                 reference: 'toggleLink_btn_'+me.id.replace(/-/g,'_'),
                 //text: 'Unlink',
                 enableToggle: true,
-                iconCls: 'fa fa-link fa-2x',
+                iconCls: 'far fa-link',
                 style: {color: 'gray'},
                 //iconCls: 'unlink',
                 scale: 'medium',

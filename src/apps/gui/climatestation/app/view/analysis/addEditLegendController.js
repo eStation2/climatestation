@@ -276,11 +276,11 @@ Ext.define('climatestation.view.analysis.addEditLegendController', {
                 ,border: true
                 ,collapsible:false
                 ,bodyStyle: 'padding: 15px 3px 0 3px;'
-                ,defaults: {autoScroll:true}
+                ,defaults: {scrollable:true}
                 ,bbar: ['->',{
                     reference: 'GenerateClassesBtn',
                     text: climatestation.Utils.getTranslation('generate'), // 'Generate'
-                    iconCls:'fa fa-cogs',   // fa fa-cogs fa-2x
+                    iconCls:'far fa-cogs',   // fa fa-cogs
                     handler: function(){
                         function interpolateColor(rgbMin, rgbMax, maxDepth, depth){
                             if (depth <= 0){
@@ -606,7 +606,7 @@ Ext.define('climatestation.view.analysis.addEditLegendController', {
             ,bbar: ['->',{
                 // reference: 'GenerateClassesBtn',
                 text: climatestation.Utils.getTranslation('generate'), // 'Generate'
-                iconCls:'fa fa-cogs',   // fa fa-cogs fa-2x
+                iconCls:'far fa-cogs',   // fa fa-cogs
                 handler: function(){
                     var precision = 8;
                     var legendClassesStore = me.getViewModel().getStore('legendClassesStore');

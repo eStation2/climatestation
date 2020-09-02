@@ -119,7 +119,7 @@ Ext.define("climatestation.view.dashboard.PC1",{
         //    collapsible:true,
         //    collapsed: true,
         //    // flex:1.5,
-        //    iconCls: 'x-tool-okay', // 'fa fa-check-circle-o fa-2x', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
+        //    iconCls: 'x-tool-okay', // 'far fa-check-circle-o', // fa-check-square fa-chevron-circle-down fa-check-circle fa-check
         //    iconAlign : 'left',
         //    height: 240,
         //    minHeight: 200,

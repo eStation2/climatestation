@@ -49,7 +49,8 @@ Ext.define('climatestation.store.TSDrawPropertiesStore', {
             //console.info('record updated!');
         },
         write: function(store, operation){
-            var result = Ext.JSON.decode(operation.getResponse().responseText);
+            // var result = Ext.JSON.decode(operation.getResponse().responseText);
+            var result = operation.getResponse().responseJson;
             if (!operation.success) {
                 //console.info(store);
                 //console.info(operation);

@@ -34,7 +34,7 @@ Ext.define("climatestation.view.analysis.addEditLegend",{
     closable: true,
     closeAction: 'destroy',
     resizable: true,
-    autoScroll: true,
+    scrollable: true,
     maximizable: false,
     maxHeight: Ext.getBody().getViewSize().height < 900 ? Ext.getBody().getViewSize().height-10 : 900,
     // maxHeight: 900,
@@ -137,7 +137,7 @@ Ext.define("climatestation.view.analysis.addEditLegend",{
             xtype: 'button',
             text: climatestation.Utils.getTranslation('save'),
             //scope:me,
-            iconCls: 'fa fa-save fa-2x',
+            iconCls: 'far fa-save',
             style: {color: 'lightblue'},
             scale: 'medium',
             disabled: false,
@@ -269,7 +269,7 @@ Ext.define("climatestation.view.analysis.addEditLegend",{
                     reference: 'assignedDatasetsGrid',
                     // width: 400,
                     bind: '{assigneddatasets}',
-                    autoScroll: true,
+                    scrollable: true,
                     width: 300,
                     height: 175,
                     // maxHeight: 300,
@@ -373,7 +373,7 @@ Ext.define("climatestation.view.analysis.addEditLegend",{
                 reference: 'legendclassesGrid',
                 width: me.params.view ? 570 : 630,
                 bind: '{legendClassesStore}',
-                autoScroll: false,
+                scrollable: false,
                 scrollable: true,
                 currScrollX: 0,
                 cuurScrollY: 0,
@@ -472,14 +472,14 @@ Ext.define("climatestation.view.analysis.addEditLegend",{
                         xtype: 'button',
                         text: climatestation.Utils.getTranslation('legend_newclass'),    // 'New class',
                         reference: 'legend_newclass_btn',
-                        iconCls: 'fa fa-plus-circle fa-2x',
+                        iconCls: 'far fa-plus-circle',
                         style: {color: 'green'},
                         handler: 'newClass'
                     }, {
                         xtype: 'button',
                         text: climatestation.Utils.getTranslation('legend_generate_classes'),    // 'Generate classes',
                         reference: 'legend_generate_classes_btn',
-                        iconCls: 'fa fa-cogs fa-2x',
+                        iconCls: 'far fa-cogs',
                         style: {color: 'gray'},
                         handler: 'generateClasses'
                     }, {
@@ -499,7 +499,7 @@ Ext.define("climatestation.view.analysis.addEditLegend",{
                         xtype: 'button',
                         tooltip: climatestation.Utils.getTranslation('legend_delete_all_classes'),    // 'Delete all classes',
                         name: 'legend_delete_all_classes',
-                        iconCls: 'fa fa-trash fa-2x',
+                        iconCls: 'far fa-trash',
                         style: {color: 'red'},
                         handler: 'deleteAllClasses'
                     }]

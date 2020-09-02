@@ -11,7 +11,7 @@ Ext.define('climatestation.store.LegendsStore', {
 
     storeId : 'LegendsStore'
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: true
     // ,session: true
 
@@ -49,6 +49,7 @@ Ext.define('climatestation.store.LegendsStore', {
     ,listeners: {
         write: function(store, operation){
             // var result = Ext.JSON.decode(operation.getResponse().responseText);
+            // var result = operation.getResponse().responseJson;
             // if (operation.success) {
             //    //Ext.toast({ html: result.message, title: climatestation.Utils.getTranslation('legendupdated'), width: 200, align: 't' });
             // }

@@ -1,7 +1,6 @@
-
-Ext.define("climatestation.view.widgets.LoginView",{
+Ext.define("climatestation.view.widgets.LoginView", {
     extend: "Ext.container.Container",
- 
+
     requires: [
         "climatestation.view.widgets.LoginViewController",
         "climatestation.view.widgets.LoginViewModel",
@@ -13,40 +12,37 @@ Ext.define("climatestation.view.widgets.LoginView",{
         'climatestation.view.widgets.Register'
     ],
 
-    controller: "widgets-loginview",
-    viewModel: {
-        type: "widgets-loginview"
+    controller: 'widgets-loginview',
+    viewModel: 'widgets-loginview',
+
+    alias: 'widget.loginview',
+
+    layout: 'fit',
+    padding: 0,
+    margin: 0,
+    style: {
+        'background-color': '#0065a2' // '#5FA2DD'   //'#157FCC'
     },
 
-    alias:'widget.loginview'
-    ,layout:'fit'
-    ,padding:0
-    ,margin:0
-    ,style: {
-        'background-color': '#5FA2DD'   //'#157FCC'
-    }
-
     // fire all listeners in the scope of this window
-    ,defaultListenerScope:true
+    defaultListenerScope: true,
 
     // hold references here
-    ,referenceHolder:true
+    referenceHolder: true,
 
-    ,initComponent: function () {
-        var me = this
-            ,SetupLogin = climatestation.LoginSetup
-        ;
+    initComponent: function () {
+        var me = this, SetupLogin = climatestation.LoginSetup;
 
         // install listeners on Setup
         SetupLogin.on({
-             scope:me
-            ,setupready:me.setupLogout
-            ,setupfail:me.failLogin
+            scope: me,
+            setupready: me.setupLogout,
+            setupfail: me.failLogin
         });
 
         me.listeners = {
-            beforerender: function(){
-                if (Ext.util.Cookies.get('estation2_userid') != null){
+            beforerender: function () {
+                if (Ext.util.Cookies.get('estation2_userid') != null) {
                     var userinfo = {
                         userid: Ext.util.Cookies.get('estation2_userid'),
                         username: Ext.util.Cookies.get('estation2_username'),
@@ -57,104 +53,222 @@ Ext.define("climatestation.view.widgets.LoginView",{
 
                     climatestation.setUser(userinfo);
                     me.setupLogout();
-                }
-                else{
+                } else {
                     me.toggleUserFunctionality();
                 }
             }
         };
 
-        me.loginItems = [{
-            xtype: 'form'
-            , padding: 5
+        me.loginPanel = {
+            xtype: 'panel',
+            closable: true,
+            draggable: false,
+            resizable: false,
 
-            // for easy access to the form from listeners
-            , reference: 'loginForm'
-            , bodyStyle: {
-                'background-color': '#5FA2DD'   //'#157FCC'
-            }
-            , defaults: {
-                anchor: '100%'
-                , allowBlank: false
-                , enableKeyEvents: true
-                , xtype: 'textfield'
-                , listeners: {
-                    keypress: 'onKeyPress'
-                }
-            }
-            , layout: 'hbox'
-            , items: [{
-                bind: '{username}'
-                // needed for defaultButton
-                , itemId: 'username'
-                , hideLabel: true
-                , fieldLabel: climatestation.Utils.getTranslation('username')    // 'User Name'
-                , emptyText: climatestation.Utils.getTranslation('username')
-                , margin: '4 5 0 5'
-                , width: 100
-            }, {
-                bind: '{password}'
-                , hideLabel: true
-                , fieldLabel: climatestation.Utils.getTranslation('password')    // 'Password'
-                , emptyText: climatestation.Utils.getTranslation('password')
-                , inputType: 'password'
-                , margin: '4 5 0 5'
-                , width: 100
-            }, {
-                xtype: 'button'
-                , text: climatestation.Utils.getTranslation('login')  // 'Login'
-                , margin: '4 10 0 5'
-                , formBind: false
-                , handler: 'onLoginClick'
-                // , menu: {
-                //     items: [{
-                //         text: climatestation.Utils.getTranslation('forgot_password')   // 'Forgot password?'
-                //         //, iconCls: 'fa fa-lock'
-                //         , glyph: 'xf023@FontAwesome'
-                //         , cls:'menu-glyph-color-red'
-                //         // style: { color: 'orange' },
-                //         , handler: 'resetPassword'
-                //     }]
-                // }
-            }, {
-                xtype: 'box'
-                , html: climatestation.Utils.getTranslation('or')   // 'or'
-                , cls: 'text-white'
-                , margin: '8 5 0 0'
-            }, {
-                xtype: 'button'
-                , text: climatestation.Utils.getTranslation('register')   // 'Register'
-                , margin: '4 45 0 5'
-                , formBind: false
-                , handler: 'onRegisterClick'
+            header: {
+                titleAlign: 'center',
+                height: 40
+            },
+
+            layout: {
+                type: 'fit',
+                align: 'center',
+                pack: 'center'
+            },
+            height: 250,
+            width: 425,
+            items: [{
+                xtype: 'form',
+                // padding: 5,
+                reference: 'loginForm',
+                bodyStyle: {
+                    'background-color': '#0065a2'   // '#5FA2DD'   //'#157FCC'
+                },
+                defaults: {
+                    anchor: '100%',
+                    allowBlank: false,
+                    enableKeyEvents: true,
+                    xtype: 'textfield',
+                    listeners: {
+                        keypress: 'onKeyPress'
+                    }
+                },
+                layout: 'vbox',
+                items: [{
+                    bind: '{username}',
+                    // needed for defaultButton
+                    itemId: 'username',
+                    hideLabel: true,
+                    fieldLabel: climatestation.Utils.getTranslation('username'),  // 'User Name'
+                    emptyText: climatestation.Utils.getTranslation('username'),
+                    padding: '10px 10px 10px 0',
+                    width: 100
+                }, {
+                    bind: '{password}',
+                    hideLabel: true,
+                    fieldLabel: climatestation.Utils.getTranslation('password'),    // 'Password'
+                    emptyText: climatestation.Utils.getTranslation('password'),
+                    inputType: 'password',
+                    padding: '10px 0 10px 0',
+                    width: 100
+                }, {
+                    xtype: 'button',
+                    text: climatestation.Utils.getTranslation('login'),  // 'Login'
+                    // margin: '4 10 0 5',
+                    formBind: false,
+                    ui: 'headerbtn',
+                    scale   : 'medium',
+                    iconCls: 'far fa-sign-in-alt',
+                    handler: 'onLoginClick'
+                    // , menu: {
+                    //     items: [{
+                    //         text: climatestation.Utils.getTranslation('forgot_password')   // 'Forgot password?'
+                    //         //, iconCls: 'far fa-lock'
+                    //         , glyph: 'xf023@FontAwesome'
+                    //         , cls:'menu-glyph-color-red'
+                    //         // style: { color: 'orange' },
+                    //         , handler: 'resetPassword'
+                    //     }]
+                    // }
+                }, {
+                    xtype: 'box',
+                    html: climatestation.Utils.getTranslation('or'),   // 'or'
+                    cls: 'text-white',
+                    padding: '10px 0 10px 0'
+                }, {
+                    xtype: 'button',
+                    text: climatestation.Utils.getTranslation('register'),   // 'Register'
+                    // margin: '4 45 0 5',
+                    formBind: false,
+                    ui: 'headerbtn',
+                    scale   : 'medium',
+                    handler: 'onRegisterClick'
+                }]
             }]
+        };
+
+        me.loginItems = [{
+            xtype: 'button',
+            text: climatestation.Utils.getTranslation('login'),  // 'Login'
+            margin: '0 0 0 0',
+            height: 75,
+            // width: 75,
+            // formBind: false,
+            ui: 'headerbtn',
+            scale   : 'medium',
+            iconCls: 'far fa-sign-in-alt',
+            arrowVisible: false,
+            // handler: 'onLoginClick',
+            menu: {
+                items: [{
+                    xtype: 'form',
+                    width: 250,
+                    padding: 10,
+                    reference: 'loginForm',
+                    // bodyStyle: {
+                    //     'background-color': '#0065a2'   // '#5FA2DD'   //'#157FCC'
+                    // },
+                    defaults: {
+                        // anchor: '100%',
+                        allowBlank: false,
+                        enableKeyEvents: true,
+                        xtype: 'textfield',
+                        labelAlign: 'top',
+                        listeners: {
+                            keypress: 'onKeyPress'
+                        }
+                    },
+                    layout: 'vbox',
+                    bbar: [{
+                        xtype: 'button',
+                        text: climatestation.Utils.getTranslation('register'),   // 'Register'
+                        margin: 0,
+                        formBind: false,
+                        scale   : 'small',
+                        iconCls: 'far fa-user-plus',
+                        handler: 'onRegisterClick'
+                    }, '->', {
+                        xtype: 'button',
+                        text: climatestation.Utils.getTranslation('login'),  // 'Login'
+                        margin: 10,
+                        formBind: false,
+                        scale   : 'medium',
+                        iconCls: 'far fa-sign-in-alt',
+                        handler: 'onLoginClick'
+                        // , menu: {
+                        //     items: [{
+                        //         text: climatestation.Utils.getTranslation('forgot_password')   // 'Forgot password?'
+                        //         //, iconCls: 'far fa-lock'
+                        //         , glyph: 'xf023@FontAwesome'
+                        //         , cls:'menu-glyph-color-red'
+                        //         // style: { color: 'orange' },
+                        //         , handler: 'resetPassword'
+                        //     }]
+                        // }
+                    }],
+                    items: [{
+                        bind: '{username}',
+                        // needed for defaultButton
+                        itemId: 'username',
+                        hideLabel: false,
+                        labelWidth: 80,
+                        fieldLabel: climatestation.Utils.getTranslation('username'),  // 'User Name'
+                        emptyText: climatestation.Utils.getTranslation('username'),
+                        // padding: '10px 10px 10px 0',
+                        width: 220
+                    }, {
+                        bind: '{password}',
+                        hideLabel: false,
+                        labelWidth: 80,
+                        fieldLabel: climatestation.Utils.getTranslation('password'),    // 'Password'
+                        emptyText: climatestation.Utils.getTranslation('password'),
+                        inputType: 'password',
+                        // padding: '10px 0 10px 0',
+                        width: 220
+                    }]
+                }]
+            }
         }];
 
-        me.logoutItems = [{     // Ext.create('Ext.container.Container', {
-            xtype: 'container'
-            , padding: 5
-
-            // for easy access to the form from listeners
-            , reference: 'logoutForm'
-            , bodyStyle: {
-                'background-color': '#5FA2DD'   //'#157FCC'
-            }
-            , defaults: {
-                anchor: '100%'
-            }
-            , layout: 'hbox'
-            , items: [{
-                xtype: 'box'
-                , reference: 'UserLoggedIn'
-                , html: climatestation.Utils.getTranslation('hello') + ' '   // 'Hello '
-                , cls: 'text-white'
-                , margin: '8 5 0 0'
+        me.logoutItems = [{
+            xtype: 'container',
+            padding: 5,
+            reference: 'logoutForm',
+            // bodyStyle: {
+            //     'background-color': '#5FA2DD'   //'#157FCC'
+            // },
+            // defaults: {
+            //     anchor: '100%'
+            // },
+            layout: 'hbox',
+            items: [{
+                xtype: 'box',
+                reference: 'UserLoggedIn',
+                html: '',
+                // html: climatestation.Utils.getTranslation('hello') + ' '   // 'Hello ',
+                cls: 'text-white',
+                // margin: '8 10 0 0',
+                padding: '18 10 0 16'
+            // },{
+            //     xtype: 'image',
+            //     cls: 'header-right-profile-image',
+            //     height: 40,
+            //     width: 35,
+            //     alt:'current user image',
+            //     // glyph: "xf007@'Font Awesome 5 Pro'",
+            //     src: 'resources/jur.png',
+            //     href: '#profile',
+            //     hrefTarget: '_self',
+            //     tooltip: 'See your profile'
             }, {
-                xtype: 'button'
-                , text: climatestation.Utils.getTranslation('logout')   // 'Logout'
-                , margin: '4 45 0 5'
-                , formBind: false
-                , handler: 'onLogoutClick'
+                xtype: 'button',
+                text: climatestation.Utils.getTranslation('logout'),   // 'Logout'
+                padding: '16px 16px 16px 0px',
+                iconCls: 'far fa-power-off icon-margin',
+                textAlign: 'left',
+                ui: 'headerbtn',
+                scale   : 'medium',
+                handler: 'onLogoutClick'
             }]
         }];
 
@@ -164,18 +278,16 @@ Ext.define("climatestation.view.widgets.LoginView",{
     }
 
     // auto-focus username
-    ,defaultButton:'username'
+    , defaultButton: 'username'
 
     /**
      * Login button click handler
      * @private
      */
-    ,onLoginClick:function() {
-        var  me = this
-            ,data = me.getViewModel().getData()
-        ;
-        //data.password = SparkMD5.hash(data.password);
-        console.info(me.getViewModel())
+    , onLoginClick: function () {
+        var me = this, data = me.getViewModel().getData();
+        // data.password = SparkMD5.hash(data.password);
+        // console.info(me.getViewModel());
         climatestation.login(data);
 
     } // eo function onLoginClick
@@ -184,8 +296,8 @@ Ext.define("climatestation.view.widgets.LoginView",{
      * Login button click handler
      * @private
      */
-    ,onLogoutClick:function() {
-        var  me = this;
+    , onLogoutClick: function () {
+        var me = this;
 
         climatestation.logout();
 
@@ -201,12 +313,12 @@ Ext.define("climatestation.view.widgets.LoginView",{
      * @private
      * @param responce
      */
-    ,setupLogout:function() {
-        var  me = this;
+    , setupLogout: function () {
+        var me = this;
         me.removeAll();
         me.add(me.logoutItems);
-        me.lookupReference('UserLoggedIn').setHtml(climatestation.Utils.getTranslation('hello') + ' ' + climatestation.getUser().username);
-
+        // me.lookupReference('UserLoggedIn').setHtml(climatestation.Utils.getTranslation('hello') + ' ' + climatestation.getUser().username);
+        me.lookupReference('UserLoggedIn').setHtml(climatestation.getUser().username);
         me.toggleUserFunctionality();
 
     } // eo function setupLogout
@@ -216,7 +328,7 @@ Ext.define("climatestation.view.widgets.LoginView",{
      * Register button click handler
      * @private
      */
-    ,onRegisterClick:function() {
+    , onRegisterClick: function () {
         new climatestation.view.widgets.Register();
     } // eo function onRegisterClick
 
@@ -225,13 +337,13 @@ Ext.define("climatestation.view.widgets.LoginView",{
      * @private
      * @param responce
      */
-    ,failLogin:function() {
-        var  me = this;
+    , failLogin: function () {
+        var me = this;
         Ext.Msg.show({
-             title:'Error'
-            ,msg:climatestation.Utils.getTranslation('username_password_incorrect')    // Username or password incorrect!
-            ,icon:Ext.Msg.ERROR
-            ,buttons:Ext.Msg.OK
+            title: 'Error'
+            , msg: climatestation.Utils.getTranslation('username_password_incorrect')    // Username or password incorrect!
+            , icon: Ext.Msg.ERROR
+            , buttons: Ext.Msg.OK
         });
 
     } // eo function failLogin
@@ -242,17 +354,17 @@ Ext.define("climatestation.view.widgets.LoginView",{
      * @param {Ext.form.field.Field} field
      * @param {Ext.EventObject} e
      */
-    ,onKeyPress:function(field, e) {
-        var  me = this
-            ,form = me.lookupReference('loginForm')
+    , onKeyPress: function (field, e) {
+        var me = this
+            , form = me.lookupReference('loginForm')
         ;
-        if(form.isValid() && Ext.EventObject.ENTER === e.getKey()) {
+        if (form.isValid() && Ext.EventObject.ENTER === e.getKey()) {
             me.onLoginClick();
         }
 
     } // eo function onKeyPress
 
-    ,toggleUserFunctionality:function() {
+    , toggleUserFunctionality: function () {
         // var me = this;
         var user = climatestation.getUser();
         var analysisWorkspaces = Ext.ComponentQuery.query('analysisworkspace');
@@ -265,12 +377,12 @@ Ext.define("climatestation.view.widgets.LoginView",{
         // var tsChartTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_graph_templatebtn');
         // var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
 
-        if (user != null && user != 'undefined'){
+        if (user != null && user != 'undefined') {
             // tsDrawPropertiesStore.proxy.extraParams = {userid: user.userid, graph_tpl_name: 'default'};
             // tsDrawPropertiesStore.load();
 
-            if (user.userlevel < 2){
-                if (acquisitionLockBtn != null){
+            if (user.userlevel < 2) {
+                if (acquisitionLockBtn != null) {
                     acquisitionLockBtn.show();
                 }
                 // if (productAdminAcquisitionBtn != null){
@@ -278,7 +390,7 @@ Ext.define("climatestation.view.widgets.LoginView",{
                 // }
             }
 
-            if (addWorkspaceBtn != null){
+            if (addWorkspaceBtn != null) {
                 addWorkspaceBtn.show();
             }
             var UserWorkspacesStore = Ext.StoreManager.lookup('UserWorkspacesStore');
@@ -286,10 +398,10 @@ Ext.define("climatestation.view.widgets.LoginView",{
             UserWorkspacesStore.load({
                 callback: function (records, options, success) {
                     var activateTab = false;
-                    records.forEach(function(workspace,id){
-                        if (workspace.get('pinned')){
+                    records.forEach(function (workspace, id) {
+                        if (workspace.get('pinned')) {
                             // open workspace
-                            Ext.getCmp('analysismain').getController().openWorkspace(workspace,activateTab);
+                            Ext.getCmp('analysismain').getController().openWorkspace(workspace, activateTab);
                         }
                     });
                 }
@@ -309,8 +421,7 @@ Ext.define("climatestation.view.widgets.LoginView",{
 
                     if (workspace.workspaceid != 'defaultworkspace') {
                         workspace.lookupReference('saveWorkspaceBtn').show();
-                    }
-                    else {
+                    } else {
                         workspace.lookupReference('saveDefaultWorkspaceAsBtn').show();
                     }
 
@@ -323,60 +434,57 @@ Ext.define("climatestation.view.widgets.LoginView",{
                 });
             }
             // mapTemplateBtn.show();
-            if (mapViewWindows != []){
-                Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
-                    if (mapview_window.templatename != ''){
+            if (mapViewWindows != []) {
+                Ext.Object.each(mapViewWindows, function (id, mapview_window, thisObj) {
+                    if (mapview_window.templatename != '') {
                         mapview_window.isTemplate = true;
-                        if (Ext.isObject(Ext.fly('mapview_title_templatename_' + mapview_window.id))){
+                        if (Ext.isObject(Ext.fly('mapview_title_templatename_' + mapview_window.id))) {
                             Ext.fly('mapview_title_templatename_' + mapview_window.id).dom.innerHTML = mapview_window.templatename;
                         }
                     }
-                    mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).show();
+                    mapview_window.lookupReference('saveMapTemplate_' + mapview_window.id.replace(/-/g, '_')).show();
                 });
             }
 
             // Ext.getCmp('userMapTemplates').setDirtyStore(true);
 
             // tsChartTemplateBtn.show();
-            if (tsChartWindows != []){
-                Ext.Object.each(tsChartWindows, function(id, tschart_window, thisObj) {
-                    if (tschart_window.graph_tpl_name != '' && tschart_window.graph_tpl_name != 'default'){
+            if (tsChartWindows != []) {
+                Ext.Object.each(tsChartWindows, function (id, tschart_window, thisObj) {
+                    if (tschart_window.graph_tpl_name != '' && tschart_window.graph_tpl_name != 'default') {
                         tschart_window.isTemplate = true;
 
-                        if (Ext.isObject(Ext.fly('graphview_title_templatename_' + tschart_window.id))){
+                        if (Ext.isObject(Ext.fly('graphview_title_templatename_' + tschart_window.id))) {
                             Ext.fly('graphview_title_templatename_' + tschart_window.id).dom.innerHTML = tschart_window.graph_tpl_name;
                         }
                     }
-                    tschart_window.lookupReference('changeSelectedProductsAndTimeframe_'+tschart_window.id.replace(/-/g,'_')).show();
-                    tschart_window.lookupReference('saveGraphTemplate_'+tschart_window.id.replace(/-/g,'_')).show();
+                    tschart_window.lookupReference('changeSelectedProductsAndTimeframe_' + tschart_window.id.replace(/-/g, '_')).show();
+                    tschart_window.lookupReference('saveGraphTemplate_' + tschart_window.id.replace(/-/g, '_')).show();
                 });
             }
             // Ext.getCmp('userGraphTemplates').setDirtyStore(true);
-        }
-        else {
+        } else {
             // tsDrawPropertiesStore.proxy.extraParams = {};
             // tsDrawPropertiesStore.load();
 
-            if (acquisitionLockBtn != null){
-                if (acquisitionLockBtn.pressed){
+            if (acquisitionLockBtn != null) {
+                if (acquisitionLockBtn.pressed) {
                     acquisitionLockBtn.toggle();
                     acquisitionLockBtn.handler(acquisitionLockBtn);
                     acquisitionLockBtn.hide();
-                }
-                else {
+                } else {
                     acquisitionLockBtn.hide();
                 }
             }
 
-            if (addWorkspaceBtn != null){
+            if (addWorkspaceBtn != null) {
                 addWorkspaceBtn.hide();
             }
             if (analysisWorkspaces != []) {
                 Ext.Object.each(analysisWorkspaces, function (id, workspace, thisObj) {
                     if (workspace.workspaceid != 'defaultworkspace') {
                         workspace.close();
-                    }
-                    else {
+                    } else {
                         // mapTemplateBtn.hide();
                         if (mapViewWindows != []) {
                             Ext.Object.each(mapViewWindows, function (id, mapview_window, thisObj) {

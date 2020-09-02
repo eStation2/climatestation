@@ -203,7 +203,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                 xtype: 'button',
                 id: 'zoomFactorBtn_' + me.id.replace(/-/g,'_'),
                 reference: 'zoomFactorBtn_' + me.id.replace(/-/g,'_'),
-                iconCls: 'fa fa-search',
+                iconCls: 'far fa-search',
                 cls: 'nobackgroundcolor',
                 style: {
                     color: 'black',
@@ -492,7 +492,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                     reference: 'refreshTimeLineBtn_' + me.id,
                     //scope: me,
                     tooltip: climatestation.Utils.getTranslation('refresh_timeline'), // 'Refresh timeline'
-                    iconCls: 'fa fa-refresh',
+                    iconCls: 'far fa-redo-alt',
                     //style: { color: 'orange' },
                     glyph: null,
                     scale: null, // 'small',
@@ -505,7 +505,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                     id: 'playBtn_' + me.id,
                     //reference: 'playBtn_' + me.id,
                     tooltip: climatestation.Utils.getTranslation('play_visible_timeline'), // 'View product dates in visible timeline. Set delay below.'
-                    iconCls: 'fa fa-play',
+                    iconCls: 'far fa-play',
                     style: { color: 'green' },
                     glyph: null,
                     scale: 'small',
@@ -544,7 +544,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                     id: 'pauseBtn_' + me.id,
                     //reference: 'pauseBtn_' + me.id,
                     tooltip: climatestation.Utils.getTranslation('pause'), // 'Pause'
-                    iconCls: 'fa fa-pause',
+                    iconCls: 'far fa-pause',
                     style: { color: 'orange' },
                     glyph: null,
                     scale: 'small',
@@ -555,7 +555,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                     id: 'stopBtn_' + me.id,
                     //reference: 'stopBtn_' + me.id,   // Give an error in Ext.mixin.Bindable method applyReference: Invalid reference "stopBtn_mapview-window-1262" for stopBtn_mapview-window-1262 - not a valid identifier
                     tooltip: climatestation.Utils.getTranslation('stop'), // 'Stop'
-                    iconCls: 'fa fa-stop',
+                    iconCls: 'far fa-stop',
                     style: {color: 'red'},
                     glyph: null,
                     scale: 'small',
@@ -997,7 +997,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                 else {
                     // Unlink Mapview window
                     mapviewLinkToggleBtn.toggle(true);  // ('pressed', false);
-                    // mapviewLinkToggleBtn.setIconCls('fa fa-chain-broken fa-2x red');
+                    // mapviewLinkToggleBtn.setIconCls('far fa-chain-broken red');
                 }
 
                 if (!me.nozoom){

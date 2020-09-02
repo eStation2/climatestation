@@ -26,12 +26,12 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
     closable: true,
     closeAction: 'destroy', // 'hide',
     resizable: true,
-    autoScroll:true,
+    scrollable:true,
     maximizable: false,
 
-    width: 1200,
-    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
-    maxHeight: 800,
+    width: 1000,
+    height: Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-10 : 650,  // 600,
+    maxHeight: Ext.getBody().getViewSize().height,
 
     frame: true,
     layout: {
@@ -49,16 +49,16 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
 
         var assignButton = {
             text: climatestation.Utils.getTranslation('assign'),  // 'Assign',
-            iconCls: 'fa fa-link fa-2x',
-            style: {color: 'green'},
+            iconCls: 'far fa-link',
+            // style: {color: 'green'},
             scale: 'medium',
             disabled: false,
             handler: 'onAssignInternetSourceClick'
         };
         var addButton = {
             text: climatestation.Utils.getTranslation('add'),  // 'Add',
-            iconCls: 'fa fa-plus-circle fa-2x',
-            style: {color: 'green'},
+            iconCls: 'far fa-plus-circle',
+            // style: {color: 'green'},
             scale: 'medium',
             disabled: false,
             handler: 'onAddInternetSourceClick'
@@ -66,15 +66,15 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
 
         var refreshButton = {
             xtype: 'button',
-            iconCls: 'fa fa-refresh fa-2x',
-            style: { color: 'gray' },
+            iconCls: 'far fa-redo-alt',
+            // style: { color: 'gray' },
             enableToggle: false,
             scale: 'medium',
             handler: 'reloadStore'
         };
         // var deleteButton = {
         //     text: climatestation.Utils.getTranslation('delete'),  // 'Delete',
-        //     iconCls: 'fa fa-minus-circle fa-2x',
+        //     iconCls: 'far fa-minus-circle',
         //     style: {color: 'red'},
         //     scale: 'medium',
         //     disabled: true,
@@ -88,13 +88,14 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
         me.tbar = [addButton, '->', refreshButton];
 
         if (me.params.assigntoproduct){
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('assigninternetsource')
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('assigninternetsource')
                 + ': ' + me.params.product.productcode + ' ' + me.params.product.version + '</span>');
 
             me.bbar = ['->', assignButton];
         }
         else {
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('internetsources') + '</span>');
+            // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('internetsources') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('internetsources') + '</span>');
         }
 
         me.items = [{
@@ -135,7 +136,7 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
             columns: [{
                 xtype: 'actioncolumn',
                 hidden: false,
-                width: 40,
+                width: 35,
                 align: 'center',
                 sortable: false,
                 menuDisabled: true,
@@ -147,11 +148,11 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
                     disabled: false,
                     getClass: function (v, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel <= 1)) {
-                           return 'edit';
+                           return 'far fa-edit';
                        }
                        else {
                            // return 'x-hide-display';
-                           return 'vieweye';
+                           return 'far fa-eye';
                        }
                     },
                     getTip: function (v, meta, rec) {
@@ -162,18 +163,26 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
                     handler: 'onEditInternetSourceClick'
                 }]
             }, {
+                xtype:'templatecolumn',
                 dataIndex: 'internet_id',
                 header: climatestation.Utils.getTranslation('id'), // 'ID'
-                width: 280,
+                width: 240,
                 minWidth: 150,
                 align: 'left',
                 menuDisabled: true,
                 sortable: true,
-                cellWrap: true
+                cellWrap: true,
+                tpl: new Ext.XTemplate(
+                    '<b>{internet_id}</b></br>' +
+                    '<span class="smalltext">' +
+                    '<b style="color:darkgrey;"> '+ climatestation.Utils.getTranslation('lastupdated') + ' - {update_datetime}</b></br>' +
+                    '<b style="color:darkgrey;"> '+ climatestation.Utils.getTranslation('type') + ' - {type}</b>' +
+                    '</span>'
+                )
             }, {
                 dataIndex: 'descriptive_name',
                 header: climatestation.Utils.getTranslation('name'), // 'Name'
-                width: 250,
+                width: 320,
                 minWidth: 150,
                 align: 'left',
                 menuDisabled: true,
@@ -182,30 +191,30 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
             }, {
                 dataIndex: 'url',
                 header: climatestation.Utils.getTranslation('url'), // 'URL'
-                width: 320,
+                width: 350,
                 minWidth: 200,
                 align: 'left',
                 menuDisabled: true,
                 sortable: false,
                 cellWrap: true
-            }, {
-                dataIndex: 'type',
-                header: climatestation.Utils.getTranslation('type'), // 'Type'
-                width: 110,
-                minWidth: 80,
-                align: 'center',
-                menuDisabled: true,
-                sortable: true,
-                cellWrap: true
-            }, {
-                dataIndex: 'update_datetime',
-                header: climatestation.Utils.getTranslation('lastupdated'), // 'Last updated'
-                width: 130,
-                minWidth: 120,
-                align: 'center',
-                menuDisabled: true,
-                sortable: false,
-                cellWrap: true
+            // }, {
+            //     dataIndex: 'type',
+            //     header: climatestation.Utils.getTranslation('type'), // 'Type'
+            //     width: 110,
+            //     minWidth: 80,
+            //     align: 'center',
+            //     menuDisabled: true,
+            //     sortable: true,
+            //     cellWrap: true
+            // }, {
+            //     dataIndex: 'update_datetime',
+            //     header: climatestation.Utils.getTranslation('lastupdated'), // 'Last updated'
+            //     width: 130,
+            //     minWidth: 120,
+            //     align: 'center',
+            //     menuDisabled: true,
+            //     sortable: false,
+            //     cellWrap: true
             },{
                xtype: 'actioncolumn',
                hidden: false,
@@ -217,7 +226,7 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
                items: [{
                    width:'35',
                    // disabled: false,
-                   isDisabled: function(view, rowIndex, colIndex, item, record){
+                   isActionDisabled: function(view, rowIndex, colIndex, item, record){
                         if (!record.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
                             return false;
                         }
@@ -227,7 +236,7 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
                    },
                    getClass: function(cell, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                           return 'delete';
+                           return 'far fa-trash-alt red';
                        }
                        else {
                            // cell.setDisabled(true);

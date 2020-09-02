@@ -136,7 +136,7 @@ Ext.define("climatestation.view.widgets.LoginViewECAS",{
                 // , menu: {
                 //     items: [{
                 //         text: climatestation.Utils.getTranslation('forgot_password')   // 'Forgot password?'
-                //         //, iconCls: 'fa fa-lock'
+                //         //, iconCls: 'far fa-lock'
                 //         , glyph: 'xf023@FontAwesome'
                 //         , cls:'menu-glyph-color-red'
                 //         // style: { color: 'orange' },

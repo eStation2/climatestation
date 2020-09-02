@@ -27,13 +27,13 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
     closable: true,
     closeAction: 'destroy', // 'hide',
     resizable: true,
-    autoScroll:true,
+    scrollable:true,
     maximizable: false,
 
     frame: true,
     width: 1000,
-    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
-    maxHeight: 800,
+    height: Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-10 : 650,  // 600,
+    maxHeight: Ext.getBody().getViewSize().height,
 
     layout: {
         type: 'fit'
@@ -50,16 +50,16 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
 
         var assignButton = {
             text: climatestation.Utils.getTranslation('assign'),  // 'Assign',
-            iconCls: 'fa fa-link fa-2x',
-            style: {color: 'green'},
+            iconCls: 'far fa-link',
+            // style: {color: 'green'},
             scale: 'medium',
             disabled: false,
             handler: 'onAssignEumetcastSourceClick'
         };
         var addButton = {
             text: climatestation.Utils.getTranslation('add'),  // 'Add',
-            iconCls: 'fa fa-plus-circle fa-2x',
-            style: {color: 'green'},
+            iconCls: 'far fa-plus-circle',
+            // style: {color: 'green'},
             scale: 'medium',
             disabled: false,
             handler: 'onAddEumetcastSourceClick'
@@ -67,8 +67,8 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
 
         var refreshButton = {
             xtype: 'button',
-            iconCls: 'fa fa-refresh fa-2x',
-            style: { color: 'gray' },
+            iconCls: 'far fa-redo-alt',
+            // style: { color: 'gray' },
             enableToggle: false,
             scale: 'medium',
             handler: 'reloadStore'
@@ -77,13 +77,14 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
         me.tbar = [addButton, '->', refreshButton];
 
         if (me.params.assigntoproduct){
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('assigneumetcastsource')
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('assigneumetcastsource')
                 + ': ' + me.params.product.productcode + ' ' + me.params.product.version + '</span>');
 
             me.bbar = ['->', assignButton];
         }
         else {
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('eumetcastsources') + '</span>');
+            // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('eumetcastsources') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('eumetcastsources') + '</span>');
         }
 
         me.items = [{
@@ -135,11 +136,11 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
                     disabled: false,
                     getClass: function (v, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel <= 1)) {
-                           return 'edit';
+                           return 'far fa-edit';
                        }
                        else {
                            // return 'x-hide-display';
-                           return 'vieweye';
+                           return 'far fa-eye';
                        }
                     },
                     getTip: function (v, meta, rec) {
@@ -187,7 +188,7 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
                items: [{
                    width:'35',
                    // disabled: false,
-                   isDisabled: function(view, rowIndex, colIndex, item, record){
+                   isActionDisabled: function(view, rowIndex, colIndex, item, record){
                         if (!record.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
                             return false;
                         }
@@ -197,7 +198,7 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
                    },
                    getClass: function(cell, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                           return 'delete';
+                           return 'far fa-trash-alt red';
                        }
                        else {
                            // cell.setDisabled(true);

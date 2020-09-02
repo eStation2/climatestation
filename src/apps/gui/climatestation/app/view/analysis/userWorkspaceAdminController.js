@@ -165,7 +165,7 @@ Ext.define('climatestation.view.analysis.userWorkspaceAdminController', {
                         ,anchor: '100%'
                         ,buttonText: ''
                         ,buttonConfig: {
-                            iconCls: 'fa fa-folder-open-o'
+                            iconCls: 'far fa-folder-open-o'
                         }
                     }],
                     buttons: [{

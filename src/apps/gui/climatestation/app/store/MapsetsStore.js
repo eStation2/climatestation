@@ -11,7 +11,7 @@ Ext.define('climatestation.store.MapsetsStore', {
 
     storeId : 'mapsets'
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: false
     ,remoteSort: false
     ,remoteGroup: false

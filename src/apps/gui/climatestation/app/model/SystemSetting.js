@@ -42,7 +42,7 @@ Ext.define('climatestation.model.SystemSetting', {
         {name: 'proxy_userpwd'}
     ]
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: true
     ,remoteSort: false
     ,remoteGroup: false

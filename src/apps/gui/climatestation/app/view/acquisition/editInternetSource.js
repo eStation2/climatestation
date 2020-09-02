@@ -38,20 +38,20 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
     modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
-    resizable: false,
-    autoScroll:true,
+    resizable: true,
+    scrollable: 'y',
     maximizable: false,
 
-    //width: 975,
-    height: Ext.getBody().getViewSize().height < 840 ? Ext.getBody().getViewSize().height-50 : 840,  // 725,
-    maxHeight: 840,
+    width: 925,
+    height: Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-50 : Ext.getBody().getViewSize().height-100,
+    maxHeight: 1070,
 
     frame: true,
     border: false,
     bodyStyle: 'padding:5px 0px 0',
 
     viewConfig:{forceFit:true},
-    layout:'hbox',
+    layout:'fit',
 
     session:true,
 
@@ -70,19 +70,19 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
         // me.title = climatestation.Utils.getTranslation('editinternetdatasource');
 
         if (me.params.edit){
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('editinternetdatasource') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('editinternetdatasource') + '</span>');
         }
         else if (me.params.view){
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('viewinternetdatasource') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('viewinternetdatasource') + '</span>');
         }
         else {
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('newinternetdatasource') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('newinternetdatasource') + '</span>');
         }
 
         me.buttons = [
         //     {
         //     text: 'TEST',
-        //     // iconCls: 'fa fa-save fa-2x',
+        //     // iconCls: 'far fa-save',
         //     style: {color: 'lightblue'},
         //     scale: 'medium',
         //     disabled: false,
@@ -92,7 +92,7 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
         // },
             '->',{
             text: 'Save',
-            iconCls: 'fa fa-save fa-2x',
+            iconCls: 'far fa-save',
             style: { color: 'lightblue' },
             scale: 'medium',
             disabled: false,
@@ -198,18 +198,19 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
             xtype: 'form',
             reference: 'internetsourceform',
             border: false,
+            scrollable: true,
             // use the Model's validations for displaying form errors
             // modelValidation: true,
             fieldDefaults: {
-                labelAlign: 'left',
+                // labelAlign: 'top',
                 labelStyle: 'font-weight: bold;',
-                msgTarget: 'right',
+                msgTarget: 'side',
                 preventMark: false
             },
             items : [{
                 layout: {
                     type: 'hbox'
-                    ,align: 'stretch'
+                    // ,align: 'stretch'
                 },
                 items: [{
                     xtype: 'fieldset',
@@ -219,45 +220,44 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                     margin: '10 5 10 10',
                     padding: '10 10 10 10',
                     defaults: {
-                        width: 475,
-                        labelWidth: 120,
+                        // width: 475,
+                        labelWidth: 80,
                         labelAlign: 'left',
+                        msgTarget: 'side',
                         disabled: me.params.view ? true : false
                     },
                     items: [{
                         xtype: 'textfield',      // (me.params.create || me.params.edit) ? 'textfield' : 'displayfield',
                         fieldLabel: climatestation.Utils.getTranslation('id'),    // 'ID',
-                        labelWidth: 60,
+                        // labelWidth: 60,
                         reference: 'internet_id',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.internet_id}',
+                        anchor: '100%',
                         allowBlank: false
                     },{
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('name'),    // 'Name',
-                        labelWidth: 60,
+                        // labelWidth: 60,
                         reference: 'descriptive_name',
-                        msgTarget: 'side',
-                        bind: '{theInternetSource.descriptive_name}'
+                        bind: '{theInternetSource.descriptive_name}',
+                        anchor: '100%'
                     }, {
                         xtype: 'textareafield',
                         fieldLabel: climatestation.Utils.getTranslation('description'),    // 'Description',
                         labelAlign: 'top',
                         reference: 'description',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.description}',
-                        grow: true
+                        anchor: '100%',
+                        height: 110,
+                        grow: false,
+                        // growMax: 120
                     }, {
                         xtype: 'combobox',
                         fieldLabel: climatestation.Utils.getTranslation('type'),    // 'Type',
-                        labelWidth: 60,
+                        // labelWidth: 60,
                         width: 300,
                         reference: 'type',
-                        msgTarget: 'side',
                         store: internettype,
-                        // store: {
-                        //     type: 'internettype'
-                        // },
                         valueField: 'internet_type_id',
                         displayField: 'internet_type_name',
                         bind: '{theInternetSource.type}',
@@ -270,51 +270,49 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         fieldLabel: climatestation.Utils.getTranslation('url'),    // 'URL',
                         reference: 'url',
                         labelAlign: 'top',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.url}',
-                        height: 30,
-                        grow: true
+                        anchor: '100%',
+                        height: 80,
+                        grow: false
                     }, {
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('user_name'),    // 'User name',
-                        labelWidth: 80,
+                        // labelWidth: 80,
                         reference: 'user_name',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.user_name}'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('password'),    // 'Password',
-                        labelWidth: 80,
+                        // labelWidth: 80,
                         reference: 'password',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.password}'
                     }, {
                         xtype: 'textareafield',
                         fieldLabel: climatestation.Utils.getTranslation('https_params'),    // 'https parameters',
                         reference: 'https_params',
                         labelAlign: 'top',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.https_params}',
-                        height: 30,
-                        grow: true
+                        anchor: '100%',
+                        height: 80,
+                        grow: false
                     }, {
                         xtype: 'textareafield',
                         fieldLabel: climatestation.Utils.getTranslation('include_files_expression'),    // 'Include files expression',
                         labelAlign: 'top',
                         reference: 'include_files_expression',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.include_files_expression}',
-                        height: 30,
-                        grow: true
+                        anchor: '100%',
+                        height: 110,
+                        grow: false
                     }, {
                         xtype: 'textareafield',
                         fieldLabel: climatestation.Utils.getTranslation('files_filter_expression'),    // 'Files filter expression',
                         labelAlign: 'top',
                         reference: 'files_filter_expression',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.files_filter_expression}',
-                        height: 30,
-                        grow: true
+                        anchor: '100%',
+                        height: 80,
+                        grow: false
                     //}, {
                     //    xtype: 'textfield',
                     //    fieldLabel: climatestation.Utils.getTranslation('status'),    // 'Status',
@@ -332,12 +330,11 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('pull_frequency'),    // 'Pull frequency',
                         reference: 'pull_frequency',
-                        msgTarget: 'side',
                         maxValue: 99999999,
                         minValue: 0,
                         allowDecimals: true,
                         hideTrigger: false,
-                        width: 230,
+                        width: 80,
                         bind: '{theInternetSource.pull_frequency}'
                     }, {
                         xtype: 'combobox',
@@ -347,19 +344,18 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         store: {
                             type: 'frequencies'
                         },
-                        width: 475,
+                        // width: 475,
                         bind: '{theInternetSource.frequency_id}',
+                        anchor: '100%',
                         valueField: 'frequency_id',
                         displayField: 'description',
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
                         emptyText: climatestation.Utils.getTranslation('selectafrequency')    // 'Select a frequency...'
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('start_date'),    // 'Start date',
                         reference: 'start_date',
-                        msgTarget: 'side',
                         emptyText: '',
                         // allowOnlyWhitespace: false,
                         allowBlank: true,
@@ -367,13 +363,12 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         // minValue: -99999999,
                         allowDecimals: true,
                         hideTrigger: false,
-                        width: 230,
+                        width: 100,
                         bind: '{theInternetSource.start_date}'
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('end_date'),    // 'End date',
                         reference: 'end_date',
-                        msgTarget: 'side',
                         emptyText: '',
                         // allowOnlyWhitespace: false,
                         allowBlank: true,
@@ -381,7 +376,7 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         // minValue: -99999999,
                         allowDecimals: true,
                         hideTrigger: false,
-                        width: 230,
+                        width: 100,
                         bind: '{theInternetSource.end_date}'
                     }]
                 },{
@@ -392,8 +387,11 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                     margin: '10 10 10 5',
                     padding: '10 10 10 10',
                     defaults: {
-                        width: 290,
-                        labelWidth: 130,
+                        // width: 290,
+                        labelWidth: 120,
+                        labelAlign: 'left',
+                        msgTarget: 'side',
+                        allowBlank: true,
                         disabled: me.params.view ? true : false
                     },
                     items: [{
@@ -410,19 +408,16 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         allowBlank: true,
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
                         emptyText: climatestation.Utils.getTranslation('selectaformattype')    // 'Select a format type...'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('file_extension'),    // 'File extension',
                         reference: 'file_extension',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.file_extension}'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('delimiter'),    // 'Delimiter',
                         reference: 'delimiter',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.delimiter}'
                     }, {
                         xtype: 'combobox',
@@ -438,15 +433,14 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         displayField: 'date_format',    // 'definition',
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
+
                         emptyText: climatestation.Utils.getTranslation('selectadateformat')    // 'Select a date format...'
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('date_position'),    // 'Date position',
                         reference: 'date_position',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theInternetSource.date_position}'
@@ -455,31 +449,31 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         fieldLabel: climatestation.Utils.getTranslation('product_identifier'),    // 'Product identifier',
                         labelAlign: 'top',
                         reference: 'product_identifier',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.product_identifier}',
-                        height: 30,
-                        width: 350,
+                        anchor: '100%',
+                        // height: 30,
+                        // width: 350,
                         grow: true
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('prod_id_position'),    // 'Prod id position',
                         reference: 'prod_id_position',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
-                        bind: '{theInternetSource.prod_id_position}'
+                        bind: '{theInternetSource.prod_id_position}',
+                        labelWidth: 120
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('prod_id_length'),    // 'Prod id length',
                         reference: 'prod_id_length',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
-                        bind: '{theInternetSource.prod_id_length}'
+                        bind: '{theInternetSource.prod_id_length}',
+                        labelWidth: 120
                     }, {
                         xtype: 'combobox',
                         fieldLabel: climatestation.Utils.getTranslation('area_type'),    // 'Area type',
@@ -494,15 +488,13 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         allowBlank: true,
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
                         emptyText: climatestation.Utils.getTranslation('selectanareatype')    // 'Select an area type...'
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('area_position'),    // 'Area position',
                         reference: 'area_position',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theInternetSource.area_position}'
@@ -510,9 +502,8 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('area_length'),    // 'Area length',
                         reference: 'area_length',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theInternetSource.area_length}'
@@ -532,21 +523,18 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         allowBlank: true,
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
                         emptyText: climatestation.Utils.getTranslation('selectanapreproctype')    // 'Select a pre-processing type...'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('product_release'),    // 'Product release',
                         reference: 'product_release',
-                        msgTarget: 'side',
                         bind: '{theInternetSource.product_release}'
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('release_position'),    // 'Release position',
                         reference: 'release_position',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theInternetSource.release_position}'
@@ -554,9 +542,8 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('release_length'),    // 'Release length',
                         reference: 'release_length',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theInternetSource.release_length}'
@@ -565,10 +552,10 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         fieldLabel: climatestation.Utils.getTranslation('native_mapset'),    // 'Native mapset',
                         reference: 'native_mapset',
                         bind: '{theInternetSource.native_mapset}',
-                        // store: mapsets,
-                        store: {
-                            type: 'mapsets'
-                        },
+                        store: 'mapsets',
+                        // store: {
+                        //     type: 'mapsets'
+                        // },
                         valueField: 'mapsetcode',
                         displayField: 'descriptive_name',
                         // itemTpl: '<div class=""><span>{mapsetcode}</span>{descriptive_name}</div>',
@@ -576,7 +563,6 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         allowBlank: true,
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
                         emptyText: climatestation.Utils.getTranslation('selectanamapset')    // 'Select a mapset...'
                     }]
                 }]

@@ -62,9 +62,15 @@ Ext.define('climatestation.view.analysis.graphTemplateAdminModel', {
                     // This event is triggered on every change made in a record!
                 },
                 write: function(store, operation){
-                    var result = Ext.JSON.decode(operation.getResponse().responseText);
+                    // var result = Ext.JSON.decode(operation.getResponse().responseText);
+                    // var result = operation.getResponse().responseJson;
                     if (operation.success) {
-                        Ext.toast({html: operation.getRecords()[0].get('graph_tpl_name') + ' ' + climatestation.Utils.getTranslation('deleted'), title: climatestation.Utils.getTranslation('graph_tpl_deleted'), width: 300, align: 't'});   // "Graph template deleted"
+                        Ext.toast({
+                            html: operation.getRecords()[0].get('graph_tpl_name') + ' ' + climatestation.Utils.getTranslation('deleted'),
+                            title: climatestation.Utils.getTranslation('graph_tpl_deleted'),
+                            width: 300,
+                            align: 't'
+                        });   // "Graph template deleted"
                     }
                 }
             }

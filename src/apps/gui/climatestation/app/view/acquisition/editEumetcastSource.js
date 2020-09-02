@@ -32,22 +32,22 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
     modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
-    resizable: false,
-    autoScroll:true,
+    resizable: true,
+    scrollable: 'y',
     maximizable: false,
 
-    //width: 1100,
-    height: Ext.getBody().getViewSize().height < 730 ? Ext.getBody().getViewSize().height-50 : 730,  // 600,
-    maxHeight: 730,
+    width: 850,
+    height: Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-50 : Ext.getBody().getViewSize().height-100,  // 600,
+    maxHeight: 925,
 
     frame: true,
     border: false,
     bodyStyle: 'padding:5px 0px 0',
 
-    viewConfig:{forceFit:true},
-    layout:'hbox',
+    viewConfig: {forceFit:true},
+    layout: 'fit',
 
-    session:true,
+    session: true,
 
     params: {
         create: false,
@@ -64,19 +64,20 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
         // me.title = climatestation.Utils.getTranslation('editeumetcastdatasource');
 
         if (me.params.edit){
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('editeumetcastdatasource') + '</span>');
+            // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('editeumetcastdatasource') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('editeumetcastdatasource') + '</span>');
         }
         else if (me.params.view){
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('vieweumetcastdatasource') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('vieweumetcastdatasource') + '</span>');
         }
         else {
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('neweumetcastdatasource') + '</span>');
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('neweumetcastdatasource') + '</span>');
         }
 
         me.buttons = [
         //     {
         //     text: 'TEST',
-        //     // iconCls: 'fa fa-save fa-2x',
+        //     // iconCls: 'far fa-save',
         //     style: {color: 'lightblue'},
         //     scale: 'medium',
         //     disabled: false,
@@ -86,7 +87,7 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
         // },
             '->',{
             text: climatestation.Utils.getTranslation('save'),    // 'Save',
-            iconCls: 'fa fa-save fa-2x',
+            iconCls: 'far fa-save',
             style: { color: 'lightblue' },
             scale: 'medium',
             disabled: false,
@@ -172,18 +173,19 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
             //bind: '{theEumetcastSource}',     // NO BIND otherwise does not work with formula on store.
             reference: 'eumetcastsourceform',
             border: false,
+            scrollable: true,
             // use the Model's validations for displaying form errors
             //modelValidation: true,
             fieldDefaults: {
-                labelAlign: 'left',
+                // labelAlign: 'left',
                 labelStyle: 'font-weight: bold;',
-                msgTarget: 'right',
+                msgTarget: 'side',
                 preventMark: false
             },
             items : [{
                 layout: {
                     type: 'hbox'
-                    ,align: 'stretch'
+                    // ,align: 'stretch'
                 },
                 items: [{
                     xtype: 'fieldset',
@@ -193,56 +195,58 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                     margin: '10 5 10 10',
                     padding: '10 10 10 10',
                     defaults: {
-                        width: 400,
-                        labelWidth: 120,
+                        // width: 400,
+                        labelWidth: 80,
                         labelAlign: 'top',
+                        msgTarget: 'side',
                         disabled: me.params.view ? true : false
                     },
                     items: [{
                         xtype: 'textfield',
-                        fieldLabel: climatestation.Utils.getTranslation('id'),    // 'ID',
-                        labelAlign: 'left',
-                        labelWidth: 60,
                         reference: 'eumetcast_id',
-                        msgTarget: 'side',
+                        fieldLabel: climatestation.Utils.getTranslation('id'),    // 'ID',
+                        labelWidth: 80,
                         bind: '{theEumetcastSource.eumetcast_id}',
+                        anchor: '100%',
                         allowBlank: false
                     }, {
                         xtype: 'textareafield',
-                        fieldLabel: climatestation.Utils.getTranslation('description'),    // 'Description',
                         reference: 'description',
-                        msgTarget: 'side',
+                        fieldLabel: climatestation.Utils.getTranslation('description'),    // 'Description',
                         shrinkWrap: 2,
                         minHeight: 160,
                         grow: true,
-                        bind: '{theEumetcastSource.description}'
+                        bind: '{theEumetcastSource.description}',
+                        anchor: '100%'
                         //dataIndex: 'description'
                     }, {
                         xtype: 'textareafield',
                         fieldLabel: climatestation.Utils.getTranslation('filterexpression'),    // 'Filter expression',
                         reference: 'filter_expression_jrc',
-                        msgTarget: 'side',
+                        minHeight: 80,
+                        shrinkWrap: 2,
                         bind: '{theEumetcastSource.filter_expression_jrc}',
+                        anchor: '100%',
                         //dataIndex: 'filter_expression_jrc',
                         allowBlank: false,
                         grow: true
                     }, {
                         xtype: 'textareafield',
-                        fieldLabel: climatestation.Utils.getTranslation('tipicalfilename'),    // 'Typical file name',
                         reference: 'typical_file_name',
-                        msgTarget: 'side',
+                        fieldLabel: climatestation.Utils.getTranslation('tipicalfilename'),    // 'Typical file name',
                         minHeight: 80,
                         shrinkWrap: 2,
                         grow: true,
-                        bind: '{theEumetcastSource.typical_file_name}'
+                        bind: '{theEumetcastSource.typical_file_name}',
+                        anchor: '100%'
                         //dataIndex: 'typical_file_name'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('frequency'),    // 'Frequency',
                         reference: 'frequency',
-                        msgTarget: 'side',
                         shrinkWrap: 2,
-                        bind: '{theEumetcastSource.frequency}'
+                        bind: '{theEumetcastSource.frequency}',
+                        anchor: '100%'
                         //dataIndex: 'collection_name'
                     // }, {
                     //     xtype: 'displayfield',
@@ -280,8 +284,11 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                     margin: '10 10 10 5',
                     padding: '10 10 10 10',
                     defaults: {
-                        width: 290,
-                        labelWidth: 130,
+                        // width: 290,
+                        labelWidth: 120,
+                        labelAlign: 'left',
+                        msgTarget: 'side',
+                        allowBlank: true,
                         disabled: me.params.view ? true : false
                     },
                     items: [{
@@ -298,20 +305,17 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                         allowBlank: true,
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
                         emptyText: climatestation.Utils.getTranslation('selectaformattype')    // 'Select a format type...'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('file_extension'),    // 'File extension',
                         reference: 'file_extension',
-                        msgTarget: 'side',
                         bind: '{theEumetcastSource.file_extension}'
                         //dataIndex: 'file_extension'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('delimiter'),    // 'Delimiter',
                         reference: 'delimiter',
-                        msgTarget: 'side',
                         bind: '{theEumetcastSource.delimiter}'
                         //dataIndex: 'delimiter'
                     }, {
@@ -328,15 +332,13 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                         displayField: 'date_format',    // 'definition',
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
                         emptyText: climatestation.Utils.getTranslation('selectadateformat')    // 'Select a date format...'
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('date_position'),    // 'Date position',
                         reference: 'date_position',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theEumetcastSource.date_position}'
@@ -346,18 +348,17 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                         fieldLabel: climatestation.Utils.getTranslation('product_identifier'),    // 'Product identifier',
                         reference: 'product_identifier',
                         labelAlign: 'top',
-                        msgTarget: 'side',
                         bind: '{theEumetcastSource.product_identifier}',
-                        height: 30,
-                        width: 350,
+                        anchor: '100%',
+                        // height: 30,
+                        // width: 350,
                         grow: true
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('prod_id_position'),    // 'Product ID position',
                         reference: 'prod_id_position',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theEumetcastSource.prod_id_position}'
@@ -366,9 +367,8 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('prod_id_length'),    // 'Product ID length',
                         reference: 'prod_id_length',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theEumetcastSource.prod_id_length}'
@@ -387,15 +387,13 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                         allowBlank: true,
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
                         emptyText: climatestation.Utils.getTranslation('selectanareatype')    // 'Select an area type...'
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('area_position'),    // 'Area position',
                         reference: 'area_position',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theEumetcastSource.area_position}'
@@ -404,9 +402,8 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('area_length'),    // 'Area length',
                         reference: 'area_length',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theEumetcastSource.area_length}'
@@ -427,22 +424,19 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                         allowBlank: true,
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
                         emptyText: climatestation.Utils.getTranslation('selectanapreproctype')    // 'Select a pre-processing type...'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('product_release'),    // 'Product release',
                         reference: 'product_release',
-                        msgTarget: 'side',
                         bind: '{theEumetcastSource.product_release}'
                         //dataIndex: 'product_release'
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('release_position'),    // 'Release position',
                         reference: 'release_position',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theEumetcastSource.release_position}'
@@ -451,9 +445,8 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                         xtype: 'numberfield',
                         fieldLabel: climatestation.Utils.getTranslation('release_length'),    // 'Release length',
                         reference: 'release_length',
-                        msgTarget: 'side',
                         maxValue: 99999999,
-                        minValue: 0,
+                        minValue: -1,
                         allowDecimals: true,
                         hideTrigger: false,
                         bind: '{theEumetcastSource.release_length}'
@@ -463,10 +456,7 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                         fieldLabel: climatestation.Utils.getTranslation('native_mapset'),    // 'Native mapset',
                         reference: 'native_mapset',
                         bind: '{theEumetcastSource.native_mapset}',
-                        // store: mapsets,
-                        store: {
-                            type: 'mapsets'
-                        },
+                        store: 'mapsets',
                         valueField: 'mapsetcode',
                         displayField: 'descriptive_name',
                         // itemTpl: '<div class=""><span>{mapsetcode}</span>{descriptive_name}</div>',
@@ -474,7 +464,6 @@ Ext.define("climatestation.view.acquisition.editEumetcastSource",{
                         allowBlank: true,
                         typeAhead: false,
                         queryMode: 'local',
-                        msgTarget: 'side',
                         emptyText: climatestation.Utils.getTranslation('selectanamapset')    // 'Select a mapset...'
                     }]
                 }]

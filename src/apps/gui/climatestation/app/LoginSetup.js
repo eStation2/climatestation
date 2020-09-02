@@ -34,7 +34,7 @@ Ext.define('climatestation.LoginSetup', {
              * @param {Object} response
              */
             ,success = function(response) {
-                var o;
+                var o, exprireDate;
 
                 // clear sensitive data
                 params = null;
@@ -51,12 +51,13 @@ Ext.define('climatestation.LoginSetup', {
                 }
                 else {
                     // save received user data
+                    exprireDate = Ext.Date.add (new Date(),Ext.Date.DAY,1);
                     user = o.user;
-                    Ext.util.Cookies.set('estation2_userid', user.userid);
-                    Ext.util.Cookies.set('estation2_username', user.username);
-                    Ext.util.Cookies.set('estation2_useremail', user.email);
-                    Ext.util.Cookies.set('estation2_userlevel', user.userlevel);
-                    Ext.util.Cookies.set('estation2_userlanguage', user.prefered_language);
+                    Ext.util.Cookies.set('estation2_userid', user.userid, exprireDate);
+                    Ext.util.Cookies.set('estation2_username', user.username, exprireDate);
+                    Ext.util.Cookies.set('estation2_useremail', user.email, exprireDate);
+                    Ext.util.Cookies.set('estation2_userlevel', user.userlevel, exprireDate);
+                    Ext.util.Cookies.set('estation2_userlanguage', user.prefered_language, exprireDate);
                     if (user.prefered_language != climatestation.globals['selectedLanguage']){
                         window.location = '?lang=' + user.prefered_language;
                     }
@@ -124,12 +125,14 @@ Ext.define('climatestation.LoginSetup', {
              * @returns {Object}
              */
             ,setUser:function(usr) {
+                var exprireDate = Ext.Date.add (new Date(),Ext.Date.DAY,1);
                 user = usr;
-                Ext.util.Cookies.set('estation2_userid', user.userid);
-                Ext.util.Cookies.set('estation2_username', user.username);
-                Ext.util.Cookies.set('estation2_useremail', user.email);
-                Ext.util.Cookies.set('estation2_userlevel', user.userlevel);
-                Ext.util.Cookies.set('estation2_userlanguage', user.prefered_language);
+
+                Ext.util.Cookies.set('estation2_userid', user.userid, exprireDate);
+                Ext.util.Cookies.set('estation2_username', user.username, exprireDate);
+                Ext.util.Cookies.set('estation2_useremail', user.email, exprireDate);
+                Ext.util.Cookies.set('estation2_userlevel', user.userlevel, exprireDate);
+                Ext.util.Cookies.set('estation2_userlanguage', user.prefered_language, exprireDate);
             } // eo function getUser
 
             /**

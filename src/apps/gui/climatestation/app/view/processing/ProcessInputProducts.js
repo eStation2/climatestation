@@ -64,16 +64,16 @@ Ext.define("climatestation.view.processing.ProcessInputProducts",{
                     '<b class="smalltext" style="color:darkgrey;">{prod_descriptive_name}</b>' +
                     '</br>'
                 ),
-            width: 250,
+            width: 200,
             cellWrap:true
         }, {
             header: '', // 'Subproductcode',
             dataIndex: 'subproductcode',
-            width: 150
+            width: 100
         }, {
             header: '', // 'Mapsetcode',
             dataIndex: 'mapsetcode',
-            width: 200
+            width: 160
         //}, {
         //    header: '',
         //    xtype: 'widgetcolumn',

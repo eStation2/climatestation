@@ -3,7 +3,7 @@ Ext.define('climatestation.view.acquisition.product.editMapsetModel', {
     alias: 'viewmodel.acquisition-product-editmapset',
     stores: {
         mapsets: {
-            source: 'MapsetsStore'
+            source: 'mapsets'
         }
         //theMapset: {
         //    source: '{mapsets}',

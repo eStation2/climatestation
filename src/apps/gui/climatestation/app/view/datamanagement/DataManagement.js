@@ -33,19 +33,20 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
         draggable :false,
         markDirty: false,
         resizable: false,
-        disableSelection: true,
         trackOver: false,
-        preserveScrollOnRefresh: false,
-        preserveScrollOnReload: false,
+        // preserveScrollOnRefresh: false,
+        // preserveScrollOnReload: false,
+        scrollable: true,
         focusable: false,
-        focusOnToFront: false
+        loadMask: true
+        // focusOnToFront: false
     },
-    // selType: 'cellmodel',
-    // selModel: {listeners:{}},
-    // selModel: null,
-    bufferedRenderer: false,
 
+    bufferedRenderer: true,
+    scrollable: true,
     collapsible: false,
+    suspendLayout: false,
+    disableSelection: true,
     enableColumnMove: false,
     enableColumnResize: false,
     multiColumnSort: false,
@@ -54,10 +55,9 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
     frame: false,
     border: false,
     focusable: false,
-    margin: '0 0 10 0',    // (top, right, bottom, left).
+    margin: '0 0 10 0',
 
-    // layout: 'fit',
-    // autoHeight: true,
+    layout: 'fit',
 
     features: [{
         id: 'prodcat',
@@ -66,7 +66,7 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
         hideGroupedHeader: true,
         enableGroupingMenu: false,
         startCollapsed : true,
-        focusable: false,
+        // focusable: false,
         groupByText: climatestation.Utils.getTranslation('productcategories')  // 'Product category'
     }],
 
@@ -75,51 +75,15 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
         dirtyStore: false
     },
 
-    //listeners: {
-    //    cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
-    //        //e.stopPropagation();
-    //        return false;
-    //    }
-    //},
-    //listeners: {
-    //    viewready: function (){
-    //        //this.suspendEvents(true);
-    //        var groupFeature = this.getView().getFeature('prodcat');
-    //        var me = this;
-    //        //console.info('me.firstGroupKey defined in afterrender In viewready: ' + me.firstGroupKey);
-    //
-    //        if ( !this.getStore().isLoaded() ){
-    //            var task = new Ext.util.DelayedTask(function(){
-    //                if (me.firstGroupKey != 'undefined') {
-    //                    groupFeature.expand(me.firstGroupKey, true);
-    //                } else {
-    //                    groupFeature.expand("<span style='display: none;'>1</span>"+climatestation.Utils.getTranslation('vegetation'), true);  // rainfall
-    //                }
-    //            });
-    //            task.delay(2000);
-    //
-    //        } else {
-    //            if (me.firstGroupKey != 'undefined') {
-    //                groupFeature.expand(me.firstGroupKey, true);
-    //            } else {
-    //                groupFeature.expand("<span style='display: none;'>1</span>"+climatestation.Utils.getTranslation('vegetation'), true);  // rainfall
-    //            }
-    //        }
-    //        //this.resumeEvents();
-    //    }
-    //},
-
     initComponent: function () {
         var me = this;
 
         me.mon(me, {
             loadstore: function() {
                 var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
-                // console.info('DM loadstore');
 
                 if (me.forceStoreLoad || !datasetsstore.isLoaded() || me.dirtyStore) {
                     if (datasetsstore.isStore) {
-                        // console.info('DM reload store');
                         datasetsstore.proxy.extraParams = {force: true};
                         datasetsstore.load();
                     }
@@ -135,18 +99,13 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
             },
             groupexpand: function(view, node, group){
                 me.hideCompletenessTooltip();
-
+                me.view.updateLayout();
                 var taskRefresh = new Ext.util.DelayedTask(function() {
                     view.refresh();
+                    view.updateLayout();
                 });
                 taskRefresh.delay(50);
 
-                // var groupFeature = view.getFeature('prodcat');
-                // Ext.util.Observable.capture(view, function (e) { console.log('groupexpand - ' + e);});
-                // groupFeature.expand(group, true);
-                // groupFeature.expand(group, true);
-                // view.ownerCt.updateLayout();
-                // groupFeature.fireEvent('expand', group, true);
             },
             afterrender: function(view){
                 // Ext.util.Observable.capture(view, function(e){console.log('datamanagementgrid ' + view.id + ': ' + e);});
@@ -154,32 +113,34 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
                 scroller.on('scroll', function(){
                     var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
                     Ext.each(completenessTooltips, function(item) {
-                       // item.disable();
-                       item.hide();
+                        // item.disable();
+                        item.hide();
                     });
                 }, scroller, {single: false});
-
-                // view.suspendEvents(false);
-                // view.clearManagedListeners();
             }
         }
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
-            //     text: climatestation.Utils.getTranslation('expandall'),    // 'Expand All',
-            //     handler: function(btn) {
-            //         var view = btn.up().up().getView();
-            //         view.getFeature('prodcat').expandAll();
-            //         view.refresh();
-            //     }
-            // }, {
-                tooltip: climatestation.Utils.getTranslation('collapseall'),    // 'Collapse All',
-                iconCls: 'collapse',
+                tooltip:  climatestation.Utils.getTranslation('expandall'),    // 'Expand All',
+                iconCls: 'far fa-blinds-open',
                 scale: 'medium',
+                margin: 5,
+                padding: 5,
+                handler: function(btn) {
+                    var view = btn.up().up().getView();
+                    view.getFeature('prodcat').expandAll();
+                    me.hideCompletenessTooltip();
+                }
+            }, {
+                tooltip:  climatestation.Utils.getTranslation('collapseall'),    // 'Collapse All',
+                iconCls: 'far fa-blinds-raised',
+                scale: 'medium',
+                margin: 5,
+                padding: 5,
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('prodcat').collapseAll();
-
                     me.hideCompletenessTooltip();
                 }
             }, ' ', ' ', ' ', {
@@ -189,7 +150,7 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
                 id: 'datamanagement-requests-btn',
                 reference: 'datamanagement-requests-btn',
                 text: climatestation.Utils.getTranslation('myrequests'),    // 'My requests',
-                iconCls: 'fa fa-cloud-download fa-2x',
+                iconCls: 'far fa-cloud-download',
                 style: {color: 'gray'},
                 scale: 'medium',
                 handler: 'showRequestsAdmin',
@@ -204,12 +165,11 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
             '->', // same as { xtype: 'tbfill' }
             {
                 xtype: 'button',
-                iconCls: 'fa fa-refresh fa-2x',
+                iconCls: 'far fa-redo-alt',
                 style: { color: 'gray' },
                 enableToggle: false,
                 scale: 'medium',
                 handler:  function(btn) {
-                    // var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
                     var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
 
                     Ext.each(completenessTooltips, function(item) {
@@ -218,10 +178,6 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
 
                     me.forceStoreLoad = true;
                     me.fireEvent('loadstore');
-                    // if (datasetsstore.isStore) {
-                    //     datasetsstore.proxy.extraParams = {force: true};
-                    //     datasetsstore.load();
-                    // }
                 }
             }]
         });
@@ -250,16 +206,6 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
             columns: [{
                 xtype:'templatecolumn',
                 header: climatestation.Utils.getTranslation('product'),    // 'Product',
-                // tpl: new Ext.XTemplate(
-                //         '<b>{prod_descriptive_name}</b>' +
-                //         '<tpl if="version != \'undefined\'">',
-                //             '<b class="smalltext"> - {version}</b>',
-                //         '</tpl>',
-                //         '</br><span class="smalltext">' +
-                //         '<b style="color:darkgrey;">{productcode}</b>' +
-                //         '<p>{description}</p>' +
-                //         '</span></br>'
-                //     ),
                 tpl: new Ext.XTemplate(
                         '<b>{prod_descriptive_name}</b>' +
                         '<tpl if="version != \'undefined\'">',
@@ -271,26 +217,18 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
                         '<b class="smalltext" style="color:darkgrey;">'+climatestation.Utils.getTranslation('provider')+': {provider}</b>' +
                         '</br>'
                     ),
-                width: 450,
+                width: 250,
                 cellWrap:true
-//            }, {
-//                xtype: 'checkcolumn',
-//                header: 'Active',
-//                width: 65,
-//                dataIndex: 'activated',
-//                stopSelection: false,
-//                hideable: true,
-//                hidden:false,
-//                disabled: true
             },{
                 xtype: 'actioncolumn',
-                header: climatestation.Utils.getTranslation('actions'),    // 'Actions',
-                width: 70,
+                header: climatestation.Utils.getTranslation('request'),    // 'Actions',
+                width: 80,
                 align:'center',
                 menuDisabled: true,
                 stopSelection: false,
                 items: [{
-                    icon: 'resources/img/icons/download.png',
+                    // icon: 'resources/img/icons/download.png',
+                    iconCls: 'far fa-download',
                     tooltip: climatestation.Utils.getTranslation('tipcompletedatasetall'),    // 'Complete all product data sets (all mapsets and its subproducts).',
                     scope: me,
                     handler: function (grid, rowIndex, colIndex, icon, e, record) {
@@ -319,34 +257,34 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
             ,columns: [{
                 xtype: 'widgetcolumn',
                 //dataIndex: 'productmapsets',
-                minWidth: 1025,
+                width: 1090,
                 bodyPadding:0,
                 variableRowHeight: false,
                 scrollable: false,
 
-                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; left: 0px;" tabindex="-1">' +
+                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('mapset') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 215px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 200px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('actions') + '</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('request') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 255px; right: auto; left: 285px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 255px; right: auto; left: 270px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('subproductname') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 545px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 450px; right: auto; left: 525px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('status') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 905px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 975px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('actions') + '</span>' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('request') + '</span>' +
                 '           </div>' +
                 '       </div>',
                 // listeners: {
@@ -360,30 +298,18 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
                 }
                 ,onWidgetAttach: function(col,widget, record) {
 
-                    if (!widget.widgetattached) {
+                    // if (!widget.widgetattached) {
                         // Ext.suspendLayouts();
                         widget.getStore().setData(record.getData().productmapsets);
                         widget.widgetattached = true;
                         // Ext.resumeLayouts(true);
-                    }
-                    // else {
-                    //     me.ownerGrid.updateLayout();
                     // }
-
-                    //var productmapsets = record.getData().productmapsets;
-                    //var newstore = Ext.create('Ext.data.JsonStore', {
-                    //    model: 'ProductMapSet',
-                    //    data: productmapsets
-                    //});
-                    //widget.setStore(newstore);
                 }
             }]
         }];
 
         me.callParent();
 
-        //me.groupingFeature = me.view.getFeature('prodcat');
-        //me.mon(me, 'afterrender', me.onAfterRender, me);
     }
 
     ,hideCompletenessTooltip: function(){
@@ -393,14 +319,4 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
            item.hide();
         });
     }
-    //,onAfterRender: function() {
-    //    var me = this;
-    //    me.getStore().load({
-    //        callback:function(){
-    //            me.firstGroupKey = me.getStore().getGroups().items[0].getGroupKey();
-    //            //console.info(me.firstGroupKey);
-    //            //me.view.getFeature('prodcat').expand(me.firstGroupKey, true);
-    //        }
-    //    });
-    //}
 });

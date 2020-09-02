@@ -4,10 +4,10 @@ Ext.define('climatestation.view.acquisition.editInternetSourceModel', {
     stores: {
         internetsources: {
             source: 'InternetSourceStore'
-        },
-        mapsets: {
-            source: 'MapsetsStore'
         }
+        // mapsets: {
+        //     source: 'MapsetsStore'
+        // }
     }
 
     ,formulas: {

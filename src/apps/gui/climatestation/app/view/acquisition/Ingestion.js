@@ -31,24 +31,12 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
     rowLines: false,
     collapsible: false,
     bufferedRenderer: false,
-    forceFit: true,
     focusable: false,
-    minHeight: 55,
-
-    layout: 'fit',
-
-    // selType: 'cellmodel',
-    // selModel: {listeners:{}},
 
     initComponent: function () {
         var me = this;
-        //Ext.util.Observable.capture(this, function(e){console.log('Ingestion - ' + this.id + ': ' + e);});
 
-        // me.listeners = {
-        //     afterrender: function(){
-        //         me.view.refresh();
-        //     }
-        // };
+        //Ext.util.Observable.capture(this, function(e){console.log('Ingestion - ' + this.id + ': ' + e);});
 
         me.viewConfig = {
             stripeRows: false,
@@ -58,14 +46,14 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
             resizable: false,
             disableSelection: true,
             trackOver: false,
-            forceFit: true,
+            // forceFit: true,
             preserveScrollOnRefresh: false,
             focusable: false,
             loadMask: false,
-            getRowClass: function(record) {
-                return 'wordwrap';
-            }
-            ,listeners: {
+            // getRowClass: function(record) {
+            //     return 'wordwrap';
+            // },
+            listeners: {
                 render: function(view){
                     createTooltip(view);
                     // Ext.util.Observable.capture(view, function(e){console.log(view.id + ': ' + e);});
@@ -87,21 +75,21 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
                     }
                 },
                 itemmouseenter: function(view){
-                    // console.info('itemmouseenter');
                     var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                    // console.info(widgettooltip);
                     widgettooltip.trackMouse = true;
                     if (widgettooltip.disabled){
                         widgettooltip.enable();
                     }
                 },
                 itemmouseleave: function(view){
-                    // console.info('itemmouseleave');
-                    var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
-                    if (!widgettooltip.disabled && widgettooltip.trackMouse){
-                        widgettooltip.disable();
-                    }
-                },
-                rowfocus: {}
+                    // // console.info('itemmouseleave');
+                    // var widgettooltip = Ext.getCmp(view.getId() + '_completness_tooltip');
+                    // if (!widgettooltip.disabled && widgettooltip.trackMouse){
+                    //     widgettooltip.disable();
+                    // }
+                }
+                // ,rowfocus: {}
             }
         };
 
@@ -118,15 +106,15 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
                 // Render immediately so that tip.body can be referenced prior to the first show.
                 // renderTo: Ext.getBody(),
                 maxHeight: 350,
-                autoScroll: true,
+                scrollable: true,
                 // autoRender: true,
                 hidden: false,
-                disabled: true,
+                disabled: false,
                 trackMouse: true,
-                mouseOffset : [-5,0],
-                autoHide: false,
-                showDelay: 100,
-                // hideDelay: 5000,
+                // mouseOffset : [-5,0],
+                autoHide: true,
+                showDelay: 500,
+                hideDelay: 1000,
                 // dismissDelay: 10000, // auto hide after 10 seconds
                 closable: true,
                 anchorToTarget: false,
@@ -134,21 +122,19 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
                 padding: 5,
                 listeners: {
                     close: function(tip) {
-                        // tip.disable();
                         tip.hide();
                     },
                     // Change content dynamically depending on which element triggered the show.
                     beforeshow: function (tip) {
                         // Ext.util.Observable.capture(tip.triggerElement, function(e){console.log(tip.id + ': ' + e);});
+                        // console.info(tip);
                         if (climatestation.Utils.objectExists(tip.triggerElement)) {
                             var datasetinterval = '',
                                 datasetForTipText,
                                 tooltipintervals,
-                                mapsetdatasetrecord = view.getRecord(tip.triggerElement),   // view.dataSource.getData().items[0], //  view.dataSource.data.items[0], //
-                                completeness = mapsetdatasetrecord.get('completeness') || mapsetdatasetrecord.getCompleteness(); // mapsetdatasetrecord.getAssociatedData().completeness;
-                            // completeness = mapsetdatasetrecord.get('completeness');
-
-                            if (mapsetdatasetrecord.get('mapsetcode')!=='') {
+                                mapsetdatasetrecord = view.getRecord(tip.triggerElement);   // view.dataSource.getData().items[0], //  view.dataSource.data.items[0], //
+                            if (mapsetdatasetrecord && mapsetdatasetrecord.get('mapsetcode')!=='') {
+                                var completeness = mapsetdatasetrecord.get('completeness'); //  || mapsetdatasetrecord.getCompleteness(); // mapsetdatasetrecord.getAssociatedData().completeness;
 
                                 var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
                                 Ext.each(completenessTooltips, function(item) {
@@ -166,30 +152,34 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
 
                                 tooltipintervals = datasetForTipText;
                                 if (mapsetdatasetrecord.get('frequency_id') === 'singlefile' && completeness.totfiles === 1 && completeness.missingfiles === 0) {
-                                    datasetinterval = '<span style="color:#81AF34">' + climatestation.Utils.getTranslation('singlefile') + '</span>';
+                                    datasetinterval = '<span style="color:#BDF65E"><b>' + climatestation.Utils.getTranslation('singlefile') + '</b></span>';
                                     tooltipintervals += datasetinterval;
                                 }
                                 else if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
-                                    datasetinterval = '<span style="color:#808080">' + climatestation.Utils.getTranslation('notanydata') + '</span>';
+                                    datasetinterval = '<span style="color:#ffffff"><b>' + climatestation.Utils.getTranslation('notanydata') + '</b></span>';
                                     tooltipintervals += datasetinterval;
                                 }
                                 else {
-                                    completeness.intervals().getData().items.forEach(function (interval) {
+                                    completeness.intervals.forEach(function (interval) {
                                         // console.info(interval);
                                         var color, intervaltype = '';
-                                        if (interval.get('intervaltype') === 'present') {
-                                            color = '#81AF34'; // green
+                                        if (interval.intervaltype === 'present') {
+                                            color = '#BDF65E'; // green
                                             intervaltype = climatestation.Utils.getTranslation('present');
                                         }
-                                        if (interval.get('intervaltype') === 'missing') {
-                                            color = '#FF0000'; // red
+                                        if (interval.intervaltype === 'missing') {
+                                            color = '#F34242'; // red
                                             intervaltype = climatestation.Utils.getTranslation('missing');
                                         }
-                                        if (interval.get('intervaltype') === 'permanent-missing') {
-                                            color = '#808080'; // gray
+                                        if (interval.intervaltype === 'permanent-missing') {
+                                            color = '#ffffff'; // gray
                                             intervaltype = climatestation.Utils.getTranslation('permanent-missing');
                                         }
-                                        datasetinterval = '<span style="color:' + color + '">' + climatestation.Utils.getTranslation('from') + ' ' + interval.get('fromdate') + ' ' + climatestation.Utils.getTranslation('to') + ' ' + interval.get('todate') + ' - ' + intervaltype + '</span></br>';
+                                        datasetinterval = '<span style="color:' + color + '"><b>' +
+                                            climatestation.Utils.getTranslation('from') + ' ' +
+                                            interval.fromdate + ' ' +
+                                            climatestation.Utils.getTranslation('to') + ' ' +
+                                            interval.todate + ' - ' + intervaltype + '</b></span></br>';
                                         tooltipintervals += datasetinterval;
                                     });
                                 }
@@ -264,22 +254,22 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
                         productversion: version,
                         subproductcode: subproductcode
                     });
-                    selectMapsetForIngestWin.show();
 
+                    selectMapsetForIngestWin.show();
                 }
             }]
         },{
             header: '', // 'Sub Product Code',
             dataIndex: 'subproductcode',
             //bind: '{ingestions.subproductcode}',
-            width: 150,
-            minWidth: 150
+            width: 120,
+            minWidth: 120
         }, {
             header: '', // 'Mapset',
             dataIndex: 'mapsetname',
             //bind: '{ingestions.mapset}',
-            width: 200,
-            minWidth: 200,
+            width: 150,
+            minWidth: 150,
             cellWrap:true
         },{
             xtype: 'actioncolumn',
@@ -307,7 +297,7 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
                         return climatestation.Utils.getTranslation('delete_mapset_for')+' <b>'+rec.get('subproductcode')+'</b>';
                     //}
                 },
-                //isDisabled: function(view, rowIndex, colIndex, item, record) {
+                //isActionDisabled: function(view, rowIndex, colIndex, item, record) {
                 //    // Returns true if 'defined_by' is 'JRC'
                 //    if (record.get('defined_by')=='JRC') {
                 //        return true;
@@ -364,13 +354,13 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
             }]
         }, {
             // header: '', // 'Completeness',
-            width: 360,
+            width: 380,
             xtype: 'templatecolumn',
             // dataIndex: 'datasetcompletenessimage',
             // style: {cursor: 'pointer'},
             tpl: new Ext.XTemplate(
-                    '<img style="cursor: pointer;" src="{datasetcompletenessimage}" />'
-                ),
+                '<img style="cursor: pointer;" src="{datasetcompletenessimage}" />'
+            ),
             listeners: {
                 click: function(view){
                     // console.info(view);
@@ -432,9 +422,9 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
                 getClass: function(v, meta, rec) {
                     if (rec.get('mapsetcode')!=='') {
                         if (rec.get('activated')) {
-                            return 'activated';
+                            return 'far fa-check-square green';   // 'activated';
                         } else {
-                            return 'deactivated';
+                            return 'far fa-square green';   // 'deactivated';
                         }
                     } else {
                         return ' hide-actioncolumn';  // 'x-hide-display';

@@ -29,7 +29,7 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
     maximizable: false,
     resizable: false,
     //resizeHandles: 'n,s',
-    autoScroll: true,
+    scrollable: true,
     height: Ext.getBody().getViewSize().height < 730 ? Ext.getBody().getViewSize().height-130 : 730,  // 600,
     minHeight: 500,
     maxHeight: 830,
@@ -77,7 +77,7 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
             '->',{
                 reference: 'assignLegendsBtn',
                 text: climatestation.Utils.getTranslation('assign_selected_legends'), // 'Assign selected legends'
-                iconCls:'fa fa-plus-circle fa-1x',
+                iconCls:'far fa-plus-circle fa-1x',
                 style: {color:'green'},
                 handler: function(){
                     var selrec = me.lookupReference('legendsGrid').getSelectionModel().getSelected();
@@ -140,7 +140,7 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('newlegend'),    // 'New legend',
                 name: 'newlegend',
-                iconCls: 'fa fa-plus-circle fa-2x',
+                iconCls: 'far fa-plus-circle',
                 style: {color: 'green'},
                 hidden: false,
                 // glyph: 'xf055@FontAwesome',
@@ -150,7 +150,7 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('copylegend'),    // 'Copy legend',
                 name: 'copylegend',
-                iconCls: 'fa fa-files-o fa-2x',
+                iconCls: 'far fa-files-o',
                 style: {color: 'black'},
                 hidden: false,
                 // glyph: 'xf055@FontAwesome',
@@ -160,7 +160,7 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
             //     xtype: 'button',
             //     text: climatestation.Utils.getTranslation('exportlegend'),    // 'Export legend',
             //     name: 'exportlegend',
-            //     iconCls: 'fa fa-download fa-2x',
+            //     iconCls: 'far fa-download',
             //     style: {color: 'black'},
             //     hidden: false,
             //     // glyph: 'xf055@FontAwesome',
@@ -170,7 +170,7 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
             //     xtype: 'button',
             //     text: climatestation.Utils.getTranslation('importlegend'),    // 'Import legend',
             //     name: 'importlegend',
-            //     iconCls: 'fa fa-upload fa-2x',
+            //     iconCls: 'far fa-upload',
             //     style: {color: 'blue'},
             //     hidden: false,
             //     // glyph: 'xf055@FontAwesome',
@@ -245,9 +245,9 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
                     disabled: false,
                     getClass: function (v, meta, rec) {
                         if (rec.get('defined_by')!='JRC' || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){   // JRC user has userlevel 1 and can always edit legends.
-                            return 'edit';
+                            return 'far fa-edit';
                         }
-                        else return 'vieweye';
+                        else return 'far fa-eye';
                     },
                     getTip: function (v, meta, rec) {
                         if (rec.get('defined_by')!='JRC' || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){   // JRC user has userlevel 1 and can always edit legends.
@@ -328,7 +328,7 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
                     disabled: false,
                     getClass: function (v, meta, rec) {
                         if (rec.get('defined_by') != 'JRC' || (climatestation.Utils.objectExists(user) && user.userlevel == 1)) {
-                            return 'delete';
+                            return 'far fa-trash-alt red';
                         }
                     },
                     getTip: function (v, meta, rec) {

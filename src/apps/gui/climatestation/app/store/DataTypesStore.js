@@ -10,7 +10,7 @@ Ext.define('climatestation.store.DataTypesStore', {
 
     storeId : 'datatypes'
 
-    ,autoLoad: true
+    ,autoLoad: false
 
     ,proxy: {
         type : 'ajax',

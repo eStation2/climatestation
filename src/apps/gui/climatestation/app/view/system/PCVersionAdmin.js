@@ -29,7 +29,7 @@ Ext.define("climatestation.view.system.PCVersionAdmin",{
     border:true,
     frame:true,
     bodyStyle: 'padding:5px 5px 0',
-    autoScroll: true,
+    scrollable: true,
 
     store: 'versions',
 
@@ -47,7 +47,7 @@ Ext.define("climatestation.view.system.PCVersionAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('save'),    // 'Save',
                 id: 'changeversionbtn',
-                iconCls: 'fa fa-save fa-2x',
+                iconCls: 'far fa-save',
                 style: { color: 'lightblue' },
                 scale: 'medium',
                 disabled: true,

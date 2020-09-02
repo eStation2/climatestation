@@ -40,7 +40,7 @@ Ext.define("climatestation.view.analysis.mapTemplateAdmin",{
     maximizable: false,
     collapsible: false,
     resizable: false,
-    autoScroll: true,
+    scrollable: true,
     //height: Ext.getBody().getViewSize().height < 400 ? Ext.getBody().getViewSize().height-10 : 400,
     //autoWidth: false,
     //autoHeight: false,
@@ -149,7 +149,7 @@ Ext.define("climatestation.view.analysis.mapTemplateAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('openselected'),    // 'Open selected',
                 name: 'addlayer',
-                iconCls: 'fa fa-folder-open-o fa-2x',
+                iconCls: 'far fa-folder-open-o',
                 style: {color: 'green'},
                 hidden: false,
                 // glyph: 'xf055@FontAwesome',
@@ -186,9 +186,9 @@ Ext.define("climatestation.view.analysis.mapTemplateAdmin",{
                 width:'45',
                 disabled: false,
                 getClass: function(v, meta, rec) {
-                    return 'delete';
+                    return 'far fa-trash-alt red';
                     //if (rec.get('deletable')){
-                    //    return 'delete';
+                    //    return 'far fa-trash-alt red';
                     //}
                 },
                 getTip: function(v, meta, rec) {

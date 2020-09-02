@@ -35,7 +35,7 @@ Ext.define("climatestation.view.widgets.Register",{
         align: 'center',
         pack: 'center'
     },
-    height: 350,
+    height: 375,
     width: 425,
 
     initComponent: function () {
@@ -71,7 +71,7 @@ Ext.define("climatestation.view.widgets.Register",{
                 disabled: true,
                 formBind: true,
                 iconAlign: 'left',
-                iconCls: 'fa fa-user-plus fa-lg',
+                iconCls: 'far fa-user-plus fa-lg',
                 style: { color: 'black' },
                 // glyph: 'xf0c7@FontAwesome',
                 scale: 'medium',

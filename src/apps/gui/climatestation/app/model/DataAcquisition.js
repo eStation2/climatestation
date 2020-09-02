@@ -12,6 +12,7 @@ Ext.define('climatestation.model.DataAcquisition', {
        {name: 'data_source_id'},
        {name: 'defined_by'},
        {name: 'type'},
+       {name: 'descriptive_name'},
        {name: 'activated', type: 'boolean'},
        {name: 'store_original_data', type: 'boolean'},
        {name: 'latest'},

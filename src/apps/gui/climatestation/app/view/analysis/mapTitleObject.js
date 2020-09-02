@@ -185,7 +185,7 @@ Ext.define("climatestation.view.analysis.mapTitleObject",{
             tooltip: climatestation.Utils.getTranslation('add_dynamic_field'), // 'Add a dynamic field',
             overflowText: climatestation.Utils.getTranslation('add_dynamic_field'), // 'Add a dynamic field',
             hidden: false,
-            iconCls: 'fa fa-code',
+            iconCls: 'far fa-code',
             floating: false,  // usually you want this set to True (default)
             enableToggle: false,
             arrowVisible: false,

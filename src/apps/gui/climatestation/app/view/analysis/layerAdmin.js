@@ -28,7 +28,7 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
     maximizable: false,
     resizable: true,
     //resizeHandles: 'n,s',
-    autoScroll: false,
+    scrollable: false,
     height: Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-130 : 700,  // 600,
     minHeight: 500,
     maxHeight: 700,
@@ -70,7 +70,7 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('addlayer'),    // 'Add layer',
                 name: 'addlayer',
-                iconCls: 'fa fa-plus-circle fa-2x',
+                iconCls: 'far fa-plus-circle',
                 style: {color: 'green'},
                 hidden: false,
                 // glyph: 'xf055@FontAwesome',
@@ -147,9 +147,9 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
                     disabled: false,
                     getClass: function (v, meta, rec) {
                         if (rec.get('defined_by') != 'JRC' || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                            return 'edit';
+                            return 'far fa-edit';
                         }
-                        else return 'vieweye';
+                        else return 'far fa-eye';
                     },
                     getTip: function (v, meta, rec) {
                         return climatestation.Utils.getTranslation('editlayerproperties') + ' ' + rec.get('layername');
@@ -161,7 +161,7 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
                     disabled: false,
                     getClass: function(v, meta, rec) {
                         if (rec.get('deletable') || rec.get('defined_by') != 'JRC' || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                            return 'delete';
+                            return 'far fa-trash-alt red';
                         }
                     },
                     getTip: function(v, meta, rec) {
@@ -274,9 +274,9 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
                     style: {"line-height": "70px"},
                     getClass: function(v, meta, rec) {
                         if (rec.get('enabled')) {
-                            return 'activated';
+                            return 'far fa-check-square green';   // 'activated';
                         } else {
-                            return 'deactivated';
+                            return 'far fa-square green';   // 'deactivated';
                         }
                     },
                     getTip: function(v, meta, rec) {
@@ -312,9 +312,9 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
                     style: {"line-height": "70px"},
                     getClass: function(v, meta, rec) {
                         if (rec.get('open_in_mapview')) {
-                            return 'activated';
+                            return 'far fa-check-square green';   // 'activated';
                         } else {
-                            return 'deactivated';
+                            return 'far fa-square green';   // 'deactivated';
                         }
                     },
                     getTip: function(v, meta, rec) {

@@ -12,46 +12,62 @@ Ext.define('climatestation.view.acquisition.AcquisitionController', {
 
 
     checkStatusServices: function(){
-        var me = this;
+        var me = this.getView();
 
         // AJAX call to check the status of all 3 services
         Ext.Ajax.request({
             method: 'POST',
             url: 'services/checkstatusall',
             success: function(response, opts){
-                var services = Ext.JSON.decode(response.responseText);
+                let services = Ext.JSON.decode(response.responseText);
+                let eumetcastbtn = me.down('button[name=eumetcastbtn]');
+                let internetbtn = me.down('button[name=internetbtn]');
+                let ingestbtn = me.down('button[name=ingestbtn]');
+
                 if (services.eumetcast){
-                    me.getView().down('button[name=eumetcastbtn]').setStyle('color','green');
-                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=runeumetcast]').setDisabled(true);
-                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=stopeumetcast]').setDisabled(false);
-                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=restarteumetcast]').setDisabled(false);
+                    // eumetcastbtn.setStyle('color','green');
+                    eumetcastbtn.setIconCls('green');
+                    eumetcastbtn.setGlyph("xf013@'Font Awesome 5 Free'");
+                    eumetcastbtn.down('menuitem[name=runeumetcast]').setDisabled(true);
+                    eumetcastbtn.down('menuitem[name=stopeumetcast]').setDisabled(false);
+                    eumetcastbtn.down('menuitem[name=restarteumetcast]').setDisabled(false);
                 } else {
-                    me.getView().down('button[name=eumetcastbtn]').setStyle('color','red');
-                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=runeumetcast]').setDisabled(false);
-                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=stopeumetcast]').setDisabled(true);
-                    me.getView().down('button[name=eumetcastbtn]').down('menuitem[name=restarteumetcast]').setDisabled(true);
+                    // eumetcastbtn.setStyle('color','red');
+                    eumetcastbtn.setIconCls('red');
+                    eumetcastbtn.setGlyph("xf013@'Font Awesome 5 Free'");
+                    eumetcastbtn.down('menuitem[name=runeumetcast]').setDisabled(false);
+                    eumetcastbtn.down('menuitem[name=stopeumetcast]').setDisabled(true);
+                    eumetcastbtn.down('menuitem[name=restarteumetcast]').setDisabled(true);
                 }
                 if (services.internet){
-                    me.getView().down('button[name=internetbtn]').setStyle('color','green');
-                    me.getView().down('button[name=internetbtn]').down('menuitem[name=runinternet]').setDisabled(true);
-                    me.getView().down('button[name=internetbtn]').down('menuitem[name=stopinternet]').setDisabled(false);
-                    me.getView().down('button[name=internetbtn]').down('menuitem[name=restartinternet]').setDisabled(false);
+                    // internetbtn.setStyle('color','green');
+                    internetbtn.setIconCls('green');
+                    internetbtn.setGlyph("xf013@'Font Awesome 5 Free'");
+                    internetbtn.down('menuitem[name=runinternet]').setDisabled(true);
+                    internetbtn.down('menuitem[name=stopinternet]').setDisabled(false);
+                    internetbtn.down('menuitem[name=restartinternet]').setDisabled(false);
                 } else {
-                    me.getView().down('button[name=internetbtn]').setStyle('color','red');
-                    me.getView().down('button[name=internetbtn]').down('menuitem[name=runinternet]').setDisabled(false);
-                    me.getView().down('button[name=internetbtn]').down('menuitem[name=stopinternet]').setDisabled(true);
-                    me.getView().down('button[name=internetbtn]').down('menuitem[name=restartinternet]').setDisabled(true);
+                    // internetbtn.setStyle('color','red');
+                    internetbtn.setIconCls('red');
+                    internetbtn.setGlyph("xf013@'Font Awesome 5 Free'");
+                    internetbtn.down('menuitem[name=runinternet]').setDisabled(false);
+                    internetbtn.down('menuitem[name=stopinternet]').setDisabled(true);
+                    internetbtn.down('menuitem[name=restartinternet]').setDisabled(true);
                 }
                 if (services.ingest){
-                    me.getView().down('button[name=ingestbtn]').setStyle('color','green');
-                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=runingest]').setDisabled(true);
-                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(false);
-                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(false);
+                    // ingestbtn.setStyle('color','green');
+                    ingestbtn.setIconCls('green');
+                    ingestbtn.setGlyph("xf013@'Font Awesome 5 Free'");
+                    ingestbtn.down('menuitem[name=runingest]').setDisabled(true);
+                    ingestbtn.down('menuitem[name=stopingest]').setDisabled(false);
+                    ingestbtn.down('menuitem[name=restartingest]').setDisabled(false);
                 } else {
-                    me.getView().down('button[name=ingestbtn]').setStyle('color','red');
-                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=runingest]').setDisabled(false);
-                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=stopingest]').setDisabled(true);
-                    me.getView().down('button[name=ingestbtn]').down('menuitem[name=restartingest]').setDisabled(true);
+                    // ingestbtn.setStyle('color','red');
+                    ingestbtn.setIconCls('red');
+                    ingestbtn.setGlyph("xf013@'Font Awesome 5 Free'");
+                    ingestbtn.down('menuitem[name=runingest]').setDisabled(false);
+                    ingestbtn.down('menuitem[name=stopingest]').setDisabled(true);
+                    ingestbtn.down('menuitem[name=restartingest]').setDisabled(true);
                 }
                 var ingestarchives_chkbox = Ext.getCmp('ingest_archives_from_eumetcast');
                 //console.info(ingestarchives_chkbox);
@@ -92,11 +108,11 @@ Ext.define('climatestation.view.acquisition.AcquisitionController', {
     }
 
 
-    ,selectProduct: function(btn, event) {
-        var selectProductWin = new climatestation.view.acquisition.product.selectProduct();
-        // selectProductWin.down('grid').getStore().load();
-        selectProductWin.show();
-    }
+    // ,selectProduct: function(btn, event) {
+    //     var selectProductWin = new climatestation.view.acquisition.product.selectProduct();
+    //     // selectProductWin.down('grid').getStore().load();
+    //     selectProductWin.show();
+    // }
 
     ,openProductAdmin: function(btn, event) {
         var ProductAdminWin = new climatestation.view.acquisition.product.ProductAdmin();

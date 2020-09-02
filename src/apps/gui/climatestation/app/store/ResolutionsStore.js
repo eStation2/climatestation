@@ -10,7 +10,7 @@ Ext.define('climatestation.store.ResolutionsStore', {
 
     storeId : 'ResolutionsStore'
 
-    ,autoLoad: true
+    ,autoLoad: false
 
     ,proxy: {
         type : 'ajax',

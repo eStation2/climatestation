@@ -33,20 +33,21 @@ Ext.define("climatestation.view.datamanagement.requestsAdmin",{
     maximizable: false,
     collapsible: false,
     resizable: false,
-    autoScroll: true,
+    scrollable: true,
     layout: 'fit',
     height: 300,
     width: 785,
 
-    border:false,
+    border: false,
     frame: false,
     bodyBorder: true,
     defaultAlign: 'tl-bc',
+
     bind: '{requests}',
 
     selModel : {
-        allowDeselect : true,
-        mode:'MULTI'
+        // allowDeselect : true,
+        // mode:'MULTI'
     },
 
     hideHeaders: false,
@@ -56,7 +57,7 @@ Ext.define("climatestation.view.datamanagement.requestsAdmin",{
     multiColumnSort: false,
     columnLines: true,
     rowLines: true,
-    cls: 'newpanelstyle',
+    // cls: 'newpanelstyle',
 
     config: {
         forceStoreLoad: false,
@@ -127,12 +128,12 @@ Ext.define("climatestation.view.datamanagement.requestsAdmin",{
                 me.fireEvent('loadstore');
                 me.focus(true);
             }
-            ,focusleave: function(){
-                if (Ext.isObject(me.myMask)) {
-                    me.myMask.hide();
-                }
-                me.hide();
-            }
+            // ,focusleave: function(){
+            //     if (Ext.isObject(me.myMask)) {
+            //         me.myMask.hide();
+            //     }
+            //     me.hide();
+            // }
         };
 
         me.tools = [
@@ -152,7 +153,7 @@ Ext.define("climatestation.view.datamanagement.requestsAdmin",{
         //         xtype: 'button',
         //         text: climatestation.Utils.getTranslation('openselected'),    // 'Open selected',
         //         name: 'addlayer',
-        //         iconCls: 'fa fa-folder-open-o fa-2x',
+        //         iconCls: 'far fa-folder-open-o',
         //         style: {color: 'green'},
         //         hidden: false,
         //         // glyph: 'xf055@FontAwesome',
@@ -189,21 +190,21 @@ Ext.define("climatestation.view.datamanagement.requestsAdmin",{
                 disabled: false,
                 getClass: function(v, meta, rec) {
                     if (rec.get('status').toLowerCase()=='running'){
-                        // return 'fa fa-pause-circle-o fa-2x green';
-                        return 'pause'
+                        return 'far fa-pause-circle orange';
+                        // return 'pause'
                     }
                     else if (rec.get('status').toLowerCase()=='paused'){
-                        // return 'fa fa-play-circle-o fa-2x orange';
-                        return 'play'
+                        return 'far fa-play-circle green';
+                        // return 'play'
                     }
                     else if (rec.get('status').toLowerCase()=='finished'){
-                        // return 'fa fa-play-circle-o fa-2x orange';
-                        return 'finished'
+                        return 'far fa-check-circle green';
+                        // return 'finished'
                     }
                     else {
-                        // return 'fa fa-exclamation-circle fa-2x red';
                         // There is an error in the request job, give the user the possibility to restart the job
-                        return 'playred'     // 'exclamation'
+                        return 'far fa-play-circle red';
+                        // return 'playred'     // 'exclamation'
                     }
                 },
                 getTip: function(v, meta, rec) {
@@ -313,9 +314,9 @@ Ext.define("climatestation.view.datamanagement.requestsAdmin",{
                 width:'45',
                 disabled: false,
                 getClass: function(v, meta, rec) {
-                    return 'delete';
+                    return 'far fa-trash-alt red';
                     // if (rec.get('status').toLowerCase()!='running' && rec.get('status').toLowerCase()!='paused'){
-                    //    return 'delete';
+                    //    return 'far fa-trash-alt red';
                     // }
                 },
                 getTip: function(v, meta, rec) {

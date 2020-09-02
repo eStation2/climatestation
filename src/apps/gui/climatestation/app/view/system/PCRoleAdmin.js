@@ -29,7 +29,7 @@ Ext.define("climatestation.view.system.PCRoleAdmin",{
     border:true,
     frame:true,
     bodyStyle: 'padding:5px 5px 0',
-    autoScroll: true,
+    scrollable: true,
 
     params: {
        currentrole: null
@@ -50,7 +50,7 @@ Ext.define("climatestation.view.system.PCRoleAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('save'),    // 'Save',
                 id: 'changerolebtn',
-                iconCls: 'fa fa-save fa-2x',
+                iconCls: 'far fa-save',
                 style: { color: 'lightblue' },
                 scale: 'medium',
                 disabled: false,

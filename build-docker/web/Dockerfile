@@ -1,9 +1,15 @@
-#FROM ubuntu:18.04 AS ubuntu
+# FROM ubuntu:18.04 AS ubuntu
+# FROM python:3.8-slim-buster
 FROM continuumio/miniconda3
 
 USER root
+# Security: Don't run as root!!!
+# RUN useradd --create-home adminuser
+# USER adminuser
 
-#Setup user
+# TODO: Like COPY, use ARG as late as possible!
+
+# Setup user
 ARG UID
 ARG GID
 
@@ -57,12 +63,14 @@ RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin
 RUN apt-get update && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi-py3
 
 # Install all needed Python packages, listed in the file requirements.txt
-ADD requirements.txt /etc/apache2/sites-available/requirements.txt
-RUN pip install --upgrade pip
 # Some packages depend on setuptools to be installed. the reqiurements.txt does not preserve
 # the order of install so install setuptools before the requirements.txt
+# By default pip keeps copies of the downloaded package, in case you reinstall later.
+# This wastes space, and you won't need it. Use the --no-cache-dir flag!
+ADD requirements.txt /etc/apache2/sites-available/requirements.txt
+RUN pip install --upgrade pip
 RUN pip install setuptools
-RUN pip install -r /etc/apache2/sites-available/requirements.txt
+RUN pip install --no-cache-dir -r /etc/apache2/sites-available/requirements.txt
 RUN pip install --upgrade numpy
 
 # Install and hook mod_wsgi to apache2
@@ -102,6 +110,13 @@ RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
 RUN a2enmod headers rewrite proxy wsgi
 RUN service apache2 restart
 WORKDIR /var/www/climatestation
+
+# Pre-compile bytecode for faster startup.
+# Compile installed code:
+# RUN python -c "import compileall; compileall.compile_path(maxlevels=10)"
+# Compile code in a directory:
+# RUN python -m compileall yourpackage/
+
 
 # https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact
 #ENTRYPOINT ["apache2ctl", "-D", "FOREGROUND"]

@@ -62,6 +62,7 @@ Ext.define('climatestation.store.UserWorkspacesStore', {
             // console.info(index);
             // console.info(isMove);
             // var result = Ext.JSON.decode(operation.getResponse().responseText);
+            // var result = operation.getResponse().responseJson;
             // if (operation.success) {
             //     Ext.toast({html: operation.getRecords()[0].get('workspacename') + ' ' + climatestation.Utils.getTranslation('deleted'), title: climatestation.Utils.getTranslation('workspace_deleted'), width: 300, align: 't'});   // "Workspace deleted"
             // }
@@ -74,6 +75,7 @@ Ext.define('climatestation.store.UserWorkspacesStore', {
             // console.info(details);
             // This event is triggered on every change made in a record!
             // var result = Ext.JSON.decode(operation.getResponse().responseText);
+            // var result = operation.getResponse().responseJson;
             // if (operation.success) {
             //     Ext.toast({html: operation.getRecords()[0].get('workspacename') + ' ' + climatestation.Utils.getTranslation('updated'), title: climatestation.Utils.getTranslation('workspace_updated'), width: 300, align: 't'});   // "Workspace updated"
             // }

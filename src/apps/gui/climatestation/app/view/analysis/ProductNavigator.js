@@ -493,7 +493,7 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
                         xtype: 'button',
                         text: climatestation.Utils.getTranslation('assign_legend'),    // 'Assign legend to product',
                         name: 'assign_legend',
-                        iconCls: 'fa fa-plus-circle fa-1x',
+                        iconCls: 'far fa-plus-circle fa-1x',
                         style: {color: 'green'},
                         hidden: climatestation.globals['typeinstallation'].toLowerCase() == 'jrc_online',
                         handler: 'assignLegend'
@@ -577,7 +577,7 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
                 //         width:'35',
                 //         disabled: false,
                 //         getClass: function (v, meta, rec) {
-                //             return 'edit';
+                //             return 'far fa-edit';
                 //         },
                 //         getTip: function (v, meta, rec) {
                 //             return climatestation.Utils.getTranslation('editlegendproperties') + ' ' + rec.get('legend_descriptive_name');

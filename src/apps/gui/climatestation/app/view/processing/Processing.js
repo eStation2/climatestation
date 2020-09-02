@@ -44,6 +44,7 @@ Ext.define("climatestation.view.processing.Processing",{
 
     //selModel: {listeners:{}},
 
+    titleAlign: 'center',
     collapsible: false,
     enableColumnMove:false,
     enableColumnResize:false,
@@ -63,26 +64,43 @@ Ext.define("climatestation.view.processing.Processing",{
         groupByText: climatestation.Utils.getTranslation('productcategories')  // 'Product category'
     }],
 
-    //listeners: {
-        //beforecellclick: function(view, td, cellIndex) {
-        //    console.info('hallo cell: ' + cellIndex);
-        //    if (cellIndex > 0) return false;    // check the cellIndex for whatever columns you need.
-        //}
-        //cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
-        //    //e.stopPropagation();
-        //    //console.info('cellclick');
-        //    return false;
-        //}
-    //},
+    config: {
+        forceStoreLoad: false
+    },
+
+    // listeners: {
+    //     afterrender: function(){
+    //         this.controller.loadstore();
+    //     },
+    //     beforecellclick: function(view, td, cellIndex) {
+    //        console.info('hallo cell: ' + cellIndex);
+    //        if (cellIndex > 0) return false;    // check the cellIndex for whatever columns you need.
+    //     }
+    //     cellclick : function(view, cell, cellIndex, record, row, rowIndex, e) {
+    //        //e.stopPropagation();
+    //        //console.info('cellclick');
+    //        return false;
+    //     }
+    // },
 
     initComponent: function () {
         var me = this;
 
+        // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('processing') + '</span>');
+
+        // me.mon(me, {
+        //     loadstore: function() {
+        //         Ext.data.StoreManager.lookup('LayersStore').load();
+        //     }
+        // });
+
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
                 tooltip: climatestation.Utils.getTranslation('expandall'),    // 'Expand All',
-                iconCls: 'expand',
+                iconCls: 'far fa-blinds-open',
                 scale: 'medium',
+                margin: 5,
+                padding: 5,
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('processprodcat').expandAll();
@@ -90,8 +108,10 @@ Ext.define("climatestation.view.processing.Processing",{
                 }
             }, {
                 tooltip: climatestation.Utils.getTranslation('collapseall'),    // 'Collapse All',
-                iconCls: 'collapse',
+                iconCls: 'far fa-blinds-raised',
                 scale: 'medium',
+                margin: 5,
+                padding: 5,
                 handler: function(btn) {
                     var view = btn.up().up().getView();
                     view.getFeature('processprodcat').collapseAll();
@@ -110,17 +130,13 @@ Ext.define("climatestation.view.processing.Processing",{
             '->',
             {
                 xtype: 'button',
-                iconCls: 'fa fa-refresh fa-2x',
+                iconCls: 'far fa-redo-alt',
                 style: { color: 'gray' },
                 enableToggle: false,
                 scale: 'medium',
                 handler:  function(btn) {
-                    var processingstore  = Ext.data.StoreManager.lookup('ProcessingStore');
-
-                    if (processingstore.isStore) {
-                        processingstore.proxy.extraParams = {force: true};
-                        processingstore.load();
-                    }
+                    me.forceStoreLoad = true;
+                    me.controller.loadstore();
                 }
             }]
         });
@@ -150,20 +166,20 @@ Ext.define("climatestation.view.processing.Processing",{
             },
             columns: [{
                 xtype: 'widgetcolumn',
-                width: 625,
+                width: 475,
                 bodyPadding: 0,
 
-                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 260px; left: 0px;" tabindex="-1">' +
+                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('product') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 150px; right: auto; left: 260px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 100px; right: auto; left: 200px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('subproduct') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 200px;  left: 410px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 160px;  left: 300px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('mapset') + '</span>' +
                 //'               <span data-ref="textEl" class="x-column-header-text"' + climatestation.Utils.getTranslation('mapset') + '></span>' +
@@ -212,12 +228,12 @@ Ext.define("climatestation.view.processing.Processing",{
             },
             columns: [{
                 header: climatestation.Utils.getTranslation('type'),    // 'Type',
-                width: 150,
+                width: 140,
                 dataIndex: 'algorithm',
                 cellWrap:true
             },{
                 header: climatestation.Utils.getTranslation('options'),    // 'Options',
-                width: 150,
+                width: 140,
                 dataIndex: 'derivation_method',
                 cellWrap:true
             },{
@@ -233,9 +249,9 @@ Ext.define("climatestation.view.processing.Processing",{
                     // handler: me.onToggleActivation
                     getClass: function(v, meta, rec) {
                         if (rec.get('process_activated')) {
-                            return 'activated';
+                            return 'far fa-check-square green';   // 'activated';
                         } else {
-                            return 'deactivated';
+                            return 'far fa-square green';   // 'deactivated';
                         }
                     },
                     getTip: function(v, meta, rec) {
@@ -256,7 +272,7 @@ Ext.define("climatestation.view.processing.Processing",{
                 xtype: 'actioncolumn',
                 text: climatestation.Utils.getTranslation('log'),    // 'Log',
                 id: 'processinglogcolumn',
-                width: 75,
+                width: 45,
                 height:40,
                 menuDisabled: true,
                 align:'center',
@@ -295,7 +311,7 @@ Ext.define("climatestation.view.processing.Processing",{
             }
             ,columns: [{
                 xtype: 'widgetcolumn',
-                width: 600,
+                width: 510,
                 bodyPadding:0,
 
                 header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 0px;" tabindex="-1">' +
@@ -303,12 +319,12 @@ Ext.define("climatestation.view.processing.Processing",{
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('subproductname') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 200px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 150px; right: auto; left: 200px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('mapset') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 400px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 160px; right: auto; left: 350px; margin: 0px; top: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + climatestation.Utils.getTranslation('subproductcode') + '</span>' +
                 '           </div>' +

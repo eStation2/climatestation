@@ -65,12 +65,16 @@ Ext.define('climatestation.view.analysis.mapTemplateAdminModel', {
                     //console.info('record updated!');
                 },
                 write: function(store, operation){
-                    var result = Ext.JSON.decode(operation.getResponse().responseText);
-                    //console.info('Write');
-                    //console.info(store);
-                    //console.info(operation.getRecords()[0]);
+                    // var result = Ext.JSON.decode(operation.getResponse().responseText);
+                    // var result = operation.getResponse().responseJson;
+
                     if (operation.success) {
-                        Ext.toast({html: operation.getRecords()[0].get('templatename') + ' ' + climatestation.Utils.getTranslation('deleted'), title: climatestation.Utils.getTranslation('map_tpl_deleted'), width: 300, align: 't'});   // "Map template deleted"
+                        Ext.toast({
+                            html: operation.getRecords()[0].get('templatename') + ' ' + climatestation.Utils.getTranslation('deleted'),
+                            title: climatestation.Utils.getTranslation('map_tpl_deleted'),
+                            width: 300,
+                            align: 't'
+                        });   // "Map template deleted"
                     }
                 }
             }

@@ -9,17 +9,8 @@ Ext.define('climatestation.view.dashboard.DashboardController', {
         'climatestation.view.dashboard.PC2'
     ],
 
-    //selectProduct: function(btn, event) {
-    //    var selectProductWin = new climatestation.view.acquisition.product.selectProduct();
-    //    selectProductWin.down('grid').getStore().load();
-    //    selectProductWin.show();
-    //},
-
     setupDashboard: function(reload) {
         var me = this.getView();
-
-        var pcs_container = Ext.getCmp('pcs_container');
-        var dashboard_panel = Ext.getCmp('dashboard-panel');
         var myMask = null;
 
         var PC1 = {},
@@ -40,7 +31,7 @@ Ext.define('climatestation.view.dashboard.DashboardController', {
         if (reload){
             myMask = new Ext.LoadMask({
                 msg    : climatestation.Utils.getTranslation('loading'),
-                target : dashboard_panel
+                target : me
             });
 
             myMask.show();
@@ -49,7 +40,7 @@ Ext.define('climatestation.view.dashboard.DashboardController', {
         this.getStore('dashboard').load({
             callback: function(records, options, success){
 
-                pcs_container.removeAll();
+                me.pcs_container.removeAll();
 
                 records.forEach(function(dashboard) {
                     me.PC2_service_eumetcast = dashboard.get('PC2_service_eumetcast');
@@ -89,7 +80,8 @@ Ext.define('climatestation.view.dashboard.DashboardController', {
                 });
 
                 if (me.type_installation === 'full'){
-                    me.setTitle('<span class="dashboard-header-title-style">' + climatestation.Utils.getTranslation('mesa_full_estation') + '</span>');  // 'MESA Full eStation',
+                    // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('mesa_full_estation') + '</span>');  // 'MESA Full eStation',
+                    me.lookupReference('dashboardtitle').setText('<span class="dashboard-header-title-style">' + climatestation.Utils.getTranslation('mesa_full_estation') + '</span>');  // 'MESA Full eStation',
 
                     // var acquisitiontab = Ext.getCmp('acquisitionmaintab');
                     // var processingtab = Ext.getCmp('processingmaintab');
@@ -261,30 +253,31 @@ Ext.define('climatestation.view.dashboard.DashboardController', {
                     };
 
                     if (me.activePC === 'pc1') {
-                        pcs_container.add(PC2);
-                        pcs_container.add(PC1_connection);
-                        pcs_container.add(PC1);
-                        pcs_container.add(PC23_connection);
-                        pcs_container.add(PC3);
+                        me.pcs_container.add(PC2);
+                        me.pcs_container.add(PC1_connection);
+                        me.pcs_container.add(PC1);
+                        me.pcs_container.add(PC23_connection);
+                        me.pcs_container.add(PC3);
                     }
                     else if (me.activePC === 'pc2') {
-                        pcs_container.add(PC1);
-                        pcs_container.add(PC1_connection);
-                        pcs_container.add(PC2);
-                        pcs_container.add(PC23_connection);
-                        pcs_container.add(PC3);
+                        me.pcs_container.add(PC1);
+                        me.pcs_container.add(PC1_connection);
+                        me.pcs_container.add(PC2);
+                        me.pcs_container.add(PC23_connection);
+                        me.pcs_container.add(PC3);
                     }
                     else if (me.activePC === 'pc3') {
-                        pcs_container.add(PC1);
-                        pcs_container.add(PC1_connection);
-                        pcs_container.add(PC3);
-                        pcs_container.add(PC23_connection);
-                        pcs_container.add(PC2);
+                        me.pcs_container.add(PC1);
+                        me.pcs_container.add(PC1_connection);
+                        me.pcs_container.add(PC3);
+                        me.pcs_container.add(PC23_connection);
+                        me.pcs_container.add(PC2);
                     }
 
                 }
                 else {
-                    me.setTitle('<span class="dashboard-header-title-style">' + climatestation.Utils.getTranslation('mesa_light_estation') + '</span>');  // 'MESA Light eStation',
+                    // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('mesa_light_estation') + '</span>');  // 'MESA Light eStation',
+                    me.lookupReference('dashboardtitle').setText('<span class="dashboard-header-title-style">' + climatestation.Utils.getTranslation('mesa_light_estation') + '</span>');  // 'MESA Light eStation',
 
                     if (me.activePC === 'pc1') pc1Active = true;
                     if (me.activePC === 'pc2') pc2Active = true;
@@ -331,14 +324,13 @@ Ext.define('climatestation.view.dashboard.DashboardController', {
                         direction: 'right'
                     };
 
-                    pcs_container.add(PC1);
-                    pcs_container.add(PC1_connection);
-                    pcs_container.add(PC2);
+                    me.pcs_container.add(PC1);
+                    me.pcs_container.add(PC1_connection);
+                    me.pcs_container.add(PC2);
                 }
                 if (reload){
                      myMask.hide();
                 }
-
             }
         });
     }

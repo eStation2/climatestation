@@ -11,7 +11,7 @@ Ext.define('climatestation.store.LayersStore', {
 
     storeId : 'LayersStore'
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: true
     // ,session: true
 
@@ -49,9 +49,14 @@ Ext.define('climatestation.store.LayersStore', {
         //    // This event is triggered on every change made in a record!
         //},
         write: function(store, operation){
-            var result = Ext.JSON.decode(operation.getResponse().responseText);
+            // var result = Ext.JSON.decode(operation.getResponse().responseText);
+            var result = operation.getResponse().responseJson;
             if (operation.success) {
-               //Ext.toast({ html: result.message, title: climatestation.Utils.getTranslation('layerupdated'), width: 200, align: 't' });
+               Ext.toast({
+                   html: result.message,
+                   title: climatestation.Utils.getTranslation('layerupdated'),
+                   width: 300, align: 't'
+               });
             }
         }
     }

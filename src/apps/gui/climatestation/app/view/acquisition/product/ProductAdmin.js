@@ -33,55 +33,63 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
     modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
-    resizable: false,
+    resizable: true,
+    resizeHandles: 'n,s',
     scrollable: 'y',    // vertical scrolling only
     maximizable: false,
 
     // minWidth: 700,
-    width: 790,
-    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
-    maxHeight: 800,
+    width: 700,
+    height: Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-10 : 650,  // 600,
+    maxHeight: Ext.getBody().getViewSize().height,
 
     // layout: {
     //     type  : 'fit'
     // },
 
     config: {
-        changesmade:false
+        changesmade: false,
+        forceStoreLoad: false
     },
 
     initComponent: function () {
         var me = this;
         var user = climatestation.getUser();
 
-        me.setTitle('<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('productadministration') + '</div>');
+        // me.setTitle('<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('productadministration') + '</div>');
+        me.setTitle('<div class="">' + climatestation.Utils.getTranslation('productadministration') + '</div>');
 
         if ((climatestation.Utils.objectExists(user) && user.userlevel == 1)) {
-           me.width = 790;
+           me.width = 700;
         }
         else {
-           me.width = 700;
+           me.width = 610;
         }
 
         me.listeners = {
             close: me.onClose,
-            beforerender: function(){
-                Ext.data.StoreManager.lookup('IngestSubProductsStore').load();
+            afterrender: function(){
+                me.controller.loadProductsStore();
+                // Ext.data.StoreManager.lookup('IngestSubProductsStore').load();
                 // console.info(Ext.data.StoreManager.lookup('IngestSubProductsStore'));
             }
         };
 
         me.tbar = {
-            items: [
-            {
-               text: climatestation.Utils.getTranslation('newproduct'),  // 'New product',
-               name: 'newproduct',
-               iconCls: 'fa fa-plus-circle fa-2x',
-               style: {color: 'green'},
-               hidden: false,
-               scale: 'medium',
-               handler: function () {
-
+            padding: 0,
+            margin: 0,
+            defaults: {
+                margin: 5,
+                padding: 5,
+            },
+            items: [{
+                text: climatestation.Utils.getTranslation('newproduct'),  // 'New product',
+                name: 'newproduct',
+                iconCls: 'far fa-plus-circle',
+                // style: {color: 'green'},
+                hidden: false,
+                scale: 'medium',
+                handler: function () {
                    var newProductWin = new climatestation.view.acquisition.product.editProduct({
                        params: {
                            new: true,
@@ -90,12 +98,11 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
                        }
                    });
                    newProductWin.show();
-               }
-            },
-            '->',{
+                }
+            }, {
                text: climatestation.Utils.getTranslation('eumetcastsources'),  // 'EUMETCAST Sources',
                name: 'eumetcastsources',
-               iconCls: 'eumetsat-icon',        // 'fa fa-plus-circle fa-2x',
+               iconCls: 'eumetsat-icon',
                // style: {color: 'green'},
                hidden: false,
                scale: 'medium',
@@ -110,11 +117,10 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
 
                     EumetcastSourceAdminWin.show();
                }
-            },
-            {
+            }, {
                text: climatestation.Utils.getTranslation('internetsources'),  // 'INTERNET Sources',
                name: 'internetsources',
-               iconCls: 'internet-icon',    // 'fa fa-plus-circle fa-2x',
+               iconCls: 'far fa-globe',  // 'internet-icon',    //
                // style: {color: 'green'},
                hidden: false,
                scale: 'medium',
@@ -129,12 +135,11 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
 
                     InternetSourceAdminWin.show();
                }
-            },
-            {
+            }, {
                text: climatestation.Utils.getTranslation('mapsets'),  // 'Mapsets',
                name: 'mapsetsadmin',
-               iconCls: 'mapset-icon',    // 'fa fa-plus-circle fa-2x',
-               style: {color: 'green'},
+               iconCls: 'mapset-icon',
+               // style: {color: 'green'},
                hidden: false,
                scale: 'medium',
                handler: function () {
@@ -146,21 +151,23 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
                     });
                     selectMapsetForIngestWin.show();
                }
-            },
-                '->', {
+            }, '->', {
                 xtype: 'button',
-                iconCls: 'fa fa-refresh fa-2x',
+                iconCls: 'far fa-redo-alt',
                 style: { color: 'gray' },
                 enableToggle: false,
                 scale: 'medium',
-                handler: 'reloadProductsStore'
+                handler: function(){
+                    me.forceStoreLoad = true;
+                    me.controller.loadProductsStore();
+                }
             }]
         };
 
         // me.bbar = {
         //     items: ['->', {
         //         text: climatestation.Utils.getTranslation('close'),  // 'Close',
-        //         iconCls: 'fa fa-times fa-2x',
+        //         iconCls: 'far fa-times',
         //         style: { color: 'green' },
         //         hidden: false,
         //         scale: 'medium',
@@ -204,7 +211,7 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
                 groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
                 hideGroupedHeader: true,
                 enableGroupingMenu: false,
-                startCollapsed : false,
+                startCollapsed : true,
                 groupByText: climatestation.Utils.getTranslation('productcategories')  // 'Product categories'
             }],
 
@@ -264,11 +271,11 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
                        getClass: function (v, meta, rec) {
                            // return 'editproduct';
                            if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel <= 1)) {
-                               return 'editproduct';
+                               return 'far fa-edit';
                            }
                            else {
                                // return 'x-hide-display';
-                               return 'vieweye';
+                               return 'far fa-eye';
                            }
                        },
                        getTip: function (v, meta, rec) {
@@ -297,7 +304,7 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
                             // '<p>{description}</p>' +
                             '</span>'
                         ),
-                    minWidth: 410,
+                    minWidth: 300,
                     cellWrap:true,
                     sortable: false,
                     hideable: false,
@@ -319,9 +326,9 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
                         height: 85,
                         getClass: function (v, meta, rec) {
                             if (rec.get('activated')) {
-                                return 'activated';
+                                return 'far fa-check-square green';   // 'activated';
                             } else {
-                                return 'deactivated';
+                                return 'far fa-square green';   // 'deactivated';
                             }
                         },
                         getTip: function (v, meta, rec) {
@@ -331,7 +338,7 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
                                 return climatestation.Utils.getTranslation('activateproduct');  // 'Activate Product';
                             }
                         },
-                        // isDisabled: function(view, rowIndex, colIndex, item, record) {
+                        // isActionDisabled: function(view, rowIndex, colIndex, item, record) {
                         //     // Returns true if 'editable' is false (, null, or undefined)
                         //     return false;    // !record.get('editable');
                         // },
@@ -400,7 +407,7 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
                    items: [{
                        width:'35',
                        disabled: false,
-                       isDisabled: function(view, rowIndex, colIndex, item, record){
+                       isActionDisabled: function(view, rowIndex, colIndex, item, record){
                             if (!record.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
                                 return false;
                             }
@@ -410,7 +417,7 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
                        },
                        getClass: function(cell, meta, rec) {
                            if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                               return 'delete';
+                               return 'far fa-trash-alt red';
                            }
                            else {
                                // cell.setDisabled(true);   // This will not make syncing record content possible!

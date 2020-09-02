@@ -11,7 +11,7 @@ Ext.define('climatestation.store.TimeseriesProductsStore', {
     storeId : 'TimeseriesProductsStore'
 
     //,session: false
-    ,autoLoad: true
+    ,autoLoad: false
     ,loadMask: false
 
     //,sorters: {property: 'order_index', direction: 'DESC'}

@@ -68,7 +68,7 @@ Ext.define('climatestation.view.analysis.ProductNavigatorController', {
         //         ,border: true
         //         ,collapsible: false
         //         // ,bodyStyle: 'padding: 15px 3px 0 3px;'
-        //         ,defaults: {autoScroll:true}
+        //         ,defaults: {scrollable:true}
         //         ,listeners: {
         //              close: function(){
         //                  filters.remove(excludeProductLegends);
@@ -83,7 +83,7 @@ Ext.define('climatestation.view.analysis.ProductNavigatorController', {
         //         '->',{
         //             reference: 'assignLegendsBtn',
         //             text: climatestation.Utils.getTranslation('assign_selected_legends'), // 'Assign selected legends'
-        //             iconCls:'fa fa-plus-circle fa-1x',
+        //             iconCls:'far fa-plus-circle fa-1x',
         //             style: {color:'green'},
         //             handler: function(){
         //                 var selrec = assignLegendWin.lookupReference('assignLegendsGrid').getSelectionModel().getSelected();

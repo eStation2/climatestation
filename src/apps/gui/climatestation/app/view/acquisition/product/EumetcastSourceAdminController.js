@@ -51,6 +51,7 @@ Ext.define('climatestation.view.acquisition.product.EumetcastSourceAdminControll
                 'orig_eumetcast_id': '',
                 'collection_name': '',
                 'filter_expression_jrc': '',
+                'frequency': '',
                 'description': '',
                 'typical_file_name': '',
                 'keywords_theme': '',

@@ -88,7 +88,8 @@ Ext.define("climatestation.view.header.Header",{
                       '<img alt="{caption}" src="{src}" width="{width}" height="60" />  ',
                 '</tpl>',
                 '</div>',
-                '<div id="header"> <p id="banner-title-text">eStation 2 - </p><span id="banner-title-text-small">' + climatestation.Utils.getTranslation('earthobservationprocessingservice') + '</span></div>'
+                '<div id="header"> <p id="banner-title-text">Climate station </p><span id="banner-title-text-small"></span></div>'
+                // '<div id="header"> <p id="banner-title-text">Climate station </p><span id="banner-title-text-small">' + climatestation.Utils.getTranslation('earthobservationprocessingservice') + '</span></div>'
             //    '<div id="header"> <p id="banner-title-text">eStation 2 - </p><span id="banner-title-text-small">EARTH OBSERVATION PROCESSING SERVICE</span></div>'
             );
         }

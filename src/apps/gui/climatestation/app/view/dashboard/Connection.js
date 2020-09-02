@@ -17,8 +17,8 @@ Ext.define("climatestation.view.dashboard.Connection",{
         pack: 'start',
         align: 'middle'
     },
-    width: 100,
-    margin: '2px',
+    width: 103,
+    // margin: '2px',
     //defaults: {
     //    width:35
     //},
@@ -29,26 +29,26 @@ Ext.define("climatestation.view.dashboard.Connection",{
     initComponent: function () {
         var me = this,
             alt = '',
-            glyph = 'xf178@FontAwesome', // 'fa-long-arrow-right'
-            colorCls = 'fa-8x glyph-color-green';
+            glyph = "xf178@'Font Awesome 5 Free'",
+            colorCls = 'fa-9x glyph-color-green';
 
         if (me.connected){
-            colorCls = 'fa-8x glyph-color-green';
+            colorCls = 'fa-9x glyph-color-green';
             alt += 'Connected (green) '
         }
         else {
-            colorCls = 'fa-8x glyph-color-red';
+            colorCls = 'fa-9x glyph-color-red';
             alt += 'Not Connected (red) '
         }
 
         if (me.direction === 'right'){
-            glyph = 'xf178@FontAwesome'; // 'fa-long-arrow-right'
-            alt += 'arrow to right'
+            glyph = "xf30b@'Font Awesome 5 Free'"; // 'fa-long-arrow-alt-right'
+            alt += 'arrow to right';
         }
         else {
-            glyph = 'xf177@FontAwesome'; // 'fa-long-arrow-left'
+            glyph = "xf30a@'Font Awesome 5 Free'"; // 'fa-long-arrow-alt-left'
             colorCls += ' arrow-left-style';
-            alt += 'arrow to left'
+            alt += 'arrow to left';
         }
 
         me.items = [{
@@ -58,39 +58,6 @@ Ext.define("climatestation.view.dashboard.Connection",{
             alt: alt
         }];
 
-
-        //if (me.connected){
-        //    me.items = [{
-        //        xtype: 'image',
-        //        glyph: 'xf0e7@FontAwesome', // 'fa-flash'
-        //        cls:'glyph-color-green fa-rotate-270 fa-3x'
-        //    },{
-        //        xtype: 'image',
-        //        glyph: 'xf0c1@FontAwesome', // 'fa-chain'
-        //        cls:'glyph-color-green fa-flip-horizontal fa-3x'
-        //    },{
-        //        xtype: 'image',
-        //        glyph: 'xf0e7@FontAwesome', // 'fa-flash'
-        //        cls:'glyph-color-green fa-rotate-90 fa-3x'
-        //    }];
-        //}
-        //else {
-        //    me.items = [{
-        //        xtype: 'image',
-        //        glyph: 'xf0e7@FontAwesome', // 'fa-flash'
-        //        cls:'glyph-color-red fa-rotate-270 fa-3x'
-        //    },{
-        //        xtype: 'image',
-        //        glyph: 'xf127@FontAwesome', // 'fa-chain-broken'
-        //        cls:'glyph-color-red fa-flip-horizontal fa-3x'
-        //    },{
-        //        xtype: 'image',
-        //        glyph: 'xf0e7@FontAwesome', // 'fa-flash'
-        //        cls:'glyph-color-red fa-rotate-90 fa-3x'
-        //    }];
-        //}
-
         me.callParent();
     }
-
 });

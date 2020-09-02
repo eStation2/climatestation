@@ -49,7 +49,7 @@ Ext.define('climatestation.view.acquisition.product.MapsetAdminController', {
 
     loadMapsetStore: function(){
         var me = this.getView(),
-            mapsetsStore = Ext.data.StoreManager.lookup('MapsetsStore'),
+            mapsetsStore = Ext.data.StoreManager.lookup('mapsets'),
             mapsetsforingestStore = this.getStore('mapsetsforingest');
 
         if (me.config.assigntoproduct){
@@ -68,7 +68,7 @@ Ext.define('climatestation.view.acquisition.product.MapsetAdminController', {
 
     onAddMapsetClick: function(){
         // Create a new eumetcast source record and pass it. With the bind the store will automaticaly saved (through CRUD) on the server!
-        var mapsetstore  = Ext.data.StoreManager.lookup('MapsetsStore');
+        var mapsetstore  = Ext.data.StoreManager.lookup('mapsets');
         var user = climatestation.getUser();
 
         var newMapSetRecord = new climatestation.model.MapSet({
@@ -156,7 +156,7 @@ Ext.define('climatestation.view.acquisition.product.MapsetAdminController', {
             fn: function(btn) {
                 if (btn === 'ok') {
                     grid.getStore().remove(record);
-                    Ext.data.StoreManager.lookup('MapsetsStore').sync({
+                    Ext.data.StoreManager.lookup('mapsets').sync({
                         success: function () {
                             // console.log('success');
                             Ext.toast({html: climatestation.Utils.getTranslation('mapsetdeleted'), title: climatestation.Utils.getTranslation('mapsetdeleted'), width: 200, align: 't'});

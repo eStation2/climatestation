@@ -8,10 +8,35 @@ Ext.define('climatestation.view.acquisition.product.ProductAdminController', {
         'climatestation.view.acquisition.product.editProduct'
     ],
 
-    reloadProductsStore: function(grid){
-        // var me = this.getView();
-        // me.down('grid').getStore().load();
-        Ext.data.StoreManager.lookup('ProductsStore').load();
+    loadProductsStore: function(){
+        var me = this.getView();
+        var productsStore = Ext.data.StoreManager.lookup('ProductsStore');
+        var ingestsubproductsStore = Ext.data.StoreManager.lookup('IngestSubProductsStore');
+
+        if (me.forceStoreLoad || !productsStore.isLoaded() || !ingestsubproductsStore.isLoaded()) {
+            var myLoadMask = new Ext.LoadMask({
+                msg: climatestation.Utils.getTranslation('loading'), // 'Loading...',
+                target: me
+            });
+            myLoadMask.show();
+
+            productsStore.load({
+                callback: function(records, options, success) {
+                    ingestsubproductsStore.load({
+                        callback: function(records, options, success) {
+                            myLoadMask.hide();
+                        }
+                    });
+                }
+            });
+
+            me.forceStoreLoad = false;
+        }
+        Ext.data.StoreManager.lookup('mapsets').load();
+        Ext.data.StoreManager.lookup('categoriesall').load();
+        Ext.data.StoreManager.lookup('frequencies').load();
+        Ext.data.StoreManager.lookup('dateformats').load();
+        Ext.data.StoreManager.lookup('datatypes').load();
     },
 
     editProduct: function(grid, rowIndex, colIndex, refElement, event){

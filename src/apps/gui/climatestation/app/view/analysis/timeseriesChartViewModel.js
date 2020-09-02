@@ -48,10 +48,11 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewModel', {
                     // This event is triggered on every change made in a record!
                 },
                 write: function(store, operation){
-                    var result = Ext.JSON.decode(operation.getResponse().responseText);
-                    if (operation.success) {
-
-                    }
+                    // var result = Ext.JSON.decode(operation.getResponse().responseText);
+                    // var result = operation.getResponse().responseJson;
+                    // if (operation.success) {
+                    //
+                    // }
                 }
             }
         }

@@ -30,7 +30,7 @@ pycurl
 reloader
 web.py
 psutil
-request
+#request
 #pymorph
 scikit-image
 docker-py

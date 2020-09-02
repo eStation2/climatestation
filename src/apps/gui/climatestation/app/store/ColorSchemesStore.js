@@ -11,7 +11,7 @@ Ext.define('climatestation.store.ColorSchemesStore', {
 
     storeId : 'colorschemes',
 
-    autoLoad: true,
+    autoLoad: false,
 
      proxy: {
         type: 'ajax',

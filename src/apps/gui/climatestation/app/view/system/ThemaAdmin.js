@@ -29,7 +29,7 @@ Ext.define("climatestation.view.system.ThemaAdmin",{
     border:true,
     frame:true,
     bodyStyle: 'padding:5px 5px 0',
-    autoScroll: true,
+    scrollable: true,
     defaultAlign: 'b-c',
 
     store: 'themas',
@@ -48,7 +48,7 @@ Ext.define("climatestation.view.system.ThemaAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('save'),    // 'Save',
                 id: 'changethemabtn',
-                iconCls: 'fa fa-save fa-2x',
+                iconCls: 'far fa-save',
                 style: { color: 'lightblue' },
                 scale: 'medium',
                 disabled: true,

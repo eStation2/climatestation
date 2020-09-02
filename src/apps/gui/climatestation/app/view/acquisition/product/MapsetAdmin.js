@@ -15,7 +15,7 @@ Ext.define("climatestation.view.acquisition.product.MapsetAdmin",{
         'climatestation.view.acquisition.product.MapsetAdminModel'
     ],
 
-    title: '<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('selectmapset') + '</div>',
+    // title: '<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('selectmapset') + '</div>',
     header: {
         titlePosition: 0,
         titleAlign: 'center'
@@ -28,10 +28,10 @@ Ext.define("climatestation.view.acquisition.product.MapsetAdmin",{
     maximizable: false,
     resizable: true,
     resizeHandles: 'n,s',
-    autoScroll: false,
+    scrollable: true,
     width: 890,
-    height: Ext.getBody().getViewSize().height < 800 ? Ext.getBody().getViewSize().height-10 : 800,
-    minHeight:800,
+    height: Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-10 : 650,
+    maxHeight: Ext.getBody().getViewSize().height,
 
     border:false,
     frame: false,
@@ -60,16 +60,16 @@ Ext.define("climatestation.view.acquisition.product.MapsetAdmin",{
         var assignButton = {
             text: climatestation.Utils.getTranslation('assign'),  // 'Assign',
             reference: 'assignmapsetBtn',
-            iconCls: 'fa fa-link fa-2x',
-            style: {color: 'green'},
+            iconCls: 'far fa-link',
+            // style: {color: 'green'},
             scale: 'medium',
             disabled: false,
             handler: 'onAssignMapsetClick'
         };
         var addButton = {
             text: climatestation.Utils.getTranslation('add'),  // 'Add',
-            iconCls: 'fa fa-plus-circle fa-2x',
-            style: {color: 'green'},
+            iconCls: 'far fa-plus-circle',
+            // style: {color: 'green'},
             scale: 'medium',
             disabled: false,
             handler: 'onAddMapsetClick'
@@ -77,8 +77,8 @@ Ext.define("climatestation.view.acquisition.product.MapsetAdmin",{
 
         var refreshButton = {
             xtype: 'button',
-            iconCls: 'fa fa-refresh fa-2x',
-            style: { color: 'gray' },
+            iconCls: 'far fa-redo-alt',
+            // style: { color: 'gray' },
             enableToggle: false,
             scale: 'medium',
             handler: 'loadMapsetStore'
@@ -88,13 +88,14 @@ Ext.define("climatestation.view.acquisition.product.MapsetAdmin",{
 
 
         if (me.config.assigntoproduct){
-            me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('assignmapset_toproduct')
+            me.setTitle('<span class="">' + climatestation.Utils.getTranslation('assignmapset_toproduct')
                 + ': ' + me.productcode + ' - ' + me.version + ' - ' + me.subproductcode + '</span>');
 
             me.bbar = ['->', assignButton];
         }
         else {
-            me.title = '<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('mapsetadmin') + '</div>';
+            // me.title = '<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('mapsetadmin') + '</div>';
+            me.title = '<div class="">' + climatestation.Utils.getTranslation('mapsetadmin') + '</div>';
         }
 
         me.items = [{
@@ -139,11 +140,11 @@ Ext.define("climatestation.view.acquisition.product.MapsetAdmin",{
                 items: [{
                     getClass: function (v, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)) {
-                           return 'edit';
+                           return 'far fa-edit';
                        }
                        else {
                            // return 'x-hide-display';
-                           return 'vieweye';
+                           return 'far fa-eye';
                        }
                     },
                     getTip: function (v, meta, rec) {
@@ -210,7 +211,7 @@ Ext.define("climatestation.view.acquisition.product.MapsetAdmin",{
                items: [{
                    width:'35',
                    // disabled: false,
-                   isDisabled: function(view, rowIndex, colIndex, item, record){
+                   isActionDisabled: function(view, rowIndex, colIndex, item, record){
                         if (!record.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
                             return false;
                         }
@@ -220,7 +221,7 @@ Ext.define("climatestation.view.acquisition.product.MapsetAdmin",{
                    },
                    getClass: function(v, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                           return 'delete';
+                           return 'far fa-trash-alt red';
                        }
                        else {
                            // v.setDisabled(true);

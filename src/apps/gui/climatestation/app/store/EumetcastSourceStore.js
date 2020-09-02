@@ -12,7 +12,7 @@ Ext.define('climatestation.store.EumetcastSourceStore', {
 
     storeId : 'EumetcastSourceStore'
 
-    ,autoLoad: true
+    ,autoLoad: false
     ,autoSync: false
     // ,session: false
 
@@ -57,9 +57,14 @@ Ext.define('climatestation.store.EumetcastSourceStore', {
         //    // This event is triggered on every change made in a record!
         //},
         write: function(store, operation){
-            var result = Ext.JSON.decode(operation.getResponse().responseText);
+            // var result = Ext.JSON.decode(operation.getResponse().responseText);
+            var result = operation.getResponse().responseJson;
             if (operation.success) {
-               Ext.toast({ html: result.message, title: climatestation.Utils.getTranslation('datasourceupdated'), width: 200, align: 't' });
+               Ext.toast({
+                   html: result.message,
+                   title: climatestation.Utils.getTranslation('datasourceupdated'),
+                   width: 300, align: 't'
+               });
             }
         }
     }

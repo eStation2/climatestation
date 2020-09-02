@@ -27,14 +27,14 @@ Ext.define('climatestation.view.system.systemsettingsController', {
                         if (result.success) {
                             //console.info(result);
                             if (result.running == 'true') {
-                                me.getView().down('button[name=ingestarchivebtn]').setIconCls('fa fa-spin fa-spinner');
+                                me.getView().down('button[name=ingestarchivebtn]').setIconCls('far fa-spin fa-spinner');
                                 //me.getView().down('button[name=ingestarchivebtn]').setStyle('color','white');
                                 me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=run_ingestarchive]').setDisabled(true);
                                 me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=stop_ingestarchive]').setDisabled(false);
                                 me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=restart_ingestarchive]').setDisabled(false);
                             } else {
                                 me.getView().down('button[name=ingestarchivebtn]').setIconCls('');
-                                //me.getView().down('button[name=ingestarchivebtn]').setIconCls('fa fa-spinner');
+                                //me.getView().down('button[name=ingestarchivebtn]').setIconCls('far fa-spinner');
                                 //me.getView().down('button[name=ingestarchivebtn]').setStyle('color','gray');
                                 me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=run_ingestarchive]').setDisabled(false);
                                 me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=stop_ingestarchive]').setDisabled(true);
@@ -48,7 +48,7 @@ Ext.define('climatestation.view.system.systemsettingsController', {
                             //        width: 250,
                             //        align: 't'
                             //    });
-                            //    btn.setIconCls('fa fa-spin fa-spinner');
+                            //    btn.setIconCls('far fa-spin fa-spinner');
                             //}
                             //else {
                             //    btn.setIconCls('');
@@ -81,14 +81,14 @@ Ext.define('climatestation.view.system.systemsettingsController', {
                 if (result.running == 'true') {
                     running = true;
                     checkstatus.start();
-                    me.getView().down('button[name=ingestarchivebtn]').setIconCls('fa fa-spin fa-spinner');
+                    me.getView().down('button[name=ingestarchivebtn]').setIconCls('far fa-spin fa-spinner');
                     //me.getView().down('button[name=ingestarchivebtn]').setStyle('color','white');
                     me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=run_ingestarchive]').setDisabled(true);
                     me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=stop_ingestarchive]').setDisabled(false);
                     me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=restart_ingestarchive]').setDisabled(false);
                 } else {
                     me.getView().down('button[name=ingestarchivebtn]').setIconCls('');
-                    //me.getView().down('button[name=ingestarchivebtn]').setIconCls('fa fa-spinner');
+                    //me.getView().down('button[name=ingestarchivebtn]').setIconCls('far fa-spinner');
                     //me.getView().down('button[name=ingestarchivebtn]').setStyle('color','gray');
                     me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=run_ingestarchive]').setDisabled(false);
                     me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=stop_ingestarchive]').setDisabled(true);

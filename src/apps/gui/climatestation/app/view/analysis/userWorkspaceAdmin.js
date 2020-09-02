@@ -34,7 +34,7 @@ Ext.define("climatestation.view.analysis.userWorkspaceAdmin",{
     maximizable: false,
     collapsible: false,
     resizable: false,
-    autoScroll: true,
+    scrollable: true,
 
     //height: Ext.getBody().getViewSize().height < 400 ? Ext.getBody().getViewSize().height-10 : 400,
     height: 400,
@@ -192,7 +192,7 @@ Ext.define("climatestation.view.analysis.userWorkspaceAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('openselected'),    // 'Open selected',
                 reference: 'openworkspaces',
-                iconCls: 'fa fa-folder-open-o fa-2x',
+                iconCls: 'far fa-folder-open-o',
                 style: {color: 'green'},
                 hidden: false,
                 // glyph: 'xf055@FontAwesome',
@@ -202,7 +202,7 @@ Ext.define("climatestation.view.analysis.userWorkspaceAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('newworkspace'),    // 'New',
                 reference: 'newworkspace',
-                iconCls: 'fa fa-plus-circle fa-2x',
+                iconCls: 'far fa-plus-circle',
                 style: {color: 'green'},
                 hidden: me.refworkspaces ? true : false,
                 // glyph: 'xf055@FontAwesome',
@@ -212,7 +212,7 @@ Ext.define("climatestation.view.analysis.userWorkspaceAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('export_workspaces'),    // 'Export',
                 reference: 'exportworkspaces',
-                iconCls: 'fa fa-download fa-2x',
+                iconCls: 'far fa-download',
                 style: {color: 'blue'},
                 hidden: me.refworkspaces ? true : false,
                 disabled: true,
@@ -223,7 +223,7 @@ Ext.define("climatestation.view.analysis.userWorkspaceAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('import'),    // 'Import',
                 reference: 'importworkspaces',
-                iconCls: 'fa fa-upload fa-2x',
+                iconCls: 'far fa-upload',
                 style: {color: 'orange'},
                 hidden: me.refworkspaces ? true : false,
                 // glyph: 'xf055@FontAwesome',
@@ -262,9 +262,9 @@ Ext.define("climatestation.view.analysis.userWorkspaceAdmin",{
             items: [{
                 getClass: function (v, meta, rec) {
                     if (rec.get('showindefault')) {
-                        return 'activated';
+                        return 'far fa-check-square green';   // 'activated';
                     } else {
-                        return 'deactivated';
+                        return 'far fa-square green';   // 'deactivated';
                     }
                 },
                 getTip: function (v, meta, rec) {
@@ -351,7 +351,7 @@ Ext.define("climatestation.view.analysis.userWorkspaceAdmin",{
                 width:'45',
                 disabled: false,
                 getClass: function(v, meta, rec) {
-                    return 'delete';
+                    return 'far fa-trash-alt red';
                 },
                 getTip: function(v, meta, rec) {
                     return climatestation.Utils.getTranslation('delete_workspace') + ': ' + rec.get('workspacename');   // 'Delete workspace'
