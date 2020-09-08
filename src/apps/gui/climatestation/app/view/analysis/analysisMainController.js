@@ -100,7 +100,7 @@ Ext.define('climatestation.view.analysis.analysisMainController', {
 
     ,addNewWorkspace: function() {
         var me = this.getView();
-        var tab = me.add({
+        var tab = me.insert(me.tabBar.items.length, {
             xtype: 'analysisworkspace',
             workspacename: 'New workspace',
             title: 'New workspace',

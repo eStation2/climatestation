@@ -18,7 +18,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
 
     // layout: 'fit',
 
-    scrollable: 'vertical',
+    // scrollable: 'vertical',
     scrollable: true,
 
     defaults: {
@@ -427,16 +427,17 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
             minWidth: 385,
             maxWidth: maxwidth,
             autoHeight: true,
-            border: 2,
+            // border: 2,
             padding: 5,
             style: {
-                borderColor: '#157FCC',
+                // borderColor: '#157FCC',
                 borderStyle: 'solid'
             }
             // layout: 'vbox'
         });
 
         me.fromtoSelection = {
+            xtype: 'container',
             layout: 'hbox',
             layoutConfig: {columns: 3, rows: 1},
             margin: 5,
@@ -455,7 +456,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 labelAlign: 'left',
                 labelWidth: 35,
                 style: {"margin-right": "10px"},
-                width: 160,
+                width: 180,
                 format: "d/m/Y",
                 emptyText: 'dd/mm/yyyy ',
                 allowBlank: true,
@@ -473,7 +474,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 labelAlign: 'left',
                 labelWidth: 20,
                 style: {"margin-right": "10px"},
-                width: 160,
+                width: 180,
                 format: "d/m/Y",
                 emptyText: 'dd/mm/yyyy ',
                 allowBlank: true,
@@ -489,6 +490,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
         };
 
         me.yearSelection = {
+            xtype: 'container',
             layout: 'hbox',
             layoutConfig: {columns: 3, rows: 1},
             margin: 5,
@@ -535,7 +537,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 layout: 'vbox',
                 layoutConfig: {columns: 1, rows: 2},
                 // margin: '0 0 0 20',
-                width: 160,
+                width: 190,
                 items: [{
                     xtype: 'datefield',
                     reference: 'ts_from_season',
@@ -543,7 +545,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     labelAlign: 'left',
                     labelWidth: 35,
                     style: {"margin-right": "10px"},
-                    width: 130,
+                    width: 150,
                     format: "d/m",
                     emptyText: 'dd/mm ',
                     allowBlank: true,
@@ -562,7 +564,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     labelAlign: 'left',
                     labelWidth: 35,
                     style: {"margin-right": "10px"},
-                    width: 130,
+                    width: 150,
                     format: "d/m",
                     emptyText: 'dd/mm',
                     allowBlank: true,
@@ -580,6 +582,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
         };
 
         me.multipleyearsSelection = {
+            xtype: 'container',
             reference: 'multiyears_selection',
             layout: 'hbox',
             layoutConfig: {columns: 3, rows: 1},
@@ -642,7 +645,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 title: '<b>' + climatestation.Utils.getTranslation('season') + '</b>',   // '<b>Season</b>',
                 layout: 'vbox',
                 layoutConfig: {columns: 1, rows: 2},
-                width: 160,
+                width: 190,
                 items: [{
                     xtype: 'datefield',
                     reference: 'ts_from_seasonmulti',
@@ -650,7 +653,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     labelAlign: 'left',
                     labelWidth: 35,
                     style: {"margin-right": "10px"},
-                    width: 130,
+                    width: 150,
                     format: "d/m",
                     emptyText: 'dd/mm ',
                     allowBlank: true,
@@ -669,7 +672,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     labelAlign: 'left',
                     labelWidth: 35,
                     style: {"margin-right": "10px"},
-                    width: 130,
+                    width: 150,
                     format: "d/m",
                     emptyText: 'dd/mm',
                     allowBlank: true,
@@ -824,7 +827,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
         }
 
         me.productcategoriesAvailable = {
-            xtype: 'panel',
+            xtype: 'treepanel',
             //id:'productcategories',
             reference: 'productcategories',
             // title: climatestation.Utils.getTranslation('products'),  // 'Products',
@@ -839,13 +842,13 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
             style: {
                 "font-size": 16
             },
-            layout: {
-                // layout-specific configs
-                type: 'accordion',
-                titleCollapse: true,
-                animate: false,
-                activeOnTop: true
-            },
+            // layout: {
+            //     // layout-specific configs
+            //     type: 'accordion',
+            //     titleCollapse: true,
+            //     animate: false,
+            //     activeOnTop: true
+            // },
             defaults: {
                 margin: '0 0 1 0',
                 padding: '0 0 0 0'
@@ -1133,7 +1136,7 @@ Ext.define("climatestation.view.analysis.timeseriesCategoryProducts",{
             variableRowHeight: true,
             items: [{
                 getClass: function (v, meta, rec) {
-                    return 'add20';
+                    return 'far fa-plus-circle green';
                 },
                 getTip: function (v, meta, rec) {
                     return climatestation.Utils.getTranslation('add_to_selected');   // 'Add to selected'

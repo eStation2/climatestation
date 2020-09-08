@@ -35,9 +35,10 @@ Ext.define('climatestation.TabTitleEditor', {
             // update the innerHTML of the bound element when editing completes
             updateEl: true,
             alignment: 'l-l',
-            autoSize: {
-                width: 'boundEl'
-            },
+            // autoSize: {
+            //     width: 'boundEl'
+            // },
+            autoSize: true,
             field: {
                 xtype: 'textfield',
                 border: 1,

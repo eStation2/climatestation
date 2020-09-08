@@ -31,11 +31,11 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
     maximizable: false,
     collapsible: true,
     collapsed: false,
-    resizable: false,
+    resizable: true,
     floating: true,
     alwaysOnTop: false,
     shrinkWrap: 3, // both width and height depend on content (shrink wrap).
-    width:420,
+    width: 500,
     // maxWidth:500,
     // autoWidth: true,
     // autoHeight: true,
@@ -108,10 +108,10 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
             height: 65,
             flex: 1,
             maxHeight: 80,
-            border: 2,
+            // border: 2,
             padding: '3 5 3 10',
             style: {
-                borderColor: '#157FCC',
+                // borderColor: '#157FCC',
                 borderStyle: 'solid'
             },
             items: [{
@@ -176,7 +176,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
                         disabled: false,
                         //width: 150,
                         autoWidth: true,
-                        margin: '0 0 5 0',
+                        margin: '0 0 5 5',
                         graphtype: 'xy',
                         handler: 'generateTimeseriesChart'
                     }]
@@ -207,7 +207,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
                         disabled: false,
                         //width: 150,
                         autoWidth: true,
-                        margin: '0 0 5 0',
+                        margin: '0 0 5 5',
                         graphtype: 'cumulative',
                         handler: 'generateTimeseriesChart'
                     }]
@@ -237,7 +237,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
                         scale: 'medium',
                         disabled: false,
                         autoWidth: true,
-                        margin: '0 0 5 0',
+                        margin: '0 0 5 5',
                         graphtype: 'ranking',
                         handler: 'generateTimeseriesChart'
                     }]
@@ -268,7 +268,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
                         scale: 'medium',
                         disabled: false,
                         autoWidth: true,
-                        margin: '0 0 5 0',
+                        margin: '0 0 5 5',
                         graphtype: 'matrix',
                         handler: 'generateTimeseriesChart'
                     }]

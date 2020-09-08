@@ -15,7 +15,7 @@ Ext.define('climatestation.view.analysis.timeseriesProductSelectionModel', {
 
     stores: {
         categories: {
-            source: 'CategoriesStore',
+            source: 'categories',
             session: true
             // ,proxy:{
             //   extraParams: {all: false}

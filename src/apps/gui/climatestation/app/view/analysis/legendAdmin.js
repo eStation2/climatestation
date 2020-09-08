@@ -21,7 +21,7 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
         titleAlign: 'center',
         iconCls: 'legends'
     },
-    constrainHeader: Ext.getBody(),
+    // constrainHeader: Ext.getBody(),
 
     modal: true,
     closable: true,
@@ -30,9 +30,9 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
     resizable: false,
     //resizeHandles: 'n,s',
     scrollable: true,
-    height: Ext.getBody().getViewSize().height < 730 ? Ext.getBody().getViewSize().height-130 : 730,  // 600,
-    minHeight: 500,
-    maxHeight: 830,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-130 : 625,  // 600,
+    minHeight: 625,
+    // maxHeight: 625,
     width: 860,
     // autoWidth: true,
 
@@ -64,7 +64,7 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
 
         me.width = (climatestation.Utils.objectExists(user) && user.userlevel == 1) ? 860+90 : 860
 
-        me.height = Ext.getBody().getViewSize().height < 730 ? Ext.getBody().getViewSize().height-130 : 730;  // 600,
+        me.height = Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-130 : 625;  // 600,
 
         if (me.assign){
             me.title = '<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('assign_legends_to') + ': ' + me.productname + '<b class="smalltext"> - ' + me.productcode + ' - '  + me.productversion + ' - '  + me.subproductcode + '</b>' + '</div>'  // 'Assign legends to <productname>'
@@ -77,8 +77,8 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
             '->',{
                 reference: 'assignLegendsBtn',
                 text: climatestation.Utils.getTranslation('assign_selected_legends'), // 'Assign selected legends'
-                iconCls:'far fa-plus-circle fa-1x',
-                style: {color:'green'},
+                iconCls:'far fa-plus-circle green',
+                // style: {color:'green'},
                 handler: function(){
                     var selrec = me.lookupReference('legendsGrid').getSelectionModel().getSelected();
                     var selected_legendids = [];
@@ -140,8 +140,8 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('newlegend'),    // 'New legend',
                 name: 'newlegend',
-                iconCls: 'far fa-plus-circle',
-                style: {color: 'green'},
+                iconCls: 'far fa-plus-circle green',
+                // style: {color: 'green'},
                 hidden: false,
                 // glyph: 'xf055@FontAwesome',
                 scale: 'medium',
@@ -150,8 +150,8 @@ Ext.define("climatestation.view.analysis.legendAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('copylegend'),    // 'Copy legend',
                 name: 'copylegend',
-                iconCls: 'far fa-files-o',
-                style: {color: 'black'},
+                iconCls: 'far fa-copy',
+                // style: {color: 'black'},
                 hidden: false,
                 // glyph: 'xf055@FontAwesome',
                 scale: 'medium',

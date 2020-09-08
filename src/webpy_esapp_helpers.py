@@ -6201,7 +6201,7 @@ def __TimeseriesProducts():
     return datamanagement_json
 
 
-def __TimeseriesProductsTree():
+def TimeseriesProductsTree():
     import copy
 
     db_products = querydb.get_timeseries_products()
@@ -6217,95 +6217,138 @@ def __TimeseriesProductsTree():
             version = prod_record['version']
 
             # prod_dict['itemtype'] = "TimeseriesProduct"
-            prod_dict['cat_descr_name'] = prod_record['cat_descr_name']
             prod_dict['category_id'] = prod_record['category_id']
+            prod_dict['cat_descr_name'] = prod_record['cat_descr_name']
             prod_dict['order_index'] = prod_record['order_index']
             prod_dict['productid'] = prod_record['productid']
             prod_dict['productcode'] = prod_record['productcode']
             prod_dict['version'] = prod_record['version']
             prod_dict['subproductcode'] = prod_record['subproductcode']
             # prod_dict['mapsetcode'] = ""
-            prod_dict['descriptive_name'] = prod_record['descriptive_name']
-            prod_dict['description'] = prod_record['description']
+            # prod_dict['mapset_name'] = ""
+            prod_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
+            prod_dict['product_descriptive_name'] = prod_record['descriptive_name']
+            prod_dict['product_description'] = prod_record['description']
+            prod_dict['frequency_id'] = prod_record['frequency_id']
+            prod_dict['date_format'] = prod_record['date_format']
+            prod_dict['timeseries_role'] = prod_record['timeseries_role']
+            prod_dict['selected'] = False
+            prod_dict['cumulative'] = False
+            prod_dict['difference'] = False
+            prod_dict['reference'] = False
             # prod_dict['years'] = []
-            # prod_dict['parentId'] = 'root'
-            # prod_dict['leaf'] = False
+            prod_dict['leaf'] = False
+            prod_dict['expanded'] = False
 
             # does the product have mapsets?
             p = Product(product_code=productcode, version=version)
             all_prod_mapsets = p.mapsets
-            # print all_prod_mapsets
 
             if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
-                prod_dict['productmapsets'] = []
                 # prod_dict['children'] = []
                 for mapset in all_prod_mapsets:
                     mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
-                    if mapset_info != []:
-                        mapset_record = functions.row2dict(mapset_info)
-                        # print mapset_record
-                        mapset_dict = {}
-                        # mapset_dict['itemtype'] = "TimeseriesMapset"
-                        # mapset_dict['cat_descr_name'] = prod_record['cat_descr_name']
-                        # mapset_dict['category_id'] = prod_record['category_id']
-                        # mapset_dict['order_index'] = prod_record['order_index']
-                        # mapset_dict['productid'] = prod_record['productid']
-                        # mapset_dict['productcode'] = prod_record['productcode']
-                        # mapset_dict['version'] = prod_record['version']
-                        # mapset_dict['subproductcode'] = prod_record['subproductcode']
-                        mapset_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_record['mapsetcode']
-                        mapset_dict['mapsetcode'] = mapset_record['mapsetcode']
-                        mapset_dict['descriptive_name'] = mapset_record['descriptive_name']
-                        mapset_dict['description'] = mapset_record['description']
-                        mapset_dict['timeseriesmapsetdatasets'] = []
-                        # mapset_dict['years'] = []
-                        # mapset_dict['parentId'] = prod_record['productid']
-                        # mapset_dict['leaf'] = False
-                        # mapset_dict['children'] = []
+                    if mapset_info != [] and hasattr(mapset_info, "__len__") and mapset_info.__len__() > 0:
+                        # for mapsetinfo in mapset_info:
+                        #     mapset_record = functions.row2dict(mapsetinfo)
+
+                        tmp_prod_dict = copy.deepcopy(prod_dict)
+                        tmp_prod_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_info['mapsetcode']
+                        tmp_prod_dict['mapsetcode'] = mapset_info['mapsetcode']
+                        tmp_prod_dict['mapset_name'] = mapset_info['descriptive_name']
+
+                        # t3 = time.time()
+                        # print 'before getting dataset info: ' + str(t3)
+
+                        dataset = p.get_dataset(mapset=mapset, sub_product_code=tmp_prod_dict['subproductcode'])
+                        # dataset.get_filenames()
+                        all_present_product_dates = dataset.get_dates()
+
+                        # t4 = time.time()
+                        # tot_get_dataset = t4-t3
+                        # print 'after getting dataset info: ' + str(tot_get_dataset)
+
+                        # t5 = time.time()
+                        # print 'before getting years: ' + str(t5)
+
+                        distinctyears = []
+                        for product_date in all_present_product_dates:
+                            if product_date is not None and product_date.year not in distinctyears:
+                                distinctyears.append(product_date.year)
+                        tmp_prod_dict['years'] = distinctyears
+
+                        # If there is data available on disk, include the subproduct with
+                        # timeseries_role='Initial' in the list!
+                        if tmp_prod_dict['years'].__len__() > 0:
+                            products_dict_all.append(tmp_prod_dict)
+                            # tmp_prod_dict = copy.deepcopy(prod_dict)
+                            #
+                            # products_dict_all.append(tmp_prod_dict)
+                            # tmp_prod_dict = []
+
+                        # t6 = time.time()
+                        # total = t6-t5
+                        # print 'after getting years: ' + str(total)
+
+                        # Get all subproducts which have as timeseries_role = subproductcode ('Initial')
                         timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
                                                                                         version=version,
                                                                                         subproductcode=subproductcode)
+                        # t7 = time.time()
+                        # print 'before getting subproduct info: ' + str(t7)
+
                         for subproduct in timeseries_mapset_datasets:
                             if subproduct is not None:
-                                dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                                dataset.get_filenames()
+                                # t7 = time.time()
+                                dataset_record = functions.row2dict(subproduct)
+                                dataset = p.get_dataset(mapset=mapset,
+                                                        sub_product_code=dataset_record['subproductcode'])
+                                # t8 = time.time()
+                                # totals_subproduct = t8 - t7
+                                # print 'after getting subproduct dataset: ' + str(totals_subproduct)
+
+                                # dataset.get_filenames()
+
                                 all_present_product_dates = dataset.get_dates()
 
                                 distinctyears = []
                                 for product_date in all_present_product_dates:
-                                    if product_date.year not in distinctyears:
+                                    if product_date is not None and product_date.year not in distinctyears:
                                         distinctyears.append(product_date.year)
 
-                                dataset_record = functions.row2dict(subproduct)
                                 dataset_dict = {}
-                                # dataset_dict['itemtype'] = "TimeseriesSubproduct"
-                                # dataset_dict['cat_descr_name'] = prod_record['cat_descr_name']
-                                # dataset_dict['category_id'] = prod_record['category_id']
-                                # dataset_dict['order_index'] = prod_record['order_index']
-                                dataset_dict['subproductid'] = dataset_record['productid']
+                                dataset_dict['category_id'] = prod_record['category_id']
+                                dataset_dict['cat_descr_name'] = prod_record['cat_descr_name']
+                                dataset_dict['order_index'] = prod_record['order_index']
+                                dataset_dict['productid'] = dataset_record['productid']
                                 dataset_dict['productcode'] = dataset_record['productcode']
                                 dataset_dict['version'] = dataset_record['version']
                                 dataset_dict['subproductcode'] = dataset_record['subproductcode']
-                                dataset_dict['mapsetcode'] = mapset_record['mapsetcode']
-                                dataset_dict['descriptive_name'] = dataset_record['descriptive_name']
-                                dataset_dict['description'] = dataset_record['description']
+                                dataset_dict['productmapsetid'] = tmp_prod_dict['productmapsetid']
+                                dataset_dict['display_index'] = dataset_record['display_index']
+                                dataset_dict['mapsetcode'] = mapset_info['mapsetcode']
+                                dataset_dict['mapset_name'] = mapset_info['descriptive_name']
+                                dataset_dict['group_product_descriptive_name'] = prod_record[
+                                    'group_product_descriptive_name']
+                                dataset_dict['product_descriptive_name'] = dataset_record['descriptive_name']
+                                dataset_dict['product_description'] = dataset_record['description']
+                                dataset_dict['frequency_id'] = dataset_record['frequency_id']
+                                dataset_dict['date_format'] = dataset_record['date_format']
+                                dataset_dict['timeseries_role'] = dataset_record['timeseries_role']
                                 dataset_dict['years'] = distinctyears
-                                # dataset_dict['leaf'] = True
-                                # dataset_dict['checked'] = False
-                                # dataset_dict['parentId'] = mapset_dict['productmapsetid']
+                                dataset_dict['selected'] = False
+                                dataset_dict['cumulative'] = False
+                                dataset_dict['difference'] = False
+                                dataset_dict['reference'] = False
 
-                                # dataset_dict['mapsetcode'] = mapset
-                                mapset_dict['timeseriesmapsetdatasets'].append(dataset_dict)
-                                # mapset_dict['children'].append(dataset_dict)
-
-                        if dataset_dict['years'].__len__() > 0:
-                            # tmp_prod_dict = prod_dict.copy()
-                            tmp_prod_dict = copy.deepcopy(prod_dict)
-
-                            tmp_prod_dict['productmapsets'].append(mapset_dict)
-                            # tmp_prod_dict['children'].append(mapset_dict)
-                            products_dict_all.append(tmp_prod_dict)
-                            tmp_prod_dict = []
+                                # If there is data available on disk, include the subproduct in the list!
+                                if dataset_dict['years'].__len__() > 0:
+                                    products_dict_all.append(dataset_dict)
+                                    # # tmp_prod_dict = prod_dict.copy()
+                                    # tmp_prod_dict = copy.deepcopy(dataset_dict)
+                                    #
+                                    # products_dict_all.append(tmp_prod_dict)
+                                    # tmp_prod_dict = []
 
         prod_json = json.dumps(products_dict_all,
                                ensure_ascii=False,
@@ -6317,14 +6360,14 @@ def __TimeseriesProductsTree():
         # datamanagement_json = '{"descriptive_name": "", "productid": "root", "parentId": null,
         #                         "leaf": false, "children": '+prod_json+'}'
 
-        datamanagement_json = '{"success":"true", "total":' \
-                              + str(db_products.__len__()) \
-                              + ',"products":' + prod_json + '}'
+        timeseriesproducts_json = '{"success":"true", "total":' \
+                                  + str(db_products.__len__()) \
+                                  + ',"products":' + prod_json + '}'
 
     else:
-        datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
+        timeseriesproducts_json = '{"success":false, "error":"No data sets defined!"}'
 
-    return datamanagement_json
+    return timeseriesproducts_json
 
 
 def getIngestion(force):

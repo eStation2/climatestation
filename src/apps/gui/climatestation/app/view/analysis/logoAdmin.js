@@ -18,7 +18,7 @@ Ext.define("climatestation.view.analysis.logoAdmin",{
     header: {
         titlePosition: 0,
         titleAlign: 'center',
-        iconCls: 'logos'
+        iconCls: 'far fa-globe-africa'
     },
     constrainHeader: Ext.getBody(),
 
@@ -29,9 +29,9 @@ Ext.define("climatestation.view.analysis.logoAdmin",{
     resizable: true,
     //resizeHandles: 'n,s',
     scrollable: false,
-    height: Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-130 : 700,  // 600,
-    minHeight: 500,
-    maxHeight: 700,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-130 : 625,  // 600,
+    minHeight: 625,
+    // maxHeight: 700,
     width: 800, // 1275,
 
     border:false,
@@ -53,7 +53,7 @@ Ext.define("climatestation.view.analysis.logoAdmin",{
         var user = climatestation.getUser();
 
         me.title = '<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('logoadministration') + '</div>';
-        me.height = Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830;  // 600,
+        me.height = Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-130 : 625;  // 600,
 
         me.tools = [
         {
@@ -69,8 +69,8 @@ Ext.define("climatestation.view.analysis.logoAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('addlogo'),    // 'Add logo',
                 name: 'addlayer',
-                iconCls: 'far fa-plus-circle',
-                style: {color: 'green'},
+                iconCls: 'far fa-plus-circle green',
+                // style: {color: 'green'},
                 hidden: false,
                 // glyph: 'xf055@FontAwesome',
                 scale: 'medium',

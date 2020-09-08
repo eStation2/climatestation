@@ -275,29 +275,30 @@
 }
 
 .pin_red {
-    color: red;
+    color: red !important;
 }
 
 .pin_green {
-    color: lime;
+    color: lime !important;
 }
 
-.newworkspacetab .x-tab-inner-workspace {
+.newworkspacetab .x-tab-inner-default  {
     color: darkred !important;
 }
 
-.defaultworkspacetab.x-tab-workspace-top {
+.defaultworkspacetab {  /* .x-tab-workspace-top */
     background: #9DAFC9 !important;
 }
-.defaultworkspacetab.x-tab-workspace-top.x-tab-active {
-    /* .x-tab-workspace .x-tab .x-tab-top-active .x-tab-default-top-active .x-tab-active */
+.defaultworkspacetab .x-tab-active {
+    /* .x-tab-workspace .x-tab .x-tab-top-active .x-tab-default-top-active .x-tab-active .x-tab-workspace-top.x-tab-active */
     background: #577097 !important;
+    color: white !important;
 }
 
-.refworkspacetab.x-tab-workspace-top {
+.refworkspacetab {
     background: #93E134 !important;
 }
-.refworkspacetab.x-tab-workspace-top.x-tab-active {
+.refworkspacetab.x-tab-active {
     background: #3E7A0C  !important;
 }
 
@@ -1207,14 +1208,14 @@
 }
 
 .newpanelstyle .x-panel-header-default {
-    background-color: #A9DEEC !important;
+    background-color: #5FA2DD !important;
     font-weight:bold !important;
     color:#000 !important;
     font-size:13px !important;
 }
 
 .newpanelstyle .x-tool-img {
-    background-color: #A9DEEC !important;
+    background-color: #5FA2DD !important;
 }
 
 .categorytitle {

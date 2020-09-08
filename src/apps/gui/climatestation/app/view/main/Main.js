@@ -31,7 +31,7 @@ Ext.define('climatestation.view.main.Main', {
 
         me.listeners = {
             afterrender: function(){
-                // me.controller.doCardNavigation('acquisitionmain');
+                me.controller.doCardNavigation('analysismain');
             }
         };
 
