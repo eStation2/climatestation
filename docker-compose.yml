@@ -62,10 +62,10 @@ services:
     - ${DBDUMP_VOLUME}:/climatestation/db_dump:rw
     - ${CS_VOLUME}:/climatestation:rw
     - ./src:/var/www/climatestation:rw
-    - docker-postgresql12-volume:/var/lib/postgresql:rw
+    - cs-docker-postgresql12-volume:/var/lib/postgresql:rw
     - ./log/postgres:/var/log/climatestation:rw
 
 # create an external docker volume: docker volume create --name cs-docker-postgresql12-volume -d local
 volumes:
-  docker-postgresql12-volume:
+ cs-docker-postgresql12-volume:
     external: true
