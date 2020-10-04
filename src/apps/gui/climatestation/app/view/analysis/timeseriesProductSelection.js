@@ -6,8 +6,8 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
         "climatestation.view.analysis.timeseriesProductSelectionController",
         "climatestation.view.analysis.timeseriesProductSelectionModel",
         'Ext.util.DelayedTask',
-        'climatestation.Utils',
-        'climatestation.view.analysis.timeseriesCategoryProducts'
+        'climatestation.Utils'
+        // 'climatestation.view.analysis.timeseriesCategoryProducts'
     ],
 
     controller: "analysis-timeseriesproductselection",
@@ -18,8 +18,9 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
 
     // layout: 'fit',
 
-    scrollable: 'vertical',
+    // scrollable: 'vertical',
     scrollable: true,
+    reserveScrollbar: true,
 
     defaults: {
         margin: '5 3 5 3'
@@ -42,12 +43,17 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
 
     listeners: {
         // afterrender: 'setTemplateSelections'
-        beforerender: function(){
+        afterrender: function(){
             var me = this;
             var user = climatestation.getUser();
-            var tsDrawPropertiesStore = me.getViewModel().get('timeseriesdrawproperties');
+            // // var tsDrawPropertiesStore = me.getViewModel().get('timeseriesdrawproperties');
+            var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
 
-            if (!tsDrawPropertiesStore.isLoaded()) {
+            // if (me.tplChartView) {
+            //     me.getController().setTemplateSelections();
+            // }
+// debugger;
+            if (tsDrawPropertiesStore.isLoaded()) {
                 if (user != 'undefined' && user != null) {
                     tsDrawPropertiesStore.proxy.extraParams = {
                         userid: user.userid,
@@ -56,27 +62,27 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                         graph_tpl_id: me.isTemplate ? me.tplChartView.graph_tpl_id : '-1',
                         graph_tpl_name: me.isTemplate ? me.tplChartView.graph_tpl_name : 'default'
                     };
-                }
-                tsDrawPropertiesStore.load({
-                    callback: function (records, options, success) {
-                        if (me.tplChartView){
-                            me.getController().setTemplateSelections();
+
+                    tsDrawPropertiesStore.reload({
+                        callback: function (records, options, success) {
+                            if (me.tplChartView){
+                                me.getController().setTemplateSelections();
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
             else {
                 if (me.tplChartView) {
                     me.getController().setTemplateSelections();
                 }
             }
-
         }
     },
 
     initComponent: function () {
         var me = this;
-        var maxwidth = 440;
+        var maxwidth = 455;
 
         me.idpostfix = me.isTemplate ? me.tplChartView.id : me.graphtype;
         me.reference = 'timeseriesproductselection_'+me.idpostfix;
@@ -85,16 +91,18 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
             xtype: 'grid',
             // id: 'selected-timeseries-mapset-dataset-grid_'+me.idpostfix,
             reference: 'selected-timeseries-mapset-dataset-grid_'+me.idpostfix,
-            autoWidth: true,
-            minWidth: 385,
-            maxWidth: maxwidth,
-            minHeight: 100,
-            maxHeight: 225,
+            // autoWidth: true,
+            // minWidth: 385,
+            // maxWidth: maxwidth,
+            width: 455,
+            minHeight: 150,
+            maxHeight: 200,
             scrollable: true,
             hidden: false,
             bind: '{selectedtimeseriesmapsetdatasets}',
-            layout: 'fit',
-            margin: '0 3 10 3',
+            // layout: 'fit',
+            margin: '0 0 5 0',
+            // flex: 1,
 
             viewConfig: {
                 stripeRows: false,
@@ -126,7 +134,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     groupable: false,
                     hideable: false,
                     stopSelection: false,
-                    shrinkWrap: 0,
+                    // shrinkWrap: 0,
                     resizable: false
                 },
                 items: [{
@@ -314,17 +322,17 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 }, {
                     xtype: 'actioncolumn',
                     //header: climatestation.Utils.getTranslation('actions'),   // 'Edit draw properties',
-                    width: 35,
+                    width: 30,
                     align: 'left',
                     hidden: !me.tplChartView || me.matrix,
                     disabled: me.matrix,
                     items: [{
                         // scope: me,
-                        //width: '35',
+                        width: 30,
                         margin: 3,
                         disabled: false,
                         getClass: function (v, meta, rec) {
-                            return 'chart-curve_edit';
+                            return 'chart-curve_edit size24';
                         },
                         getTip: function (v, meta, rec) {
                             return climatestation.Utils.getTranslation('edittimeseriesdrawproperties') + ' ' + rec.get('productcode') + ' - ' + rec.get('subproductcode');
@@ -345,12 +353,13 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 minWidth: 385,
                 maxWidth: maxwidth,
                 maxHeight: 170,
-                scrollable: 'vertical',
+                // scrollable: 'vertical',
                 scrollable: true,
                 hidden: true,
                 bind: '{productcolorschemes}',
-                layout: 'fit',
+                // layout: 'fit',
                 margin: '0 3 10 3',
+                flex: 1,
 
                 viewConfig: {
                     stripeRows: false,
@@ -391,7 +400,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                         groupable: false,
                         hideable: false,
                         stopSelection: false,
-                        shrinkWrap: 0
+                        // shrinkWrap: 0
                     },
                     items: [{
                         xtype: 'actioncolumn',
@@ -426,18 +435,24 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
             autoWidth: true,
             minWidth: 385,
             maxWidth: maxwidth,
-            autoHeight: true,
-            border: 2,
+            // autoHeight: true,
+            height: 270,
+            // flex: 1,
+            // border: 2,
             padding: 5,
             style: {
-                borderColor: '#157FCC',
+                // borderColor: '#157FCC',
                 borderStyle: 'solid'
             }
             // layout: 'vbox'
         });
 
         me.fromtoSelection = {
-            layout: 'hbox',
+            xtype: 'container',
+            layout: {
+                type: 'hbox',
+                align: 'stretch'
+            },
             layoutConfig: {columns: 3, rows: 1},
             margin: 5,
             items: [{
@@ -455,7 +470,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 labelAlign: 'left',
                 labelWidth: 35,
                 style: {"margin-right": "10px"},
-                width: 160,
+                width: 180,
                 format: "d/m/Y",
                 emptyText: 'dd/mm/yyyy ',
                 allowBlank: true,
@@ -473,7 +488,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 labelAlign: 'left',
                 labelWidth: 20,
                 style: {"margin-right": "10px"},
-                width: 160,
+                width: 180,
                 format: "d/m/Y",
                 emptyText: 'dd/mm/yyyy ',
                 allowBlank: true,
@@ -489,7 +504,10 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
         };
 
         me.yearSelection = {
-            layout: 'hbox',
+            xtype: 'container',
+            layout: {
+                type: 'hbox'
+            },
             layoutConfig: {columns: 3, rows: 1},
             margin: 5,
             hidden: false,
@@ -535,7 +553,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 layout: 'vbox',
                 layoutConfig: {columns: 1, rows: 2},
                 // margin: '0 0 0 20',
-                width: 160,
+                width: 190,
                 items: [{
                     xtype: 'datefield',
                     reference: 'ts_from_season',
@@ -543,7 +561,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     labelAlign: 'left',
                     labelWidth: 35,
                     style: {"margin-right": "10px"},
-                    width: 130,
+                    width: 150,
                     format: "d/m",
                     emptyText: 'dd/mm ',
                     allowBlank: true,
@@ -562,7 +580,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     labelAlign: 'left',
                     labelWidth: 35,
                     style: {"margin-right": "10px"},
-                    width: 130,
+                    width: 150,
                     format: "d/m",
                     emptyText: 'dd/mm',
                     allowBlank: true,
@@ -580,8 +598,12 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
         };
 
         me.multipleyearsSelection = {
+            xtype: 'container',
             reference: 'multiyears_selection',
-            layout: 'hbox',
+            layout: {
+                type: 'hbox',
+                align: 'stretch'
+            },
             layoutConfig: {columns: 3, rows: 1},
             margin: 5,
             items: [{
@@ -623,17 +645,24 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 bind: {
                     store: '{years}'
                 },
+                listeners: {
+                    scrolltotop: function (events) {
+                        var records = me.getViewModel().getStore('years').getData().items;
+                        if (records.length > 0)
+                            this.ensureVisible(records[0], {focus: true});
+                    }
+                },
                 defaults: {
                     sortable: true
                 },
                 columns: [
                     {
                         text: '<span class="smalltext">' + climatestation.Utils.getTranslation('available_years')+ '</span>',     // 'Available Years',
-                        width: 115,
+                        width: 108,
                         dataIndex: 'year',
                         menuDisabled: true,
                         sortable: true,
-                        shrinkWrap: 0,
+                        // shrinkWrap: 0,
                         stopSelection: false
                     }
                 ]
@@ -642,7 +671,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 title: '<b>' + climatestation.Utils.getTranslation('season') + '</b>',   // '<b>Season</b>',
                 layout: 'vbox',
                 layoutConfig: {columns: 1, rows: 2},
-                width: 160,
+                width: 190,
                 items: [{
                     xtype: 'datefield',
                     reference: 'ts_from_seasonmulti',
@@ -650,7 +679,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     labelAlign: 'left',
                     labelWidth: 35,
                     style: {"margin-right": "10px"},
-                    width: 130,
+                    width: 150,
                     format: "d/m",
                     emptyText: 'dd/mm ',
                     allowBlank: true,
@@ -669,7 +698,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     labelAlign: 'left',
                     labelWidth: 35,
                     style: {"margin-right": "10px"},
-                    width: 130,
+                    width: 150,
                     format: "d/m",
                     emptyText: 'dd/mm',
                     allowBlank: true,
@@ -823,127 +852,343 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
             me.timeframeselection.add(me.multipleyearsSelection);
         }
 
+        // console.info(me.getViewModel().getStore('timeseriesproducts'));
+
+        me.TimeseriesProductsStore = Ext.create('Ext.data.TreeStore', {
+            model: 'climatestation.model.TimeseriesProduct',
+            autoLoad: false,
+            session: new Ext.data.Session(),
+            loadMask: true,
+            sorters: [ {property: 'display_index', direction: 'ASC'}]  // {property: 'mapsetcode', direction: 'DESC'},
+            ,folderSort: true
+            ,filterer: 'bottomup'
+
+            ,proxy: {
+                type: 'ajax',
+                url: 'analysis/timeseriesproduct',
+                reader: {
+                     type: 'json'
+                    // ,successProperty: 'success'
+                    ,rootProperty: 'children'
+                    // ,messageProperty: 'message'
+                },
+                listeners: {
+                    exception: function(proxy, response, operation){
+                        // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
+                        console.info('TIMESERIES PRODUCT VIEW MODEL - REMOTE EXCEPTION - Reload timeseries product grid!');
+                    }
+                }
+            }
+
+        });
+
+
         me.productcategoriesAvailable = {
-            xtype: 'panel',
-            //id:'productcategories',
-            reference: 'productcategories',
+            xtype: 'treepanel',
+            store: me.TimeseriesProductsStore,
+            // bind:'{timeseriesproducts}',
+            reserveScrollbar: true,
+            useArrows: true,
+            rootVisible: false,
+            multiSelect: false,
+            singleExpand: true,
+            root: {
+                text: 'Products',
+                // id: 'timeseriesproductdata',
+                expanded: true
+            },
+
+            reference: 'availableproducts' + me.id,
             // title: climatestation.Utils.getTranslation('products'),  // 'Products',
             border: true,
             frame: false,
-            autoWidth: true,
-            minWidth: 360,
-            maxWidth: climatestation.Utils.objectExists(me.tplChartView) ? 360 : maxwidth,
-            height: 360,
+            // autoWidth: true,
+            // minWidth: 360,
+            // maxWidth: climatestation.Utils.objectExists(me.tplChartView) ? 360 : maxwidth,
+            width: 455,
+            flex: 1,
+            height: 300,
             collapsible: true,
             bodyPadding: '0 0 0 0',
             style: {
                 "font-size": 16
             },
-            layout: {
-                // layout-specific configs
-                type: 'accordion',
-                titleCollapse: true,
-                animate: false,
-                activeOnTop: true
-            },
+            // layout: {
+            //     // layout-specific configs
+            //     type: 'accordion',
+            //     titleCollapse: true,
+            //     animate: false,
+            //     activeOnTop: true
+            // },
             defaults: {
                 margin: '0 0 1 0',
                 padding: '0 0 0 0'
+            },
+            plugins: {
+                gridfilters: true
             },
             tools: [{
                 type: 'refresh',
                 tooltip: climatestation.Utils.getTranslation('refreshproductlist'),  // 'Refresh product list',
                 callback: function (grid) {
-                    var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore');
-                    //var timeseriesProductsStore = me.getViewModel().getStore('products');
-                    //console.info(timeseriesProductsStore);
-                    if (timeseriesProductsStore.isStore) {
-                        timeseriesProductsStore.proxy.extraParams = {force: true};
-                        timeseriesProductsStore.reload({
+                    // var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore');
+                    // //var timeseriesProductsStore = me.getViewModel().getStore('products');
+                    if (me.TimeseriesProductsStore.isStore) {
+                        me.TimeseriesProductsStore.proxy.extraParams = {force: true};
+                        me.TimeseriesProductsStore.reload({
                             callback: function (records, options, success) {
-                                var productpanelitems = me.lookupReference('productcategories');
-                                productpanelitems.removeAll();
-                                productpanelitems.fireEvent('afterrender');
+                                // var productpanelitems = me.lookupReference('productcategories');
+                                // productpanelitems.removeAll();
+                                // productpanelitems.fireEvent('afterrender');
                             }
                         });
                     }
                 }
             }],
-            listeners: {
-                afterrender: function () {
-                    //console.info(this.getViewModel().getStore('categories'));
-                    var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore'),
-                        delay = 0;
 
-                    var myLoadMask = new Ext.LoadMask({
-                        msg: climatestation.Utils.getTranslation('loading'), // 'Loading...',
-                        target: me
-                    });
-
-                    if (!timeseriesProductsStore.isLoaded()) {
-                        delay = 500;
-                        // myLoadMask.show();
+            header: {
+                padding: '0 10px 0 10px',
+                itemPosition: 0, // after title before collapse tool
+                items: [{
+                    xtype: 'combobox',
+                    store: 'categories',
+                    // fieldLabel: climatestation.Utils.getTranslation('productcategory'),    // TODO add 'Product category',
+                    // labelAlign: 'top',
+                    reference: 'categoriesCombo',
+                    valueField: 'category_id',
+                    displayField: 'descriptive_name',
+                    // itemTpl: '<div class=""><span>{mapsetcode}</span>{descriptive_name}</div>',
+                    width: 165,
+                    padding: 0,
+                    allowBlank: false,
+                    typeAhead: false,
+                    queryMode: 'local',
+                    emptyText: climatestation.Utils.getTranslation('selectanacategory'),    // 'Select a category...'
+                    listeners:{
+                         scope: me.productcategoriesAvailable,
+                         select: function(combo, rec, scope){
+                             // var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore');
+                             // Filter the TimeseriesProductsStore
+                             me.TimeseriesProductsStore.setFilters({
+                                property: 'category_id'
+                                ,value: rec.get('category_id')
+                                ,anyMatch: true
+                             });
+                         }
                     }
-                    else if (timeseriesProductsStore.count() < 1){
-                        timeseriesProductsStore.proxy.extraParams = {force: true};
-                        timeseriesProductsStore.reload({
+                },{
+                    xtype : 'displayfield',
+                    fieldLabel: climatestation.Utils.getTranslation('productcategory'),    // TODO add 'Product category',
+                    padding: '0 0 0 5px',
+                    width: 150,
+                    labelWidth: 130,
+                    labelSeparator : ''
+                }]
+            },
+            // features: [{
+            //     reference: 'tsproductcategories',
+            //     ftype: 'grouping',
+            //     groupHeaderTpl: Ext.create('Ext.XTemplate', '<div class="group-header-style">{name} ({children.length})</div>'),
+            //     hideGroupedHeader: true,
+            //     enableGroupingMenu: false,
+            //     startCollapsed : true,
+            //     depthToIndent: 150,
+            //     groupByText: climatestation.Utils.getTranslation('productcategories')  // 'Product categories'
+            // }],
+            listeners: {
+                afterrender: function (treegrid) {
+                    var categoriesCombo = me.lookupReference('categoriesCombo');
+                    // var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore');
+                    var categoriesStoreData = Ext.getStore('categories').getData();
+                    me.suspendLayouts();
+
+                    // timeseriesProductsStore.proxy.extraParams = {force: true};
+                    if (!me.TimeseriesProductsStore.isLoaded() || me.TimeseriesProductsStore.count() < 1) {
+                        me.TimeseriesProductsStore.load({
                             callback: function (records, options, success) {
+                                categoriesCombo.setValue(categoriesStoreData.items[0].get('category_id'));
+                                // Filter the TimeseriesProductsStore
+                                me.TimeseriesProductsStore.setFilters({
+                                    property: 'category_id'
+                                    , value: categoriesStoreData.items[0].get('category_id')
+                                    , anyMatch: true
+                                });
+                                me.resumeLayouts();
                             }
                         });
                     }
+                    else {
+                        categoriesCombo.setValue(categoriesStoreData.items[0].get('category_id'));
+                        // Filter the TimeseriesProductsStore
+                        me.TimeseriesProductsStore.setFilters({
+                            property: 'category_id'
+                            , value: categoriesStoreData.items[0].get('category_id')
+                            , anyMatch: true
+                        });
+                        me.resumeLayouts();
+                    }
 
-                    var task = new Ext.util.DelayedTask(function () {
-                        if (!timeseriesProductsStore.isLoaded()) {
-                            delay = 500;
-                            task.delay(delay);
+                    // var delay = 0;
+                    // var myLoadMask = new Ext.LoadMask({
+                    //     msg: climatestation.Utils.getTranslation('loading'), // 'Loading...',
+                    //     target: me
+                    // });
+                    //
+                    // if (!timeseriesProductsStore.isLoaded()) {
+                    //     delay = 500;
+                    //     // myLoadMask.show();
+                    // }
+                    // else if (timeseriesProductsStore.count() < 1){
+                    //     timeseriesProductsStore.proxy.extraParams = {force: true};
+                    //     timeseriesProductsStore.reload({
+                    //         callback: function (records, options, success) {
+                    //             myLoadMask.hide();
+                    //         }
+                    //     });
+                    // }
+                    //
+                    // var task = new Ext.util.DelayedTask(function () {
+                    //     if (!timeseriesProductsStore.isLoaded()) {
+                    //         delay = 500;
+                    //         task.delay(delay);
+                    //     }
+                    //     else {
+                    //         myLoadMask.hide();
+                    //         //me.lookupReference('productcategories').removeAll();
+                    //         me.getViewModel().getStore('categories').each(function (record) {
+                    //             me.lookupReference('productcategories').add({
+                    //                 xtype: 'timeseriescategoryproducts',
+                    //                 reference: 'productsPanel_' + record.get('category_id') + '_' + me.id,
+                    //                 categoryid: record.get('category_id'),
+                    //                 categoryname: record.get('descriptive_name'),
+                    //                 title: '<span class="categorytitle"> ' + record.get('descriptive_name') + '</span>',
+                    //                 graphtype: me.graphtype,
+                    //                 cumulative: me.cumulative,
+                    //                 multiplevariables: me.multiplevariables
+                    //             });
+                    //         });
+                    //     }
+                    // });
+                    // task.delay(delay);
+                }
+            },
+            columns: [{
+                xtype: 'treecolumn', // this is so we know which column will show the tree
+                text: '',
+                width: 25,
+                // flex: 2,
+                sortable: true
+            },{
+                xtype: 'actioncolumn',
+                hidden: false,
+                width: 25,
+                align: 'center',
+                // shrinkWrap: 0,
+                padding: 0,
+                variableRowHeight: true,
+                items: [{
+                    getClass: function (v, meta, rec) {
+                        if (!rec.get('leaf')){
+                            return '';
                         }
                         else {
-                            myLoadMask.hide();
-                            //me.lookupReference('productcategories').removeAll();
-                            me.getViewModel().getStore('categories').each(function (record) {
-                                me.lookupReference('productcategories').add({
-                                    xtype: 'timeseriescategoryproducts',
-                                    reference: 'productsPanel_' + record.get('category_id') + '_' + me.id,
-                                    categoryid: record.get('category_id'),
-                                    categoryname: record.get('descriptive_name'),
-                                    title: '<span class="categorytitle"> ' + record.get('descriptive_name') + '</span>',
-                                    graphtype: me.graphtype,
-                                    cumulative: me.cumulative,
-                                    multiplevariables: me.multiplevariables
-                                });
-                            });
+                            return 'far fa-plus-circle green';
                         }
-                    });
-                    task.delay(delay);
-                }
-            }
+                    },
+                    getTip: function (v, meta, rec) {
+                        if (!rec.get('leaf')){
+                            return '';
+                        }
+                        else {
+                            return climatestation.Utils.getTranslation('add_to_selected');   // 'Add to selected'
+                        }
+                    },
+                    handler: 'TimeseriesProductsGridRowClick'       //  rowclick event takes over!
+                }]
+            },{
+                xtype: 'templatecolumn',
+                width: 350,
+                //minWidth: 275,
+                cellWrap: true,
+                tpl: new Ext.XTemplate(
+                    '<tpl if="leaf">',
+                    '<b>{product_descriptive_name}</b>',
+                    '<tpl else>',
+                    '<b>{product_descriptive_name}</b>',
+                    '</tpl>',
+                    '<tpl if="version != \'undefined\'">',
+                    '<b class="smalltext"> - {version}</b>',
+                    '</tpl>',
+                    '<tpl if="leaf">',
+                    '</br>',
+                    '<b class="smalltext" style="color:darkgrey;">{productcode} - {subproductcode}</b>',
+                    '<b class="smalltext"> - {mapset_name}</b>',
+                    '<tpl else>',
+                    '<b class="smalltext" style="color:darkgrey;"> - {productcode}</b>',
+                    '</br>',
+                    '<b class="smalltext">   {mapset_name}</b>',
+                    '</tpl>',
+
+                    // ,'<span>&nbsp;&nbsp;(display_index: <b style="color:black">{display_index}</b>)</span>'
+                    //'<tpl for="productmapsets">',
+                    //'<b class="smalltext"> - {descriptive_name}</b>',
+                    //'</tpl>'
+                )
+            },{
+                xtype: 'actioncolumn',
+                //header: climatestation.Utils.getTranslation('active'),   // 'Active',
+                hidden: false,
+                hideable: false,
+                width: 25,
+                align: 'center',
+                // shrinkWrap: 0,
+                variableRowHeight:true,
+                items: [{
+                    getClass: function(v, meta, rec) {
+                        return 'info';
+                    },
+                    getTip: function(v, meta, rec) {
+                        if (rec.get('leaf')){
+                            return rec.get('product_description');
+                        }
+                        else {
+                            return rec.get('group_product_description');
+                        }
+                    },
+                    handler: function(grid, rowIndex, colIndex, icon, e, record) {
+
+                    }
+                }]
+            }]
         };
 
         if (climatestation.Utils.objectExists(me.tplChartView)){
+            // me.layout = {
+            //     type: 'table',
+            //     columns: 2,
+            //     tdAttrs: {
+            //         valign: 'top'
+            //     }
+            // };
             me.layout = {
-                type: 'table',
-                columns: 2,
-                tdAttrs: {
-                    valign: 'top'
-                }
-            };
+                type: 'hbox',
+                align: 'stretch'
+            }
 
             me.items = [
-            {
-                xtype: 'container',
-                items: [
-                    me.productcategoriesAvailable
-                ]
-            },
-            {
+                me.productcategoriesAvailable
+                // xtype: 'container',
+                // items: [
+                //     me.productcategoriesAvailable
+                // ]
+            , {
                 xtype: 'container',
                 items: [
                     me.selectedtimeseries,
                     me.colorschemesProduct,
                     me.timeframeselection
                 ]
-            }
-            ];
+            }];
         }
         else {
             me.items = [
@@ -961,225 +1206,225 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
 
 
 
-Ext.define("climatestation.view.analysis.timeseriesCategoryProducts",{
-    extend: "Ext.grid.Panel",
-
-    requires: [
-        "climatestation.view.analysis.timeseriesProductSelectionController",
-        "climatestation.view.analysis.timeseriesProductSelectionModel",
-        'Ext.util.DelayedTask',
-        'climatestation.Utils'
-    ],
-
-    controller: "analysis-timeseriesproductselection",
-    viewModel: {
-        type: "analysis-timeseriesproductselection"
-    },
-    xtype: 'timeseriescategoryproducts',
-
-    //title: climatestation.Utils.getTranslation('products'),  // 'Products',
-    //reference: 'TimeSeriesCategoryProductsGrid',
-
-    //bind: '{products}',
-    session: true,
-    viewConfig: {
-        stripeRows: false,
-        enableTextSelection: true,
-        draggable: false,
-        markDirty: false,
-        resizable: false,
-        disableSelection: false,
-        trackOver: true
-    },
-    layout: 'fit',
-    autoWidth: true,
-    maxWidth: 440,
-    height: 400,
-    hideHeaders: true,
-
-    //selType: 'checkboxmodel',
-    //selModel: {
-    //    allowDeselect: true,
-    //    checkOnly: false,
-    //    mode: 'SIMPLE'
-    //    //,listeners: {}
-    //},
-
-    collapsible: false,
-    enableColumnMove: false,
-    enableColumnResize: true,
-    multiColumnSort: false,
-    columnLines: false,
-    rowLines: true,
-    frame: false,
-    border: false,
-    bodyBorder: false,
-    forceFit: true,
-    reserveScrollbar: true,
-
-    //tools: [{
-    //    type: 'refresh',
-    //    tooltip: climatestation.Utils.getTranslation('refreshproductlist'),  // 'Refresh product list',
-    //    callback: function (grid) {
-    //        var timeseriesProductsStore = grid.getStore('products');
-    //
-    //        if (timeseriesProductsStore.isStore) {
-    //            timeseriesProductsStore.load();
-    //        }
-    //    }
-    //}],
-    //
-    //onRender: function() {
-    //    var me = this;
-    //    me.callParent(arguments);
-    //    if(me.border){
-    //        me.el.setStyle("border","1px solid #333");
-    //    }
-    //
-    //},
-
-    cls: 'group-header-style',      // grid-color-yellow
-    style: {"margin-right": "15px", cursor: 'pointer'},
-
-    features: [{
-        reference: 'timeseriesproductcategories',
-        ftype: 'grouping',
-        groupHeaderTpl: Ext.create('Ext.XTemplate',
-            '<div class="product-group-header-style">',
-                //'{[children[0].product_descriptive_name]}',
-            //'<tpl for="children">',
-            //    '<tpl if="timeseries_role == \'Initial\'">',
-            //        '<b>{product_descriptive_name}</b>',
-            //    '</tpl>',
-            //'</tpl>',
-            ' {name} <span style="color:black; font-size:12px;"> ({children.length})</span></div>'
-        ),
-        hideGroupedHeader: true,
-        enableGroupingMenu: false,
-        startCollapsed: true,
-        depthToIndent: 150
-        //,groupByText: climatestation.Utils.getTranslation('productcategories')  // 'Product category'
-    }],
-
-    //plugins: [{
-    //    ptype: 'rowexpander',
-    //    //cellWrap:true,
-    //    //layout:'fit',
-    //    useArrows: true,
-    //    rowBodyTpl: [
-    //        '<div class="subproducts"></div>'
-    //    ]
-    //    //rowBodyTpl: new Ext.XTemplate(
-    //    //    '<span class="smalltext">' +
-    //    //    '<p>{description}</p>' +
-    //    //    '</span>'
-    //    //)
-    //}],
-    //
-    //listeners: {
-    //    //afterrender: 'loadTimeseriesProductsGrid',
-    //    rowclick: 'TimeseriesProductsGridRowClick'
-    //},
-
-    categoryid: null,
-    categoryname: null,
-    graphtype: '',
-    cumulative: false,
-    multiplevariables: false,
-
-    initComponent: function () {
-        var me = this;
-        var productsStore = me.getViewModel().get('products');
-        me.store = productsStore;
-
-        me.listeners = {
-            rowclick: 'TimeseriesProductsGridRowClick',
-            beforerender: function(){
-                var delay = 0;
-                if (productsStore == null || !productsStore.isLoaded()){
-                    delay = 1000;
-                }
-
-                var task = new Ext.util.DelayedTask(function() {
-                    //if (productsStore.getFilters().items.length == 0) {
-                    productsStore.setFilters({
-                        property: 'category_id'
-                        ,value: me.categoryid
-                        ,anyMatch: true
-                    });
-                    //}
-                    if (!me.multiplevariables){
-                        productsStore.setFilters({
-                            property: 'date_format'
-                            ,value: 'YYYMMDD'
-                            ,anyMatch: true
-                        });
-                    }
-                    productsStore.setSorters({property: 'display_index', direction: 'ASC'});
-                    me.store = productsStore;
-                });
-                task.delay(delay);
-            }
-        };
-
-
-        me.columns = [{
-            xtype: 'actioncolumn',
-            hidden: false,
-            width: 25,
-            align: 'center',
-            shrinkWrap: 0,
-            padding: 0,
-            variableRowHeight: true,
-            items: [{
-                getClass: function (v, meta, rec) {
-                    return 'add20';
-                },
-                getTip: function (v, meta, rec) {
-                    return climatestation.Utils.getTranslation('add_to_selected');   // 'Add to selected'
-                }
-                //,handler: 'TimeseriesProductsGridRowClick'       //  rowclick event takes over!
-            }]
-        },{
-            xtype: 'templatecolumn',
-            width: 275,
-            //minWidth: 275,
-            cellWrap: true,
-            tpl: new Ext.XTemplate(
-                '<b>{product_descriptive_name}</b>',
-                '<tpl if="version != \'undefined\'">',
-                '<b class="smalltext"> - {version}</b>',
-                '</tpl>',
-                '</br>',
-                '<b class="smalltext" style="color:darkgrey;">{productcode} - {subproductcode}</b>',
-                '<b class="smalltext"> - {mapset_name}</b>'
-                // ,'<span>&nbsp;&nbsp;(display_index: <b style="color:black">{display_index}</b>)</span>'
-                //'<tpl for="productmapsets">',
-                //'<b class="smalltext"> - {descriptive_name}</b>',
-                //'</tpl>'
-            )
-        },{
-            xtype: 'actioncolumn',
-            //header: climatestation.Utils.getTranslation('active'),   // 'Active',
-            hidden: false,
-            hideable: false,
-            width: 25,
-            align: 'center',
-            shrinkWrap: 0,
-            variableRowHeight:true,
-            items: [{
-                getClass: function(v, meta, rec) {
-                    return 'info';
-                },
-                getTip: function(v, meta, rec) {
-                    return rec.get('product_description');
-                },
-                handler: function(grid, rowIndex, colIndex, icon, e, record) {
-
-                }
-            }]
-        }];
-
-        me.callParent();
-    }
-});
+// Ext.define("climatestation.view.analysis.timeseriesCategoryProducts",{
+//     extend: "Ext.grid.Panel",
+//
+//     requires: [
+//         "climatestation.view.analysis.timeseriesProductSelectionController",
+//         "climatestation.view.analysis.timeseriesProductSelectionModel",
+//         'Ext.util.DelayedTask',
+//         'climatestation.Utils'
+//     ],
+//
+//     controller: "analysis-timeseriesproductselection",
+//     viewModel: {
+//         type: "analysis-timeseriesproductselection"
+//     },
+//     xtype: 'timeseriescategoryproducts',
+//
+//     //title: climatestation.Utils.getTranslation('products'),  // 'Products',
+//     //reference: 'TimeSeriesCategoryProductsGrid',
+//
+//     //bind: '{products}',
+//     session: true,
+//     viewConfig: {
+//         stripeRows: false,
+//         enableTextSelection: true,
+//         draggable: false,
+//         markDirty: false,
+//         resizable: false,
+//         disableSelection: false,
+//         trackOver: true
+//     },
+//     layout: 'fit',
+//     autoWidth: true,
+//     maxWidth: 440,
+//     height: 400,
+//     hideHeaders: true,
+//
+//     //selType: 'checkboxmodel',
+//     //selModel: {
+//     //    allowDeselect: true,
+//     //    checkOnly: false,
+//     //    mode: 'SIMPLE'
+//     //    //,listeners: {}
+//     //},
+//
+//     collapsible: false,
+//     enableColumnMove: false,
+//     enableColumnResize: true,
+//     multiColumnSort: false,
+//     columnLines: false,
+//     rowLines: true,
+//     frame: false,
+//     border: false,
+//     bodyBorder: false,
+//     forceFit: true,
+//     reserveScrollbar: true,
+//
+//     //tools: [{
+//     //    type: 'refresh',
+//     //    tooltip: climatestation.Utils.getTranslation('refreshproductlist'),  // 'Refresh product list',
+//     //    callback: function (grid) {
+//     //        var timeseriesProductsStore = grid.getStore('products');
+//     //
+//     //        if (timeseriesProductsStore.isStore) {
+//     //            timeseriesProductsStore.load();
+//     //        }
+//     //    }
+//     //}],
+//     //
+//     //onRender: function() {
+//     //    var me = this;
+//     //    me.callParent(arguments);
+//     //    if(me.border){
+//     //        me.el.setStyle("border","1px solid #333");
+//     //    }
+//     //
+//     //},
+//
+//     cls: 'group-header-style',      // grid-color-yellow
+//     style: {"margin-right": "15px", cursor: 'pointer'},
+//
+//     features: [{
+//         reference: 'timeseriesproductcategories',
+//         ftype: 'grouping',
+//         groupHeaderTpl: Ext.create('Ext.XTemplate',
+//             '<div class="product-group-header-style">',
+//                 //'{[children[0].product_descriptive_name]}',
+//             //'<tpl for="children">',
+//             //    '<tpl if="timeseries_role == \'Initial\'">',
+//             //        '<b>{product_descriptive_name}</b>',
+//             //    '</tpl>',
+//             //'</tpl>',
+//             ' {name} <span style="color:black; font-size:12px;"> ({children.length})</span></div>'
+//         ),
+//         hideGroupedHeader: true,
+//         enableGroupingMenu: false,
+//         startCollapsed: true,
+//         depthToIndent: 150
+//         //,groupByText: climatestation.Utils.getTranslation('productcategories')  // 'Product category'
+//     }],
+//
+//     //plugins: [{
+//     //    ptype: 'rowexpander',
+//     //    //cellWrap:true,
+//     //    //layout:'fit',
+//     //    useArrows: true,
+//     //    rowBodyTpl: [
+//     //        '<div class="subproducts"></div>'
+//     //    ]
+//     //    //rowBodyTpl: new Ext.XTemplate(
+//     //    //    '<span class="smalltext">' +
+//     //    //    '<p>{description}</p>' +
+//     //    //    '</span>'
+//     //    //)
+//     //}],
+//     //
+//     //listeners: {
+//     //    //afterrender: 'loadTimeseriesProductsGrid',
+//     //    rowclick: 'TimeseriesProductsGridRowClick'
+//     //},
+//
+//     categoryid: null,
+//     categoryname: null,
+//     graphtype: '',
+//     cumulative: false,
+//     multiplevariables: false,
+//
+//     initComponent: function () {
+//         var me = this;
+//         var productsStore = me.getViewModel().get('products');
+//         me.store = productsStore;
+//
+//         me.listeners = {
+//             rowclick: 'TimeseriesProductsGridRowClick',
+//             beforerender: function(){
+//                 var delay = 0;
+//                 if (productsStore == null || !productsStore.isLoaded()){
+//                     delay = 1000;
+//                 }
+//
+//                 var task = new Ext.util.DelayedTask(function() {
+//                     //if (productsStore.getFilters().items.length == 0) {
+//                     productsStore.setFilters({
+//                         property: 'category_id'
+//                         ,value: me.categoryid
+//                         ,anyMatch: true
+//                     });
+//                     //}
+//                     if (!me.multiplevariables){
+//                         productsStore.setFilters({
+//                             property: 'date_format'
+//                             ,value: 'YYYMMDD'
+//                             ,anyMatch: true
+//                         });
+//                     }
+//                     productsStore.setSorters({property: 'display_index', direction: 'ASC'});
+//                     me.store = productsStore;
+//                 });
+//                 task.delay(delay);
+//             }
+//         };
+//
+//
+//         me.columns = [{
+//             xtype: 'actioncolumn',
+//             hidden: false,
+//             width: 25,
+//             align: 'center',
+//             shrinkWrap: 0,
+//             padding: 0,
+//             variableRowHeight: true,
+//             items: [{
+//                 getClass: function (v, meta, rec) {
+//                     return 'far fa-plus-circle green';
+//                 },
+//                 getTip: function (v, meta, rec) {
+//                     return climatestation.Utils.getTranslation('add_to_selected');   // 'Add to selected'
+//                 }
+//                 //,handler: 'TimeseriesProductsGridRowClick'       //  rowclick event takes over!
+//             }]
+//         },{
+//             xtype: 'templatecolumn',
+//             width: 275,
+//             //minWidth: 275,
+//             cellWrap: true,
+//             tpl: new Ext.XTemplate(
+//                 '<b>{product_descriptive_name}</b>',
+//                 '<tpl if="version != \'undefined\'">',
+//                 '<b class="smalltext"> - {version}</b>',
+//                 '</tpl>',
+//                 '</br>',
+//                 '<b class="smalltext" style="color:darkgrey;">{productcode} - {subproductcode}</b>',
+//                 '<b class="smalltext"> - {mapset_name}</b>'
+//                 // ,'<span>&nbsp;&nbsp;(display_index: <b style="color:black">{display_index}</b>)</span>'
+//                 //'<tpl for="productmapsets">',
+//                 //'<b class="smalltext"> - {descriptive_name}</b>',
+//                 //'</tpl>'
+//             )
+//         },{
+//             xtype: 'actioncolumn',
+//             //header: climatestation.Utils.getTranslation('active'),   // 'Active',
+//             hidden: false,
+//             hideable: false,
+//             width: 25,
+//             align: 'center',
+//             shrinkWrap: 0,
+//             variableRowHeight:true,
+//             items: [{
+//                 getClass: function(v, meta, rec) {
+//                     return 'info';
+//                 },
+//                 getTip: function(v, meta, rec) {
+//                     return rec.get('product_description');
+//                 },
+//                 handler: function(grid, rowIndex, colIndex, icon, e, record) {
+//
+//                 }
+//             }]
+//         }];
+//
+//         me.callParent();
+//     }
+// });

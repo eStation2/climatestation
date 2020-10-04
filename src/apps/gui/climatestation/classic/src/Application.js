@@ -50,7 +50,8 @@ Ext.define('climatestation.Application', {
         ,'DataAcquisitionsStore'    // no autoload
         ,'IngestionsStore'          // no autoload
         ,'ProcessingStore'          // no autoload
-        ,'TimeseriesProductsStore'  // no autoload
+        // ,'TimeseriesProductsStore'  // no autoload
+        ,'TSDrawPropertiesStore'
         ,"ColorSchemesStore"
         ,'DataSetsStore'            // no autoload
         ,'UserWorkspacesStore'      // no autoload
@@ -68,20 +69,21 @@ Ext.define('climatestation.Application', {
         var me = this;
         //console.info(me);
 
-        Ext.override(Ext.tip.QuickTip, {
-            // dismissDelay: 20000
-            shadow: false
-        });
+        // Ext.override(Ext.tip.QuickTip, {
+        //     // dismissDelay: 20000
+        //     shadow: false
+        // });
 
         Ext.ariaWarn = Ext.emptyFn;
 
         Ext.tip.QuickTipManager.init();
         // Apply a set of config properties to the singleton
-        // Ext.apply(Ext.tip.QuickTipManager.getQuickTip(), {
-        //     shadow: false,
-        //     frame: true,
-        //     showDelay: 50      // Show 50ms after entering target
-        // });
+        Ext.apply(Ext.tip.QuickTipManager.getQuickTip(), {
+            shadow: false,
+            frame: true,
+            trackMouse: true,
+            showDelay: 50      // Show 50ms after entering target
+        });
 
 
         Ext.setGlyphFontFamily('FontAwesomePro');

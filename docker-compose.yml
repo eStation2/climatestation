@@ -16,7 +16,9 @@ services:
     ports:
     - 8080:80
     restart: unless-stopped
-    volumes: 
+#    privileged: true
+    volumes:
+#    - /var/run/docker.sock:/var/run/docker.sock:rw
     - ./log/web:/var/log/apache2
     - ./src:/var/www/climatestation:rw
     - ${DATA_VOLUME}:/data:rw
@@ -32,6 +34,7 @@ services:
     restart: unless-stopped
     volumes:
     - ./log/mapserver:/var/log/apache2
+#    - /data/mapserver/cgi-bin:/usr/lib/cgi-bin:rw
 
   postgres:
     build:
@@ -58,12 +61,14 @@ services:
     ports:
     - 5432:5432
     restart: unless-stopped
+#    privileged: true
     volumes:
     - ${DBDUMP_VOLUME}:/climatestation/db_dump:rw
     - ${CS_VOLUME}:/climatestation:rw
     - ./src:/var/www/climatestation:rw
     - cs-docker-postgresql12-volume:/var/lib/postgresql:rw
     - ./log/postgres:/var/log/climatestation:rw
+#    - "/var/run/docker.sock:/var/run/docker.sock"-
 
 # create an external docker volume: docker volume create --name cs-docker-postgresql12-volume -d local
 volumes:

@@ -29,10 +29,10 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
     resizable: true,
     //resizeHandles: 'n,s',
     scrollable: false,
-    height: Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-130 : 700,  // 600,
-    minHeight: 500,
-    maxHeight: 700,
-    width: 1220, // 1275,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-130 : 625,  // 600,
+    minHeight: 625,
+    // maxHeight: 700,
+    width: 1300,
 
     border:false,
     frame: false,
@@ -53,8 +53,8 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
         var user = climatestation.getUser();
 
         me.title = '<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('layeradministration') + '</div>';
-        me.height = Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830;  // 600,
-        me.width = climatestation.globals['typeinstallation'].toLowerCase() == 'jrc_online' ? 1000: 1220;
+        me.height = Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-130 : 625;  // 600,
+        me.width = climatestation.globals['typeinstallation'].toLowerCase() == 'jrc_online' ? 1080: 1300;
 
         me.tools = [
         {
@@ -70,8 +70,8 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
                 xtype: 'button',
                 text: climatestation.Utils.getTranslation('addlayer'),    // 'Add layer',
                 name: 'addlayer',
-                iconCls: 'far fa-plus-circle',
-                style: {color: 'green'},
+                iconCls: 'far fa-plus-circle green',
+                // style: {color: 'green'},
                 hidden: false,
                 // glyph: 'xf055@FontAwesome',
                 scale: 'medium',
@@ -130,7 +130,7 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
 
             columns: [{
                 xtype: 'actioncolumn',
-                header: climatestation.Utils.getTranslation('actions'),   // 'Edit layer',
+                header: climatestation.Utils.getTranslation('edit'),   // 'Edit layer',
                 menuDisabled: true,
                 sortable: true,
                 variableRowHeight : true,
@@ -155,21 +155,6 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
                         return climatestation.Utils.getTranslation('editlayerproperties') + ' ' + rec.get('layername');
                     },
                     handler: 'editLayer'
-                },{
-                    // scope: me,
-                    width:'45',
-                    disabled: false,
-                    getClass: function(v, meta, rec) {
-                        if (rec.get('deletable') || rec.get('defined_by') != 'JRC' || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                            return 'far fa-trash-alt red';
-                        }
-                    },
-                    getTip: function(v, meta, rec) {
-                        if (rec.get('deletable') || rec.get('defined_by') != 'JRC' || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                            return climatestation.Utils.getTranslation('deletelayer') + ' ' + rec.get('layername');
-                        }
-                    },
-                    handler: 'deleteLayer'
                 }]
             }, {
                 text: climatestation.Utils.getTranslation('layername'),  // 'Layer name',
@@ -298,9 +283,9 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
                 header: climatestation.Utils.getTranslation('autoloadinmapview'),  // 'Auto load in Mapview',
                 menuDisabled: true,
                 sortable: true,
-                variableRowHeight : true,
-                draggable:false,
-                groupable:false,
+                variableRowHeight: true,
+                draggable: false,
+                groupable: false,
                 hideable: true,
                 hidden: (climatestation.globals['typeinstallation'].toLowerCase() == 'jrc_online' || climatestation.globals['typeinstallation'].toLowerCase() == 'online'),
                 width: 135,
@@ -310,25 +295,54 @@ Ext.define("climatestation.view.analysis.layerAdmin",{
                     // scope: me,
                     disabled: false,
                     style: {"line-height": "70px"},
-                    getClass: function(v, meta, rec) {
+                    getClass: function (v, meta, rec) {
                         if (rec.get('open_in_mapview')) {
                             return 'far fa-check-square green';   // 'activated';
                         } else {
                             return 'far fa-square green';   // 'deactivated';
                         }
                     },
-                    getTip: function(v, meta, rec) {
+                    getTip: function (v, meta, rec) {
                         if (rec.get('open_in_mapview')) {
                             return climatestation.Utils.getTranslation('tipnotautoloadinmapview');     // 'Do not auto load in new opened Mapviews';
                         } else {
                             return climatestation.Utils.getTranslation('tipautoloadinmapview');     // 'Auto load in new opened Mapviews';
                         }
                     },
-                    handler: function(grid, rowIndex, colIndex) {
+                    handler: function (grid, rowIndex, colIndex) {
                         var rec = grid.getStore().getAt(rowIndex),
                             action = (rec.get('open_in_mapview') ? 'deactivated' : 'activated');
                         rec.get('open_in_mapview') ? rec.set('open_in_mapview', false) : rec.set('open_in_mapview', true);
                     }
+                }]
+            },{
+                xtype: 'actioncolumn',
+                header: climatestation.Utils.getTranslation('delete'),   // 'Edit layer',
+                menuDisabled: true,
+                sortable: true,
+                variableRowHeight : true,
+                draggable:false,
+                groupable:false,
+                hideable: false,
+                width: 80,
+                align: 'center',
+                stopSelection: false,
+
+                items: [{
+                    // scope: me,
+                    width:'45',
+                    disabled: false,
+                    getClass: function(v, meta, rec) {
+                        if (rec.get('deletable') || rec.get('defined_by') != 'JRC' || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
+                            return 'far fa-trash-alt red';
+                        }
+                    },
+                    getTip: function(v, meta, rec) {
+                        if (rec.get('deletable') || rec.get('defined_by') != 'JRC' || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
+                            return climatestation.Utils.getTranslation('deletelayer') + ' ' + rec.get('layername');
+                        }
+                    },
+                    handler: 'deleteLayer'
                 }]
             }]
         }];

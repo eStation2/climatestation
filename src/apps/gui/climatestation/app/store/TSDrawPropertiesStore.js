@@ -11,9 +11,11 @@ Ext.define('climatestation.store.TSDrawPropertiesStore', {
 
     storeId : 'TSDrawPropertiesStore',
 
-    autoLoad: false,
+    autoLoad: true,
     autoSync: false,
-    //session: true,
+    // session: new Ext.data.Session(),
+
+    // asynchronousLoad: false,
 
     proxy: {
         type: 'rest',
@@ -49,12 +51,12 @@ Ext.define('climatestation.store.TSDrawPropertiesStore', {
             //console.info('record updated!');
         },
         write: function(store, operation){
-            // var result = Ext.JSON.decode(operation.getResponse().responseText);
-            var result = operation.getResponse().responseJson;
-            if (!operation.success) {
-                //console.info(store);
-                //console.info(operation);
-            }
+            // // var result = Ext.JSON.decode(operation.getResponse().responseText);
+            // var result = operation.getResponse().responseJson;
+            // if (!operation.success) {
+            //     //console.info(store);
+            //     //console.info(operation);
+            // }
         }
     }
 });

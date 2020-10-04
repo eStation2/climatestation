@@ -1,5 +1,5 @@
 Ext.define('climatestation.store.TimeseriesProductsStore', {
-    extend  : 'Ext.data.Store',
+    extend  : 'Ext.data.TreeStore',
     alias: 'store.timeseriesproducts',
 
     requires: [
@@ -10,11 +10,11 @@ Ext.define('climatestation.store.TimeseriesProductsStore', {
 
     storeId : 'TimeseriesProductsStore'
 
-    //,session: false
+    // ,session: new Ext.data.Session()
     ,autoLoad: false
-    ,loadMask: false
+    ,loadMask: true
 
-    //,sorters: {property: 'order_index', direction: 'DESC'}
+    ,sorters: {property: 'display_index', direction: 'ASC'}
     //
     //,grouper:{
     //         groupFn : function (item) {
@@ -27,14 +27,17 @@ Ext.define('climatestation.store.TimeseriesProductsStore', {
     //         sortProperty: 'productmapsetid'
     //}
 
+    ,folderSort: true
+    ,filterer: 'bottomup'
+
     ,proxy: {
         type: 'ajax',
         url: 'analysis/timeseriesproduct',
         reader: {
              type: 'json'
-            ,successProperty: 'success'
-            ,rootProperty: 'products'
-            ,messageProperty: 'message'
+            // ,successProperty: 'success'
+            ,rootProperty: 'children'
+            // ,messageProperty: 'message'
         },
         listeners: {
             exception: function(proxy, response, operation){

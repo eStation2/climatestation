@@ -34,7 +34,7 @@ Ext.define("climatestation.view.analysis.analysisMain",{
     frame: false,
     border: false,
     bodyPadding: '1 0 0 0',
-    ui: 'workspace',
+    // ui: 'workspace',
     tabPosition: 'top',
     // tabRotation: 'default', // 0,
 
@@ -48,9 +48,9 @@ Ext.define("climatestation.view.analysis.analysisMain",{
                 Ext.data.StoreManager.lookup('LayersStore').load();
                 Ext.data.StoreManager.lookup('LegendsStore').load();
                 Ext.data.StoreManager.lookup('LogosStore').load();
-                Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
+                // Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
                 Ext.data.StoreManager.lookup('colorschemes').load();
-                Ext.data.StoreManager.lookup('ProductNavigatorStore').load();
+                // Ext.data.StoreManager.lookup('ProductNavigatorStore').load();
                 // Ext.data.StoreManager.lookup('UserWorkspacesStore').load();
             }
         });
@@ -87,12 +87,12 @@ Ext.define("climatestation.view.analysis.analysisMain",{
                 var bar = tabpanel.tabBar;
 
                 // bar.insert(tabpanel.tabBar.items.length, [{
-                bar.insert(0, [{
+                bar.add({
                 //     xtype: 'component',
                 //     html: '&nbsp'
                 // }, {
                     xtype: 'toolbar',
-                    padding: '6px 0px 0px 0px',
+                    padding: '6px 0px 2px 0px',
                     margin:'0px 0px 0px 10px',
                     enableFocusableContainer: true,
                     focusable: true,
@@ -105,6 +105,47 @@ Ext.define("climatestation.view.analysis.analysisMain",{
                     },
                     listeners: null,
                     items: [{
+                        margin: '0 15 0 0',
+                        height: 32,
+                        width: 32,
+                        ui: 'menubtn',
+                        scale: 'large',
+                        iconCls: 'far fa-bars',
+                        id: 'analysis-menu-btn',
+                        arrowVisible: false,
+                        menu: {
+                            // ui: 'mainmenu',
+                            items: [
+                                {
+                                    text: 'Legends',
+                                    iconCls: 'legends',
+                                    handler: function(){
+                                        var newLegendAdminWin = new climatestation.view.analysis.legendAdmin();
+                                        me.add(newLegendAdminWin);
+                                        newLegendAdminWin.show();
+                                    }
+                                },
+                                {
+                                    text: 'Layers',
+                                    iconCls: 'layers',
+                                    handler: function(){
+                                        var newLayerAdminWin = new climatestation.view.analysis.layerAdmin();
+                                        me.add(newLayerAdminWin);
+                                        newLayerAdminWin.show();
+                                    }
+                                },
+                                {
+                                    text: 'Logos',
+                                    iconCls: 'far fa-globe-africa',
+                                    handler: function(){
+                                        var newLogosAdminWin = new climatestation.view.analysis.logoAdmin();
+                                        me.add(newLogosAdminWin);
+                                        newLogosAdminWin.show();
+                                    }
+                                },
+                            ]
+                        }
+                    },{
                         xtype: 'button',
                         reference: 'analysismain_refworkspacesbtn',
                         text:  climatestation.Utils.getTranslation('ref_workspaces'), // 'REF WORKSPACES',
@@ -137,7 +178,7 @@ Ext.define("climatestation.view.analysis.analysisMain",{
                             }
                         }
                     }]
-                }]);
+                });
 
                 tabpanel.insert(1,{
                     xtype: 'analysisworkspace',

@@ -138,13 +138,13 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
     createSelectedProductsAndTimeFramePanel: function(){
         var me = this.getView();
 
-        return Ext.create('Ext.panel.Panel', {
+        return Ext.create('Ext.window.Window', {
             title: climatestation.Utils.getTranslation('graphtemplate_products_timeframe_selections'),     // 'Graph template product and time frame selections',
             id: me.getId()+'-select_products_timeframe',
             reference: me.getId()+'-select_products_timeframe',
-            width: 765, // document.getElementById(me.id + "-body").offsetWidth-3,
+            // width: 880, // document.getElementById(me.id + "-body").offsetWidth-3,
             minHeight: 430, // document.getElementById(me.id + "-body").offsetHeight-3,
-            // autoWidth: true,
+            autoWidth: true,
             // autoHeight: true,
             margin: '2 2 2 5',
             maximizable: false,
@@ -158,31 +158,32 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
             closable: true,
             closeAction: 'hide',
             draggable: true,
-            // constrain: true,
-            constrainHeader: true,
+            // constrainHeader: true,
             alwaysOnTop: true,
             autoShow: false,
             frame: false,
             frameHeader : false,
             border: false,
             shadow: false,
-            componentCls: 'rounded-box',
-            header: {
-                cls: 'rounded-box-header',
-                style: {
-                    'background-color': '#A9DEEC !important;',
-                    'font-weight':'bold',
-                    'color':'#000',
-                    'font-size': '13px;'
-                }
-            },
+            modal: true,
+            cls: 'rounded-box',
+            // componentCls: 'rounded-box',
+            // header: {
+            //     cls: 'rounded-box-header',
+            //     style: {
+            //         'background-color': '#A9DEEC !important;',
+            //         'font-weight':'bold',
+            //         'color':'#000',
+            //         'font-size': '13px;'
+            //     }
+            // },
             dockedItems:  [{
                 dock: 'bottom',
                 xtype: 'toolbar',
                 items : ['->',{
                     text: climatestation.Utils.getTranslation('update_graph'), // 'Update graph',
                     // scope:me,
-                    iconCls: 'far fa-save',    // 'icon-disk',
+                    iconCls: 'far fa-save lightblue',    // 'icon-disk',
                     style: { color: 'lightblue' },
                     scale: 'medium',
                     disabled: false,
@@ -2396,7 +2397,8 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
                 closable: true,
                 closeAction: 'hide',
                 draggable: true,
-                constrain: true,
+                constrainHeader: true,
+                constrain: false,
                 alwaysOnTop: true,
                 autoShow: false,
                 frame: false,

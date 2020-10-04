@@ -11,7 +11,6 @@ Ext.define("climatestation.view.analysis.workspace",{
         'climatestation.view.analysis.graphTemplateAdmin',
         'climatestation.view.analysis.mapTemplateAdmin',
         'climatestation.view.analysis.timeseriesChartSelection'
-        // 'climatestation.view.analysis.timeseriesChartSelection'
     ],
     
     controller: "analysis-workspace",
@@ -20,9 +19,7 @@ Ext.define("climatestation.view.analysis.workspace",{
     },
     xtype: 'analysisworkspace',
 
-    // id: 'analysisworkspace',
     name: 'analysisworkspace',
-    // reference: 'analysisworkspace',
 
     layout: {
         type: 'fit',
@@ -58,30 +55,27 @@ Ext.define("climatestation.view.analysis.workspace",{
     initComponent: function () {
         var me = this;
 
-        //Ext.util.Observable.capture(me, function(e){console.log('AnalysisMain - ' + e);});
-        // console.info(me.isrefworkspace);
-
         me.listeners = {
             afterrender: function() {
                 // Ext.util.Observable.capture(me, function (e) { console.log('analysismain - ' + e);});
                 //if (window.navigator.onLine){
 
-                me.backgroundLayers = [];
-                me.backgroundLayers.push(
-                  new ol.layer.Tile({
-                      visible: false,
-                      projection: 'EPSG:4326',
-                      source: new ol.source.TileWMS({
-                          url: 'analysis/getbackgroundlayer',   // 'http://demo.boundlessgeo.com/geoserver/wms',
-                          params: {
-                              layername:'naturalearth',
-                              'LAYERS': 'HYP_HR_SR_OB_DR'       // 'ne:NE1_HR_LC_SR_W_DR'
-                          },
-                          wrapX: false,
-                          noWrap: true
-                    })
-                  })
-                );
+                // me.backgroundLayers = [];
+                // me.backgroundLayers.push(
+                //   new ol.layer.Tile({
+                //       visible: false,
+                //       projection: 'EPSG:4326',
+                //       source: new ol.source.TileWMS({
+                //           url: 'analysis/getbackgroundlayer',   // 'http://demo.boundlessgeo.com/geoserver/wms',
+                //           params: {
+                //               layername:'naturalearth',
+                //               'LAYERS': 'HYP_HR_SR_OB_DR'       // 'ne:NE1_HR_LC_SR_W_DR'
+                //           },
+                //           wrapX: false,
+                //           noWrap: true
+                //     })
+                //   })
+                // );
 
                 me.mousePositionControl = new ol.control.MousePosition({
                   coordinateFormat: ol.coordinate.createStringXY(4),
@@ -110,10 +104,7 @@ Ext.define("climatestation.view.analysis.workspace",{
                 // workspace tab closable.
                 var taskMakeTabCloseable = new Ext.util.DelayedTask(function() {
                     if (me.workspaceid != "defaultworkspace"){
-                        // console.info(me.allMapsLoaded);
-                        // console.info(me.allGraphsLoaded);
                         me.tab.setClosable(true);
-                        // me.ownerCt.getActiveTab().tab.setClosable(true);
                         me.updateLayout();
                     }
                 });
@@ -246,11 +237,11 @@ Ext.define("climatestation.view.analysis.workspace",{
         }
 
         if (!me.pinned && me.pinable) {
-            me.setIconCls('far fa-thumb-tack pin_red');
+            me.setIconCls('far fa-thumbtack pin_red');
 
         }
         else if (me.pinned && me.pinable){
-            me.setIconCls('far fa-thumb-tack pin_green');
+            me.setIconCls('far fa-thumbtack pin_green');
         }
 
         // if (me.workspaceid == 'defaultworkspace'){
@@ -274,14 +265,14 @@ Ext.define("climatestation.view.analysis.workspace",{
                             e.btnIconEl.on('click', function(e) {
                                 // alert('click');
                                 if (!me.pinned && me.pinable) {
-                                    me.setIconCls('far fa-thumb-tack pin_green');
+                                    me.setIconCls('far fa-thumbtack pin_green');
                                     me.pinned = true;
                                     if (!me.isNewWorkspace){
                                         me.getController().savePin();
                                     }
                                 }
                                 else if (me.pinned && me.pinable){
-                                    me.setIconCls('far fa-thumb-tack pin_red');
+                                    me.setIconCls('far fa-thumbtack pin_red');
                                     me.pinned = false;
                                     if (!me.isNewWorkspace){
                                         me.getController().savePin();
@@ -292,7 +283,7 @@ Ext.define("climatestation.view.analysis.workspace",{
                             //     console.info('mouseover');
                             //
                             // });
-                            e.ownerCt.doLayout();
+                            e.ownerCt.updateLayout();
                         }
                     }
                 }
@@ -400,51 +391,51 @@ Ext.define("climatestation.view.analysis.workspace",{
             },{ xtype: 'tbspacer'
             },{ xtype: 'tbspacer'
             },{ xtype: 'tbspacer'
-            },{
-                xtype: 'button',
-                name: 'analysismain_legendsbtn_'+me.id.replace(/-/g,'_'),
-                reference: 'analysismain_legendsbtn_'+me.id.replace(/-/g,'_'),
-                text: climatestation.Utils.getTranslation('legends'),  // 'LEGENDS',
-                iconCls: 'legends',
-                style: { color: 'gray' },
-                scale: 'small',
-                hidden:  (climatestation.getUser() == 'undefined' || climatestation.getUser() == null || climatestation.globals['typeinstallation'] == 'jrc_online' ? true : false),
-                handler: 'legendAdmin'
-            },{
-                xtype: 'button',
-                name: 'analysismain_layersbtn_'+me.id.replace(/-/g,'_'),
-                reference: 'analysismain_layersbtn_'+me.id.replace(/-/g,'_'),
-                text: climatestation.Utils.getTranslation('layers'),  // 'LAYERS',
-                iconCls: 'layers',
-                style: { color: 'gray' },
-                scale: 'small',
-                // hidden:  (climatestation.getUser() == 'undefined' || climatestation.getUser() == null ? true : false),
-                hidden:  (climatestation.getUser() == 'undefined' || climatestation.getUser() == null || climatestation.globals['typeinstallation'] == 'jrc_online' ? true : false),
-                handler: 'layerAdmin'
-            },{
-                xtype: 'button',
-                name: 'analysismain_logosbtn_'+me.id.replace(/-/g,'_'),
-                reference: 'analysismain_logosbtn_'+me.id.replace(/-/g,'_'),
-                text: climatestation.Utils.getTranslation('logos'),  // 'LOGOS',
-                iconCls: 'logos',
-                style: { color: 'gray' },
-                scale: 'small',
-                hidden:  (climatestation.getUser() == 'undefined' || climatestation.getUser() == null || climatestation.globals['typeinstallation'] == 'jrc_online' ? true : false),
-                handler: 'logosAdmin'
-            },
-                { xtype: 'tbspacer'
-            },
-                { xtype: 'tbspacer'
-            },
-                { xtype: 'tbspacer'
+            // },{
+            //     xtype: 'button',
+            //     name: 'analysismain_legendsbtn_'+me.id.replace(/-/g,'_'),
+            //     reference: 'analysismain_legendsbtn_'+me.id.replace(/-/g,'_'),
+            //     text: climatestation.Utils.getTranslation('legends'),  // 'LEGENDS',
+            //     iconCls: 'legends',
+            //     style: { color: 'gray' },
+            //     scale: 'small',
+            //     hidden:  (climatestation.getUser() == 'undefined' || climatestation.getUser() == null || climatestation.globals['typeinstallation'] == 'jrc_online' ? true : false),
+            //     handler: 'legendAdmin'
+            // },{
+            //     xtype: 'button',
+            //     name: 'analysismain_layersbtn_'+me.id.replace(/-/g,'_'),
+            //     reference: 'analysismain_layersbtn_'+me.id.replace(/-/g,'_'),
+            //     text: climatestation.Utils.getTranslation('layers'),  // 'LAYERS',
+            //     iconCls: 'layers',
+            //     style: { color: 'gray' },
+            //     scale: 'small',
+            //     // hidden:  (climatestation.getUser() == 'undefined' || climatestation.getUser() == null ? true : false),
+            //     hidden:  (climatestation.getUser() == 'undefined' || climatestation.getUser() == null || climatestation.globals['typeinstallation'] == 'jrc_online' ? true : false),
+            //     handler: 'layerAdmin'
+            // },{
+            //     xtype: 'button',
+            //     name: 'analysismain_logosbtn_'+me.id.replace(/-/g,'_'),
+            //     reference: 'analysismain_logosbtn_'+me.id.replace(/-/g,'_'),
+            //     text: climatestation.Utils.getTranslation('logos'),  // 'LOGOS',
+            //     iconCls: 'far fa-globe-africa',
+            //     style: { color: 'gray' },
+            //     scale: 'small',
+            //     hidden:  (climatestation.getUser() == 'undefined' || climatestation.getUser() == null || climatestation.globals['typeinstallation'] == 'jrc_online' ? true : false),
+            //     handler: 'logosAdmin'
+            // },
+            //     { xtype: 'tbspacer'
+            // },
+            //     { xtype: 'tbspacer'
+            // },
+            //     { xtype: 'tbspacer'
             },{
                 xtype: 'button',
                 name: 'saveDefaultWorkspaceAsBtn',
                 reference: 'saveDefaultWorkspaceAsBtn',
                 text: climatestation.Utils.getTranslation('save_as'),  // 'Save as',
-                iconCls: 'far fa-save',
-                style: {color: 'lightblue'},
-                scale: 'medium',
+                iconCls: 'far fa-save fa-lg lightblue',
+                // style: {color: 'lightblue'},
+                scale: 'small',
                 hidden: (!me.isrefworkspace && me.workspaceid != 'defaultworkspace') || climatestation.getUser() == 'undefined' || climatestation.getUser() == null ? true : false,
                 listeners: {
                     afterrender: function (me) {
@@ -461,27 +452,28 @@ Ext.define("climatestation.view.analysis.workspace",{
                 xtype: 'splitbutton',
                 name: 'saveWorkspaceBtn',
                 reference: 'saveWorkspaceBtn',
-                iconCls: 'far fa-save',
-                style: {color: 'lightblue'},
+                iconCls: 'far fa-save fa-lg lightblue',
+                // style: {color: 'lightblue'},
                 cls: 'nopadding-splitbtn',
-                scale: 'medium',
+                scale: 'small',
                 hidden:  me.isrefworkspace || (me.workspaceid == 'defaultworkspace' || climatestation.getUser() == 'undefined' || climatestation.getUser() == null ? true : false),
                 arrowVisible: (!me.isNewWorkspace ? true : false),
-                listeners: {
-                    afterrender: function (me) {
-                        // Register the new tip with an element's ID
-                        Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
-                            title: '',
-                            text: climatestation.Utils.getTranslation('save_workspace')
-                        });
-                    }
-                },
+                tooltip: climatestation.Utils.getTranslation('save_workspace'),
+                // listeners: {
+                //     afterrender: function (me) {
+                //         // Register the new tip with an element's ID
+                //         Ext.tip.QuickTipManager.register({
+                //             target: me.getId(), // Target button's ID
+                //             title: '',
+                //             text: climatestation.Utils.getTranslation('save_workspace')
+                //         });
+                //     }
+                // },
                 handler: 'saveWorkspace',
                 menu: {
                     hideOnClick: false,
                     // hidden: (!me.isNewWorkspace ? true : false),
-                    alwaysOnTop: true,
+                    // alwaysOnTop: true,
                     width: 165,
                     defaults: {
                         hideOnClick: true
@@ -490,27 +482,27 @@ Ext.define("climatestation.view.analysis.workspace",{
                     items: [{
                             //xtype: 'button',
                             text: climatestation.Utils.getTranslation('save_as'),    // 'Save as...',
-                            glyph: 'xf0c7@FontAwesome',
-                            cls:'lightblue',
-                            // iconCls: 'far fa-save fa-lg lightblue',
-                            style: { color: 'lightblue' },
+                            // glyph: 'xf0c7@FontAwesome',
+                            // cls:'lightblue',
+                            iconCls: 'far fa-save lightblue',
+                            // style: { color: 'lightblue' },
                             width: 165,
                             handler: 'setWorkspaceName'
                     }]
                 }
-            },
-            '->',
-            {
-                xtype: 'button',
-                name: 'togglebackgroundlayer',
-                //text: climatestation.Utils.getTranslation('hidebackgroundlayer'),  // 'Hide Background layer',
-                text: climatestation.Utils.getTranslation('showbackgroundlayer'),  // 'Show Background layer',
-                enableToggle: true,
-                // iconCls: 'far fa-cog', // fa-spin 'icon-play', // icomoon fonts
-                // style: { color: 'gray' },
-                // glyph: 'xf0c7@FontAwesome',
-                scale: 'small',
-                handler: 'toggleBackgroundlayer'
+            // },
+            // '->',
+            // {
+            //     xtype: 'button',
+            //     name: 'togglebackgroundlayer',
+            //     //text: climatestation.Utils.getTranslation('hidebackgroundlayer'),  // 'Hide Background layer',
+            //     text: climatestation.Utils.getTranslation('showbackgroundlayer'),  // 'Show Background layer',
+            //     enableToggle: true,
+            //     // iconCls: 'far fa-cog', // fa-spin 'icon-play', // icomoon fonts
+            //     // style: { color: 'gray' },
+            //     // glyph: 'xf0c7@FontAwesome',
+            //     scale: 'small',
+            //     handler: 'toggleBackgroundlayer'
             }]
         });
 

@@ -373,7 +373,6 @@ Ext.define("climatestation.view.analysis.addEditLegend",{
                 reference: 'legendclassesGrid',
                 width: me.params.view ? 570 : 630,
                 bind: '{legendClassesStore}',
-                scrollable: false,
                 scrollable: true,
                 currScrollX: 0,
                 cuurScrollY: 0,

@@ -94,13 +94,13 @@ Ext.define('climatestation.view.analysis.analysisMainController', {
                 }
             }
         });
-        task.delay(2000);
+        task.delay(1000);
 
     }
 
     ,addNewWorkspace: function() {
         var me = this.getView();
-        var tab = me.add({
+        var tab = me.insert(me.tabBar.items.length, {
             xtype: 'analysisworkspace',
             workspacename: 'New workspace',
             title: 'New workspace',

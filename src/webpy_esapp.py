@@ -761,6 +761,7 @@ class TimeseriesProducts(object):
         if 'force' in getparams:
             force = getparams.force
         return webpy_esapp_helpers.getTimeseriesProducts(force)
+        # return webpy_esapp_helpers.TimeseriesProductsTree()
 
 
 class getUserWorkspaces(object):

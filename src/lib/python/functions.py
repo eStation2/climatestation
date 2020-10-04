@@ -214,9 +214,10 @@ def getStatusPostgreSQL():
         systemsettings = getSystemSettings()
         # Get status of postgresql
         command = [es_constants.es2globals['postgresql_executable'], 'status']  # /etc/init.d/postgresql-9.3  on CentOS
-        command = ["source", "/root/setup_estationdb.sh"]
+
         # print command
         if systemsettings['docker_install']:
+            command = ["source", "/root/setup_estationdb.sh"]
             c = Client(base_url='unix://var/run/docker.sock')
             commandid = c.exec_create('postgres', command)
             status = c.exec_start(commandid)

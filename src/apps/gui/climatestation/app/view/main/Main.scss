@@ -1,0 +1,194 @@
+
+//$lightest-color: dynamic(#fff);
+//$font-weight: dynamic(400);
+//$font-weight-bold: dynamic(500);
+$main-menu-background-color: dynamic(#32404e);
+$main-menu-glyph-color: dynamic(#ADB3B8);
+
+//.x-grid-cell {
+//  position: relative;
+//}
+//
+////Add border around html editor field
+//.x-html-editor-input {
+//  border: 1px solid #ccc;
+//}
+
+.x-btn-icon-el-default-toolbar-medium {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+@include  extjs-menu-ui (
+        $ui: 'mainmenu',
+        $ui-background-color : $main-menu-background-color,
+        $ui-border-color : #fff,
+        $ui-border-style : 'solid',
+        $ui-border-width : 0,
+        $ui-padding : 5,
+        $ui-text-color : #ADB3B8,
+        $ui-item-font-family : 'Times New Roman',
+        $ui-item-font-size : 16px,
+        $ui-item-font-weight : 'bolder',  // 'lighter' 'normal' 'bolder'
+        $ui-item-height : 36px,   // 24
+        $ui-item-border-width : 1,
+        $ui-item-cursor : 'pointer',
+        $ui-item-active-text-color : #fff,
+        $ui-item-active-background-color : mix(white, $main-menu-background-color, 5%),
+        $ui-item-active-border-color : mix(white, $main-menu-background-color, 5%),
+        $ui-item-active-border-radius : 10,
+        $ui-item-icon-size : 24px,  // 16
+        $ui-glyph-color : $main-menu-glyph-color
+        //$ui-glyph-font-size :
+        //$ui-glyph-opacity :
+        //$ui-item-active-glyph-color :
+        //$ui-item-checkbox-size :
+        //$ui-item-checkbox-glyph :
+        //$ui-item-checkbox-checked-glyph :
+        //$ui-item-checkbox-glyph-color :
+        //$ui-item-active-checkbox-glyph-color :
+        //$ui-item-icon-background-position :
+        //$ui-item-icon-vertical-offset :
+        //$ui-item-text-horizontal-spacing :
+        //$ui-item-icon-horizontal-spacing :
+        //$ui-item-arrow-horizontal-spacing :
+        //$ui-item-separator-margin :
+        //$ui-item-arrow-height :
+        //$ui-item-arrow-width :
+        //$ui-item-arrow-margin :
+        //$ui-item-arrow-glyph-color :
+        //$ui-item-active-arrow-glyph-color :
+        //$ui-item-arrow-glyph :
+        //$ui-component-margin :
+        //$ui-separator-border-color :
+        //$ui-separator-background-color :
+        //$ui-separator-size :
+);
+
+
+//--------------------------------------------------------
+
+.header-logo {
+  background-color: #fff;
+  height: 75px;
+
+  font-size: 16px;
+  color: #fff;
+  margin-left: 17px;
+
+  .main-logo {
+    line-height: 74px;
+    height: 74px;
+
+    img {
+      margin-left: 0px;
+      margin-right: 15px;
+      top: 0px;
+      position: relative;
+    }
+  }
+}
+
+
+.headerbar {
+  background-color: #0065a2;
+  padding: 0 0 0 0;
+  position: fixed;
+  width: 100%;
+  z-index: 10;
+  border: none;
+
+  .header-title-text {
+    line-height: 65px;
+    position: absolute;
+    left: 275px !important;
+    top: 10px !important;
+    font-size: 30px;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  .header-section-title-text {
+    line-height: 65px;
+    position: absolute;
+    left: 600px !important;
+    top: 10px !important;
+    font-size: 32px;
+    font-weight:bold !important;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  .header-right-profile-image {
+    border-radius: 20px;
+  }
+}
+
+
+////UI Styles for buttons
+@include extjs-button-small-ui(
+        $ui: 'headerbtn',
+        $color: #fff,
+        $glyph-color: #fff,
+        $background-color: transparent,
+        //$border-color: darken($color-gray, 5%),
+        $border-width: 0,
+        $inner-border-width: 0,
+        $inner-border-width-pressed: 0,
+        $inner-border-width-focus-pressed: 0,
+        $color: $neutral-medium-dark-color,
+        $font-size: 14px,
+        $icon-size: 21px,
+        $padding: 16px
+);
+
+@include extjs-button-medium-ui(
+        $ui: 'headerbtn',
+        $color: #fff,
+        $glyph-color: #fff,
+        $background-color: transparent,
+        $border-width: 0,
+        $inner-border-width: 0,
+        $inner-border-width-pressed: 0,
+        $inner-border-width-focus-pressed: 0,
+        $color: $neutral-medium-dark-color,
+        $font-size: 12px,
+        $icon-size: 21px,
+        $padding: 16px
+);
+
+@include extjs-button-large-ui(
+        $ui: 'headerbtn',
+        $color: #fff,
+        $glyph-color: #fff,
+        $background-color: transparent,
+        $border-width: 0,
+        $inner-border-width: 0,
+        $inner-border-width-pressed: 0,
+        $inner-border-width-focus-pressed: 0,
+        $color: $neutral-medium-dark-color,
+        $font-size: 14px,
+        $icon-size: 28px,
+        $padding: 16px
+);
+
+@include extjs-button-large-ui(
+        $ui: 'menubtn',
+        $color: #fff,
+        $glyph-color: #fff,
+        $background-color: transparent,
+        $border-width: 0,
+        $inner-border-width: 0,
+        $inner-border-width-pressed: 0,
+        $inner-border-width-focus-pressed: 0,
+        $color: $neutral-medium-dark-color,
+        $font-size: 14px,
+        $icon-size: 28px,
+        $padding: 0px
+);

@@ -31,11 +31,11 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
     maximizable: false,
     collapsible: true,
     collapsed: false,
-    resizable: false,
+    resizable: true,
     floating: true,
     alwaysOnTop: false,
     shrinkWrap: 3, // both width and height depend on content (shrink wrap).
-    width:420,
+    width: 500,
     // maxWidth:500,
     // autoWidth: true,
     // autoHeight: true,
@@ -108,10 +108,10 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
             height: 65,
             flex: 1,
             maxHeight: 80,
-            border: 2,
+            // border: 2,
             padding: '3 5 3 10',
             style: {
-                borderColor: '#157FCC',
+                // borderColor: '#157FCC',
                 borderStyle: 'solid'
             },
             items: [{
@@ -153,7 +153,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
             frame: false,
             border: false,
             flex: 5,
-            // bodyPadding: '3 3 3 3',
+            bodyPadding: '5px 5px 5px 5px',
             componentCls: 'rounded-box',
             resizable: false,
             defaults: {
@@ -176,14 +176,14 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
                         disabled: false,
                         //width: 150,
                         autoWidth: true,
-                        margin: '0 0 5 0',
+                        margin: '5 0 5 5',
                         graphtype: 'xy',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    reference: 'timeseriesproductselection_profile' + me.id,
+                    reference: 'timeseriesproductselection_xy',    // + me.id,
                     graphtype: 'xy',
                     cumulative: false,
                     multiplevariables: true,
@@ -207,14 +207,14 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
                         disabled: false,
                         //width: 150,
                         autoWidth: true,
-                        margin: '0 0 5 0',
+                        margin: '5 0 5 5',
                         graphtype: 'cumulative',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    reference: 'timeseriesproductselection_cumulative' + me.id,
+                    reference: 'timeseriesproductselection_cumulative', // + me.id,
                     graphtype: 'cumulative',
                     cumulative: true,
                     multiplevariables: true,
@@ -237,14 +237,14 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
                         scale: 'medium',
                         disabled: false,
                         autoWidth: true,
-                        margin: '0 0 5 0',
+                        margin: '0 0 5 5',
                         graphtype: 'ranking',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    reference: 'timeseriesproductselection_ranking' + me.id,
+                    reference: 'timeseriesproductselection_ranking',    // + me.id,
                     graphtype: 'ranking',
                     cumulative: false,
                     ranking: true,
@@ -268,14 +268,14 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
                         scale: 'medium',
                         disabled: false,
                         autoWidth: true,
-                        margin: '0 0 5 0',
+                        margin: '5 0 5 5',
                         graphtype: 'matrix',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    reference: 'timeseriesproductselection_matrix' + me.id,
+                    reference: 'timeseriesproductselection_matrix', // + me.id,
                     graphtype: 'matrix',
                     cumulative: false,
                     matrix: true,

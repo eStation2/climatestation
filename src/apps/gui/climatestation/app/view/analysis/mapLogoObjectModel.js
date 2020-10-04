@@ -28,10 +28,10 @@ Ext.define('climatestation.view.analysis.mapLogoObjectModel', {
     data: {
         logoData: [],
         logoDefaultData: [
-            { src:'resources/img/logo/GMES.png', width:'20%', height:'60px' },
-            { src:'resources/img/logo/AUC_h110.jpg', width:'20%', height:'60px' },
+            // { src:'resources/img/logo/GMES.png', width:'20%', height:'60px' },
+            // { src:'resources/img/logo/AUC_h110.jpg', width:'20%', height:'60px' },
             { src:'resources/img/logo/ACP_h110.jpg', width:'20%', height:'60px' },
-            { src:'resources/img/logo/logo_en.gif', width:'20%', height:'60px' }
+            { src:'resources/img/logo/logo_en.jpg', width:'20%', height:'60px' }
         ]
     }
 

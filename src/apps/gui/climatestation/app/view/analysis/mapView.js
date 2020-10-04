@@ -1124,7 +1124,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                         }
                     }
 
-                    Ext.data.StoreManager.lookup('ColorSchemesStore').each(function(rec){
+                    Ext.data.StoreManager.lookup('colorschemes').each(function(rec){
                         if (rec.get('legend_id')== me.legendid){
                             //me.colorschemeHTML = rec.get('colorschemeHTML');
                             me.legendHTML = rec.get('legendHTML');
