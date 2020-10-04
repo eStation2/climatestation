@@ -66,7 +66,7 @@ There is one docker-compose.yml file for setting up the three containers.
     
     You can download the docs, layers and logos from the JRC SFTP server [here](ftp://narmauser:JRCkOq7478@srv-ies-ftp.jrc.it/narma/eStation_2.0/static_data).
     - host: srv-ies-ftp.jrc.it
-    - username: narma
+    - username: narmauser
     - pwd: JRCkOq7478
     - directory: /narma/eStation_2.0/static_data
     
