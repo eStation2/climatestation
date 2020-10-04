@@ -415,9 +415,10 @@ Ext.define("climatestation.view.widgets.LoginView", {
                     workspace.lookupReference('maptemplateadminbtn_' + workspace.id.replace(/-/g, '_')).show();
                     workspace.lookupReference('graphtemplateadminbtn_' + workspace.id.replace(/-/g, '_')).show();
 
-                    workspace.lookupReference('analysismain_legendsbtn_' + workspace.id.replace(/-/g, '_')).show();
-                    workspace.lookupReference('analysismain_layersbtn_' + workspace.id.replace(/-/g, '_')).show();
-                    workspace.lookupReference('analysismain_logosbtn_' + workspace.id.replace(/-/g, '_')).show();
+                    // TODO: show new top left menu with items legend, layers and logos.
+                    // workspace.lookupReference('analysismain_legendsbtn_' + workspace.id.replace(/-/g, '_')).show();
+                    // workspace.lookupReference('analysismain_layersbtn_' + workspace.id.replace(/-/g, '_')).show();
+                    // workspace.lookupReference('analysismain_logosbtn_' + workspace.id.replace(/-/g, '_')).show();
 
                     if (workspace.workspaceid != 'defaultworkspace') {
                         workspace.lookupReference('saveWorkspaceBtn').show();
@@ -517,9 +518,10 @@ Ext.define("climatestation.view.widgets.LoginView", {
                         workspace.lookupReference('maptemplateadminbtn_' + workspace.id.replace(/-/g, '_')).hide();
                         workspace.lookupReference('graphtemplateadminbtn_' + workspace.id.replace(/-/g, '_')).hide();
 
-                        workspace.lookupReference('analysismain_legendsbtn_' + workspace.id.replace(/-/g, '_')).hide();
-                        workspace.lookupReference('analysismain_layersbtn_' + workspace.id.replace(/-/g, '_')).hide();
-                        workspace.lookupReference('analysismain_logosbtn_' + workspace.id.replace(/-/g, '_')).hide();
+                        // TODO: hide new top left menu with items legend, layers and logos.
+                        // workspace.lookupReference('analysismain_legendsbtn_' + workspace.id.replace(/-/g, '_')).hide();
+                        // workspace.lookupReference('analysismain_layersbtn_' + workspace.id.replace(/-/g, '_')).hide();
+                        // workspace.lookupReference('analysismain_logosbtn_' + workspace.id.replace(/-/g, '_')).hide();
 
                         workspace.lookupReference('saveDefaultWorkspaceAsBtn').hide();
                         if (Ext.isObject(workspace.lookupReference('maptemplateadminbtn_' + workspace.id.replace(/-/g, '_')).mapTemplateAdminPanel)) {

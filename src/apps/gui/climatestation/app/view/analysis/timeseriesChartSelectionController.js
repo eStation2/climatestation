@@ -35,8 +35,10 @@ Ext.define('climatestation.view.analysis.timeseriesChartSelectionController', {
     }
 
     ,generateTimeseriesChart: function(btn){
+        // console.info(btn.graphtype);
         var me = this.getView();
         var TSChartWinConfig = this.getTimeseriesSelections(btn.graphtype);
+
         if (TSChartWinConfig != null){
             TSChartWinConfig.workspace = me.workspace;
             var newTSChartWin = new climatestation.view.analysis.timeseriesChartView(TSChartWinConfig);

@@ -12,7 +12,6 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
         "climatestation.view.analysis.mapLogoObject",
         'Ext.toolbar.Toolbar',
         'Ext.window.Window',
-        // 'Highcharts.Chart',
         'climatestation.Utils',
         'climatestation.view.analysis.mapDisclaimerObject',
         'climatestation.view.analysis.timeseriesChartViewController',
@@ -34,7 +33,9 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
     collapsible: true,
     resizable: true,
     shadow: false,
-    componentCls: 'rounded-box-win',
+    frame: false,
+    border: true,
+    // componentCls: 'rounded-box-win',
 
     width:700,
     height: Ext.getBody().getViewSize().height < 600 ? Ext.getBody().getViewSize().height-80 : 600,
@@ -71,7 +72,18 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
         wkt_geom: null,
         graphtype: null,
         timeseriesChart: {},
-        timeseriesGraph: {}
+        timeseriesGraph: {},
+
+        istemplate: false,
+        graphviewposition: [50,5],
+        graphviewsize: [700,600],
+        disclaimerObjPosition: [0,611],
+        disclaimerObjContent: '',
+        logosObjPosition: [434, 583],
+        logosObjContent: null,
+        showObjects: false,
+        showtoolbar: true,
+        auto_open: false
     },
 
     listeners: {
@@ -111,6 +123,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
                     logoObj.logoPosition = me.logosObjPosition;
                     if (climatestation.Utils.objectExists(me.logosObjContent)) {
                         logoObj.getViewModel().data.logoData = me.logosObjContent;
+                        logoObj.setLogoData(me.logosObjContent);
                     }
                 }
 
@@ -194,7 +207,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
             }
         }];
 
-        me.tbar = Ext.create('Ext.toolbar.Toolbar', {
+        me.tbar = {
             id: 'tbar_'+me.id,
             reference: 'tbar_'+me.id,
             dock: 'top',
@@ -206,18 +219,38 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
             shadow: false,
             padding:0,
             defaults: {
-                margin: 2
+                margin: 2,
+                padding: 4
+                // width: 34,
+                // height: 34
             },
             items: [{
                 text: '<div style="font-size: 11px;">' + climatestation.Utils.getTranslation('PRODUCTS').toUpperCase() + '</div>',   // 'Products',
                 reference: 'changeSelectedProductsAndTimeframe_'+me.id.replace(/-/g,'_'),
-                tooltip: climatestation.Utils.getTranslation('change_selected_products'), //  'Change Selected products',
-                iconCls: 'far fa-calendar',
-                style: {color: '#748FFC'},
+                // tooltip: climatestation.Utils.getTranslation('change_selected_products'), //  'Change Selected products',
+                // iconCls: 'far fa-calendar',
+                // style: {color: '#748FFC'},
                 scale: 'medium',
+                width: 85,
+                height: 34,
+                // padding: 5,
                 disabled: (me.graphtype == 'scatter'),
                 // hidden:  ((climatestation.getUser() == 'undefined' || climatestation.getUser() == null) || !me.isTemplate ? true : false),
-                handler: 'changeSelectedProductsAndTimeFrame'
+                handler: 'changeSelectedProductsAndTimeFrame',
+                listeners: {
+                    afterrender: function(btn) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: btn.btnInnerEl.el, // Target button's ID
+                            title : '',  // QuickTip Header
+                            text  : climatestation.Utils.getTranslation('change_selected_products') // Tip content
+                        });
+
+                    },
+                    destroy: function(btn) {
+                     Ext.tip.QuickTipManager.unregister(btn.getId());
+                    }
+                }
             // }, {
             //     xtype: 'button',
             //     tooltip: climatestation.Utils.getTranslation('change_timeframe'),   //  'Change Time frame',
@@ -229,45 +262,91 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
             //     handler: 'changeSelectedProductsAndTimeFrame'
             },{
                 // text: climatestation.Utils.getTranslation('properties'),    // 'Graph properties',
-                tooltip: climatestation.Utils.getTranslation('graph_edit_properties'), //  'Edit graph properties',
+                // tooltip: climatestation.Utils.getTranslation('graph_edit_properties'), //  'Edit graph properties',
                 iconCls: 'chart-curve_edit',
                 scale: 'medium',
                 disabled: (me.graphtype == 'scatter'),
-                handler: 'openChartProperties'
-            }, {
-                xtype: 'tbseparator'
+                handler: 'openChartProperties',
+                listeners: {
+                    afterrender: function(btn) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: btn.btnIconEl.el, // Target button's ID
+                            // delegate: btn.btnInnerEl.el,   // btnIconEl  btnInnerEl btnWrap
+                            title : '',  // QuickTip Header
+                            text  : climatestation.Utils.getTranslation('graph_edit_properties') // Tip content
+                        });
+
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
+                    }
+                }
             }, ' ', {
                 // text: climatestation.Utils.getTranslation('values'),    // downloadtimeseries = 'Download timeseries',
-                tooltip: climatestation.Utils.getTranslation('graph_download_values'),   //  'Download time series values',
-                iconCls: 'download-values_excel',   // 'far fa-file-excel-o',    // 'far fa-download',
-                style: { color: 'green' },
-                scale: 'medium'
-                ,handler: 'tsDownload'
+                // tooltip: climatestation.Utils.getTranslation('graph_download_values'),   //  'Download time series values',
+                iconCls: 'far fa-file-excel green',    // 'download-values_excel',  'far fa-download',
+                // style: { color: 'green' },
+                scale: 'medium',
+                padding: '6px 4px 2px 4px',
+                handler: 'tsDownload',
+                listeners: {
+                    afterrender: function(btn) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: btn.btnIconEl.el, // Target button's ID
+                            title : '',  // QuickTip Header
+                            text  : climatestation.Utils.getTranslation('graph_download_values') // Tip content
+                        });
+
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
+                    }
+                }
             },{
                 // text: climatestation.Utils.getTranslation('savechart'),    // 'Save graph',
-                tooltip: climatestation.Utils.getTranslation('graph_download_png'),   //  'Download graph as PNG',
+                // tooltip: climatestation.Utils.getTranslation('graph_download_png'),   //  'Download graph as PNG',
                 iconCls: 'download_png',    // 'far fa-floppy-o',
-                scale: 'medium'
-                ,handler: 'saveChartAsPNG'
+                scale: 'medium',
+                handler: 'saveChartAsPNG',
+                listeners: {
+                    afterrender: function(btn) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: btn.btnIconEl.el, // Target button's ID
+                            title : '',  // QuickTip Header
+                            text  : climatestation.Utils.getTranslation('graph_download_png') // Tip content
+                        });
+
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
+                    }
+                }
             },{
                 xtype: 'splitbutton',
                 reference: 'saveGraphTemplate_'+me.id.replace(/-/g,'_'),
-                tooltip: climatestation.Utils.getTranslation('graph_save_graph_tpl'),   //  'Save graph as template',
-                iconCls: 'far fa-save',
-                style: {color: 'lightblue'},
+                // tooltip: climatestation.Utils.getTranslation('graph_save_graph_tpl'),   //  'Save graph as template',
+                iconCls: 'far fa-save lightblue',
                 cls: 'nopadding-splitbtn',
                 scale: 'medium',
+                padding: '6px 4px 2px 4px',
                 hidden:  (climatestation.getUser() == 'undefined' || climatestation.getUser() == null ? true : false),
                 arrowVisible: (!me.isNewTemplate ? true : false),
                 handler: 'setGraphTemplateName',
                 listeners: {
-                    afterrender: function (me) {
+                    afterrender: function(btn) {
                         // Register the new tip with an element's ID
                         Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
-                            title: '',
-                            text: climatestation.Utils.getTranslation('save_graph_template')
+                            target: btn.btnIconEl.el, // Target button's ID
+                            title : '',  // QuickTip Header
+                            text  : climatestation.Utils.getTranslation('graph_save_graph_tpl') //  'Save graph as template',
                         });
+
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                     }
                 },
                 menu: {
@@ -281,13 +360,9 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
                         padding: 2
                     },
                     items: [{
-                        //xtype: 'button',
                         text: climatestation.Utils.getTranslation('save_as'),    // 'Save as...',
                         tooltip: climatestation.Utils.getTranslation('graph_tpl_save_as'),   //  'Save graph as template',
-                        glyph: 'xf0c7@FontAwesome',
-                        cls:'lightblue',
-                        // iconCls: 'far fa-save fa-lg lightblue',
-                        style: { color: 'lightblue' },
+                        iconCls: 'far fa-save fa-lg lightblue',
                         //cls: 'x-menu-no-icon button-gray',
                         width: 165,
                         handler: function(){
@@ -296,7 +371,6 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
                         }
                     }]
                 }
-
             },
             '->',
             {
@@ -307,41 +381,76 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
                     "font-size": '1.70em'
                 },
                 scale: 'medium',
+                padding: '6px 4px 2px 4px',
                 enableToggle: true,
+                // tooltip: climatestation.Utils.getTranslation('show_hide_title_logo_discalaimer_objects'),
                 handler: 'toggleObjects',
                 listeners: {
-                    afterrender: function (me) {
+                    afterrender: function(btn) {
                         // Register the new tip with an element's ID
                         Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
-                            title: '',
-                            text: climatestation.Utils.getTranslation('show_hide_title_logo_discalaimer_objects')
+                            target: btn.btnIconEl.el, // Target button's ID
+                            title : '',  // QuickTip Header
+                            text  : climatestation.Utils.getTranslation('show_hide_title_logo_discalaimer_objects')
                         });
+
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                     }
                 }
             },{
                 xtype: 'button',
-                tooltip: climatestation.Utils.getTranslation('change_selected_region'),   //  'Change selected region',
+                // tooltip: climatestation.Utils.getTranslation('change_selected_region'),   //  'Change selected region',
                 iconCls: 'change-region-unlink',
                 // style: {color: '#748FFC'},
                 enableToggle: true,
                 pressed: false,
-                margin: 0,
                 scale: 'medium',
-                handler: 'toggleRegionLink'
+                margin: 1,
+                handler: 'toggleRegionLink',
+                listeners: {
+                    afterrender: function(btn) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: btn.btnIconEl.el, // Target button's ID
+                            title : '',  // QuickTip Header
+                            text  : climatestation.Utils.getTranslation('change_selected_region')
+                        });
+
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
+                    }
+                }
             },
             ' ',
             {
                 xtype: 'button',
-                tooltip: climatestation.Utils.getTranslation('graph_refresh'),   //  'Refresh graph',
+                // tooltip: climatestation.Utils.getTranslation('graph_refresh'),   //  'Refresh graph',
                 iconCls: 'far fa-redo-alt',
                 hidden: false,
                 style: { color: 'gray' },
                 enableToggle: false,
                 scale: 'medium',
-                handler: 'refreshChart'
+                padding: '6px 4px 2px 4px',
+                handler: 'refreshChart',
+                listeners: {
+                    afterrender: function(btn) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: btn.btnIconEl.el, // Target button's ID
+                            title : '',  // QuickTip Header
+                            text  : climatestation.Utils.getTranslation('graph_refresh')
+                        });
+
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
+                    }
+                }
             }]
-        });
+        };
 
 
         me.name ='tsgraphwindow_' + me.id;

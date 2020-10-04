@@ -11993,6 +11993,11 @@ tr.x-grid-subtable-row {
     color: darkgray;
     padding: 5px;
 }
+/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:17 */
+.x-btn-icon-el-default-toolbar-medium {
+    width: 24px !important;
+    height: 24px !important;
+}
 /* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/ext/classic/theme-neutral/sass/var/menu/Menu.scss:824 */
 .x-menu-body-mainmenu {
     background: #32404e;
@@ -12346,7 +12351,7 @@ tr.x-grid-subtable-row {
 .x-ie8 .x-box-scroller-menu-mainmenu {
     background-color: #32404e;
 }
-/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:66 */
+/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:71 */
 .header-logo {
     background-color: #fff;
     height: 75px;
@@ -12354,19 +12359,19 @@ tr.x-grid-subtable-row {
     color: #fff;
     margin-left: 17px;
 }
-/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:74 */
+/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:79 */
 .header-logo .main-logo {
     line-height: 74px;
     height: 74px;
 }
-/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:78 */
+/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:83 */
 .header-logo .main-logo img {
     margin-left: 0px;
     margin-right: 15px;
     top: 0px;
     position: relative;
 }
-/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:88 */
+/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:93 */
 .headerbar {
     background-color: #0065a2;
     padding: 0 0 0 0;
@@ -12375,7 +12380,7 @@ tr.x-grid-subtable-row {
     z-index: 10;
     border: none;
 }
-/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:96 */
+/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:101 */
 .headerbar .header-title-text {
     line-height: 65px;
     position: absolute;
@@ -12388,7 +12393,7 @@ tr.x-grid-subtable-row {
     color: #fff;
     overflow: hidden;
 }
-/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:109 */
+/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:114 */
 .headerbar .header-section-title-text {
     line-height: 65px;
     position: absolute;
@@ -12402,7 +12407,7 @@ tr.x-grid-subtable-row {
     color: #fff;
     overflow: hidden;
 }
-/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:123 */
+/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:128 */
 .headerbar .header-right-profile-image {
     border-radius: 20px;
 }

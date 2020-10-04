@@ -62,11 +62,14 @@ Ext.define("climatestation.view.analysis.mapDisclaimerObject",{
         //me.html = me.defaultContent;
         //me.setHtml(me.defaultContent);
 
+        me.items = [];  // needed to be able to add items!
+
         me.listeners = {
             //element  : 'el',
             el: {
                 dblclick: function () {
-                    var editorpanel = this.component.map_disclaimer_editor;
+                    var editorpanel = me.lookupReference('map_disclaimer_editor' + me.id);
+                    // var editorpanel = this.component.map_disclaimer_editor;
                     editorpanel.down('htmleditor').setValue(this.component.getContent());
                     editorpanel.constrainTo = this.component.constrainTo;
                     editorpanel.show();
@@ -125,40 +128,83 @@ Ext.define("climatestation.view.analysis.mapDisclaimerObject",{
             }
         };
 
-        me.map_disclaimer_editor = Ext.create('Ext.panel.Panel', {
+        var map_disclaimer_editor = Ext.create('Ext.window.Window', {
+            id: 'map_disclaimer_editor' + me.id,
+            reference: 'map_disclaimer_editor' + me.id,
             autoWidth: true,
-            autoHeight: true,
-            layout: 'fit',
-            modal: false,
+            autoHeight: false,
+            scrollable: false,
+            // width: 250,
+            height: 200,
+            // layout: 'fit',
+            layout: {
+                type: 'vbox',
+                align: 'stretch'
+            },
+            modal: true,
             hidden: true,
             floating: true,
-            defaultAlign: 'bl-bl',
+            defaultAlign: 'l-c',
             closable: true,
             closeAction: 'hide',
             draggable: true,
-            constrain: true,
-            constrainTo: me.constrainTo,
-            alwaysOnTop: false,
+            // constrain: true,
+            // constrainTo: me.constrainTo,
+            alwaysOnTop: true,
             autoShow: false,
             resizable: false,
             frame: false,
             frameHeader : false,
             border: false,
-            shadow: true,
-            headerOverCls: 'grayheader',
+            bodyBorder: false,
+            shadow: false,
+            cls: 'rounded-box',
+            // headerOverCls: 'grayheader',
             header: {
                 title: climatestation.Utils.getTranslation('disclaimer_object'), // 'Disclaimer object',
-                titleAlign: 'right',
-                cls: 'transparentheader',
-                hidden: false,
-                items: [{
+                titleAlign: 'left',
+                // cls: 'transparentheader',
+                padding: '6px 16px 6px 16px',
+                hidden: false
+                // items: [{
+                //     xtype:'button',
+                //     itemId: 'stopedit_tool_' + me.id,
+                //     tooltip: climatestation.Utils.getTranslation('save_changes'), // 'Save changes',
+                //     iconCls: 'far fa-save white',
+                //     // glyph:0xf0c7,
+                //     // cls: 'btntransparent',
+                //     cls: 'header-btn',
+                //     scale: 'medium',
+                //     hidden: false,
+                //     margin: '3 0 0 5',
+                //     handler: function (btn) {
+                //         var panel = btn.up().up();
+                //         var mapDisclaimerObj = me,
+                //             mapDisclaimerEditor = panel.down('#map_disclaimer_editor_' + me.id);
+                //
+                //         mapDisclaimerObj.update(mapDisclaimerEditor.getValue());
+                //         mapDisclaimerObj.setContent(mapDisclaimerEditor.getValue());
+                //         mapDisclaimerObj.changesmade = true;
+                //         //mapDisclaimerObj.show();  // Show event not triggered because the object is not hidden!
+                //         mapDisclaimerObj.fireEvent('refreshimage');
+                //         panel.hide();
+                //     }
+                // }]
+            },
+            bbar: {
+                padding: 0,
+                items: ['->', {
                     xtype:'button',
                     itemId: 'stopedit_tool_' + me.id,
                     tooltip: climatestation.Utils.getTranslation('save_changes'), // 'Save changes',
-                    glyph:0xf0c7,
-                    cls: 'btntransparent',
+                    iconCls: 'far fa-save lightblue',
+                    // glyph:0xf0c7,
+                    // cls: 'btntransparent',
+                    cls: 'header-btn',
+                    scale: 'medium',
                     hidden: false,
                     margin: '3 0 0 5',
+                    padding: 2,
                     handler: function (btn) {
                         var panel = btn.up().up();
                         var mapDisclaimerObj = me,
@@ -191,10 +237,12 @@ Ext.define("climatestation.view.analysis.mapDisclaimerObject",{
                 autoWidth: true,
                 autoHeight: true,
                 minWidth: 250,
-                minHeight: 45,
+                minHeight: 150,
                 value: ''
             }]
         });
+
+        me.add(map_disclaimer_editor);
 
         me.callParent();
 

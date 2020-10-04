@@ -15,6 +15,7 @@ Ext.define('climatestation.model.TimeseriesProduct', {
         {name: 'mapsetcode', mapping: 'mapsetcode'},
         {name: 'mapset_name', mapping: 'mapset_name'},
         {name: 'group_product_descriptive_name', mapping: 'group_product_descriptive_name'},
+        {name: 'group_product_description', mapping: 'group_product_description'},
         {name: 'product_descriptive_name', mapping: 'product_descriptive_name'},
         {name: 'product_description', mapping: 'product_description'},
         {name: 'years', mapping: 'years'},
@@ -26,7 +27,11 @@ Ext.define('climatestation.model.TimeseriesProduct', {
         {name: 'difference', mapping: 'difference'},
         {name: 'reference', mapping: 'reference'},
         {name: 'zscore', mapping: 'zscore'},
-        {name: 'colorramp', mapping: 'colorramp'}
+        {name: 'colorramp', mapping: 'colorramp'},
+        {name: 'leaf', mapping: 'leaf'},
+        {name: 'expanded', mapping: 'expanded'},
+        {name: 'children', mapping: 'children'},
+        {name: 'text', mapping: 'text'},
         //{name: 'product_type', mapping: 'product_type'},
     ]
 
@@ -49,6 +54,7 @@ Ext.define('climatestation.model.SelectedTimeseriesMapSetDataSet', {
         {name: 'mapsetcode', mapping: 'mapsetcode'},
         {name: 'mapset_name', mapping: 'mapset_name'},
         {name: 'group_product_descriptive_name', mapping: 'group_product_descriptive_name'},
+        {name: 'group_product_description', mapping: 'group_product_description'},
         {name: 'product_descriptive_name', mapping: 'product_descriptive_name'},
         {name: 'product_description', mapping: 'product_description'},
         {name: 'years', mapping: 'years'},
@@ -60,7 +66,11 @@ Ext.define('climatestation.model.SelectedTimeseriesMapSetDataSet', {
         {name: 'difference', mapping: 'difference'},
         {name: 'reference', mapping: 'reference'},
         {name: 'zscore', mapping: 'zscore'},
-        {name: 'colorramp', mapping: 'colorramp'}
+        {name: 'colorramp', mapping: 'colorramp'},
+        {name: 'leaf', mapping: 'leaf'},
+        {name: 'expanded', mapping: 'expanded'},
+        {name: 'iconCls', mapping: 'iconCls'},
+        {name: 'text', mapping: 'text'},
         //{name: 'subproductid', type: 'string', mapping: 'subproductid'},
     ]
 });

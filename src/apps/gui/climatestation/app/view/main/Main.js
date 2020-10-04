@@ -431,7 +431,7 @@ Ext.define('climatestation.view.main.Main', {
                     // handler: 'onToggleNavigationSize',
                     arrowVisible: false,
                     menu: {
-                        ui: 'mainmenu',
+                        // ui: 'mainmenu',
                         items: [
                             {
                                 text: 'Dashboard',

@@ -2469,21 +2469,39 @@ def get_timeseries_subproducts(productcode=None, version='undefined', subproduct
 
     try:
 
-        query = "select p.productcode || '_' || p.version as productid, " + \
-                "       p.productcode, " + \
-                "       p.subproductcode, " + \
-                "       p.version, " + \
-                "       p.display_index, " + \
-                "       p.date_format, " + \
-                "       p.frequency_id, " + \
-                "       p.descriptive_name, " + \
-                "       p.description, " + \
-                "       p.masked, " + \
-                "       p.timeseries_role " + \
-                "from products.product p " + \
-                "where p.timeseries_role = '" + subproductcode + "'" + \
-                "  and p.productcode = '" + productcode + "'" + \
-                "  and p.version = '" + version + "'"
+        # query = "select p.productcode || '_' || p.version as productid, " + \
+        #         "       p.productcode, " + \
+        #         "       p.subproductcode, " + \
+        #         "       p.version, " + \
+        #         "       p.display_index, " + \
+        #         "       p.date_format, " + \
+        #         "       p.frequency_id, " + \
+        #         "       p.descriptive_name, " + \
+        #         "       p.description, " + \
+        #         "       p.masked, " + \
+        #         "       p.timeseries_role " + \
+        #         "from products.product p " + \
+        #         "where p.timeseries_role = '" + subproductcode + "'" + \
+        #         "  and p.productcode = '" + productcode + "'" + \
+        #         "  and p.version = '" + version + "'"
+
+        query = " select p.productcode || '_' || p.version as productid, " + \
+                "        p.productcode, " + \
+                "        p.subproductcode, " + \
+                "        p.version, " + \
+                "        p.display_index, " + \
+                "        p.date_format, " + \
+                "        p.product_type, " + \
+                "        p.descriptive_name, " + \
+                "        p.description, " + \
+                "        p.frequency_id, " + \
+                "        p.masked, " + \
+                "        p.timeseries_role " + \
+                " from products.product p " + \
+                " where p.productcode = '" + productcode + "'" + \
+                " and p.version = '" + version + "'" + \
+                " and p.product_type != 'Native' " + \
+                " and p.timeseries_role != '' "
 
         if masked is None:
             where = ""
@@ -2493,7 +2511,7 @@ def get_timeseries_subproducts(productcode=None, version='undefined', subproduct
             else:
                 where = " and p.masked = 't' "
 
-        query += where + " ORDER BY productcode, subproductcode"
+        query += where + " ORDER BY p.display_index "
         productslist = db.execute(query)
         productslist = productslist.fetchall()
         # print result
@@ -2576,28 +2594,48 @@ def get_timeseries_products(masked=None):
     global db
     try:
 
-        query = "select p.productcode || '_' || p.version as productid, " + \
-                "       p.productcode, " + \
-                "       p.subproductcode, " + \
-                "       p.version, " + \
-                "       p.display_index, " + \
-                "       p.date_format, " + \
-                "       p.product_type, " + \
-                "       p.descriptive_name, " + \
-                "       p.description, " + \
-                "       p.frequency_id, " + \
-                "       p.masked, " + \
-                "       p.timeseries_role, " + \
-                "       pc.category_id, " + \
-                "       pc.descriptive_name as cat_descr_name, " + \
-                "       pc.order_index, " + \
-                "       pnative.descriptive_name as group_product_descriptive_name " + \
-                "from products.product p " + \
-                "     left outer join products.product_category pc on p.category_id = pc.category_id " + \
-                "     left outer join products.product pnative " + \
-                "           on p.productcode = pnative.productcode and p.version = pnative.version " + \
-                "where p.timeseries_role = 'Initial' " + \
-                "  and pnative.product_type = 'Native' "
+        # query = "select p.productcode || '_' || p.version as productid, " + \
+        #         "       p.productcode, " + \
+        #         "       p.subproductcode, " + \
+        #         "       p.version, " + \
+        #         "       p.display_index, " + \
+        #         "       p.date_format, " + \
+        #         "       p.product_type, " + \
+        #         "       p.descriptive_name, " + \
+        #         "       p.description, " + \
+        #         "       p.frequency_id, " + \
+        #         "       p.masked, " + \
+        #         "       p.timeseries_role, " + \
+        #         "       pc.category_id, " + \
+        #         "       pc.descriptive_name as cat_descr_name, " + \
+        #         "       pc.order_index, " + \
+        #         "       pnative.descriptive_name as group_product_descriptive_name, " + \
+        #         "       pnative.description as group_product_description " + \
+        #         "from products.product p " + \
+        #         "     left outer join products.product_category pc on p.category_id = pc.category_id " + \
+        #         "     left outer join products.product pnative " + \
+        #         "           on p.productcode = pnative.productcode and p.version = pnative.version " + \
+        #         "where p.timeseries_role = 'Initial' " + \
+        #         "  and pnative.product_type = 'Native' "
+
+        query = " select p.productcode || '_' || p.version as productid, " + \
+                "        p.productcode, " + \
+                "        p.subproductcode, " + \
+                "        p.version, " + \
+                "        p.product_type, " + \
+                "        p.descriptive_name, " + \
+                "        p.description, " + \
+                "        p.masked, " + \
+                "        pc.category_id, " + \
+                "        pc.descriptive_name as cat_descr_name, " + \
+                "        pc.order_index " + \
+                " from products.product p " + \
+                "      left outer join products.product_category pc on p.category_id = pc.category_id " + \
+                " where p.product_type = 'Native' " + \
+                " and (p.productcode, p.version) in (select distinct productcode, version " + \
+                "                                    from products.product p2 " + \
+                "                                    where p2.product_type != 'Native' and p2.timeseries_role != '') " + \
+                " order by pc.order_index, p.productcode, p.version  "
 
         if masked is None:
             where = ""
@@ -2657,6 +2695,7 @@ def get_timeseries_products(masked=None):
         if db.session:
             db.session.close()
         # db = None
+
 
 
 ######################################################################################

@@ -48,9 +48,9 @@ Ext.define("climatestation.view.analysis.analysisMain",{
                 Ext.data.StoreManager.lookup('LayersStore').load();
                 Ext.data.StoreManager.lookup('LegendsStore').load();
                 Ext.data.StoreManager.lookup('LogosStore').load();
-                Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
+                // Ext.data.StoreManager.lookup('TimeseriesProductsStore').load();
                 Ext.data.StoreManager.lookup('colorschemes').load();
-                Ext.data.StoreManager.lookup('ProductNavigatorStore').load();
+                // Ext.data.StoreManager.lookup('ProductNavigatorStore').load();
                 // Ext.data.StoreManager.lookup('UserWorkspacesStore').load();
             }
         });
@@ -138,9 +138,9 @@ Ext.define("climatestation.view.analysis.analysisMain",{
                                     text: 'Logos',
                                     iconCls: 'far fa-globe-africa',
                                     handler: function(){
-                                        var newLegendAdminWin = new climatestation.view.analysis.legendAdmin();
-                                        me.add(newLegendAdminWin);
-                                        newLegendAdminWin.show();
+                                        var newLogosAdminWin = new climatestation.view.analysis.logoAdmin();
+                                        me.add(newLogosAdminWin);
+                                        newLogosAdminWin.show();
                                     }
                                 },
                             ]

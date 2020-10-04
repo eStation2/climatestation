@@ -65,12 +65,12 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
         changesmade: false
     },
 
-    //bind: {
+    // bind: {
     //    data: {
-    //        bindTo: '{logoData}',
-    //        deep: true
+    //        bindTo: '{logoData}'
+    //        // deep: true
     //    }
-    //},
+    // },
 
     bind:{
         logoData:'{logoData}'
@@ -82,10 +82,10 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
 
         // me.setLogoData(Ext.Array.pluck(me.getViewModel().getStore('defaultlogos').getRange(), 'data'));
         // Ext.util.Observable.capture(me, function(e){console.log('logoobj - ' + me.id + ': ' + e);});
-        me.bind = {
-            logoData:'{logoData}'
-        };
-        me.publishes = ['logoData'];
+        // me.bind = {
+        //     logoData:'{logoData}'
+        // };
+        // me.publishes = ['logoData'];
 
         me.logos_ImageObj = new Image();
 
@@ -97,13 +97,15 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
             //element  : 'el',
             el: {
                 dblclick: function () {
-                    var editorpanel = me.map_logo_editor_panel;
-                    editorpanel.constrainTo = me.constrainTo;       // this.component
+                    var editorpanel = me.lookupReference('map_logo_editor' + me.id);
+                    // var editorpanel = me.map_logo_editor;
+                    // editorpanel.constrainTo = me.constrainTo;       // this.component
+
                     //editorpanel.currentLogoData = this.component.getLogoData();
                     //editorpanel.down('dataview').setData(this.component.getLogoData());
                     //console.info(editorpanel.down('#logo-editor-view-' + me.id));
                     //console.info(editorpanel.down('#logo-editor-view-' + me.id).getStore());
-                    //console.info(me.getLogoData());
+                    // console.info(me.getLogoData());
                     editorpanel.down('#logo-editor-view-' + me.id).getStore().removeAll();
                     editorpanel.down('#logo-editor-view-' + me.id).getStore().add(me.getLogoData());
                     //console.info(editorpanel);
@@ -118,6 +120,7 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
                     title: climatestation.Utils.getTranslation('logo_object'), // 'Logo object',
                     text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + climatestation.Utils.getTranslation('doubleclick_to_edit') // 'Double click to edit.'
                 });
+
                 if (me.getLogoData().length == 0){
                     if (me.getViewModel().getStore('defaultlogos').getRange().length != 0){
                         me.setLogoData(Ext.Array.pluck(me.getViewModel().getStore('defaultlogos').getRange(), 'data'));
@@ -176,10 +179,10 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
             // ,move: function(){
             //     me.logoPosition = me.getPosition();
             // }
-            ,beforedestroy: function(){
-                // To fix the error: mapView.js?_dc=1506608907564:56 Uncaught TypeError: binding.destroy is not a function
-                me.bind = null;
-            }
+            // ,beforedestroy: function(){
+            //     // To fix the error: mapView.js?_dc=1506608907564:56 Uncaught TypeError: binding.destroy is not a function
+            //     me.bind = null;
+            // }
         };
 
         me.items = [{
@@ -214,24 +217,29 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
         }];
 
 
-        me.map_logo_editor_panel = Ext.create('Ext.panel.Panel', {
-            id: 'map_logo_editor_panel' + me.id,
-            autoWidth: false,
+        var map_logo_editor = Ext.create('Ext.window.Window', {        // Ext.panel.Panel
+            id: 'map_logo_editor' + me.id,
+            reference: 'map_logo_editor' + me.id,
+            autoWidth: true,
             autoHeight: true,
             scrollable: false,
-            width: 568,
-            minHeight: 400,
-            layout: 'vbox',
-            modal: false,
+            // width: 600,
+            minHeight: 530,
+            layout: {
+                type: 'vbox',
+                align: 'stretch'
+            },
+            modal: true,
             hidden: true,
             floating: true,
-            defaultAlign: 'br-br',
+            defaultAlign: 'l-c',  // 'br-br',
             closable: true,
             closeAction: 'hide',
             draggable: true,
-            constrain: true,
-            constrainTo: me.constrainTo,
-            alwaysOnTop: false,
+            // constrain: true,
+            // constrainTo: me.constrainTo,
+            // constrainHeader: true,
+            alwaysOnTop: true,
             autoShow: false,
             resizable: false,
             frame: false,
@@ -239,7 +247,7 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
             border: false,
             bodyBorder: false,
             bodyStyle: "background-color: white !important;",
-            shadow: true,
+            shadow: false,
             cls: 'rounded-box',
             //headerOverCls: 'grayheader',
             header: {
@@ -247,25 +255,7 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
                 titleAlign: 'left',
                 //cls: 'transparentheader',
                 hidden: false,
-                items: [{
-                    xtype:'button',
-                    itemId: 'stopedit_tool_' + me.id,
-                    tooltip: climatestation.Utils.getTranslation('save_changes'), // 'Save changes',
-                    glyph:0xf0c7,
-                    cls: 'btntransparent',
-                    hidden: false,
-                    margin: '3 0 0 5',
-                    handler: function (btn) {
-                        var panel = btn.up().up();
-                        var mapLogoEditor = panel.down('#logo-editor-view-' + me.id);
-                        panel.hide();
-                        //var jsonData = Ext.encode(Ext.pluck(store.data.items, 'data'));
-                        me.setLogoData(Ext.Array.pluck(mapLogoEditor.store.getRange(), 'data'));
-                        me.updateLayout();
-                        me.changesmade = true;
-                        me.fireEvent('refreshimage');
-                    }
-                }]
+                padding: '6px 16px 6px 16px'
             },
             //config: {
             //    currentLogoData: null
@@ -277,15 +267,50 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
                 xtype: 'panel',
                 header: {
                     title: climatestation.Utils.getTranslation('selected_logos'),    // 'Selected logos',
-                    cls: 'rounded-box-gray-header'
+                    cls: 'rounded-box-gray-header',
+                    padding: '1px 16px 1px 16px',
+                    items: [{
+                        xtype:'button',
+                        itemId: 'stopedit_tool_' + me.id,
+                        tooltip: climatestation.Utils.getTranslation('save_changes'), // 'Save changes',
+                        iconCls: 'far fa-save lightblue',
+                        // glyph:0xf0c7,
+                        // cls: 'btntransparent',
+                        cls: 'header-btn',
+                        scale: 'medium',
+                        hidden: false,
+                        margin: '0 0 0 0',
+                        handler: function (btn) {
+                            var window = btn.up().up().up();
+                            var mapLogoEditor = window.down('#logo-editor-view-' + me.id);
+                            //var jsonData = Ext.encode(Ext.pluck(store.data.items, 'data'));
+
+                            var selectedlogos = [];
+                            mapLogoEditor.store.getRange().forEach(function(logo){
+                                // console.info(logo.getData())
+                                selectedlogos.push(logo.getData());
+                            });
+                            // console.info(selectedlogos);
+                            me.setLogoData(selectedlogos);
+                            // me.setLogoData(Ext.Array.pluck(mapLogoEditor.store.getRange(), 'data'));
+                            console.info(me.getLogoData());
+                            me.getViewModel().data.logoData = me.getLogoData();
+                            me.updateLayout();
+                            me.changesmade = true;
+                            me.fireEvent('render');
+                            me.fireEvent('refreshimage');
+                            window.hide();
+                        }
+                    }]
                 },
-                region: 'center',
+                // region: 'center',
                 layout: 'fit',
                 cls: 'rounded-box',
-                width: 555,
-                height: 105,
-                scrollable: true,
-                scrollable: 'vertical',
+                width: 570,
+                height: 130,
+                // autoHeight: true,
+                // scrollable: true,
+                // scrollable: 'vertical',
                 reserveScrollbar: true,
                 margin: 5,
                 // flex: 1,
@@ -332,12 +357,15 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
                 header: {
                     title: climatestation.Utils.getTranslation('available_logos'),    // 'Available logos',
                     cls: 'rounded-box-gray-header',
+                    padding: '1px 16px 1px 16px',
                     items: [{
                         xtype:'button',
                         // itemId: 'stopedit_tool_' + me.id,
                         tooltip: climatestation.Utils.getTranslation('refresh_logos_from_server'), // 'Refresh logos from server',
-                        glyph:0xf01e,
-                        cls: 'btn-refresh-transparent',
+                        iconCls: 'far fa-redo-alt lightblue',
+                        // glyph:0xf01e,
+                        // cls: 'btn-refresh-transparent',
+                        cls: 'header-btn',
                         hidden: false,
                         margin: '0 0 0 0',
                         handler: function (btn) {
@@ -345,14 +373,14 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
                         }
                     }]
                 },
-                region: 'south',
+                // region: 'south',
                 layout: 'fit',
                 cls: 'rounded-box',
                 margin: 5,
-                width: 555,
-                height: 310,
-                scrollable: true,
-                scrollable: 'vertical',
+                width: 570,
+                height: 335,
+                // scrollable: true,
+                scrollable: 'y',
                 reserveScrollbar: true,
                 // flex: 2,
                 // tools: [{
@@ -369,7 +397,8 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
                         // scope: this,
                         // selectionchange: this.onIconSelect,
                         itemdblclick: function(view, rec, itemEl) {
-                            view.up().up().down('dataview').store.add(rec);
+                            view.up().up().down('#logo-editor-view-' + me.id).getStore().add(rec);
+                            // view.up().up().down('dataview').store.add(rec);
                         }
                     },
                     singleSelect: true,
@@ -387,12 +416,13 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
                             '</div>',
                             '<tpl if="xindex % 4 === 0"><div class="x-clear"></div></tpl>',
                             // '</tpl>',
-                        '</tpl>',
-                        '<div class="x-clear"></div>'
+                        '</tpl>'
+                        // ,'<div class="x-clear"></div>'
                     )
                 }]
             }]
         });
+        me.add(map_logo_editor);
 
         me.callParent();
 

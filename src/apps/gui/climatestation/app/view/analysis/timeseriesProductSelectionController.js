@@ -24,8 +24,8 @@ Ext.define('climatestation.view.analysis.timeseriesProductSelectionController', 
     ,createNewTSDrawPropertiesRecord: function(TSrecord){
         var me = this.getView();
         var myNewRecord = null;
-        // var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
-        var tsDrawPropertiesStore = me.getViewModel().getStore('timeseriesdrawproperties');
+        var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
+        // var tsDrawPropertiesStore = me.getViewModel().getStore('timeseriesdrawproperties');
 
         var newcharttype = 'line',
             newyaxes_id = TSrecord.get('productcode') + ' - ' + TSrecord.get('version');
@@ -65,10 +65,9 @@ Ext.define('climatestation.view.analysis.timeseriesProductSelectionController', 
     ,getTSDrawProperties: function(TSrecord){
         var me = this.getView();
         var user = climatestation.getUser();
-        var myNewRecord = null;
         var tsdrawprobs_record = null;
-        // var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
-        var tsDrawPropertiesStore = me.getViewModel().getStore('timeseriesdrawproperties');
+        var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
+        // var tsDrawPropertiesStore = me.getViewModel().getStore('timeseriesdrawproperties');
         // tsDrawPropertiesStore.getSource().load();    // there is no load method for a chained store
 
         if (!tsDrawPropertiesStore.isLoaded()){
@@ -600,88 +599,155 @@ Ext.define('climatestation.view.analysis.timeseriesProductSelectionController', 
 
     }
 
+    ,setSelections: function(){
+        var me = this.getView();
+        // console.info(me.TimeseriesProductsStore);
+        if (climatestation.Utils.objectExists(me.tplChartView)){
+            // Loop tplSelectedTimeseries and find product record in timeseriesProductsStore.
+            // When product record found, clone record and change settings to template product settings
+            // Call this.TimeseriesProductsGridRowClick(newrecord)
+            // console.info(Ext.util.JSON.decode(me.tplChartView.selectedTimeseries));
+
+            let filters = Ext.clone(me.TimeseriesProductsStore.getFilters().items);
+            filters.forEach( function (filter){
+                me.TimeseriesProductsStore.removeFilter(filter);
+            });
+
+            Ext.util.JSON.decode(me.tplChartView.selectedTimeseries).forEach( function (selectedproduct){
+                // me.getController().TimeseriesProductsGridRowClick(null, product);
+                var prodrec = null;
+                me.TimeseriesProductsStore.getData().items.some(function (product){
+                    var subproducts = product.childNodes;
+                    // console.info(product);
+                    subproducts.some(function(subproduct){
+
+                        if (subproduct.get('productcode') == selectedproduct.productcode &&
+                            subproduct.get('version') == selectedproduct.version &&
+                            subproduct.get('subproductcode') == selectedproduct.subproductcode &&
+                            subproduct.get('mapsetcode') == selectedproduct.mapsetcode
+                            ){
+                            // console.info('subproduct found');
+                            // console.info(subproduct);
+                            prodrec = subproduct;
+                            return true;
+                        }
+                    });
+
+                    if (prodrec != null){
+                        return true;
+                    }
+                });
+
+                var newrecord = Ext.clone(prodrec);
+                if (climatestation.Utils.objectExists(newrecord)) {
+                    newrecord.set('cumulative', selectedproduct.cumulative);
+                    newrecord.set('difference', selectedproduct.difference);
+                    newrecord.set('reference', selectedproduct.reference);
+                    newrecord.set('colorramp', selectedproduct.colorramp);
+                    newrecord.set('legend_id', selectedproduct.legend_id);
+                    newrecord.set('zscore', selectedproduct.zscore);
+
+                    me.getController().TimeseriesProductsGridRowClick(null, newrecord);
+                }
+            });
+
+            me.TimeseriesProductsStore.setFilters(filters);
+
+            if (me.tplChartView.yearTS != ''){
+                me.lookupReference('radio_year').setValue(true);
+                me.lookupReference("YearTimeseries").setValue(me.tplChartView.yearTS);
+                if (me.tplChartView.tsFromSeason != '' && me.tplChartView.tsToSeason != ''){
+                    me.lookupReference("ts_from_season").setValue(me.tplChartView.tsFromSeason);
+                    me.lookupReference("ts_to_season").setValue(me.tplChartView.tsToSeason);
+                }
+            }
+            if (me.tplChartView.tsFromPeriod != ''){
+                me.lookupReference('radio_fromto').setValue(true);
+                me.lookupReference("ts_from_period").setValue(me.tplChartView.tsFromPeriod);
+                me.lookupReference("ts_to_period").setValue(me.tplChartView.tsToPeriod);
+            }
+            if (me.tplChartView.yearsToCompare != ''){
+                me.lookupReference('radio_multiyears').setValue(true);
+                var multiYearsGrid = me.lookupReference("ts_selectmultiyears");
+                var selectedYearRecords = [];
+                me.getViewModel().get('years').getData().each(function(yearInStore) {
+                    if (Ext.Array.contains(me.tplChartView.yearsToCompare, yearInStore.get('year'))){
+                        selectedYearRecords.push(yearInStore);
+                        // console.info(yearInStore);
+                    }
+                });
+                if (selectedYearRecords.length > 0){
+                    multiYearsGrid.getSelectionModel().select(selectedYearRecords);
+                }
+
+                if (me.tplChartView.tsFromSeason != '' && me.tplChartView.tsToSeason != ''){
+                    me.lookupReference("ts_from_seasonmulti").setValue(me.tplChartView.tsFromSeason);
+                    me.lookupReference("ts_to_seasonmulti").setValue(me.tplChartView.tsToSeason);
+                }
+            }
+        }
+    }
+
     ,setTemplateSelections: function(){
         var me = this.getView();
-        var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore');
-		if (!timeseriesProductsStore.isLoaded() || timeseriesProductsStore.count() < 1) {
-			timeseriesProductsStore.proxy.extraParams = {force: true};
-			timeseriesProductsStore.reload({
+        var controller = this;
+        // var timeseriesProductsStore = Ext.getStore('TimeseriesProductsStore');
+		if (!me.TimeseriesProductsStore.isLoaded() || me.TimeseriesProductsStore.count() < 1) {
+			me.TimeseriesProductsStore.proxy.extraParams = {force: true};
+			me.TimeseriesProductsStore.load({
 				callback: function (records, options, success) {
-					setSelections(me);
+					controller.setSelections();
 				}
 			});						
 		}
 		else {
-			setSelections(me);
-		}
-		
-		function setSelections(me){
-			if (climatestation.Utils.objectExists(me.tplChartView)){
-				// Loop tplSelectedTimeseries and find product record in timeseriesProductsStore.
-				// When product record found, clone record and change settings to template product settings
-				// Call this.TimeseriesProductsGridRowClick(newrecord)
-				Ext.util.JSON.decode(me.tplChartView.selectedTimeseries).forEach( function (product){
-					var prodrec = null;
-					prodrec = timeseriesProductsStore.queryBy(function(record,id){
-						return (record.get('productcode') == product.productcode &&
-								record.get('version') == product.version &&
-								record.get('subproductcode') == product.subproductcode &&
-								record.get('mapsetcode') == product.mapsetcode
-							);
-					}).items;
-					var newrecord = Ext.clone(prodrec[0]);
-					if (climatestation.Utils.objectExists(newrecord)) {
-                        newrecord.set('cumulative', product.cumulative);
-                        newrecord.set('difference', product.difference);
-                        newrecord.set('reference', product.reference);
-                        newrecord.set('colorramp', product.colorramp);
-                        newrecord.set('legend_id', product.legend_id);
-                        newrecord.set('zscore', product.zscore);
-
-                        me.getController().TimeseriesProductsGridRowClick(null, newrecord);
-                    }
-				});
-
-				if (me.tplChartView.yearTS != ''){
-					me.lookupReference('radio_year').setValue(true);
-					me.lookupReference("YearTimeseries").setValue(me.tplChartView.yearTS);
-					if (me.tplChartView.tsFromSeason != '' && me.tplChartView.tsToSeason != ''){
-						me.lookupReference("ts_from_season").setValue(me.tplChartView.tsFromSeason);
-						me.lookupReference("ts_to_season").setValue(me.tplChartView.tsToSeason);
-					}
-				}
-				if (me.tplChartView.tsFromPeriod != ''){
-					me.lookupReference('radio_fromto').setValue(true);
-					me.lookupReference("ts_from_period").setValue(me.tplChartView.tsFromPeriod);
-					me.lookupReference("ts_to_period").setValue(me.tplChartView.tsToPeriod);
-				}
-				if (me.tplChartView.yearsToCompare != ''){
-					me.lookupReference('radio_multiyears').setValue(true);
-					var multiYearsGrid = me.lookupReference("ts_selectmultiyears");
-					var selectedYearRecords = [];
-					me.getViewModel().get('years').getData().each(function(yearInStore) {
-						if (Ext.Array.contains(me.tplChartView.yearsToCompare, yearInStore.get('year'))){
-							selectedYearRecords.push(yearInStore);
-							// console.info(yearInStore);
-						}
-					});
-					if (selectedYearRecords.length > 0){
-						multiYearsGrid.getSelectionModel().select(selectedYearRecords);
-					}
-
-					if (me.tplChartView.tsFromSeason != '' && me.tplChartView.tsToSeason != ''){
-						me.lookupReference("ts_from_seasonmulti").setValue(me.tplChartView.tsFromSeason);
-						me.lookupReference("ts_to_seasonmulti").setValue(me.tplChartView.tsToSeason);
-					}
-				}
-			}
+			controller.setSelections();
 		}
     }
 
-    ,TimeseriesProductsGridRowClick: function(grid, record) {
+    ,TimeseriesProductsGridRowClick: function(grid, recordIdx) {
+        // debugger;
+        // console.info(grid);
+        // console.info(recordIdx);
+        // console.info(grid.getStore().getData().items[recordIdx]);
         var me = this.getView();
         var selectedTimeseriesStore = me.getViewModel().getStore('selectedtimeseriesmapsetdatasets')
         var yearsData = [];
+        var record = null;
+
+        // In the PRODUCT selection tool of a Graph window, no grid is passed and instead of the record index,
+        // the record is passed. See function setTemplateSelections() above.
+        if (grid == null){
+            var product = recordIdx.getData();
+            record = new climatestation.model.SelectedTimeseriesMapSetDataSet({
+                productid : product.productcode,
+                productcode : product.productcode,
+                version : product.version,
+                subproductcode : product.subproductcode,
+                productmapsetid : product.productmapsetid,
+                mapsetcode : product.mapsetcode,
+                mapset_name : product.mapset_name,
+                category_id : product.category_id,
+                cat_descr_name : product.cat_descr_name,
+                order_index : product.order_index,
+                product_descriptive_name : product.product_descriptive_name,
+                product_description : product.product_description,
+                years : product.years,
+                frequency_id : product.frequency_id,
+                date_format : product.date_format,
+                timeseries_role : product.timeseries_role,
+                cumulative : product.cumulative,
+                difference : product.difference,
+                reference : product.reference,
+                colorramp : product.colorramp,
+                legend_id : product.legend_id,
+                zscore : product.zscore
+            });
+        }
+        else {
+            record = grid.getStore().getData().items[recordIdx];
+        }
+
         var newrecord = Ext.clone(record);
         var addProduct = true;
         // var gridSelectedTS = me.lookupReference('selected-timeseries-mapset-dataset-grid_'+ me.idpostfix);
@@ -753,7 +819,8 @@ Ext.define('climatestation.view.analysis.timeseriesProductSelectionController', 
             }
 
             if (me.multipleyears || me.year){
-                selectedTimeseriesStore.getData().each(function(product) {
+                selectedTimeseriesStore.each(function(product) {
+                    // console.info(product);
                     yearsData = climatestation.Utils.union_arrays(yearsData, product.get('years'));
 
                     //alltimeseriesmapsetdatasets.push(product);
@@ -795,6 +862,10 @@ Ext.define('climatestation.view.analysis.timeseriesProductSelectionController', 
                         me.getViewModel().get('years').add({'year': year});
                     }
                 });
+
+                if (me.multipleyears) {
+                    me.lookupReference('ts_selectmultiyears').fireEvent('scrolltotop');
+                }
             }
 
             // var yearsDataDict = [];

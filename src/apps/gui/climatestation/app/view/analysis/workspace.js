@@ -433,7 +433,7 @@ Ext.define("climatestation.view.analysis.workspace",{
                 name: 'saveDefaultWorkspaceAsBtn',
                 reference: 'saveDefaultWorkspaceAsBtn',
                 text: climatestation.Utils.getTranslation('save_as'),  // 'Save as',
-                iconCls: 'far fa-save lightblue',
+                iconCls: 'far fa-save fa-lg lightblue',
                 // style: {color: 'lightblue'},
                 scale: 'small',
                 hidden: (!me.isrefworkspace && me.workspaceid != 'defaultworkspace') || climatestation.getUser() == 'undefined' || climatestation.getUser() == null ? true : false,
@@ -452,7 +452,7 @@ Ext.define("climatestation.view.analysis.workspace",{
                 xtype: 'splitbutton',
                 name: 'saveWorkspaceBtn',
                 reference: 'saveWorkspaceBtn',
-                iconCls: 'far fa-save lightblue',
+                iconCls: 'far fa-save fa-lg lightblue',
                 // style: {color: 'lightblue'},
                 cls: 'nopadding-splitbtn',
                 scale: 'small',
@@ -473,7 +473,7 @@ Ext.define("climatestation.view.analysis.workspace",{
                 menu: {
                     hideOnClick: false,
                     // hidden: (!me.isNewWorkspace ? true : false),
-                    alwaysOnTop: true,
+                    // alwaysOnTop: true,
                     width: 165,
                     defaults: {
                         hideOnClick: true
