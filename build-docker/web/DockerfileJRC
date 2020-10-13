@@ -1,7 +1,8 @@
 # FROM ubuntu:18.04 AS ubuntu
 # FROM python:3.8-slim-buster
 # FROM continuumio/miniconda3
-FROM d-prd-registry.jrc.it/ubuntu:18.04 AS ubuntu
+#FROM d-prd-registry.jrc.it/ubuntu:18.04 AS ubuntu
+FROM d-prd-registry.jrc.it/continuumio/miniconda3:latest
 
 USER root
 # Security: Don't run as root!!!
@@ -20,30 +21,34 @@ ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
 ARG DEBIAN_FRONTEND=noninteractive
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-ENV PATH /opt/conda/bin:$PATH
-
-RUN apt-get update --fix-missing && \
-    apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 git mercurial subversion && \
-    apt-get clean
-
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Linux-x86_64.sh -O ~/miniconda.sh && \
-    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
-    rm ~/miniconda.sh && \
-    /opt/conda/bin/conda clean -tipsy && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc && \
-    find /opt/conda/ -follow -type f -name '*.a' -delete && \
-    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
-    /opt/conda/bin/conda clean -afy
+#ENV PATH /opt/conda/bin:$PATH
 
 # Add optional and essential packages
-RUN apt update && apt install -y software-properties-common
-RUN apt-get update && apt-get install -y make cmake gcc nano vim unzip iputils-ping locales mlocate
-#RUN apt-get install wget -y && rm -rf /var/lib/apt/lists/*
-RUN apt-get update && apt-get install -y build-essential libcurl4-openssl-dev libssl-dev
-# To have locate work
+RUN apt-get update --fix-missing && \
+    apt-get install -y make cmake gcc nano vim unzip iputils-ping locales mlocate && \
+    apt-get install -y build-essential libcurl4-openssl-dev libssl-dev && \
+    apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 git mercurial subversion && \
+    apt-get clean
 RUN updatedb
+
+#RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Linux-x86_64.sh -O ~/miniconda.sh && \
+#    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+#    rm ~/miniconda.sh && \
+#    /opt/conda/bin/conda clean -tipsy && \
+#    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+#    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+#    echo "conda activate base" >> ~/.bashrc && \
+#    find /opt/conda/ -follow -type f -name '*.a' -delete && \
+#    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
+#    /opt/conda/bin/conda clean -afy
+
+# CMD alias python3=/opt/conda/bin/python3.7
+
+#RUN conda create --name climatestation python=3.7 -y
+#RUN conda init bash
+#RUN conda activate climatestation
+#RUN echo "source activate climatestation" > ~/.bashrc
+#ENV PATH /opt/conda/envs/climatestation/bin:$PATH
 
 #ENV PATH="/root/miniconda3/bin:${PATH}"
 #ARG PATH="/root/miniconda3/bin:${PATH}"
@@ -69,6 +74,10 @@ RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin
 
 # Add Apache2 with mod-wsgi
 RUN apt-get update && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi-py3
+RUN service apache2 stop
+# Enable these Apache modules wsgi
+RUN a2dismod wsgi
+RUN a2enmod headers rewrite proxy wsgi
 
 # Install all needed Python packages, listed in the file requirements.txt
 # Some packages depend on setuptools to be installed. the reqiurements.txt does not preserve
@@ -114,10 +123,10 @@ RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
 #ENV APACHE_RUN_USER www-data
 #ENV APACHE_RUN_GROUP www-data
 
-# Enable these Apache modules wsgi
-RUN a2enmod headers rewrite proxy wsgi
 RUN service apache2 restart
 WORKDIR /var/www/climatestation
+CMD apache2ctl -D FOREGROUND
+EXPOSE  80
 
 # Pre-compile bytecode for faster startup.
 # Compile installed code:
@@ -125,18 +134,14 @@ WORKDIR /var/www/climatestation
 # Compile code in a directory:
 # RUN python -m compileall yourpackage/
 
-
 # https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact
 #ENTRYPOINT ["apache2ctl", "-D", "FOREGROUND"]
 #CMD ["python", "-c", "import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces(version=1)"]
-CMD apache2ctl -D FOREGROUND
 
 #ADD docker-entrypoint.sh /root/docker-entrypoint.sh
 #RUN chmod 0775 /root/docker-entrypoint.sh
 
 #ENTRYPOINT ["/root/docker-entrypoint.sh"]
-
-EXPOSE  80
 
 
 

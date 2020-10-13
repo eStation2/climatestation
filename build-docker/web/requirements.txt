@@ -8,7 +8,7 @@ future
 urllib3
 certifi
 configparser
-numpy
+numpy==1.19.2
 pyproj
 GDAL
 geojson
