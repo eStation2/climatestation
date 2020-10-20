@@ -36,6 +36,9 @@ Ext.define("climatestation.view.analysis.analysisMain",{
     bodyPadding: '1 0 0 0',
     // ui: 'workspace',
     tabPosition: 'top',
+    tabBar: {
+        padding: 0
+    },
     // tabRotation: 'default', // 0,
 
     initComponent: function () {
@@ -54,6 +57,13 @@ Ext.define("climatestation.view.analysis.analysisMain",{
                 // Ext.data.StoreManager.lookup('UserWorkspacesStore').load();
             }
         });
+
+        // DataSetsStore is needed to query product info (MapView)
+        var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+        if (datasetsstore.isStore && !datasetsstore.isLoaded()) {
+            datasetsstore.proxy.extraParams = {force: true};
+            datasetsstore.load();
+        }
 
         me.listeners = {
             // render: function(c){

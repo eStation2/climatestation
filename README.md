@@ -33,27 +33,28 @@ There is one docker-compose.yml file for setting up the three containers.
 
    Currently, the volume for PostgreSQL has to be created externally by running the following command:
     ```bash
-    docker volume create --name docker-postgresql12-volume -d local
+    docker volume create --name cs-docker-postgresql12-volume -d local
     ```
    In the future this volume will be created automatically, probably using swarm mode.
    
 4. Setup environment variables for the web service volumes.
    
-    The web service uses two external volumes, one for the data and one for the eStation2 static layers and settings.
+    The web service uses two external volumes, one for the data and one for the Climate Station static layers and settings.
     In the .env file used by docker-compose, there are two settings which you have to change to the place where you 
-    have the data and eStation2 directories (to be renamed to climatestation).
+    have the data and climatestation directories.
     For example in Windows:
     
     * DATA_VOLUME=C:\data
-    
-    * ESTATION2_VOLUME=C:\data\eStation2
+    * CS_VOLUME=C:\data\climatestation
+    * TMP_VOLUME=C:\data\tmp\climatestation
+    * DBDUMP_VOLUME=C:\data\climatestation\db_dump
 
     The "data" directory should contain the following directories:
     + processing
     + ingest
     + ingest.wrong
     
-    The "eStation2" directory should contain the following, mostly empty, directories:
+    The "climatestation" directory should contain the following, mostly empty, directories:
     + completeness_bars
     + db_dump
     + docs   

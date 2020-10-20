@@ -413,8 +413,17 @@
     margin-right: 8px;
 }
 
+.redbtn {
+    color: red !important;
+}
+
 .lightblue {
     color: #5795CB !important;
+    line-height: 1em !important;
+}
+
+.black {
+    color: black !important;
 }
 
 .gray {
@@ -491,8 +500,19 @@
 /*}*/
 
 .ol-custom-mouse-position {
-    top: 0px;
+    top: 1px;
     right: 0px;
+    text-align: left;
+    font-size: 10px;
+    /*font-weight: bold;*/
+    /*margin-right: 5px;*/
+    /*width: 185px;*/
+    /*height: 25px;*/
+    /*float: left;*/
+    /*display: inline-block;*/
+    word-wrap: break-word;
+    line-height: 13px !important;
+    white-space: pre-wrap;
 }
 
 .ol-zoom{top:5em !important; left:unset!important; right:15px !important;}
@@ -903,9 +923,9 @@
 .transparencyicon { background: url('../img/icons/Opacity-20 black.png') no-repeat 0 0 !important; }
 
 
-/*.nopadding-btn .x-btn-inner-default-toolbar-medium {*/
-/*    padding: 0px !important;*/
-/*}*/
+.nopadding-btn .x-btn-inner-default-toolbar-medium {
+    padding: 0 !important;
+}
 
 /*.nopadding-splitbtn .x-btn-split-right > .x-btn-icon.x-btn-no-text.x-btn-button-default-toolbar-medium {*/
 /*    padding-right: 0px !important;*/
@@ -945,21 +965,24 @@
 #logo{position:relative;z-index:10;min-height:0;padding:2px;background-color:#fff;}
 
 .mapview-header .x-window-header-title-default .x-title-text{
-    padding: 0px!important;
+    padding: 2px!important;
+    margin: 0px 5px 0px 10px !important;
     border-width: 2px!important;
     line-height: 13px!important;
     white-space: unset!important;
+    text-align: left !important;
 }
 
 .graphview-header .x-window-header-title-default .x-title-text{
-    padding: 0px!important;
+    padding: 2px!important;
+    margin: 0px 5px 0px 10px !important;
     border-width: 2px!important;
     line-height: 13px!important;
     white-space: unset!important;
+    text-align: left !important;
 }
 
 .mapview-regionname {
-    line-height: 14px;
     text-align: left;
     font-size: 10px;
     font-weight: bold;
@@ -1581,27 +1604,27 @@
 
 
 
-/*.x-menu-no-icon {left: auto !important; background-image: none;}*/
-/*.x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}*/
-/*.x-menu-no-icon .x-menu-item-icon {display: none;}*/
-/*.x-menu-no-icon a.x-menu-item-link .x-menu-item-text {margin-left: 5px;}*/
+.x-menu-no-icon {left: auto !important; background-image: none;}
+.x-menu-no-icon a.x-menu-item-link {padding-left: 3px;}
+.x-menu-no-icon .x-menu-item-icon {display: none;}
+.x-menu-no-icon a.x-menu-item-link .x-menu-item-text {margin-left: 5px;}
 
 
-/*.over-item-cls {*/
-/*    background-color: #D3E5F3;*/
-/*    !*lightblue;*!*/
-/*}*/
+.over-item-cls {
+    background-color: #D3E5F3;
+    /*lightblue;*/
+}
 
-/*a.my-custom-button.x-btn-default-small {*/
-/*    background: none;*/
-/*    border: none;*/
-/*}*/
+a.my-custom-button.x-btn-default-small {
+    background: none;
+    border: none;
+}
 
-/*a.my-custom-button.x-btn-default-small span {*/
-/*    color: black;*/
-/*}*/
+a.my-custom-button.x-btn-default-small span {
+    color: black;
+}
 
-/*a.my-custom-button.x-btn-default-small:hover span {*/
-/*    color: #ababab;*/
-/*}*/
+a.my-custom-button.x-btn-default-small:hover span {
+    color: #ababab;
+}
 

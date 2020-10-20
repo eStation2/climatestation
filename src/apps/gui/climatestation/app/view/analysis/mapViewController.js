@@ -421,7 +421,12 @@ Ext.define('climatestation.view.analysis.mapViewController', {
         if (climatestation.Utils.objectExists(me.productname) && me.productname.trim() != ''){
             productname = ' - ' + me.productname;
         }
-        me.setTitleData({
+        // console.info(selectedarea);
+        // console.info(productsensor);
+        // console.info(productname);
+        // console.info(titleObjDate);
+        // console.info(mapTitleObj);
+        mapTitleObj.setData({
             'selected_area': selectedarea,
             'product_name': productsensor + productname,
             'product_date': titleObjDate
@@ -457,7 +462,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
         if (climatestation.Utils.objectExists(me.productsensor) && me.productsensor.trim() != '' && climatestation.Utils.objectExists(me.productname) && me.productname.trim() != '') {
             mapviewTitle = productdateHTML + ' - ' + me.productsensor + ' - ' + me.productname + '<BR>' + productcodetitle + versiontitle;    // + mapsetcodeHTML
         }
-
+// console.info(mapviewTitle);
         if (mapviewTitle != ''){
             Ext.fly('mapview_title_productname_' + me.id).dom.innerHTML = mapviewTitle;
         }
@@ -1236,12 +1241,10 @@ Ext.define('climatestation.view.analysis.mapViewController', {
 
     ,toggleLink: function(btn, event) {
         var mapviewwin = btn.up().up();
-        // console.info('toggleLink');
-        // console.info(btn);
         if (btn.pressed) {
             mapviewwin.map.setView(mapviewwin.mapView);
             mapviewwin.lookupReference('zoomfactorslider_' + mapviewwin.id.replace(/-/g,'_')).setValue(mapviewwin.zoomFactorSliderValue);
-            btn.setIconCls('far fa-chain-broken red');
+            btn.setIconCls('far fa-unlink redbtn');
         }
         else {
             mapviewwin.map.setView(mapviewwin.up().commonMapView);
@@ -2718,13 +2721,18 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             arrowVisible: false,
             alwaysOnTop: true,
             listeners: {
-                afterrender: function (me) {
+                afterrender: function (btn) {
                     // Register the new tip with an element's ID
                     Ext.tip.QuickTipManager.register({
-                        target: me.getId(), // Target button's ID
-                        title: '',
-                        text: climatestation.Utils.getTranslation('open_vector_layer')
+                        target: btn.btnIconEl.el, // Target button's ID
+                        // delegate: btn.btnInnerEl.el,   // btnIconEl  btnInnerEl btnWrap
+                        title : '',  // QuickTip Header
+                        text  : climatestation.Utils.getTranslation('open_vector_layer') // Tip content
                     });
+
+                },
+                destroy: function(btn) {
+                    Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                 }
             },
             handler: function(){
@@ -2824,7 +2832,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                 ['Polygon', 'Polygon'],
                 ['LineString', 'LineString'],
                 ['Point', 'Point'],
-                //['Circle', 'Circle'],
+                ['Circle', 'Circle'],
                 ['Square', 'Square'],
                 ['Box', 'Box'],
                 ['None', 'None']
@@ -2865,15 +2873,19 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             shadow: false,
             // scrollable: 'vertical',
             padding: 0,
-            margin: '0 3 0 0',
+            // margin: '0 3 0 0',
             defaults: {
-                margin: 1
+                margin: 2,
+                padding: 4
             },
             items: [{
                 text: '<div style="font-size: 11px;">' + climatestation.Utils.getTranslation('productnavigator') + '</div>', // 'PRODUCT',
                 reference: 'productNavigatorBtn_'+me.id.replace(/-/g,'_'),
                 // iconCls: 'africa',
                 scale: 'medium',
+                width: 70,
+                height: 34,
+                padding: 0,
                 cls: 'nopadding-btn',
                 handler: 'openProductNavigator'
                 // handler: function(btn, event) {
@@ -2897,36 +2909,44 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                 iconCls: 'download_png',
                 scale: 'medium',
                 handler: 'saveMap',
-                href: '',
-                download: 'estationmap.png',
+                // href: '',
+                // download: 'estationmap.png',
                 listeners: {
-                    afterrender: function (me) {
+                    afterrender: function (btn) {
                         // Register the new tip with an element's ID
                         Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
-                            title: '',
-                            text: climatestation.Utils.getTranslation('download_map_as_png')
+                            target: btn.btnIconEl.el, // Target button's ID
+                            title : '',  // QuickTip Header
+                            text  : climatestation.Utils.getTranslation('download_map_as_png') // Tip content
                         });
+
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                     }
                 }
             },{
                 xtype: 'splitbutton',
                 reference: 'saveMapTemplate_'+me.id.replace(/-/g,'_'),
-                iconCls: 'far fa-save',
+                iconCls: 'far fa-save lightblue',
                 style: {color: 'lightblue'},
                 cls: 'nopadding-splitbtn',
                 scale: 'medium',
+                padding: '6px 4px 2px 4px',
                 hidden:  (climatestation.getUser() == 'undefined' || climatestation.getUser() == null ? true : false),
                 arrowVisible: (!me.isNewTemplate ? true : false),
                 handler: 'setMapTemplateName',
                 listeners: {
-                    afterrender: function (me) {
+                    afterrender: function (btn) {
                         // Register the new tip with an element's ID
                         Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
+                            target: btn.btnIconEl.el, // Target button's ID
                             title: '',
                             text: climatestation.Utils.getTranslation('save_map_template')
                         });
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                     }
                 },
                 menu: {
@@ -2935,19 +2955,19 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                     //iconAlign: '',
                     width: 165,
                     defaults: {
-                        hideOnClick: true
+                        hideOnClick: true,
                         //cls: "x-menu-no-icon",
-                        // padding: 2
+                        padding: 2
                     },
                     items: [{
                             //xtype: 'button',
                             text: climatestation.Utils.getTranslation('save_as'),    // 'Save as...',
-                            glyph: 'xf0c7@FontAwesome',
-                            cls:'lightblue',
-                            // iconCls: 'far fa-save fa-lg lightblue',
-                            style: { color: 'lightblue' },
+                            // glyph: 'xf0c7@FontAwesome',
+                            // cls:'lightblue',
+                            iconCls: 'far fa-save fa-lg lightblue',
+                            // style: { color: 'lightblue' },
                             //cls: 'x-menu-no-icon button-gray',
-                            width: 200,
+                            width: 165,
                             handler: function(){
                                 me.isNewTemplate = true;
                                 me.getController().setMapTemplateName();
@@ -2957,14 +2977,15 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             },{
                 xtype: 'container',
                 // layout: 'fit',
-                autoWidth: true,
+                // autoWidth: true,
                 // maxWidth: 190,
-                // width: 350,
-                height: 37,
+                width: 183,
+                height: 36,
                 top: 0,
                 align:'left',
+                padding: 0,
                 style: {
-                    "line-height": '13px!important'
+                    "line-height": '11px!important'
                 },
                 // defaults: {
                 //     style: {
@@ -2989,7 +3010,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                 xtype: 'button',
                 reference: 'drawgeometry_'+me.id.replace(/-/g,'_'),
                 hidden: false,
-                iconCls: 'polygon-gray',
+                iconCls: 'far fa-draw-polygon',    // 'fal fa-draw-polygon'  'polygon-gray'
                 scale: 'medium',
                 floating: false,  // usually you want this set to True (default)
                 enableToggle: true,
@@ -2999,16 +3020,22 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                 menuAlign: 'tr-tl',
                 handler: 'toggleDrawGeometry',
                 listeners: {
-                    afterrender: function (me) {
+                    afterrender: function (btn) {
                         // Register the new tip with an element's ID
                         Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
+                            target: btn.btnIconEl.el, // Target button's ID
                             title: '',
                             text: climatestation.Utils.getTranslation('draw_geometries')
                         });
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                     }
-                    ,mouseover: function(btn , y , x ){
-                        btn.showMenu();
+                    ,mouseover: function(btn){
+                        var task = new Ext.util.DelayedTask(function() {
+                            btn.showMenu();
+                        });
+                        task.delay(1500);
                         // if (btn.pressed) {
                         //     btn.showMenu();
                         // }
@@ -3016,6 +3043,12 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                         //     btn.hideMenu();
                         // }
                     }
+                    // ,mouseout: function(btn){
+                    //     var task = new Ext.util.DelayedTask(function() {
+                    //         btn.hideMenu();
+                    //     });
+                    //     task.delay(1500);
+                    // }
                 },
                 menu: {
                     hideOnClick: true,
@@ -3032,10 +3065,10 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                         {
                             //xtype: 'button',
                             text: climatestation.Utils.getTranslation('save_as_layer'),    // 'Save as layer...',
-                            glyph: 'xf0c7@FontAwesome',
-                            cls:'lightblue',
-                            // iconCls: 'far fa-save fa-lg lightblue',
-                            style: { color: 'lightblue' },
+                            // glyph: 'xf0c7@FontAwesome',
+                            // cls:'lightblue',
+                            iconCls: 'far fa-save fa-lg lightblue',
+                            // style: { color: 'lightblue' },
                             // cls: 'x-menu-no-icon button-gray',
                             width: 200,
                             hidden:  (climatestation.globals['typeinstallation'] == 'jrc_online' ? true : false),
@@ -3131,9 +3164,9 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                         },{
                             //xtype: 'button',
                             text: climatestation.Utils.getTranslation('reset'),   // 'Reset',
-                            glyph: 'xf0e2@FontAwesome',
-                            cls:'red',
-                            // iconCls: 'far fa-undo',
+                            // glyph: 'xf0e2@FontAwesome',
+                            // cls:'red',
+                            iconCls: 'far fa-undo red',
                             style: { color: 'red' },
                             //cls: 'x-menu-no-icon button-gray',
                             width: 60,
@@ -3152,13 +3185,16 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                 enableToggle: true,
                 handler: 'toggleOutmask',
                 listeners: {
-                    afterrender: function (me) {
+                    afterrender: function (btn) {
                         // Register the new tip with an element's ID
                         Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
+                            target: btn.btnIconEl.el, // Target button's ID
                             title: '',
                             text: climatestation.Utils.getTranslation('outmask_selected_geometry')
                         });
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                     }
                 }
             },{
@@ -3169,16 +3205,20 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                     "font-size": '1.70em'
                 },
                 scale: 'medium',
+                padding: '6px 4px 2px 4px',
                 enableToggle: true,
                 handler: 'toggleObjects',
                 listeners: {
-                    afterrender: function (me) {
+                    afterrender: function (btn) {
                         // Register the new tip with an element's ID
                         Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
+                            target: btn.btnIconEl.el, // Target button's ID
                             title: '',
                             text: climatestation.Utils.getTranslation('show_hide_title_logo_discalaimer_objects')
                         });
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                     }
                 }
             },{
@@ -3190,13 +3230,16 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                 enableToggle: true,
                 toggleHandler: 'toggleLegend',
                 listeners: {
-                    afterrender: function (me) {
+                    afterrender: function (btn) {
                         // Register the new tip with an element's ID
                         Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
+                            target: btn.btnIconEl.el, // Target button's ID
                             title: '',
                             text: climatestation.Utils.getTranslation('show_hide_legend')
                         });
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                     }
                 }
             },{
@@ -3207,15 +3250,20 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                 style: {color: 'gray'},
                 //iconCls: 'unlink',
                 scale: 'medium',
+                width: 34,
+                padding: '6px 4px 2px 4px',
                 handler: 'toggleLink',
                 listeners: {
-                    afterrender: function (me) {
+                    afterrender: function (btn) {
                         // Register the new tip with an element's ID
                         Ext.tip.QuickTipManager.register({
-                            target: me.getId(), // Target button's ID
+                            target: btn.btnIconEl.el, // Target button's ID
                             title: '',
                             text: climatestation.Utils.getTranslation('link_unlink_mapview')
                         });
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                     },
                     toggle: 'toggleLink'
                 }

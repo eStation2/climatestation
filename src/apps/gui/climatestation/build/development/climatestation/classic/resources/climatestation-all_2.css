@@ -11993,6 +11993,14 @@ tr.x-grid-subtable-row {
     color: darkgray;
     padding: 5px;
 }
+/* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/analysis/mapView.scss:4 */
+.x-resizable-handle-south {
+    cursor: s-resize;
+    height: 3px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
 /* /Users/Jurvtk/Develop/climatestation/src/apps/gui/climatestation/app/view/main/Main.scss:17 */
 .x-btn-icon-el-default-toolbar-medium {
     width: 24px !important;

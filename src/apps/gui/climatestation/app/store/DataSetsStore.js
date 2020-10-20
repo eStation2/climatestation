@@ -13,7 +13,7 @@ Ext.define('climatestation.store.DataSetsStore', {
 
     storeId : 'DataSetsStore'
 
-    ,autoLoad: false
+    ,autoLoad: true
     ,autoSync: false
     ,remoteSort: false
     ,remoteGroup: false

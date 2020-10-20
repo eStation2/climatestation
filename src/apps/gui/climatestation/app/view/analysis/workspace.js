@@ -46,6 +46,7 @@ Ext.define("climatestation.view.analysis.workspace",{
         maps: [],
         graphs: [],
         tabConfig: {
+            padding: '0 10 0 10',
             style: {
                 color: 'black'
             }
@@ -91,6 +92,8 @@ Ext.define("climatestation.view.analysis.workspace",{
                 // timeseriesChartSelectionWindow.hide();
 
                 // var taskOpenMapsAndGraphs = new Ext.util.DelayedTask(function() {
+                // console.info(me.maps);
+                // console.info(me.graphs);
                 if (me.maps.length > 0) {
                     me.getController().openWorkspaceMaps(me.maps);
                 }
@@ -310,6 +313,9 @@ Ext.define("climatestation.view.analysis.workspace",{
                 borderColor: 'lightgray',
                 borderStyle: 'solid',
                 "border-bottom-width": '1px !important'
+            },
+            defaults: {
+                padding: 3
             },
             items: [' ', {
                 xtype: 'button',

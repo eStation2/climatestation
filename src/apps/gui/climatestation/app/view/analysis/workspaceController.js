@@ -76,6 +76,7 @@ Ext.define('climatestation.view.analysis.workspaceController', {
         me.allMapsLoaded = false;
 
         for (var i = 0; i < maps.length; i++) {
+            // var mapviewposition = maps[i].mapviewposition.split(",").map(function(x){return parseInt(x)});
             var wsmap = {
                 workspace : me,
                 isTemplate: maps[i].istemplate,
@@ -112,6 +113,8 @@ Ext.define('climatestation.view.analysis.workspaceController', {
                 zoomextent: maps[i].zoomextent,
                 mapsize: maps[i].mapsize,
                 mapcenter: maps[i].mapcenter
+                // x: mapviewposition[0],
+                // y: mapviewposition[1]
             };
             // console.info(wsmap);
             var newMapViewWin = new climatestation.view.analysis.mapView(wsmap);

@@ -31,7 +31,7 @@ Ext.define('climatestation.view.main.Main', {
 
         me.listeners = {
             afterrender: function(){
-                me.controller.doCardNavigation('analysismain');
+                me.controller.doCardNavigation('dashboardmain');
             }
         };
 
@@ -39,7 +39,7 @@ Ext.define('climatestation.view.main.Main', {
         //
         // me.dashboard = {
         //     title: climatestation.Utils.getTranslation('dashboard'),  // 'Dashboard',
-        //     id:'dashboardtab',
+        //     itemId:'dashboardtab',
         //     xtype:'container',
         //     hidden: true,
         //     scrollable: true,
@@ -64,7 +64,7 @@ Ext.define('climatestation.view.main.Main', {
         //
         // me.acquisition = {
         //     title: climatestation.Utils.getTranslation('acquisition'),  // 'Acquisition',
-        //     id:'acquisitionmaintab',
+        //     itemId:'acquisitionmaintab',
         //     xtype:'container',
         //     closable: false,
         //     scrollable: true,
@@ -73,7 +73,7 @@ Ext.define('climatestation.view.main.Main', {
         //     items: [{
         //         // html: '<img alt="Mockup Acquisition" width="100%" height="100%" src="../resources/img/mockup_acquisition.png">'
         //         xtype: 'acquisition-main',
-        //         id: 'acquisitionmain'
+        //         itemId: 'acquisitionmain'
         //     }],
         //     listeners: {
         //        activate: function (acquisitiontab) {
@@ -144,14 +144,14 @@ Ext.define('climatestation.view.main.Main', {
         //
         // me.processing = {
         //     title: climatestation.Utils.getTranslation('processing'),  // 'Processing',
-        //     id:'processingmaintab',
+        //     itemId:'processingmaintab',
         //     xtype:'container',
         //     scrollable: true,
         //     hidden: true,
         //     layout: 'fit',
         //     items: [{
         //        xtype  : 'processing-main',
-        //        id:'processingmain'
+        //        itemId:'processingmain'
         //     }],
         //     listeners: {
         //        activate: function (processingtab) {
@@ -164,14 +164,14 @@ Ext.define('climatestation.view.main.Main', {
         //
         // me.datamanagement = {
         //     title: climatestation.Utils.getTranslation('datamanagement'),  // 'Data Management',
-        //     id:'datamanagementmaintab',
+        //     itemId:'datamanagementmaintab',
         //     xtype:'container',
         //     scrollable: true,
         //     hidden: true,
         //     layout: 'fit',
         //     items: [{
         //        xtype  : 'datamanagement-main',
-        //        id:'datamanagementmain'
+        //        itemId:'datamanagementmain'
         //     }],
         //     listeners: {
         //        activate: function (datamanagementtab) {
@@ -201,14 +201,14 @@ Ext.define('climatestation.view.main.Main', {
         //
         // me.analysis = {
         //     title: climatestation.Utils.getTranslation('analysis'),  // 'Analysis',
-        //     id:'analysistab',
+        //     itemId:'analysistab',
         //     xtype:'container',
         //     scrollable: true,
         //     layout : 'fit',
         //     hidden: true,
         //     items: [{
         //         xtype  : 'analysis-main',
-        //         id:'analysismain',
+        //         itemId:'analysismain',
         //         reference: 'analysismain'
         //         // hidden: false
         //     }],
@@ -239,14 +239,14 @@ Ext.define('climatestation.view.main.Main', {
         //
         // me.system = {
         //     title: climatestation.Utils.getTranslation('system'),  // 'System',
-        //     id:'systemtab',
+        //     itemId:'systemtab',
         //     xtype:'container',
         //     hidden: true,
         //     scrollable: true,
         //     layout : 'center',
         //     items: [{
         //        xtype  : 'systemsettings',
-        //        id:'systemsettingsview'
+        //        itemId:'systemsettingsview'
         //     }],
         //     listeners: {
         //        activate: function (systemtab) {
@@ -280,7 +280,7 @@ Ext.define('climatestation.view.main.Main', {
         //     layout : 'center',
         //     items: [{
         //        xtype  : 'help',
-        //        id:'helpview'
+        //        itemId:'helpview'
         //     }],
         //     listeners: {
         //         activate: function (helptab) {
@@ -306,7 +306,7 @@ Ext.define('climatestation.view.main.Main', {
             },
             items: [{
                 xtype: 'dashboard-main',
-                id: 'dashboardmain',
+                itemId: 'dashboardmain',
                 reference: 'dashboardmain',
                 scrollable: true,
                 layout : 'center',
@@ -322,7 +322,7 @@ Ext.define('climatestation.view.main.Main', {
                 }
             }, {
                 xtype: 'acquisition-main',
-                id: 'acquisitionmain',
+                itemId: 'acquisitionmain',
                 reference: 'acquisitionmain',
                 listeners: {
                     activate: function(acquisitioncard){
@@ -332,7 +332,7 @@ Ext.define('climatestation.view.main.Main', {
                 }
             },{
                 xtype  : 'processing-main',
-                id:'processingmain',
+                itemId:'processingmain',
                 reference: 'processingmain',
                 listeners: {
                     activate: function(processingcard){
@@ -343,7 +343,7 @@ Ext.define('climatestation.view.main.Main', {
                 }
             },{
                 xtype  : 'datamanagement-main',
-                id:'datamanagementmain',
+                itemId:'datamanagementmain',
                 reference: 'datamanagementmain',
                 listeners: {
                     activate: function(datamanagementcard){
@@ -353,7 +353,7 @@ Ext.define('climatestation.view.main.Main', {
                 }
             },{
                 xtype  : 'analysis-main',
-                id:'analysismain',
+                itemId:'analysismain',
                 reference: 'analysismain',
                 listeners: {
                     activate: function(analysiscard){
@@ -362,8 +362,26 @@ Ext.define('climatestation.view.main.Main', {
                     }
                 }
             },{
+                xtype  : 'impact-main',
+                itemId:'impactmain',
+                reference: 'impactmain',
+                listeners: {
+                    activate: function(impactcard){
+                        me.lookupReference('header-section-title').setText(climatestation.Utils.getTranslation('IMPACT toolbox'));
+                    }
+                }
+            },{
+                xtype  : 'c3sf4p-main',
+                itemId:'c3sf4pmain',
+                reference: 'c3sf4pmain',
+                listeners: {
+                    activate: function(c3sf4pcard){
+                        me.lookupReference('header-section-title').setText(climatestation.Utils.getTranslation('Fitness For Purpose'));
+                    }
+                }
+            },{
                 xtype  : 'systemsettings',
-                id:'systemsettingsview',
+                itemId:'systemsettingsview',
                 reference: 'systemsettingsview',
                 listeners: {
                     activate: function(systemsettingscard){
@@ -373,7 +391,7 @@ Ext.define('climatestation.view.main.Main', {
                 }
             },{
                 xtype  : 'help',
-                id:'helpview',
+                itemId:'helpview',
                 reference: 'helpview',
                 listeners: {
                     activate: function(helpcard){
@@ -427,55 +445,60 @@ Ext.define('climatestation.view.main.Main', {
                     ui: 'headerbtn',
                     scale: 'large',
                     iconCls: 'far fa-bars',
-                    id: 'main-navigation-btn',
+                    itemId: 'main-navigation-btn',
                     // handler: 'onToggleNavigationSize',
                     arrowVisible: false,
                     menu: {
                         // ui: 'mainmenu',
-                        items: [
-                            {
+                        items: [{
                                 text: 'Dashboard',
                                 iconCls:'far fa-desktop',
                                 handler: function(){
                                     me.controller.doCardNavigation('dashboardmain')
                                 }
-                            },
-                            {
+                            },{
                                 text: 'Acquisition',
                                 iconCls:'far fa-download',
                                 handler: function(){
                                     me.controller.doCardNavigation('acquisitionmain')
                                 }
-                            },
-                            {
+                            },{
                                 text: 'Processing',
                                 iconCls:'far fa-cogs',
                                 handler: function(){
                                     me.controller.doCardNavigation('processingmain')
                                 }
-                            },
-                            {
+                            },{
                                 text: 'Data Management',
                                 iconCls: 'far fa-folder-tree',  // 'x-fa fa-database'  //
                                 handler: function(){
                                     me.controller.doCardNavigation('datamanagementmain')
                                 }
-                            },
-                            {
+                            },{
                                 text: 'Analysis',
                                 iconCls:'far fa-chart-bar',
                                 handler: function(){
                                     me.controller.doCardNavigation('analysismain')
                                 }
-                            },
-                            {
+                            },{
+                                text: 'IMPACT toolbox',
+                                iconCls:'far fa-layer-group',
+                                handler: function(){
+                                    me.controller.doCardNavigation('impactmain')
+                                }
+                            },{
+                                text: 'Fitness For Purpose',
+                                iconCls:'far fa-chart-scatter',
+                                handler: function(){
+                                    me.controller.doCardNavigation('c3sf4pmain')
+                                }
+                            },{
                                 text: 'System settings',
                                 iconCls:'far fa-cog',
                                 handler: function(){
                                     me.controller.doCardNavigation('systemsettingsview')
                                 }
-                            },
-                            {
+                            },{
                                 text: 'Help',
                                 iconCls:'far fa-question',
                                 handler: function(){

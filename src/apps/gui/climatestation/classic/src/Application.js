@@ -16,7 +16,7 @@ Ext.define('climatestation.Application', {
         'climatestation.*',
         // 'climatestation.view.*',
         // 'climatestation.Utils',
-        'Ext.state.CookieProvider',
+        'Ext.state.*',
         'Ext.tip.QuickTipManager'
     ],
 
@@ -65,13 +65,13 @@ Ext.define('climatestation.Application', {
 
     //init: function () {
     onBeforeLaunch: function () {
-        //console.info('onBeforeLaunch');
         var me = this;
-        //console.info(me);
 
-        // Ext.override(Ext.tip.QuickTip, {
-        //     // dismissDelay: 20000
-        //     shadow: false
+        // Ext.Loader.loadScript({
+        //     url: '/lib/js/ol-layerswitcher-master/src/ol-layerswitcher.js',
+        //     onLoad: function (options) {
+        //         console.info('layerswitcher');
+        //     }
         // });
 
         Ext.ariaWarn = Ext.emptyFn;
@@ -83,6 +83,7 @@ Ext.define('climatestation.Application', {
             frame: true,
             trackMouse: true,
             showDelay: 50      // Show 50ms after entering target
+            // dismissDelay: 20000
         });
 
 

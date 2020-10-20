@@ -1,6 +1,6 @@
 
 Ext.define("climatestation.view.analysis.ProductNavigator",{
-    extend: "Ext.panel.Panel",
+    extend: "Ext.window.Window",
     controller: "analysis-productnavigator",
     viewModel: {
         type: "analysis-productnavigator"
@@ -18,10 +18,9 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
 
     title: '<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('productnavigator') + '</div>',
 
-
     floating: true,
-    defaultAlign: 'tl-tl',
-    modal: false,
+    defaultAlign: 'c-c',
+    modal: true,
     closable: true,
     closeAction: 'hide', // 'destroy',
     maximizable: false,
@@ -29,13 +28,14 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
     focusable: true,
     draggable: true,
     constrain: true,
+    // constrainHeader: Ext.getBody(),
     alwaysOnTop: true,
     // resizeHandles: 'n,s',
     scrollable: false,
     autoWidth:  true,
-    minWidth: 340,
-    width: 340,
-    height: 590,    // 610,
+    minWidth: 360,
+    width: 360,
+    height: 650,    // 610,
     // height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 750,  // 600,
     // autoHeight:  true,
     minHeight: 300,
@@ -46,25 +46,20 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
     frame: false,
     frameHeader : false,
     shadow: false,
-    componentCls: 'rounded-box',
+    cls: 'rounded-box',
     header: {
         titlePosition: 0,
         titleAlign: 'left',
+        padding: '6px 16px 6px 16px'
         // iconCls: 'africa',
-        cls: 'rounded-box-header',
-        style: {
-            'background-color': '#A9DEEC !important;',
-            'font-weight':'bold',
-            'color':'#000',
-            'font-size': '13px;'
-        }
+        // cls: 'rounded-box-header',
+        // style: {
+        //     'background-color': '#A9DEEC !important;',
+        //     'font-weight':'bold',
+        //     'color':'#000',
+        //     'font-size': '13px;'
+        // }
     },
-    // header: {
-    //     titlePosition: 0,
-    //     titleAlign: 'left',
-    //     iconCls: 'africa'
-    // },
-    // constrainHeader: Ext.getBody(),
 
     layout: {
         type  : 'border',
@@ -93,6 +88,10 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
     initComponent: function () {
         var me = this;
 
+        me.constrainTo = me.owner.workspace.el;
+        // me.renderTo = me.owner.workspace.el;
+        me.alignTarget = me.owner.workspace.el;
+
         me.id = me.mapviewid+'-productnavigator';
         me.title = '<div class="panel-title-style-16">' + climatestation.Utils.getTranslation('productnavigator') + '</div>';
         // me.constrainHeader = me.owner;
@@ -102,19 +101,23 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
             type: 'refresh',
             align: 'c-c',
             tooltip: climatestation.Utils.getTranslation('refreshproductlist'),    // 'Refresh product list',
-            callback: 'loadProductsGrid'
+            handler: function(){
+                me.getController().loadProductsGrid(true)
+            }
         }];
 
         // Ext.util.Observable.capture(this, function(e){console.log('productnav event: ' + e);});
         me.listeners = {
             // close: me.onClose,
             afterrender: function(){
-                me.alignTarget = me.owner.el;
+                me.getController().loadProductsGrid(false);
+                // me.alignTarget = me.owner.workspace.el;
+                // console.info(me.owner);
             }
             ,show: function(){
                 // me.fireEvent('align');
                 // console.info(me.alignTarget);
-                me.alignTo(me.alignTarget);
+                // me.alignTo(me.alignTarget);
             }
             // align: function() {
             //     // me.alignTo(Ext.getCmp('analysismain').lookupReference('analysismain_maptemplatebtn'), 'tl-bc');
@@ -162,6 +165,7 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
             frame: false,
             border: false,
             bodyBorder: true,
+            margin: {top: 3, right: 3, bottom: 3, left: 3},
 
             features: [{
                 reference: 'selectproductcategories',
@@ -224,7 +228,7 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
             header: {
                 titlePosition: 0,
                 titleAlign: 'left',
-                height: 25
+                height: 35
                 //,style: {backgroundColor:'#ADD2ED'}
             },
             autoWidth:true,
@@ -237,6 +241,7 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
             frame: false,
             border: false,
             bodyBorder: false,
+            margin: {top: 3, right: 3, bottom: 3, left: 3},
             defaults: {
                 margin: {top: 5, right: 5, bottom: 5, left: 5},
                 layout: {
@@ -245,8 +250,8 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
             },
             listeners: {
                 expand: function(){
-                    this.setWidth(335); // 400
-                    this.up().setWidth(335+312);
+                    this.setWidth(400); // 335
+                    this.up().setWidth(400+312);
                 },
                 collapse: function(){
                     this.setWidth(0);
@@ -396,7 +401,7 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
                         // '<span>&nbsp;&nbsp;(display_index: <b style="color:black">{display_index}</b>)' +
                         '</span>'
                     ),
-                    width: 250,
+                    width: 300,
                     sortable: true,
                     menuDisabled: true
                 },{
@@ -426,7 +431,7 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
                 autoWidth: true,
                 // autoHeight: true,
                 // maxHeight: 190,
-                height: 165,
+                height: 200,
                 layout: 'fit',
                 scrollable: 'vertical',
                 reserveScrollbar: true,
@@ -493,8 +498,8 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
                         xtype: 'button',
                         text: climatestation.Utils.getTranslation('assign_legend'),    // 'Assign legend to product',
                         name: 'assign_legend',
-                        iconCls: 'far fa-plus-circle fa-1x',
-                        style: {color: 'green'},
+                        iconCls: 'far fa-plus-circle fa-1x green',
+                        // style: {color: 'green'},
                         hidden: climatestation.globals['typeinstallation'].toLowerCase() == 'jrc_online',
                         handler: 'assignLegend'
                     }]
@@ -528,7 +533,7 @@ Ext.define("climatestation.view.analysis.ProductNavigator",{
                     // text: '<div class="grid-header-style">' + climatestation.Utils.getTranslation('colorschemes') + '</div>',
                     text: '<div>' + climatestation.Utils.getTranslation('colorschemes') + '</div>',
                     cls: 'column-header-small-style',
-                    width: 240,
+                    width: 300,
                     shrinkWrap: 0,
                     menuDisabled:true,
                     tpl: new Ext.XTemplate(

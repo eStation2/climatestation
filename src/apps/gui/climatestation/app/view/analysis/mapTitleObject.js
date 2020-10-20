@@ -22,7 +22,7 @@ Ext.define("climatestation.view.analysis.mapTitleObject",{
     minWidth: 150,
     minHeight: 50,
     layout: 'fit',
-    liquidLayout: false,
+    // liquidLayout: false,
     hidden: true,
     floating: true,
     defaultAlign: 'tl-tl',
@@ -46,34 +46,30 @@ Ext.define("climatestation.view.analysis.mapTitleObject",{
 
     config: {
         tpl: ['<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>'],
-        titleData: null,
+        titleData: [],
         html: '<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>',
         title_ImageObj: new Image(),
         titlePosition: [0,0],
         changesmade: false
-        // ,content: ''
     },
 
     bind:{
         data:'{titleData}'
     },
+    publishes: ['titleData'],
 
     initComponent: function () {
         var me = this;
         me.title_ImageObj = new Image();
 
-        // me.setMinWidth(150);
-        // me.setMinHeight(50);
-        // me.layout = 'fit';
-        // me.titlePosition = [0,0];
-        // me.defaultTpl = '<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>';
-        // me.tpl.push(me.defaultTpl);
+        me.items = [];  // needed to be able to add items!
 
         me.listeners = {
             //element  : 'el',
             el: {
                 dblclick: function () {
-                    var editorpanel = this.component.map_title_editor_panel;
+                    var editorpanel = me.lookupReference('map_title_editor' + me.id);
+                    // var editorpanel = this.component.map_title_editor_panel;
                     //editorpanel.down('htmleditor').setValue(this.component.down().tpl.html);
                     editorpanel.down('htmleditor').setValue(this.component.tpl.html);
                     editorpanel.constrainTo = this.component.constrainTo;
@@ -93,6 +89,9 @@ Ext.define("climatestation.view.analysis.mapTitleObject",{
                     text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + climatestation.Utils.getTranslation('doubleclick_to_edit') // 'Double click to edit.'
                 });
 
+                me.getViewModel().data.titleData = me.getTitleData();
+                me.changesmade = true;
+
                 // Ext.util.Observable.capture(this, function(e){console.log('titleObj ' + e);});
                 //
                 // me.mon(me, {
@@ -103,6 +102,11 @@ Ext.define("climatestation.view.analysis.mapTitleObject",{
                 //
                 //me.mon(me.el, 'click', function(){alert('container click');});
                 //me.mon(me.el, 'change', function(){alert('container change');});
+            },
+            show: function(){
+                me.setPosition(me.titlePosition);
+                me.updateLayout();
+                // me.fireEvent('refreshimage');
             },
             refreshimage: function(){
                 if(!me.hidden) {
@@ -131,15 +135,11 @@ Ext.define("climatestation.view.analysis.mapTitleObject",{
                     // }
                 }
             },
-            show: function(){
-                me.setPosition(me.titlePosition);
-                // me.fireEvent('refreshimage');
-            }
             // ,move: function(){
             //     console.info('moving title object');
             //     me.titlePosition = me.getPosition();
             // }
-            ,beforedestroy: function(){
+            beforedestroy: function(){
                 // To fix the error: mapView.js?_dc=1506608907564:56 Uncaught TypeError: binding.destroy is not a function
                 me.bind = null;
             }
@@ -220,52 +220,67 @@ Ext.define("climatestation.view.analysis.mapTitleObject",{
             }
         });
 
-        me.map_title_editor_panel = Ext.create('Ext.panel.Panel', {
+        var map_title_editor_panel = Ext.create('Ext.window.Window', {
+            id: 'map_title_editor' + me.id,
+            reference: 'map_title_editor' + me.id,
             autoWidth: true,
             autoHeight: true,
             layout: 'fit',
-            modal: false,
+            modal: true,
             hidden: true,
             floating: true,
-            defaultAlign: 'tl-tl',
+            defaultAlign: 'tl-bc',
             closable: true,
             closeAction: 'hide',
             draggable: true,
-            constrain: true,
-            constrainTo: me.constrainTo,
-            alwaysOnTop: false,
+            // constrain: true,
+            // constrainTo: me.constrainTo,
+            alwaysOnTop: true,
             autoShow: false,
             resizable: false,
             frame: false,
             frameHeader : false,
             border: false,
             shadow: true,
-            headerOverCls: 'grayheader',
+            cls: 'rounded-box',
+            // headerOverCls: 'grayheader',
             header: {
                 title: climatestation.Utils.getTranslation('title_object'), // 'Title object',
-                titleAlign: 'right',
-                cls: 'transparentheader',
-                hidden: false,
-                items: [{
+                titleAlign: 'left',
+                // cls: 'transparentheader',
+                padding: '6px 16px 6px 16px',
+                hidden: false
+            },
+            bbar: {
+                padding: 0,
+                items: ['->', {
                     xtype:'button',
                     itemId: 'stopedit_tool_' + me.id,
                     tooltip: climatestation.Utils.getTranslation('save_changes'), // 'Save changes',
-                    glyph:0xf0c7,
-                    cls: 'btntransparent',
+                    iconCls: 'far fa-save lightblue',
+                    // glyph:0xf0c7,
+                    // cls: 'btntransparent',
+                    cls: 'header-btn',
+                    scale: 'medium',
                     hidden: false,
                     margin: '3 0 0 5',
+                    padding: 2,
                     handler: function (btn) {
-                        var panel = btn.up().up();
-                        var mapTitleObj = me,
+                        var panel = btn.up().up(),
+                            mapTitleObj = me,
                             mapTitleEditor = panel.down('#map_title_editor_' + me.id),
                             cleanText = mapTitleEditor.getValue().trim().replace(/<\/?[^>]+(>|$)/g, "");
 
-                        // mapTitleObj.setTpl(mapTitleEditor.getValue());   // .replace(/"/g, '&quot;', true);
-                        mapTitleObj.tpl.set(mapTitleEditor.getValue(), true);   // .replace(/"/g, '&quot;', true);
-                        if (cleanText == ''){
-                            mapTitleObj.tpl.set('', true);
-                        }
-                        // console.info(mapTitleObj.getData());
+                        // // mapTitleObj.setTpl(mapTitleEditor.getValue());   // .replace(/"/g, '&quot;', true);
+                        // mapTitleObj.tpl.set(mapTitleEditor.getValue(), true);   // .replace(/"/g, '&quot;', true);
+                        // if (cleanText == ''){
+                        //     mapTitleObj.tpl.set('', true);
+                        // }
+                        console.info(mapTitleEditor.getValue());
+                        console.info(mapTitleObj);
+                        console.info(mapTitleObj.getData());
+
+                        mapTitleObj.tpl.set(mapTitleEditor.getValue().trim(), true);
                         mapTitleObj.update(mapTitleObj.getData());
                         // mapTitleObj.setHeight('auto');
                         mapTitleObj.updateLayout();
@@ -290,6 +305,8 @@ Ext.define("climatestation.view.analysis.mapTitleObject",{
             },
             items: me.map_title_editor
         });
+
+        me.add(map_title_editor_panel);
 
         me.callParent();
 

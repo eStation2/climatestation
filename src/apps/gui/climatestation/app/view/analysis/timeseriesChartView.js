@@ -18,10 +18,11 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
         'climatestation.view.analysis.timeseriesChartViewModel'
     ],
 
-    title: '<span class="panel-title-style">'+climatestation.Utils.getTranslation('timeseries')+'</span>',
+    // title: '<span class="panel-title-style">'+climatestation.Utils.getTranslation('timeseries')+'</span>',
     header: {
         titlePosition: 2,
-        titleAlign: "left",
+        titleAlign: 'left',
+        padding: '2px 14px 2px 14px',
         cls: 'graphview-header'
     },
     constrainHeader: true,
@@ -35,14 +36,15 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
     shadow: false,
     frame: false,
     border: true,
+    bodyBorder: false,
     // componentCls: 'rounded-box-win',
 
     width:700,
     height: Ext.getBody().getViewSize().height < 600 ? Ext.getBody().getViewSize().height-80 : 600,
     minWidth:400,
     minHeight:350,
-    x: 50,
-    y: 5,
+    // x: 50,
+    // y: 5,
 
     // glyph : 'xf080@FontAwesome',
 
@@ -74,7 +76,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
         timeseriesChart: {},
         timeseriesGraph: {},
 
-        istemplate: false,
+        // istemplate: false,
         graphviewposition: [50,5],
         graphviewsize: [700,600],
         disclaimerObjPosition: [0,611],
@@ -90,13 +92,57 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
         beforerender: function () {
             var me = this;
 
+            // Ext.util.Observable.capture(me, function (e) { console.log('chart - ' + e);});
+
             if (me.graphtype != 'scatter'){
                 var selectedProductsAndTimeFramePanel = me.getController().createSelectedProductsAndTimeFramePanel();
                 me.add(selectedProductsAndTimeFramePanel);
 
                 selectedProductsAndTimeFramePanel.down('timeseriesproductselection').fireEvent('beforerender');
             }
+
+            // if (climatestation.Utils.objectExists(me.graphviewposition)){
+            //    me.x = me.graphviewposition[0];
+            //    me.y = me.graphviewposition[1];
+            // }
         },
+        deactivate: function(){
+            var me = this;
+            // console.info(me);
+        },
+
+//         drag: function(dragObj){
+//             var me = this;
+//             console.info(me.getPosition());
+//             console.info(dragObj);
+//             dragObj.proxy.setPosition(dragObj.startPosition[0], dragObj.startPosition[1]);
+// // debugger;
+//         },
+        dragstart: function(dragObj){
+            var me = this;
+            me.suspendEvents();
+            console.info(me);
+            console.info(me.getPosition());
+            console.info(dragObj);
+            console.info(dragObj.proxy.getPosition());
+            // dragObj.suspendEvent('drag');
+            dragObj.proxy.setPosition(dragObj.startPosition[0], dragObj.startPosition[1]);
+            dragObj.proxy.x = dragObj.startPosition[0];
+            dragObj.proxy.y = dragObj.startPosition[1];
+            // debugger;
+            // me.setPosition(dragObj.startPosition[0], dragObj.startPosition[1]);
+                // startPosition
+            // debugger;
+        },
+//         move: function (listener, x, y) {
+//             var me = this;
+//             console.info('moved to');
+//             console.info(me.getPosition());
+//             // console.info(x);
+//             // console.info(y);
+//         },
+
+
         afterrender: function () {
             var me = this,
                 disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
@@ -156,27 +202,24 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
                 me.tsgraph.redraw();
             }
         }
-        ,move: function () {
-            var me = this;
-            if( me.tsgraph instanceof Highcharts.Chart){
-                me.tsgraph.setSize(document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight);
-                me.tsgraph.redraw();
-            }
-        }
+        // ,move: function () {
+        //     var me = this;
+        //     if( me.tsgraph instanceof Highcharts.Chart){
+        //         me.tsgraph.setSize(document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight);
+        //         me.tsgraph.redraw();
+        //     }
+        // }
     },
 
     initComponent: function () {
         var me = this;
-        // Ext.util.Observable.capture(me, function(e){console.log('grapview - ' + me.id + ': ' + e);});
+        Ext.util.Observable.capture(me, function(e){console.log('grapview - ' + me.id + ': ' + e);});
 
         // me.title = '<span class="panel-title-style">'+climatestation.Utils.getTranslation('timeseries')+'</span>';
         me.title = '<span id="graphview_title_' + me.id + '">'+climatestation.Utils.getTranslation('timeseries')+'</span>' +
                    '<span id="graphview_title_templatename_' + me.id + '" class="graph-templatename"></span>';
 
         //me.height = Ext.getBody().getViewSize().height-80;
-        me.frame = false;
-        me.border= false;
-        me.bodyBorder = false;
 
         me.link_region_change = false;
         me.wkt_geom = this.wkt_geom;
@@ -231,9 +274,10 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
                 // iconCls: 'far fa-calendar',
                 // style: {color: '#748FFC'},
                 scale: 'medium',
-                width: 85,
+                width: 70,
                 height: 34,
-                // padding: 5,
+                padding: 0,
+                cls: 'nopadding-btn',
                 disabled: (me.graphtype == 'scatter'),
                 // hidden:  ((climatestation.getUser() == 'undefined' || climatestation.getUser() == null) || !me.isTemplate ? true : false),
                 handler: 'changeSelectedProductsAndTimeFrame',

@@ -31,6 +31,7 @@ mpl.use('Agg')
 mpl.rcParams['savefig.pad_inches'] = 0
 
 from matplotlib import pyplot as plt
+import random
 
 from lib.python import reloadmodules
 from config import es_constants
@@ -3606,6 +3607,23 @@ def rankTimeseries(params):
     return ts_json
 
 
+def colors(n):
+    ret = []
+    r = int(random.random() * 256)
+    g = int(random.random() * 256)
+    b = int(random.random() * 256)
+    step = 256 / n
+    for i in range(n):
+        r += step
+        g += step
+        b += step
+        r = int(r) % 256
+        g = int(g) % 256
+        b = int(b) % 256
+        ret.append((r, g, b))
+    return ret
+
+
 def classicTimeseries(params):
     yearts = params['yearTS']
     wkt = params['WKT']
@@ -3802,6 +3820,7 @@ def classicTimeseries(params):
             # yearsToCompare = json.loads(yearsToCompare)
             colorAdd = 0
             colorSubstract = 0
+            firstyear = True
             for year in yearsToCompare:
                 showYearInTicks = False
                 from_date = datetime.date(int(year), 1, 1)
@@ -3825,14 +3844,22 @@ def classicTimeseries(params):
                         rgb = "0 0 0".split(' ')
 
                 rgb = list(map(int, rgb))
-                rgb[-1] = rgb[-1] + colorAdd
-                rgb[-2] = rgb[-2] + colorAdd
-                rgb[-3] = rgb[-3] - colorSubstract
-                tsColor = ' '.join([str(i) for i in rgb])
-                colorAdd += 65
-                colorSubstract += 50
+                if firstyear:
+                    rgb[-1] = rgb[-1] + colorAdd
+                    rgb[-2] = rgb[-2] + colorAdd
+                    rgb[-3] = rgb[-3] - colorSubstract
 
-                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version,
+                    colorAdd += 165
+                    colorSubstract += 150
+                    firstyear = False
+                else:
+                    rgb[-1] = int(random.random() * 256)
+                    rgb[-2] = int(random.random() * 256)
+                    rgb[-3] = int(random.random() * 256)
+
+                tsColor = ' '.join([str(i) for i in rgb])
+
+                    # [list_files, dates_list] = getFilesList(productcode, subproductcode, version,
                 #                                         mapsetcode, date_format, from_date, to_date)
                 # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
                 #         aggregate, mapset_info, product_info, list_files, dates_list]

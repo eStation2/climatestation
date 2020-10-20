@@ -53,12 +53,7 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
     padding: 0,
 
     config: {
-        logoData: [
-            // { src:'resources/img/logo/GMES.png', width:'20%', height:'60px' },
-            // { src:'resources/img/logo/AUC_h110.jpg', width:'20%', height:'60px' },
-            // { src:'resources/img/logo/ACP_h110.jpg', width:'20%', height:'60px' },
-            // { src:'resources/img/logo/logo_en.gif', width:'20%', height:'60px' }
-        ],
+        logoData: [],
         html: '',
         logos_ImageObj: new Image(),
         logoPosition: [185,521],
@@ -80,18 +75,7 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
     initComponent: function () {
         var me = this;
 
-        // me.setLogoData(Ext.Array.pluck(me.getViewModel().getStore('defaultlogos').getRange(), 'data'));
-        // Ext.util.Observable.capture(me, function(e){console.log('logoobj - ' + me.id + ': ' + e);});
-        // me.bind = {
-        //     logoData:'{logoData}'
-        // };
-        // me.publishes = ['logoData'];
-
         me.logos_ImageObj = new Image();
-
-        // me.logoData = me.getViewModel().data.logoData;
-        // console.info(me.getViewModel().getStore('logos'));
-        // me.logoPosition = [434, 583];
 
         me.listeners = {
             //element  : 'el',
@@ -100,16 +84,10 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
                     var editorpanel = me.lookupReference('map_logo_editor' + me.id);
                     // var editorpanel = me.map_logo_editor;
                     // editorpanel.constrainTo = me.constrainTo;       // this.component
-
                     //editorpanel.currentLogoData = this.component.getLogoData();
                     //editorpanel.down('dataview').setData(this.component.getLogoData());
-                    //console.info(editorpanel.down('#logo-editor-view-' + me.id));
-                    //console.info(editorpanel.down('#logo-editor-view-' + me.id).getStore());
-                    // console.info(me.getLogoData());
                     editorpanel.down('#logo-editor-view-' + me.id).getStore().removeAll();
                     editorpanel.down('#logo-editor-view-' + me.id).getStore().add(me.getLogoData());
-                    //console.info(editorpanel);
-                    //console.info(this.component.getLogoData());
                     editorpanel.show();
                 }
             }
@@ -124,7 +102,6 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
                 if (me.getLogoData().length == 0){
                     if (me.getViewModel().getStore('defaultlogos').getRange().length != 0){
                         me.setLogoData(Ext.Array.pluck(me.getViewModel().getStore('defaultlogos').getRange(), 'data'));
-                        // console.info(me.getLogoData());
                     }
                     else {
                         me.setLogoData(me.getViewModel().data.logoDefaultData);
@@ -133,10 +110,10 @@ Ext.define("climatestation.view.analysis.mapLogoObject",{
                 me.getViewModel().data.logoData = me.getLogoData();
                 me.changesmade = true;
                 // me.fireEvent('refreshimage');
-                me.setPosition(me.logoPosition);
+                // me.setPosition(me.logoPosition);
                 // me.down().refresh();
                 // me.down().updateLayout();
-                me.updateLayout();
+                // me.updateLayout();
 
                 // me.mon(me, {
                 //     move: function() {

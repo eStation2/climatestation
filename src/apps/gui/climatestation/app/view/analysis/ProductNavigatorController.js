@@ -252,48 +252,52 @@ Ext.define('climatestation.view.analysis.ProductNavigatorController', {
         editLegendWin.show();
     },
 
-    loadProductsGrid: function() {
-
+    loadProductsGrid: function(force) {
+        var ProductNavigatorStore = Ext.data.StoreManager.lookup('ProductNavigatorStore');
         var productinfopanel = this.getView().lookupReference('product-datasets-info');
-        productinfopanel.setTitle('<div class="panel-title-style-16">'+climatestation.Utils.getTranslation('productinfo')+'</div>');
-        productinfopanel.collapse();
 
-        var mapsetdatasetgrid = this.getView().lookupReference('mapset-dataset-grid');
-        if (mapsetdatasetgrid){
-            mapsetdatasetgrid.hide();
-        }
-        var colorschemesgrid = this.getView().lookupReference('colorschemesGrid');
-        if (colorschemesgrid){
-            colorschemesgrid.hide();
-        }
+        if (!ProductNavigatorStore.isLoaded() || force){
 
-        this.getStore('colorschemes').removeAll();
-        this.getStore('mapsetdatasets').removeAll();
-        this.getStore('productmapsets').removeAll();
+            productinfopanel.setTitle('<div class="panel-title-style-16">'+climatestation.Utils.getTranslation('productinfo')+'</div>');
+            productinfopanel.collapse();
 
-        var prodgrid = this.getView().lookupReference('productsGrid');
-        var myLoadMask = new Ext.LoadMask({
-            msg    : climatestation.Utils.getTranslation('loading'), // 'Loading...',
-            target : prodgrid
-        });
-        myLoadMask.show();
-
-        Ext.data.StoreManager.lookup('ProductNavigatorStore').load({
-            params: {
-                force: true
-            },
-            callback:function(){
-                myLoadMask.hide();
+            var mapsetdatasetgrid = this.getView().lookupReference('mapset-dataset-grid');
+            if (mapsetdatasetgrid){
+                mapsetdatasetgrid.hide();
             }
-        });
-        // this.getStore('products').load({
-        //     params: {
-        //         force: true
-        //     },
-        //     callback:function(){
-        //         myLoadMask.hide();
-        //     }
-        // });
+            var colorschemesgrid = this.getView().lookupReference('colorschemesGrid');
+            if (colorschemesgrid){
+                colorschemesgrid.hide();
+            }
+
+            this.getStore('colorschemes').removeAll();
+            this.getStore('mapsetdatasets').removeAll();
+            this.getStore('productmapsets').removeAll();
+
+            var prodgrid = this.getView().lookupReference('productsGrid');
+            var myLoadMask = new Ext.LoadMask({
+                msg    : climatestation.Utils.getTranslation('loading'), // 'Loading...',
+                target : prodgrid
+            });
+            myLoadMask.show();
+
+            Ext.data.StoreManager.lookup('ProductNavigatorStore').load({
+                params: {
+                    force: true
+                },
+                callback:function(){
+                    myLoadMask.hide();
+                }
+            });
+            // this.getStore('products').load({
+            //     params: {
+            //         force: true
+            //     },
+            //     callback:function(){
+            //         myLoadMask.hide();
+            //     }
+            // });
+        }
     },
 
     productsGridRowClick: function(gridview, record){
@@ -366,7 +370,7 @@ Ext.define('climatestation.view.analysis.ProductNavigatorController', {
         //     ' ' + record.get('version') + ' - ' + record.get('subproductcode') + '</b></div>');
         colorschemesgrid.columns[1].setText('<div>' +
             ' <b class="smalltext">' + climatestation.Utils.getTranslation('for') + ' ' + record.get('descriptive_name') +
-            ' ' + record.get('version') + ' <BR> ' + record.get('subproductcode') + '</b></div>');
+            ' ' + record.get('subproductcode') + record.get('version') + '</b></div>');
 
         if (colorschemesgrid.hidden) {
             // console.info('colorschemesgrid hidden, so show');

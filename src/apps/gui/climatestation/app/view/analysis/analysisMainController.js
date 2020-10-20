@@ -45,6 +45,46 @@ Ext.define('climatestation.view.analysis.analysisMainController', {
                     workspace.set('maps',result.workspace.maps);
                     workspace.set('graphs', result.workspace.graphs);
                     workspace.dirty = false;
+
+                    if (workspace.get('showindefault')){
+                        var defaultworkspace = null;
+                        Ext.Object.each(analysisWorkspaces, function(id, ws, thisObj) {
+                            if (ws.workspaceid == 'defaultworkspace'){
+                                // ws.setTitle(workspace.get('workspacename'));
+                                ws.setMaps(workspace.get('maps'));
+                                ws.setGraphs(workspace.get('graphs'));
+
+                                ws.getController().closeAllMapsGraphs();
+                                if (ws.maps.length > 0) {
+                                    ws.getController().openWorkspaceMaps(ws.maps);
+                                }
+                                if (ws.graphs.length > 0) {
+                                    ws.getController().openWorkspaceGraphs(ws.graphs);
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        me.tabBar.items.length
+                        var tab = me.insert(me.tabBar.items.length, {
+                            xtype: 'analysisworkspace',
+                            workspaceid: workspace.get('workspaceid'),
+                            workspacename: workspace.get('workspacename'),
+                            isNewWorkspace: false,
+                            title: workspace.get('workspacename'),
+                            closable: false,
+                            titleEditable: true,
+                            pinable: true,
+                            pinned: workspace.get('pinned'),
+                            maps: workspace.get('maps'),
+                            graphs: workspace.get('graphs'),
+                            isrefworkspace: workspace.get('isrefworkspace')
+                        });
+
+                        if (activateTab){
+                            me.setActiveTab(tab);
+                        }
+                    }
                 }
             },
             failure: function(response, opts) {
@@ -53,48 +93,48 @@ Ext.define('climatestation.view.analysis.analysisMainController', {
         });
 
         // console.info(workspace);
-        var task = new Ext.util.DelayedTask(function() {
-            if (workspace.get('showindefault')){
-                var defaultworkspace = null;
-                Ext.Object.each(analysisWorkspaces, function(id, ws, thisObj) {
-                    if (ws.workspaceid == 'defaultworkspace'){
-                        // ws.setTitle(workspace.get('workspacename'));
-                        ws.setMaps(workspace.get('maps'));
-                        ws.setGraphs(workspace.get('graphs'));
-
-                        ws.getController().closeAllMapsGraphs();
-                        if (ws.maps.length > 0) {
-                            ws.getController().openWorkspaceMaps(ws.maps);
-                        }
-                        if (ws.graphs.length > 0) {
-                            ws.getController().openWorkspaceGraphs(ws.graphs);
-                        }
-                    }
-                });
-            }
-            else {
-                me.tabBar.items.length
-                var tab = me.insert(me.tabBar.items.length, {
-                    xtype: 'analysisworkspace',
-                    workspaceid: workspace.get('workspaceid'),
-                    workspacename: workspace.get('workspacename'),
-                    isNewWorkspace: false,
-                    title: workspace.get('workspacename'),
-                    closable: false,
-                    titleEditable: true,
-                    pinable: true,
-                    pinned: workspace.get('pinned'),
-                    maps: workspace.get('maps'),
-                    graphs: workspace.get('graphs'),
-                    isrefworkspace: workspace.get('isrefworkspace')
-                });
-
-                if (activateTab){
-                    me.setActiveTab(tab);
-                }
-            }
-        });
-        task.delay(1000);
+        // var task = new Ext.util.DelayedTask(function() {
+        //     if (workspace.get('showindefault')){
+        //         var defaultworkspace = null;
+        //         Ext.Object.each(analysisWorkspaces, function(id, ws, thisObj) {
+        //             if (ws.workspaceid == 'defaultworkspace'){
+        //                 // ws.setTitle(workspace.get('workspacename'));
+        //                 ws.setMaps(workspace.get('maps'));
+        //                 ws.setGraphs(workspace.get('graphs'));
+        //
+        //                 ws.getController().closeAllMapsGraphs();
+        //                 if (ws.maps.length > 0) {
+        //                     ws.getController().openWorkspaceMaps(ws.maps);
+        //                 }
+        //                 if (ws.graphs.length > 0) {
+        //                     ws.getController().openWorkspaceGraphs(ws.graphs);
+        //                 }
+        //             }
+        //         });
+        //     }
+        //     else {
+        //         me.tabBar.items.length
+        //         var tab = me.insert(me.tabBar.items.length, {
+        //             xtype: 'analysisworkspace',
+        //             workspaceid: workspace.get('workspaceid'),
+        //             workspacename: workspace.get('workspacename'),
+        //             isNewWorkspace: false,
+        //             title: workspace.get('workspacename'),
+        //             closable: false,
+        //             titleEditable: true,
+        //             pinable: true,
+        //             pinned: workspace.get('pinned'),
+        //             maps: workspace.get('maps'),
+        //             graphs: workspace.get('graphs'),
+        //             isrefworkspace: workspace.get('isrefworkspace')
+        //         });
+        //
+        //         if (activateTab){
+        //             me.setActiveTab(tab);
+        //         }
+        //     }
+        // });
+        // task.delay(3000);
 
     }
 

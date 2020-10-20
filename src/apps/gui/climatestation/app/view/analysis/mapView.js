@@ -27,12 +27,14 @@ Ext.define("climatestation.view.analysis.mapView",{
     header: {
         titlePosition: 2,
         titleAlign: 'left',
+        padding: '2px 14px 2px 14px',
         cls: 'mapview-header'
         // style: {
         //     // "border-width": "2px 7px 1px 7px !important",
         //     "line-height": "13px!important"
         // }
     },
+
     constrainHeader: true,
     //constrain: true,
     autoShow : false,
@@ -41,33 +43,33 @@ Ext.define("climatestation.view.analysis.mapView",{
     maximizable: true,
     collapsible: true,
     resizable: true,
-    focusable: true,
+    shadow: false,
+    frame: false,
+    border: true,
+    bodyBorder: false,
 
     width: 613,  // 603,
-
     height: 415,    // Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-100 : 415,
-
     minWidth:613,
     minHeight:415,
-
-    x: 20,
-    y: 20,
+    // x: 20,
+    // y: 20,
 
     margin: '0 0 0 0',
-    shadow: false,
     layout: {
         type: 'border'
     },
-    componentCls: 'rounded-box-win',
+    // componentCls: 'rounded-box-win',
     // componentCls: 'newpanelstyle',
 
     bodyStyle: {
         background: '#d3d1d1 !important'
     },
 
-    publishes: ['titleData'],       // , 'logoData'
+    // stateId: 'stateWindowExample',
+    // stateful: true,
     config: {
-        titleData: null,
+        // titleData: null,
         // logoData: null,
         productcode: '',
         productname: '',
@@ -90,17 +92,17 @@ Ext.define("climatestation.view.analysis.mapView",{
         draw: null,
         projection: 'EPSG:4326',
         defaultzoomfactor: 1
+        // defaultAlign: null
     },
-    bind:{
-        titleData:'{titleData}'
-        // ,logoData:'{logoData}'
-    },
+    // bind:{
+    //     titleData:'{titleData}'
+    // },
+    // publishes: ['titleData'],
 
     initComponent: function () {
         var me = this;
-        me.frame = false;
-        me.border= false;
-        me.bodyBorder = false;
+        // me.setDefaultAlign(null);
+        // Ext.util.Observable.capture(me, function(e){console.log('mapView - ' + me.id + ': ' + e);});
 
         me.highlight = null;
         me.toplayer = null;
@@ -203,12 +205,12 @@ Ext.define("climatestation.view.analysis.mapView",{
                 xtype: 'button',
                 id: 'zoomFactorBtn_' + me.id.replace(/-/g,'_'),
                 reference: 'zoomFactorBtn_' + me.id.replace(/-/g,'_'),
-                iconCls: 'far fa-search',
+                iconCls: 'far fa-search black',
                 cls: 'nobackgroundcolor',
-                style: {
-                    color: 'black',
-                    "font-size": '1.70em'
-                },
+                // style: {
+                //     color: 'black',
+                //     "font-size": '1.70em'
+                // },
                 glyph: null,
                 scale: 'medium',
                 hidden: false,
@@ -465,7 +467,7 @@ Ext.define("climatestation.view.analysis.mapView",{
             padding:0,
             height: 125,
             maxHeight: 125,
-            hidden: me.showtimeline ? false : true,
+            hidden: !me.showtimeline,
             hideMode : 'display',    //'display', 'visibility' 'offsets'
             frame:  false,
             shadow: false,
@@ -476,10 +478,10 @@ Ext.define("climatestation.view.analysis.mapView",{
             // },
             header : false,
             collapsible: true,
-            collapsed: me.showtimeline ? false : true,
+            collapsed: !me.showtimeline,
             // collapseFirst: true,
             collapseDirection: 'bottom',
-            collapseMode : "mini",  // The Panel collapses without a visible header.
+            collapseMode : 'mini',  // The Panel collapses without a visible header.
             //headerPosition: 'left',
             // hideCollapseTool: false,        // me.productcode != '' ? false : true,
             split: true,
@@ -487,6 +489,11 @@ Ext.define("climatestation.view.analysis.mapView",{
             dockedItems: [{
                 xtype: 'toolbar',
                 dock: 'right',
+                padding: 3,
+                defaults: {
+                    margin: 2,
+                    padding: 4
+                },
                 items: [{
                     xtype: 'button',
                     reference: 'refreshTimeLineBtn_' + me.id,
@@ -494,9 +501,9 @@ Ext.define("climatestation.view.analysis.mapView",{
                     tooltip: climatestation.Utils.getTranslation('refresh_timeline'), // 'Refresh timeline'
                     iconCls: 'far fa-redo-alt',
                     //style: { color: 'orange' },
-                    glyph: null,
-                    scale: null, // 'small',
-                    padding: 0,
+                    // glyph: null,
+                    scale: 'small',
+                    // padding: 0,
                     width: 21,
                     hidden: false,
                     handler: 'refreshTimeLine'
@@ -505,10 +512,11 @@ Ext.define("climatestation.view.analysis.mapView",{
                     id: 'playBtn_' + me.id,
                     //reference: 'playBtn_' + me.id,
                     tooltip: climatestation.Utils.getTranslation('play_visible_timeline'), // 'View product dates in visible timeline. Set delay below.'
-                    iconCls: 'far fa-play',
-                    style: { color: 'green' },
-                    glyph: null,
+                    iconCls: 'far fa-play green' ,
+                    // style: { color: 'green' },
+                    // glyph: null,
                     scale: 'small',
+                    padding: '6px 4px 2px 4px',
                     hidden: false,
                     arrowAlign: 'bottom',
                     handler: 'play',
@@ -544,10 +552,11 @@ Ext.define("climatestation.view.analysis.mapView",{
                     id: 'pauseBtn_' + me.id,
                     //reference: 'pauseBtn_' + me.id,
                     tooltip: climatestation.Utils.getTranslation('pause'), // 'Pause'
-                    iconCls: 'far fa-pause',
-                    style: { color: 'orange' },
-                    glyph: null,
+                    iconCls: 'far fa-pause orange',
+                    // style: { color: 'orange' },
+                    // glyph: null,
                     scale: 'small',
+                    padding: '6px 4px 2px 4px',
                     hidden: true,
                     handler: 'pause'
                 }, {
@@ -555,13 +564,14 @@ Ext.define("climatestation.view.analysis.mapView",{
                     id: 'stopBtn_' + me.id,
                     //reference: 'stopBtn_' + me.id,   // Give an error in Ext.mixin.Bindable method applyReference: Invalid reference "stopBtn_mapview-window-1262" for stopBtn_mapview-window-1262 - not a valid identifier
                     tooltip: climatestation.Utils.getTranslation('stop'), // 'Stop'
-                    iconCls: 'far fa-stop',
-                    style: {color: 'red'},
-                    glyph: null,
+                    iconCls: 'far fa-stop redbtn',
+                    // style: {color: 'red'},
+                    // glyph: null,
                     scale: 'small',
+                    // padding: '6px 4px 2px 4px',
                     hidden: true,
                     handler: 'stop'
-                }, ' ', {
+                }, {
                     xtype: 'button',
                     id: 'dateLinkToggleBtn_' + me.id,
                     tooltip: climatestation.Utils.getTranslation('link_unlink_timeline_from_other_mapview'), // 'Unlink/link the timeline from other mapviews.'
@@ -569,41 +579,30 @@ Ext.define("climatestation.view.analysis.mapView",{
                     //scope: me,
                     iconCls: 'calendar_linked',
                     //style: { color: 'orange' },
-                    glyph: null,
+                    // glyph: null,
                     scale: 'medium',
+                    padding: '6px 4px 2px 4px',
                     hidden: false,
                     handler: 'toggleDateLink'
                 }]
             }],
             listeners: {
-                beforerender: function(timeline){
-                    // Ext.util.Observable.capture(timeline, function(e){console.log('timeline - ' + timeline.id + ': ' + e);});
-                }
-                ,beforeshow: function () {
+                beforeshow: function () {
                     me.setHeight(me.height+125);
                 }
                 ,show: function (timeline) {
-                    // console.info(me);
                     var mapviewtimeline = me.lookupReference('product-time-line_' + me.id);
                     if (me.showtimeline) {
-                        // mapviewtimeline.fireEvent('beforeexpand');
                         mapviewtimeline.fireEvent('expand');
-                        // mapviewtimeline.expand();
-                        // me.getController().redrawTimeLine(me);
                     }
-                    // console.info('show');
-                    // console.info(timeline);
                 }
                 ,beforeexpand: function () {
-                    // console.info('beforeexpand Height to: ' + me.height+125);
                     me.setHeight(me.height+125);
-                    // me.map.updateSize();
                 }
                 ,expand: function () {
                     // var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-133];
                     // me.map.setSize(size);
                     me.map.updateSize();
-                    // console.info('Expanding map size: ' + size);
                     me.getController().redrawTimeLine();
                 }
                 ,beforecollapse: function () {
@@ -625,7 +624,6 @@ Ext.define("climatestation.view.analysis.mapView",{
                     if (!mapLegendObj.hidden) {
                         mapLegendObj.legendPosition = mapLegendObj.getPosition(true);
                     }
-                    // console.info('beforecollapse Height to: ' + me.height-125);
                     me.setHeight(me.height-125);
                 }
                 ,collapse: function () {
@@ -650,7 +648,6 @@ Ext.define("climatestation.view.analysis.mapView",{
                     // var size = [document.getElementById(me.id + "-body").offsetWidth, document.getElementById(me.id + "-body").offsetHeight-8];   // -8
                     // me.map.setSize(size);
                     me.map.updateSize();
-                    // console.info('Collapsing map size: ' + size);
                 }
             }
             ,items: [{
@@ -660,7 +657,6 @@ Ext.define("climatestation.view.analysis.mapView",{
                 layout: 'fit'
             }]
         }];
-
 
         me.listeners = {
              beforedestroy: function(){
@@ -981,7 +977,6 @@ Ext.define("climatestation.view.analysis.mapView",{
                     }
                 });
 
-
                 var mapLegendObj = me.lookupReference('product-legend_' + me.id.replace(/-/g,'_')),
                     titleObj = me.lookupReference('title_obj_' + me.id),
                     disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
@@ -1028,6 +1023,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                     me.setSize(me.mapviewSize[0],me.mapviewSize[1]);
                 }
                 if (climatestation.Utils.objectExists(me.mapviewPosition)){
+                    console.info(me.mapviewPosition);
                     me.setPosition(me.mapviewPosition);
                 }
 
@@ -1052,6 +1048,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                     logoObj.getViewModel().data.logoData = me.logosObjContent;
                     logoObj.setLogoData(me.logosObjContent);
                 }
+
                 if (climatestation.Utils.objectExists(me.scalelineObjPosition)) {
                     scalelineObj.scalelinePosition = me.scalelineObjPosition;
                 }
@@ -1059,19 +1056,20 @@ Ext.define("climatestation.view.analysis.mapView",{
                 if (climatestation.Utils.objectExists(me.titleObjPosition)){
                     titleObj.titlePosition = me.titleObjPosition;
                 }
+                // console.info(me.titleObjContent);
                 if (climatestation.Utils.objectExists(me.titleObjContent) && (me.titleObjContent.trim() != '' )){
                     titleObj.setTpl([]);    // empty template which must be an array
                     titleObj.setTpl(me.titleObjContent);
                     // titleObj.tpl.push(me.titleObjContent);
                     // titleObj.tpl.set(me.titleObjContent, true);
                 }
+                // console.info(titleObj);
                 // else {
                 //     titleObj.setTpl(['<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>']);
                 // }
 
                 if (me.showObjects){
                     var taskToggleObjects = new Ext.util.DelayedTask(function() {
-                        //console.info(mapObjectToggleBtn);
                         mapObjectToggleBtn.toggle(true);
                         me.getController().toggleObjects(mapObjectToggleBtn);
                     });
@@ -1105,6 +1103,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                     //     }
                     // },this);
 
+                    // console.info(Ext.data.StoreManager.lookup('DataSetsStore'));
                     var productRec = Ext.data.StoreManager.lookup('DataSetsStore').findRecord('productid', me.productcode + '_' + me.productversion);
                     // console.info(productRec);
                     if (climatestation.Utils.objectExists(productRec)) {
@@ -1205,15 +1204,15 @@ Ext.define("climatestation.view.analysis.mapView",{
                 me.updateLayout();
             }
 
-            ,move: function () {
-                me.getController().redrawTimeLine();
-                // var productNavigatorBtn = me.lookupReference('productNavigatorBtn_'+me.id.replace(/-/g,'_'));
-                // if (!me.mapViewProductNavigator.hidden){
-                //     me.mapViewProductNavigator.hide();
-                // }
-                me.updateLayout();
-                //console.info(me.getPosition(true));
-            }
+            // ,move: function () {
+            //     me.getController().redrawTimeLine();
+            //     // var productNavigatorBtn = me.lookupReference('productNavigatorBtn_'+me.id.replace(/-/g,'_'));
+            //     // if (!me.mapViewProductNavigator.hidden){
+            //     //     me.mapViewProductNavigator.hide();
+            //     // }
+            //     me.updateLayout();
+            //     //console.info(me.getPosition(true));
+            // }
 
             ,maximize: function () {
                 me.updateLayout();

@@ -34,3 +34,6 @@ psutil
 #pymorph
 scikit-image
 docker-py
+#statsmodels
+#pandas
+#Basemap

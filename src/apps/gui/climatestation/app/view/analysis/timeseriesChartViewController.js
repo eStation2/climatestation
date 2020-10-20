@@ -148,16 +148,17 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
             // autoHeight: true,
             margin: '2 2 2 5',
             maximizable: false,
-            collapsible: true,
+            collapsible: false,
             resizable: false,
             // layout: 'fit',
             // forceFit: true,
             hidden: true,
             floating: true,
-            defaultAlign: 'tl-tl',
+            defaultAlign: 'c-c',
             closable: true,
             closeAction: 'hide',
             draggable: true,
+            constrain: true,
             // constrainHeader: true,
             alwaysOnTop: true,
             autoShow: false,
@@ -211,10 +212,12 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
             listeners: {
                 close : function (){
                     me.lookupReference('tbar_'+me.id).enable();
+                },
+                beforerender: function(){
+                    this.constrainTo = me.workspace.el;
+                    // me.renderTo = me.owner.workspace.el;
+                    this.alignTarget = me.workspace.el;
                 }
-                // focusleave: function(){
-                //     this.close();
-                // }
             },
 
             items: [{
