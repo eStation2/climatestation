@@ -71,6 +71,8 @@ ingest_dir_in = es_constants.ingest_dir
 ingest_error_dir = es_constants.ingest_error_dir
 data_dir_out = es_constants.processing_dir
 
+python_version = sys.version_info[0]
+
 def loop_ingestion(dry_run=False, test_one_product=None):
 
 #    Driver of the ingestion process
@@ -1690,7 +1692,7 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
         outFile.write('<OGRVRTDataSource>\n')
         outFile.write('    <OGRVRTLayer name="firms_file">\n')
         outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
-        outFile.write('        <OGRVRTLayer name="firms_file" />\n')
+        # outFile.write('        <OGRVRTLayer name="firms_file" />\n')
         outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
         outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
         outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
@@ -1704,7 +1706,11 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
             outFile.write(input_file.read())
 
     # Execute the ogr2ogr command
-    command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+    if python_version == 2:
+        command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+    elif python_version == 3:
+        command = 'ogr2ogr -s_srs EPSG:4326 -t_srs EPSG:4326 -oo X_POSSIBLE_NAMES=Lon* -oo Y_POSSIBLE_NAMES=Lat* -f "ESRI Shapefile" '+ file_shp + ' '+file_csv
+
     my_logger.debug('Command is: '+command)
     try:
         os.system(command)
@@ -1761,7 +1767,10 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         region_code = region_code.split('-')[3]
     else:
         #JRC-WBD_NA_20190101-0000000000-0000000000.tif
+        #For Other region
         date = input_file_name.split('_')[2]  # 0601-0000000000-0000000000.tif
+        #For ECOWAS
+        # date = input_file_name.split('_')[1]
         date = date.split('-')[0]
         region_code = input_file_name.split('_')[1]
         # region_code = region_code.split('-')[3]
@@ -3226,6 +3235,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             orig_ds.SetGeoTransform(native_mapset.geo_transform)
             orig_ds.SetProjection(native_mapset.spatial_ref.ExportToWkt())
 
+
     return list_interm_files
 
 
@@ -3378,6 +3388,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             # Convert from YYYYMM -> YYYYMMDD
             output_date_str = str(in_date)+'01'
 
+        if datasource_descr.date_format == 'YYYY_DK':
+            # The date (e.g. 2020_36) is converted to the dekad it belongs to (e.g. 20201221)
+            output_date_str = functions.conv_yyyydk_2_yyyymmdd(in_date)
+
         if output_date_str == -1:
             output_date_str = in_date+'_DATE_ERROR_'
         else:
@@ -3527,6 +3541,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Apply Reproject-Image to the memory-driver
             orig_wkt = orig_cs.ExportToWkt()
+
             res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
                                       es_constants.ES2_OUTFILE_INTERP_METHOD)
 

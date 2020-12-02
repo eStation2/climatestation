@@ -31,269 +31,9 @@ Ext.define('climatestation.view.main.Main', {
 
         me.listeners = {
             afterrender: function(){
-                me.controller.doCardNavigation('dashboardmain');
+                me.controller.doCardNavigation('analysismain');
             }
         };
-
-        // me.loginview = 'loginview';
-        //
-        // me.dashboard = {
-        //     title: climatestation.Utils.getTranslation('dashboard'),  // 'Dashboard',
-        //     itemId:'dashboardtab',
-        //     xtype:'container',
-        //     hidden: true,
-        //     scrollable: true,
-        //     layout : 'center',
-        //     bodyCls:'dashboard-panel-body',
-        //     items: [{
-        //         xtype: 'dashboard-main'
-        //     }],
-        //     listeners: {
-        //        activate: function (dashboardtab) {
-        //            var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-        //            headerlogos.setHidden(false);
-        //            //dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
-        //            //dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
-        //            //Ext.getCmp('dashboard-panel').getController().setupDashboard();
-        //            if (Ext.isObject(dashboardtab.down('panel[id=dashboardpc2]'))){
-        //                 dashboardtab.down('panel[id=dashboardpc2]').getController().checkStatusServices();
-        //            }
-        //        }
-        //     }
-        // };
-        //
-        // me.acquisition = {
-        //     title: climatestation.Utils.getTranslation('acquisition'),  // 'Acquisition',
-        //     itemId:'acquisitionmaintab',
-        //     xtype:'container',
-        //     closable: false,
-        //     scrollable: true,
-        //     hidden: true,
-        //     layout: 'fit',
-        //     items: [{
-        //         // html: '<img alt="Mockup Acquisition" width="100%" height="100%" src="../resources/img/mockup_acquisition.png">'
-        //         xtype: 'acquisition-main',
-        //         itemId: 'acquisitionmain'
-        //     }],
-        //     listeners: {
-        //        activate: function (acquisitiontab) {
-        //             var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-        //             headerlogos.setHidden(false);
-        //
-        //             var acquisitionmain = acquisitiontab.down('panel[name=acquisitionmain]');
-        //             acquisitionmain.getController().checkStatusServices();
-        //
-        //             acquisitionmain.fireEvent('loadstore');
-        //
-        //             // var productgridstore  = Ext.data.StoreManager.lookup('ProductsActiveStore');
-        //             // var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
-        //             // var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
-        //             // var eumetcastsourcestore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
-        //             // var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
-        //             //
-        //             // var myLoadMask = new Ext.LoadMask({
-        //             //     msg    : climatestation.Utils.getTranslation('loading'), // 'Loading...',
-        //             //     target : this
-        //             // });
-        //             //
-        //             // if (eumetcastsourcestore.isStore && !eumetcastsourcestore.isLoaded()) {
-        //             //     eumetcastsourcestore.load();
-        //             // }
-        //             // if (internetsourcestore.isStore && !internetsourcestore.isLoaded()) {
-        //             //     internetsourcestore.load();
-        //             // }
-        //             //
-        //             // if (ingestiongridstore.isStore && !ingestiongridstore.isLoaded() ){
-        //             //     myLoadMask.show();
-        //             //     ingestiongridstore.load({
-        //             //         callback: function(records, options, success){
-        //             //             myLoadMask.hide();
-        //             //             if (acqgridsstore.isStore && !acqgridsstore.isLoaded()) {
-        //             //                 myLoadMask.show();
-        //             //                 acqgridsstore.load({
-        //             //                     callback: function(records, options, success) {
-        //             //                         myLoadMask.hide();
-        //             //                         if (productgridstore.isStore && !productgridstore.isLoaded()) {
-        //             //                             myLoadMask.show();
-        //             //                             productgridstore.load({
-        //             //                                 callback: function(records, options, success){
-        //             //                                     myLoadMask.hide();
-        //             //                                 }
-        //             //                             });
-        //             //                         }
-        //             //                     }
-        //             //                 });
-        //             //             }
-        //             //         }
-        //             //     });
-        //             // }
-        //
-        //            //Ext.util.Observable.capture(acquisitionmain, function(e){console.log(e);});
-        //            //acquisitionmain.getView().getFeature('productcategories').expandAll();
-        //            //acquisitionmain.getView().refresh();
-        //        },
-        //        beforedeactivate: function (acquisitiontab) {
-        //            var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
-        //            // var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
-        //            Ext.each(completenessTooltips, function(item) {
-        //                item.hide();
-        //            });
-        //        }
-        //     }
-        // };
-        //
-        // me.processing = {
-        //     title: climatestation.Utils.getTranslation('processing'),  // 'Processing',
-        //     itemId:'processingmaintab',
-        //     xtype:'container',
-        //     scrollable: true,
-        //     hidden: true,
-        //     layout: 'fit',
-        //     items: [{
-        //        xtype  : 'processing-main',
-        //        itemId:'processingmain'
-        //     }],
-        //     listeners: {
-        //        activate: function (processingtab) {
-        //            var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-        //            headerlogos.setHidden(false);
-        //            processingtab.down('panel[name=processingmain]').getController().checkStatusServices();
-        //        }
-        //     }
-        // };
-        //
-        // me.datamanagement = {
-        //     title: climatestation.Utils.getTranslation('datamanagement'),  // 'Data Management',
-        //     itemId:'datamanagementmaintab',
-        //     xtype:'container',
-        //     scrollable: true,
-        //     hidden: true,
-        //     layout: 'fit',
-        //     items: [{
-        //        xtype  : 'datamanagement-main',
-        //        itemId:'datamanagementmain'
-        //     }],
-        //     listeners: {
-        //        activate: function (datamanagementtab) {
-        //             var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-        //             headerlogos.setHidden(false);
-        //
-        //             // var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
-        //             // if (datasetsstore.isStore && !datasetsstore.isLoaded()) {
-        //             //     datasetsstore.load();
-        //             // }
-        //
-        //            var datamanagementmain = datamanagementtab.down('panel[name=datamanagementmain]');
-        //            datamanagementmain.fireEvent('loadstore');
-        //            //
-        //            ////datamanagementmain.getView().getFeature('prodcat').expandAll();
-        //            //datamanagementmain.getView().refresh();
-        //        },
-        //        beforedeactivate: function (acquisitiontab) {
-        //            var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
-        //            // var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
-        //            Ext.each(completenessTooltips, function(item) {
-        //                item.hide();
-        //            });
-        //        }
-        //     }
-        // };
-        //
-        // me.analysis = {
-        //     title: climatestation.Utils.getTranslation('analysis'),  // 'Analysis',
-        //     itemId:'analysistab',
-        //     xtype:'container',
-        //     scrollable: true,
-        //     layout : 'fit',
-        //     hidden: true,
-        //     items: [{
-        //         xtype  : 'analysis-main',
-        //         itemId:'analysismain',
-        //         reference: 'analysismain'
-        //         // hidden: false
-        //     }],
-        //     listeners: {
-        //         activate: function (analysistab) {
-        //             // Ext.util.Observable.capture(analysistab, function(e){console.log(analysistab.id + ': ' + e);});
-        //             if (climatestation.globals['typeinstallation'].toLowerCase() === 'jrc_online'){
-        //                 if (analysistab.layoutCounter > 0){
-        //                     // Ext.getCmp('headerlogos').collapse();
-        //                 }
-        //             }
-        //             else if (climatestation.globals['typeinstallation'].toLowerCase() !== 'windows' && climatestation.globals['typeinstallation'].toLowerCase() !== 'online'){
-        //                 var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-        //                 headerlogos.setHidden(true);
-        //             }
-        //
-        //             var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
-        //             if (datasetsstore.isStore && (!datasetsstore.isLoaded() || datasetsstore.count() < 1)) {
-        //                 datasetsstore.proxy.extraParams = {force: true};
-        //                 datasetsstore.load();
-        //             }
-        //             // console.info('analysis tab activated!');
-        //             // var timeseriesChartSelectionWindow = this.down().lookupReference('timeserieschartselection');
-        //             // timeseriesChartSelectionWindow.fireEvent('align');
-        //        }
-        //     }
-        // };
-        //
-        // me.system = {
-        //     title: climatestation.Utils.getTranslation('system'),  // 'System',
-        //     itemId:'systemtab',
-        //     xtype:'container',
-        //     hidden: true,
-        //     scrollable: true,
-        //     layout : 'center',
-        //     items: [{
-        //        xtype  : 'systemsettings',
-        //        itemId:'systemsettingsview'
-        //     }],
-        //     listeners: {
-        //        activate: function (systemtab) {
-        //             var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-        //             headerlogos.setHidden(false);
-        //
-        //             var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
-        //             var formpanel = Ext.getCmp('systemsettingsview');
-        //             var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
-        //                 scope: formpanel,
-        //                 loadmask: true,
-        //                 failure: function(record, operation) {
-        //                     //console.info('failure');
-        //                 },
-        //                 success: function(record, operation) {
-        //                     if (operation.success){
-        //                         formpanel.loadRecord(systemsettingsrecord);
-        //                         formpanel.updateRecord();
-        //                     }
-        //                 }
-        //             });
-        //        }
-        //     }
-        // };
-        //
-        // me.help =  {
-        //     title: climatestation.Utils.getTranslation('help'),  // 'Help',
-        //     xtype: 'container',
-        //     hidden: false,
-        //     scrollable: true,
-        //     layout : 'center',
-        //     items: [{
-        //        xtype  : 'help',
-        //        itemId:'helpview'
-        //     }],
-        //     listeners: {
-        //         activate: function (helptab) {
-        //             if (climatestation.globals['typeinstallation'].toLowerCase() === 'jrc_online'){
-        //                 Ext.getCmp('headerlogos').expand();
-        //             }
-        //             else {
-        //                 var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
-        //                 headerlogos.setHidden(false);
-        //             }
-        //         }
-        //     }
-        // };
 
         me.maincontentPanel = {
             xtype: 'panel',
@@ -529,6 +269,265 @@ Ext.define('climatestation.view.main.Main', {
             me.maincontentPanel
         ];
 
+        // me.loginview = 'loginview';
+//
+// me.dashboard = {
+//     title: climatestation.Utils.getTranslation('dashboard'),  // 'Dashboard',
+//     itemId:'dashboardtab',
+//     xtype:'container',
+//     hidden: true,
+//     scrollable: true,
+//     layout : 'center',
+//     bodyCls:'dashboard-panel-body',
+//     items: [{
+//         xtype: 'dashboard-main'
+//     }],
+//     listeners: {
+//        activate: function (dashboardtab) {
+//            var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+//            headerlogos.setHidden(false);
+//            //dashboardtab.up().down('container[id=acquisitionmaintab]').doLayout();
+//            //dashboardtab.up().down('container[id=datamanagementmaintab]').doLayout();
+//            //Ext.getCmp('dashboard-panel').getController().setupDashboard();
+//            if (Ext.isObject(dashboardtab.down('panel[id=dashboardpc2]'))){
+//                 dashboardtab.down('panel[id=dashboardpc2]').getController().checkStatusServices();
+//            }
+//        }
+//     }
+// };
+//
+// me.acquisition = {
+//     title: climatestation.Utils.getTranslation('acquisition'),  // 'Acquisition',
+//     itemId:'acquisitionmaintab',
+//     xtype:'container',
+//     closable: false,
+//     scrollable: true,
+//     hidden: true,
+//     layout: 'fit',
+//     items: [{
+//         // html: '<img alt="Mockup Acquisition" width="100%" height="100%" src="../resources/img/mockup_acquisition.png">'
+//         xtype: 'acquisition-main',
+//         itemId: 'acquisitionmain'
+//     }],
+//     listeners: {
+//        activate: function (acquisitiontab) {
+//             var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+//             headerlogos.setHidden(false);
+//
+//             var acquisitionmain = acquisitiontab.down('panel[name=acquisitionmain]');
+//             acquisitionmain.getController().checkStatusServices();
+//
+//             acquisitionmain.fireEvent('loadstore');
+//
+//             // var productgridstore  = Ext.data.StoreManager.lookup('ProductsActiveStore');
+//             // var acqgridsstore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
+//             // var ingestiongridstore = Ext.data.StoreManager.lookup('IngestionsStore');
+//             // var eumetcastsourcestore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
+//             // var internetsourcestore = Ext.data.StoreManager.lookup('InternetSourceStore');
+//             //
+//             // var myLoadMask = new Ext.LoadMask({
+//             //     msg    : climatestation.Utils.getTranslation('loading'), // 'Loading...',
+//             //     target : this
+//             // });
+//             //
+//             // if (eumetcastsourcestore.isStore && !eumetcastsourcestore.isLoaded()) {
+//             //     eumetcastsourcestore.load();
+//             // }
+//             // if (internetsourcestore.isStore && !internetsourcestore.isLoaded()) {
+//             //     internetsourcestore.load();
+//             // }
+//             //
+//             // if (ingestiongridstore.isStore && !ingestiongridstore.isLoaded() ){
+//             //     myLoadMask.show();
+//             //     ingestiongridstore.load({
+//             //         callback: function(records, options, success){
+//             //             myLoadMask.hide();
+//             //             if (acqgridsstore.isStore && !acqgridsstore.isLoaded()) {
+//             //                 myLoadMask.show();
+//             //                 acqgridsstore.load({
+//             //                     callback: function(records, options, success) {
+//             //                         myLoadMask.hide();
+//             //                         if (productgridstore.isStore && !productgridstore.isLoaded()) {
+//             //                             myLoadMask.show();
+//             //                             productgridstore.load({
+//             //                                 callback: function(records, options, success){
+//             //                                     myLoadMask.hide();
+//             //                                 }
+//             //                             });
+//             //                         }
+//             //                     }
+//             //                 });
+//             //             }
+//             //         }
+//             //     });
+//             // }
+//
+//            //Ext.util.Observable.capture(acquisitionmain, function(e){console.log(e);});
+//            //acquisitionmain.getView().getFeature('productcategories').expandAll();
+//            //acquisitionmain.getView().refresh();
+//        },
+//        beforedeactivate: function (acquisitiontab) {
+//            var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+//            // var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
+//            Ext.each(completenessTooltips, function(item) {
+//                item.hide();
+//            });
+//        }
+//     }
+// };
+//
+// me.processing = {
+//     title: climatestation.Utils.getTranslation('processing'),  // 'Processing',
+//     itemId:'processingmaintab',
+//     xtype:'container',
+//     scrollable: true,
+//     hidden: true,
+//     layout: 'fit',
+//     items: [{
+//        xtype  : 'processing-main',
+//        itemId:'processingmain'
+//     }],
+//     listeners: {
+//        activate: function (processingtab) {
+//            var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+//            headerlogos.setHidden(false);
+//            processingtab.down('panel[name=processingmain]').getController().checkStatusServices();
+//        }
+//     }
+// };
+//
+// me.datamanagement = {
+//     title: climatestation.Utils.getTranslation('datamanagement'),  // 'Data Management',
+//     itemId:'datamanagementmaintab',
+//     xtype:'container',
+//     scrollable: true,
+//     hidden: true,
+//     layout: 'fit',
+//     items: [{
+//        xtype  : 'datamanagement-main',
+//        itemId:'datamanagementmain'
+//     }],
+//     listeners: {
+//        activate: function (datamanagementtab) {
+//             var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+//             headerlogos.setHidden(false);
+//
+//             // var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+//             // if (datasetsstore.isStore && !datasetsstore.isLoaded()) {
+//             //     datasetsstore.load();
+//             // }
+//
+//            var datamanagementmain = datamanagementtab.down('panel[name=datamanagementmain]');
+//            datamanagementmain.fireEvent('loadstore');
+//            //
+//            ////datamanagementmain.getView().getFeature('prodcat').expandAll();
+//            //datamanagementmain.getView().refresh();
+//        },
+//        beforedeactivate: function (acquisitiontab) {
+//            var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+//            // var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("datasetchart-") != -1}');
+//            Ext.each(completenessTooltips, function(item) {
+//                item.hide();
+//            });
+//        }
+//     }
+// };
+//
+// me.analysis = {
+//     title: climatestation.Utils.getTranslation('analysis'),  // 'Analysis',
+//     itemId:'analysistab',
+//     xtype:'container',
+//     scrollable: true,
+//     layout : 'fit',
+//     hidden: true,
+//     items: [{
+//         xtype  : 'analysis-main',
+//         itemId:'analysismain',
+//         reference: 'analysismain'
+//         // hidden: false
+//     }],
+//     listeners: {
+//         activate: function (analysistab) {
+//             // Ext.util.Observable.capture(analysistab, function(e){console.log(analysistab.id + ': ' + e);});
+//             if (climatestation.globals['typeinstallation'].toLowerCase() === 'jrc_online'){
+//                 if (analysistab.layoutCounter > 0){
+//                     // Ext.getCmp('headerlogos').collapse();
+//                 }
+//             }
+//             else if (climatestation.globals['typeinstallation'].toLowerCase() !== 'windows' && climatestation.globals['typeinstallation'].toLowerCase() !== 'online'){
+//                 var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+//                 headerlogos.setHidden(true);
+//             }
+//
+//             var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
+//             if (datasetsstore.isStore && (!datasetsstore.isLoaded() || datasetsstore.count() < 1)) {
+//                 datasetsstore.proxy.extraParams = {force: true};
+//                 datasetsstore.load();
+//             }
+//             // console.info('analysis tab activated!');
+//             // var timeseriesChartSelectionWindow = this.down().lookupReference('timeserieschartselection');
+//             // timeseriesChartSelectionWindow.fireEvent('align');
+//        }
+//     }
+// };
+//
+// me.system = {
+//     title: climatestation.Utils.getTranslation('system'),  // 'System',
+//     itemId:'systemtab',
+//     xtype:'container',
+//     hidden: true,
+//     scrollable: true,
+//     layout : 'center',
+//     items: [{
+//        xtype  : 'systemsettings',
+//        itemId:'systemsettingsview'
+//     }],
+//     listeners: {
+//        activate: function (systemtab) {
+//             var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+//             headerlogos.setHidden(false);
+//
+//             var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
+//             var formpanel = Ext.getCmp('systemsettingsview');
+//             var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
+//                 scope: formpanel,
+//                 loadmask: true,
+//                 failure: function(record, operation) {
+//                     //console.info('failure');
+//                 },
+//                 success: function(record, operation) {
+//                     if (operation.success){
+//                         formpanel.loadRecord(systemsettingsrecord);
+//                         formpanel.updateRecord();
+//                     }
+//                 }
+//             });
+//        }
+//     }
+// };
+//
+// me.help =  {
+//     title: climatestation.Utils.getTranslation('help'),  // 'Help',
+//     xtype: 'container',
+//     hidden: false,
+//     scrollable: true,
+//     layout : 'center',
+//     items: [{
+//        xtype  : 'help',
+//        itemId:'helpview'
+//     }],
+//     listeners: {
+//         activate: function (helptab) {
+//             if (climatestation.globals['typeinstallation'].toLowerCase() === 'jrc_online'){
+//                 Ext.getCmp('headerlogos').expand();
+//             }
+//             else {
+//                 var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
+//                 headerlogos.setHidden(false);
+//             }
+//         }
+//     }
+// };
         me.callParent();
     }
 });

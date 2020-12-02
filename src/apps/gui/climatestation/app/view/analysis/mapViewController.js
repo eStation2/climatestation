@@ -1320,12 +1320,12 @@ Ext.define('climatestation.view.analysis.mapViewController', {
         if (btn.pressed) {
             mapviewwin.map.removeInteraction(mapviewwin.draw);
             mapviewwin.getController().addDrawInteraction();
-            btn.setIconCls('polygon');
+            btn.setIconCls('far fa-draw-polygon orange');
             // btn.showMenu();
         }
         else {
             mapviewwin.map.removeInteraction(mapviewwin.draw);
-            btn.setIconCls('polygon-gray');
+            btn.setIconCls('far fa-draw-polygon');
             btn.hideMenu();
         }
         mapviewwin.getController().outmaskingPossible();

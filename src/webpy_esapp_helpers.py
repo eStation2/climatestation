@@ -3821,6 +3821,32 @@ def classicTimeseries(params):
             colorAdd = 0
             colorSubstract = 0
             firstyear = True
+            counter = 0
+
+            # https://sashamaps.net/docs/resources/20-colors/
+            colourlist = [[230, 25, 75],
+                          [60, 180, 75],
+                          [255, 225, 25],
+                          [0, 130, 200],
+                          [245, 130, 48],
+                          [145, 30, 180],
+                          [70, 240, 240],
+                          [240, 50, 230],
+                          [210, 245, 60],
+                          [250, 190, 212],
+                          [0, 128, 128],
+                          [220, 190, 255],
+                          [170, 110, 40],
+                          [255, 250, 200],
+                          [128, 0, 0],
+                          [170, 255, 195],
+                          [128, 128, 0],
+                          [255, 215, 180],
+                          [0, 0, 128],
+                          [128, 128, 128],
+                          [255, 255, 255],
+                          [0, 0, 0]]
+
             for year in yearsToCompare:
                 showYearInTicks = False
                 from_date = datetime.date(int(year), 1, 1)
@@ -3843,23 +3869,25 @@ def classicTimeseries(params):
                         # RGB value stored in the database is not correct so define as default value BLACK.
                         rgb = "0 0 0".split(' ')
 
-                rgb = list(map(int, rgb))
-                if firstyear:
-                    rgb[-1] = rgb[-1] + colorAdd
-                    rgb[-2] = rgb[-2] + colorAdd
-                    rgb[-3] = rgb[-3] - colorSubstract
+                # rgb = list(map(int, rgb))
+                # if firstyear:
+                #     rgb[-1] = rgb[-1] + colorAdd
+                #     rgb[-2] = rgb[-2] + colorAdd
+                #     rgb[-3] = rgb[-3] - colorSubstract
+                #
+                #     colorAdd += 165
+                #     colorSubstract += 150
+                #     firstyear = False
+                # else:
+                #     rgb[-1] = int(random.random() * 256)
+                #     rgb[-2] = int(random.random() * 256)
+                #     rgb[-3] = int(random.random() * 256)
 
-                    colorAdd += 165
-                    colorSubstract += 150
-                    firstyear = False
-                else:
-                    rgb[-1] = int(random.random() * 256)
-                    rgb[-2] = int(random.random() * 256)
-                    rgb[-3] = int(random.random() * 256)
-
+                rgb = colourlist[counter]
+                counter += 1
                 tsColor = ' '.join([str(i) for i in rgb])
 
-                    # [list_files, dates_list] = getFilesList(productcode, subproductcode, version,
+                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version,
                 #                                         mapsetcode, date_format, from_date, to_date)
                 # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
                 #         aggregate, mapset_info, product_info, list_files, dates_list]

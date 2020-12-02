@@ -1,5 +1,6 @@
 
 Ext.define("climatestation.view.analysis.timeseriesChartView",{
+    // extend: "Ext.panel.Panel",
     extend: "Ext.window.Window",
     controller: "analysis-timeserieschartview",
     viewModel: {
@@ -25,6 +26,10 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
         padding: '2px 14px 2px 14px',
         cls: 'graphview-header'
     },
+
+    floating: true,
+    draggable: true,
+
     constrainHeader: true,
     //constrain: true,
     autoShow : false,
@@ -85,7 +90,8 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
         logosObjContent: null,
         showObjects: false,
         showtoolbar: true,
-        auto_open: false
+        auto_open: false,
+        floating: true
     },
 
     listeners: {
@@ -118,22 +124,22 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
 //             dragObj.proxy.setPosition(dragObj.startPosition[0], dragObj.startPosition[1]);
 // // debugger;
 //         },
-        dragstart: function(dragObj){
-            var me = this;
-            me.suspendEvents();
-            console.info(me);
-            console.info(me.getPosition());
-            console.info(dragObj);
-            console.info(dragObj.proxy.getPosition());
-            // dragObj.suspendEvent('drag');
-            dragObj.proxy.setPosition(dragObj.startPosition[0], dragObj.startPosition[1]);
-            dragObj.proxy.x = dragObj.startPosition[0];
-            dragObj.proxy.y = dragObj.startPosition[1];
-            // debugger;
-            // me.setPosition(dragObj.startPosition[0], dragObj.startPosition[1]);
-                // startPosition
-            // debugger;
-        },
+//         dragstart: function(dragObj){
+//             var me = this;
+//             me.suspendEvents();
+//             console.info(me);
+//             console.info(me.getPosition());
+//             console.info(dragObj);
+//             console.info(dragObj.proxy.getPosition());
+//             // dragObj.suspendEvent('drag');
+//             dragObj.proxy.setPosition(dragObj.startPosition[0], dragObj.startPosition[1]);
+//             dragObj.proxy.x = dragObj.startPosition[0];
+//             dragObj.proxy.y = dragObj.startPosition[1];
+//             // debugger;
+//             // me.setPosition(dragObj.startPosition[0], dragObj.startPosition[1]);
+//                 // startPosition
+//             // debugger;
+//         },
 //         move: function (listener, x, y) {
 //             var me = this;
 //             console.info('moved to');
@@ -213,7 +219,7 @@ Ext.define("climatestation.view.analysis.timeseriesChartView",{
 
     initComponent: function () {
         var me = this;
-        Ext.util.Observable.capture(me, function(e){console.log('grapview - ' + me.id + ': ' + e);});
+        // Ext.util.Observable.capture(me, function(e){console.log('grapview - ' + me.id + ': ' + e);});
 
         // me.title = '<span class="panel-title-style">'+climatestation.Utils.getTranslation('timeseries')+'</span>';
         me.title = '<span id="graphview_title_' + me.id + '">'+climatestation.Utils.getTranslation('timeseries')+'</span>' +

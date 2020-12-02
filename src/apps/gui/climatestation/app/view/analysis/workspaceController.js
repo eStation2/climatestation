@@ -10,7 +10,142 @@ Ext.define('climatestation.view.analysis.workspaceController', {
         'climatestation.view.analysis.mapView',
         'climatestation.view.analysis.timeseriesChartView'
     ],
-    closeAllMapsGraphs: function(){
+
+    toggleGridView: function(btn){
+        var me = this.getView();
+        var mapViewWindows = me.query('mapview-window');
+        var tsGraphWindows = me.query('timeserieschart-window');
+        // var gridview = me.lookupReference('gridview');
+
+        if (btn.pressed) {
+            btn.setIconCls('fas fa-th green');
+
+            me.gridoptions = {
+                column: 8,
+                minRow: 4, // don't collapse when empty
+                // cellHeight: 70,
+                disableOneColumnMode: true,
+                float: false,
+                alwaysShowResizeHandle: false,
+                margin: 5,
+                minWidth:'613px',
+                minHeight:'415px',
+                placeholderClass: 'grid-stack-placeholder', // <- default value
+                placeholderText: '',
+              // dragIn: '.sidebar .grid-stack-item', // class that can be dragged from outside
+              // dragInOptions: { revert: 'invalid', scroll: false, appendTo: 'body', helper: 'clone' }, // clone
+              // removable: '.trash', // drag-out delete class
+              // removeTimeout: 100,
+                acceptWidgets: function(el) { return true; } // function example, else can be simple: true | false | '.someClass' value
+            };
+
+            // me.griditems = [
+            //     {x: 0, y: 0, width: 2, height: 2, content: '<div id="gridcell_'+me.id+'">adfasd</div>'},
+            //     {x: 3, y: 1, width: 1, height: 2, autoPosition: true},
+            //     {width: 1, height: 2, autoPosition: true, resizeHandles: 's, se, sw, n, ne, nw, e, w'},
+            //     {x: 4, y: 1, width: 1, minWidth: 1, minHeight: 1},
+            //     {x: 2, y: 3, width: 3, maxWidth: 3, id: 'special'},
+            //     {x: 2, y: 5, width: 1, locker: true, noResize: true, noMove: true}
+            // ];
+
+            function addWidget(grid, mapgraphComponent) {
+                let gridcellID = 'gridcell_'+mapgraphComponent.id;
+                let n = [{
+                    // x: 0,
+                    // y: 0,
+                    autoPosition: true,
+                    width: 2,
+                    height: 2,
+                    id: gridcellID,
+                    // width: '613px',
+                    // height: '415px',
+                    resizeHandles: 'se, sw, ne, nw'
+                }];
+                grid.load(n);
+                // grid.addWidget(grid.el, n);
+
+                //let el = Ext.get("map"+me.id);
+                let el = document.querySelector('div[data-gs-id="'+gridcellID+'"]');
+                console.info(el);
+                el = el.querySelector('div');
+                console.info(el);
+                //el = el.querySelector('div[class="grid-stack-item-content"]');
+
+                new climatestation.view.analysis.mapView({
+                    workspace : me,
+                    floating: false,
+                    draggable: false,
+                    renderTo: el
+                });
+                // mapgraphComponent.floating = false;
+                // mapgraphComponent.draggable = false;
+                // mapgraphComponent.renderTo = el;
+                // mapgraphComponent.render();
+                console.info(mapgraphComponent);
+                // new Ext.panel.Panel({title:'MAP 1', layout:'fit', width:500, height:400, renderTo:el});
+            }
+
+            function removeWidget(grid, mapgraphComponent) {
+                grid.removeWidget(this.parentNode.parentNode)
+            }
+
+            me.grids = GridStack.initAll(me.gridoptions);
+            console.info(me.grids);
+            // me.grids[0].load(me.griditems);
+
+            me.grids.forEach(function(grid){
+                console.info(grid.el.id);
+                if (grid.el.id === me.gridstackElementID){
+                    me.grid = grid
+                    console.info(grid);
+                }
+            })
+
+            Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+                // console.info(mapview_window);
+                console.info(me.grid);
+                addWidget(me.grid, mapview_window);
+
+                // mapview_window.setFloating(false);
+                // mapview_window.setDragable(false);
+                // mapview_window.workspace.remove(mapview_window, false);
+                // gridview.createView(mapview_window, columnIndex);
+                // gridview.createView({
+                //     type: 'mapView',
+                //     title: 'New Map title',
+                //     items: mapview_window
+                //     // height: 200
+                // }, columnIndex);
+                // gridview.addNew('container');
+                // gridview.items.items[0].items.items[0].items[i].add(mapview_window);
+                // i += 1;
+            });
+
+            Ext.Object.each(tsGraphWindows, function(id, tsgraph_window, thisObj) {
+                console.info(tsgraph_window);
+                addWidget(me.grid, tsgraph_window);
+
+                // tsgraph_window.setFloating(false);
+                // tsgraph_window.setDragable(false);
+                // gridview.createView(tsgraph_window, columnIndex);
+                // gridview.addView({
+                //     type: 'graphView',
+                //     title: 'New Graph title',
+                //     items: tsgraph_window
+                //     // height: 200
+                // }, columnIndex);
+                // gridview.addNew('container');
+                // console.info(gridview.items.items[0].items.items[0].items);
+                // gridview.items.items[0].items.items[0].items[i].add(tsgraph_window);
+                // i += 1;
+            });
+        }
+        else {
+            btn.setIconCls('fas fa-th');
+        }
+    }
+
+    ,closeAllMapsGraphs: function(){
         var me = this.getView();
         var mapViewWindows = me.query('mapview-window');
         var tsGraphWindows = me.query('timeserieschart-window');

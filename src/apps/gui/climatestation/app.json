@@ -225,6 +225,9 @@
             "path": "app.js",
             "bundle": true
         },{
+            "path": "lib/js/gridstack/dist/gridstack.all.js",
+            "remote": true
+        },{
             "path": "lib/js/OL3/build/ol.js",
             "remote": true
 //        },{
@@ -337,6 +340,12 @@
         },{
             "path": "resources/css/climatestation.css",
             "update": "full"
+        },{
+            "path": "lib/js/gridstack/dist/gridstack.css",
+            "remote": true
+        },{
+            "path": "lib/js/gridstack/dist/gridstack-extra.css",
+            "remote": true
         },{
             "path": "lib/js/OL3/css/ol.css",
             "remote": true

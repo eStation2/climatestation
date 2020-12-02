@@ -1,5 +1,6 @@
 Ext.define("climatestation.view.analysis.mapView",{
-    extend: "Ext.window.Window",
+    extend: "Ext.panel.Panel",
+    // extend: "Ext.window.Window",
     controller: "analysis-mapview",
     viewModel: {
         type: "analysis-mapview"
@@ -34,6 +35,9 @@ Ext.define("climatestation.view.analysis.mapView",{
         //     "line-height": "13px!important"
         // }
     },
+
+    floating: true,
+    draggable: true,
 
     constrainHeader: true,
     //constrain: true,
@@ -91,7 +95,8 @@ Ext.define("climatestation.view.analysis.mapView",{
         layers: [],
         draw: null,
         projection: 'EPSG:4326',
-        defaultzoomfactor: 1
+        defaultzoomfactor: 1,
+        floating: true
         // defaultAlign: null
     },
     // bind:{
@@ -99,6 +104,11 @@ Ext.define("climatestation.view.analysis.mapView",{
     // },
     // publishes: ['titleData'],
 
+    setFloating: function(floating){
+        var me = this;
+        me.maximizable = false;
+
+    },
     initComponent: function () {
         var me = this;
         // me.setDefaultAlign(null);
@@ -273,8 +283,8 @@ Ext.define("climatestation.view.analysis.mapView",{
                         },
                         listeners: {
                             changecomplete: function(menuitem, value, oldvalue){
-                                //me.up().commonMapView.setProperties({zoomFactor: 1.1+(0.01*value)});
-                                //me.up().commonMapView.set('zoomFactor', 1.1+(0.01*value), false);
+                                //me.workspace.commonMapView.setProperties({zoomFactor: 1.1+(0.01*value)});
+                                //me.workspace.commonMapView.set('zoomFactor', 1.1+(0.01*value), false);
                                 var mapview_linked = true;
                                 var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
                                 var properties = null;
@@ -284,25 +294,25 @@ Ext.define("climatestation.view.analysis.mapView",{
                                     me.up().zoomFactorValue = value;
                                     me.up().zoomFactorSliderValue = value;
 
-                                    properties = me.up().commonMapView.getProperties();
+                                    properties = me.workspace.commonMapView.getProperties();
                                     properties['projection'] = me.projection;
                                     properties['displayProjection'] = me.projection;
                                     // properties['resolution'] = 0.1;
                                     properties['minResolution'] = 0.0001;
                                     properties['maxResolution'] = 0.25;
                                     properties['zoomFactor'] = 1.1+0.1*value;
-                                    me.up().commonMapView = new ol.View(properties);
-                                    // me.up().commonMapView.setProperties(properties)
+                                    me.workspace.commonMapView = new ol.View(properties);
+                                    // me.workspace.commonMapView.setProperties(properties)
 
-                                    me.map.setView(me.up().commonMapView);
+                                    me.map.setView(me.workspace.commonMapView);
                                     if (climatestation.Utils.objectExists(me.up().map)){
-                                        me.up().map.setView(me.up().commonMapView);
+                                        me.up().map.setView(me.workspace.commonMapView);
                                     }
 
                                     Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
                                         var mapview_window_linked = !mapview_window.lookupReference('toggleLink_btn_'+mapview_window.id.replace(/-/g,'_')).pressed;
                                         if (me != mapview_window && mapview_window_linked){
-                                           mapview_window.map.setView(me.up().commonMapView);
+                                           mapview_window.map.setView(me.workspace.commonMapView);
                                            mapview_window.lookupReference('zoomfactorslider_' + mapview_window.id.replace(/-/g,'_')).setValue(value);
                                         }
                                     });
@@ -311,12 +321,12 @@ Ext.define("climatestation.view.analysis.mapView",{
                                     // me.mapView = new ol.View({
                                     //     projection:"EPSG:4326",
                                     //     displayProjection:"EPSG:4326",
-                                    //     center: me.mapView.getCenter(),      // me.up().commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
+                                    //     center: me.mapView.getCenter(),      // me.workspace.commonMapView.getCenter(),    // [20, -2],   // [20, -4.7],
                                     //     resolution: 0.1,
                                     //     minResolution: 0.0001,
                                     //     maxResolution: 0.25,
                                     //     zoomFactor: 1.1+0.1*value   // (cioe' nel range 1.1 -> 2.1)
-                                    //     // zoom: me.up().commonMapView.getZoom(),
+                                    //     // zoom: me.workspace.commonMapView.getZoom(),
                                     //     // minZoom: 12,
                                     //     // maxZoom: 100,
                                     //     // zoomFactor: 1.1+(0.01*value)
@@ -340,7 +350,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                                 //     Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
                                 //         var mapview_window_linked = !mapview_window.lookupReference('toggleLink_btn_'+mapview_window.id.replace(/-/g,'_')).pressed;
                                 //         if (me != mapview_window && mapview_window_linked){
-                                //            mapview_window.map.setView(me.up().commonMapView);
+                                //            mapview_window.map.setView(me.workspace.commonMapView);
                                 //            mapview_window.lookupReference('zoomfactorslider_' + mapview_window.id.replace(/-/g,'_')).setValue(value);
                                 //         }
                                 //     });
@@ -687,7 +697,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                     //interactions: ol.interaction.defaults().extend([select]),
                     interactions : ol.interaction.defaults({doubleClickZoom :false}),
                     //layers: [blanklayer],
-                    view: me.up().commonMapView,
+                    view: me.workspace.commonMapView,
                     controls: ol.control.defaults({
                         attribution:false,
                         attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
@@ -1023,7 +1033,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                     me.setSize(me.mapviewSize[0],me.mapviewSize[1]);
                 }
                 if (climatestation.Utils.objectExists(me.mapviewPosition)){
-                    console.info(me.mapviewPosition);
+                    // console.info(me.mapviewPosition);
                     me.setPosition(me.mapviewPosition);
                 }
 

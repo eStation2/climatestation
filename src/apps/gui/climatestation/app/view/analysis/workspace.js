@@ -25,10 +25,14 @@ Ext.define("climatestation.view.analysis.workspace",{
         type: 'fit',
         padding: 0
     },
+    // layout: {
+    //     type: 'card',
+    //     anchor: '100%'
+    // },
     frame: false,
     border: false,
     bodyPadding: '1 0 0 0',
-    scrollable: 'y',
+    scrollable: true,
     closable: false,
     closeAction: 'destroy', // 'hide'
     plugins: ['tabtitleedit'],
@@ -56,11 +60,41 @@ Ext.define("climatestation.view.analysis.workspace",{
     initComponent: function () {
         var me = this;
 
+        // Ext.util.Observable.capture(me, function (e) { console.log('analysismain - ' + e);});
+        me.gridstackElementID = 'grid-stack-'+me.id;
+        me.html = '<div class="grid-stack grid-stack-6" id="'+me.gridstackElementID+'"></div>'; // Place gridstack grid here.
+        // me.html = '<div class="grid-stack grid-stack-6">HALLOOO</div>',    // Place gridstack grid here.
+
         me.listeners = {
             afterrender: function() {
-                // Ext.util.Observable.capture(me, function (e) { console.log('analysismain - ' + e);});
-                //if (window.navigator.onLine){
+                // let options = {
+                //   column: 6,
+                //   minRow: 1, // don't collapse when empty
+                //   cellHeight: 70,
+                //   disableOneColumnMode: true,
+                //   float: false,
+                //   // dragIn: '.sidebar .grid-stack-item', // class that can be dragged from outside
+                //   // dragInOptions: { revert: 'invalid', scroll: false, appendTo: 'body', helper: 'clone' }, // clone
+                //   // removable: '.trash', // drag-out delete class
+                //   // removeTimeout: 100,
+                //   acceptWidgets: function(el) { return true; } // function example, else can be simple: true | false | '.someClass' value
+                // };
+                // var grid = GridStack.init(options, me.gridstackElementID);
+                // let items = [
+                //   {x: 0, y: 0, width: 2, height: 2, content: 'widget1'},
+                //   {x: 3, y: 1, width: 1, height: 2, content: 'widget2'},
+                //   {x: 4, y: 1, width: 1, content: 'widget3'},
+                //   {x: 2, y: 3, width: 3, maxWidth: 3, id: 'special', content: 'has maxWidth=3'},
+                //   {x: 2, y: 5, width: 1, content: 'widget4'}
+                // ];
+                // grid.load(items);
+                // var count = 0;
+                // grid.addWidget('<div><div class="grid-stack-item-content">' + count++ + '</div></div>', {x: 0, y: 0, width: 2, height: 2});
+                // grid.addWidget('<div><div class="grid-stack-item-content">' + count++ + '</div></div>', {x: 2, y: 3, width: 3, height: 1});
+                // grid.addWidget('<div><div class="grid-stack-item-content">' + count++ + '</div></div>', {x: 1, y: 3, width: 1, height: 1});
 
+
+                //if (window.navigator.onLine){
                 // me.backgroundLayers = [];
                 // me.backgroundLayers.push(
                 //   new ol.layer.Tile({
@@ -240,11 +274,11 @@ Ext.define("climatestation.view.analysis.workspace",{
         }
 
         if (!me.pinned && me.pinable) {
-            me.setIconCls('far fa-thumbtack pin_red');
+            me.setIconCls('far fa-map-pin pin_red');
 
         }
         else if (me.pinned && me.pinable){
-            me.setIconCls('far fa-thumbtack pin_green');
+            me.setIconCls('far fa-map-pin pin_green');
         }
 
         // if (me.workspaceid == 'defaultworkspace'){
@@ -265,17 +299,19 @@ Ext.define("climatestation.view.analysis.workspace",{
                                     text: climatestation.Utils.getTranslation('pin_unpin_workspace')     // Click to pin or unpin workspace
                                 });
                             }
-                            e.btnIconEl.on('click', function(e) {
+                            e.btnIconEl.on('dblclick', function(e) {
                                 // alert('click');
                                 if (!me.pinned && me.pinable) {
-                                    me.setIconCls('far fa-thumbtack pin_green');
+                                    me.setIconCls('far fa-map-pin pin_green');
+                                    // me.setIconCls('far fa-thumbtack pin_green');
                                     me.pinned = true;
                                     if (!me.isNewWorkspace){
                                         me.getController().savePin();
                                     }
                                 }
                                 else if (me.pinned && me.pinable){
-                                    me.setIconCls('far fa-thumbtack pin_red');
+                                    me.setIconCls('far fa-map-pin pin_red');
+                                    // me.setIconCls('far fa-thumbtack pin_red');
                                     me.pinned = false;
                                     if (!me.isNewWorkspace){
                                         me.getController().savePin();
@@ -454,7 +490,7 @@ Ext.define("climatestation.view.analysis.workspace",{
                     }
                 },
                 handler: 'setWorkspaceName'
-            },{
+            }, {
                 xtype: 'splitbutton',
                 name: 'saveWorkspaceBtn',
                 reference: 'saveWorkspaceBtn',
@@ -462,7 +498,7 @@ Ext.define("climatestation.view.analysis.workspace",{
                 // style: {color: 'lightblue'},
                 cls: 'nopadding-splitbtn',
                 scale: 'small',
-                hidden:  me.isrefworkspace || (me.workspaceid == 'defaultworkspace' || climatestation.getUser() == 'undefined' || climatestation.getUser() == null ? true : false),
+                hidden: me.isrefworkspace || (me.workspaceid == 'defaultworkspace' || climatestation.getUser() == 'undefined' || climatestation.getUser() == null ? true : false),
                 arrowVisible: (!me.isNewWorkspace ? true : false),
                 tooltip: climatestation.Utils.getTranslation('save_workspace'),
                 // listeners: {
@@ -486,18 +522,37 @@ Ext.define("climatestation.view.analysis.workspace",{
                         // hidden: (!me.isNewWorkspace ? true : false)
                     },
                     items: [{
-                            //xtype: 'button',
-                            text: climatestation.Utils.getTranslation('save_as'),    // 'Save as...',
-                            // glyph: 'xf0c7@FontAwesome',
-                            // cls:'lightblue',
-                            iconCls: 'far fa-save lightblue',
-                            // style: { color: 'lightblue' },
-                            width: 165,
-                            handler: 'setWorkspaceName'
+                        //xtype: 'button',
+                        text: climatestation.Utils.getTranslation('save_as'),    // 'Save as...',
+                        // glyph: 'xf0c7@FontAwesome',
+                        // cls:'lightblue',
+                        iconCls: 'far fa-save lightblue',
+                        // style: { color: 'lightblue' },
+                        width: 165,
+                        handler: 'setWorkspaceName'
                     }]
                 }
-            // },
-            // '->',
+            }, '->', {
+                xtype: 'button',
+                name: 'togglegridview',
+                tooltip: climatestation.Utils.getTranslation('Grid view'),
+                iconCls: 'fas fa-th',
+                scale: 'small',
+                enableToggle: true,
+                toggleHandler: 'toggleGridView',
+                listeners: {
+                    afterrender: function (btn) {
+                        // Register the new tip with an element's ID
+                        Ext.tip.QuickTipManager.register({
+                            target: btn.btnIconEl.el, // Target button's ID
+                            title: '',
+                            text: climatestation.Utils.getTranslation('Toggle grid view')
+                        });
+                    },
+                    destroy: function(btn) {
+                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
+                    }
+                }
             // {
             //     xtype: 'button',
             //     name: 'togglebackgroundlayer',
@@ -519,26 +574,66 @@ Ext.define("climatestation.view.analysis.workspace",{
             bodyPadding: 0
         };
         me.items = [{
-            // region: 'center',
-            xtype: 'container',
-            id: 'backgroundmap_'+me.id,
-            reference: 'backgroundmap_'+me.id,
-            scrollable: 'y',
-            closable: false,
-            autoWidth: true,
-            height: 700
-            // flex: 1,
-            // layout: {
-            //     type: 'fit'
-            // }
-            // style: { "background-color": 'white' },
-            // html : '<div id="backgroundmap_' + me.id + '" style="width: 100%; height: 100%;"></div>'
-        }, {
+        //     xtype: 'dashboard',
+        //     reference: 'gridview',
+        //     // stateful: !1,
+        //     columnWidths: [0.25, 0.25, 0.25, 0.25],
+        //     parts: {
+        //         // container: {
+        //         //     viewTemplate: {
+        //         //         title: 'Map',
+        //         //         layout: 'fit',
+        //         //         items: []
+        //         //         // items: [{
+        //         //         //     xtype: 'mapview-window'
+        //         //         // }]
+        //         //     }
+        //         // }
+        //         // mapView: {
+        //         //     viewTemplate: {
+        //         //         title: 'Map',
+        //         //         items: []
+        //         //         // items: [{
+        //         //         //     xtype: 'mapview-window'
+        //         //         // }]
+        //         //     }
+        //         // },
+        //         // graphView: {
+        //         //     viewTemplate: {
+        //         //         title: 'Graph',
+        //         //         items: []
+        //         //         // items: [{
+        //         //         //     xtype: 'timeserieschart-window'
+        //         //         // }]
+        //         //     }
+        //         // }
+        //     }
+        //     // defaultContent: [{
+        //     //     type: 'container',
+        //     //     columnIndex: 0,
+        //     //     rowIndex: 0
+        //     // }]
+        // }, {
             xtype: 'timeserieschartselection',
             // id: 'timeserieschartselection'+me.id,
             reference: 'timeserieschartselection'+me.id,
             workspace: me
         }];
+
+        //     // region: 'center',
+        //     xtype: 'container',
+        //     id: 'backgroundmap_'+me.id,
+        //     reference: 'backgroundmap_'+me.id,
+        //     scrollable: 'y',
+        //     closable: false,
+        //     autoWidth: true,
+        //     height: 700
+        //     // flex: 1,
+        //     // layout: {
+        //     //     type: 'fit'
+        //     // }
+        //     // style: { "background-color": 'white' },
+        //     // html : '<div id="backgroundmap_' + me.id + '" style="width: 100%; height: 100%;"></div>'
 
         me.commonMapView = new ol.View({
             projection:"EPSG:4326",
