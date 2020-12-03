@@ -121,6 +121,8 @@ WORKDIR /var/www/climatestation
 # https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact
 #ENTRYPOINT ["apache2ctl", "-D", "FOREGROUND"]
 #CMD ["python", "-c", "import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces(version=1)"]
+
+#CMD ["python", "-u", "./resources/libs_python/my_server.py", "127.0.0.1", "8899", "9999"]
 CMD apache2ctl -D FOREGROUND
 
 #ADD docker-entrypoint.sh /root/docker-entrypoint.sh
@@ -128,7 +130,7 @@ CMD apache2ctl -D FOREGROUND
 
 #ENTRYPOINT ["/root/docker-entrypoint.sh"]
 
-EXPOSE  80
+EXPOSE  80 8899 9999
 
 
 

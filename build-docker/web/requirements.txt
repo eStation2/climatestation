@@ -8,7 +8,8 @@ future
 urllib3
 certifi
 configparser
-numpy==1.19.2
+numpy
+#numpy==1.19.2
 pyproj
 GDAL
 geojson
@@ -34,6 +35,17 @@ psutil
 #pymorph
 scikit-image
 docker-py
+
+# For C3SF4P
 #statsmodels
 #pandas
 #Basemap
+
+# For IMPACT
+tornado
+gitpython
+# pysqlite3
+mahotas
+sklearn
+xlsxwriter
+wheel

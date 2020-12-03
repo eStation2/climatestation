@@ -106,6 +106,9 @@ Ext.define('climatestation.view.main.Main', {
                 itemId:'impactmain',
                 reference: 'impactmain',
                 listeners: {
+                    beforerender: function(impactcard){
+
+                    },
                     activate: function(impactcard){
                         me.lookupReference('header-section-title').setText(climatestation.Utils.getTranslation('IMPACT toolbox'));
                     }
