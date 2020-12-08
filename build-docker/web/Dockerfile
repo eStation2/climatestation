@@ -123,14 +123,16 @@ WORKDIR /var/www/climatestation
 #CMD ["python", "-c", "import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces(version=1)"]
 
 #CMD ["python", "-u", "./resources/libs_python/my_server.py", "127.0.0.1", "8899", "9999"]
-CMD apache2ctl -D FOREGROUND
 
-#ADD docker-entrypoint.sh /root/docker-entrypoint.sh
-#RUN chmod 0775 /root/docker-entrypoint.sh
 
-#ENTRYPOINT ["/root/docker-entrypoint.sh"]
 
-EXPOSE  80 8899 9999
+ADD docker-entrypoint.sh /root/docker-entrypoint.sh
+RUN chmod 0775 /root/docker-entrypoint.sh
+
+ENTRYPOINT ["/root/docker-entrypoint.sh"]
+#CMD apache2ctl -D FOREGROUND
+
+EXPOSE 80 8899 9999
 
 
 
