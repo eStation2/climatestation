@@ -21,6 +21,8 @@ Ext.define('climatestation.view.main.Main', {
     controller: 'app-main',
     viewModel: 'app-main',
 
+    impactWindow: null,
+
     layout: {
         type: 'border'
         // ,align: 'stretch'
@@ -227,7 +229,8 @@ Ext.define('climatestation.view.main.Main', {
                                 text: 'IMPACT toolbox',
                                 iconCls:'far fa-layer-group',
                                 handler: function(){
-                                    me.controller.doCardNavigation('impactmain')
+                                   let res = me.controller.launchImpact(me.impactWindow);
+                                   me.impactWindow = res;
                                 }
                             },{
                                 text: 'Fitness For Purpose',

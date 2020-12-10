@@ -7,10 +7,31 @@ Ext.define('climatestation.view.main.MainController', {
     extend: 'Ext.app.ViewController',
 
     alias: 'controller.app-main',
+    impactWindow: 'ciao',
+    itemId:'MainController',
+
+    initComponent: function(){
+        var me = this;
+
+    },
 
     doCardNavigation: function(cardid) {
         let me = this.getView(),
         contentlayout = me.getComponent('maincontentPanel').getLayout();
         contentlayout.setActiveItem(cardid);
+    },
+
+    launchImpact: function(impactWindow) {
+
+                if(impactWindow !== null && impactWindow.closed == false ) {
+                    alert("Window already open");
+                    impactWindow.focus();
+                    return impactWindow
+
+                } else {
+                     return window.open('http://localhost:8899/IMPACT', "IMPACT Toolbox");
+                }
+                // url and port should be taken from configuration file
+                //window.open('http://localhost:8899/IMPACT', "IMPACT Toolbox");
     }
 });
