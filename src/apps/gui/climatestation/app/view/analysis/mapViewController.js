@@ -1280,7 +1280,8 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             titleObj.show();
             disclaimerObj.show();
             logoObj.show();
-            btn.setStyle({ color: 'green' });
+            // btn.setStyle({ color: 'green' });
+            btn.setIconCls('far fa-object-group green');
         }
         else {
             titleObj.titlePosition = titleObj.getPosition(true);
@@ -1289,7 +1290,8 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             titleObj.hide();
             disclaimerObj.hide();
             logoObj.hide();
-            btn.setStyle({ color: 'black' });
+            // btn.setStyle({ color: 'black' });
+            btn.setIconCls('far fa-object-group black');
         }
     }
 
@@ -2862,7 +2864,6 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             }
         });
 
-
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             dock: 'top',
             autoShow: false,
@@ -3025,24 +3026,25 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                         Ext.tip.QuickTipManager.register({
                             target: btn.btnIconEl.el, // Target button's ID
                             title: '',
+                            showDelay: 1000,
                             text: climatestation.Utils.getTranslation('draw_geometries')
                         });
                     },
                     destroy: function(btn) {
                         Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
                     }
-                    ,mouseover: function(btn){
-                        var task = new Ext.util.DelayedTask(function() {
-                            btn.showMenu();
-                        });
-                        task.delay(1500);
-                        // if (btn.pressed) {
-                        //     btn.showMenu();
-                        // }
-                        // else {
-                        //     btn.hideMenu();
-                        // }
-                    }
+                    // ,mouseover: function(btn){
+                    //     var task = new Ext.util.DelayedTask(function() {
+                    //         btn.showMenu();
+                    //     });
+                    //     task.delay(1500);
+                    //     // if (btn.pressed) {
+                    //     //     btn.showMenu();
+                    //     // }
+                    //     // else {
+                    //     //     btn.hideMenu();
+                    //     // }
+                    // }
                     // ,mouseout: function(btn){
                     //     var task = new Ext.util.DelayedTask(function() {
                     //         btn.hideMenu();
@@ -3200,7 +3202,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             },{
                 reference: 'objectsbtn_'+me.id.replace(/-/g,'_'),
                 hidden: false,
-                iconCls: 'far fa-object-group',
+                iconCls: 'far fa-object-group black',
                 style: {
                     "font-size": '1.70em'
                 },

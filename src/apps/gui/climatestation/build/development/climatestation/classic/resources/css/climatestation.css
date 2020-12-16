@@ -973,7 +973,7 @@
 
 #logo{position:relative;z-index:10;min-height:0;padding:2px;background-color:#fff;}
 
-.mapview-header .x-window-header-title-default .x-panel-header-title-default .x-title-text{
+.mapview-header .x-panel-header-title-default .x-title-text{
     padding: 2px!important;
     margin: 0px 5px 0px 10px !important;
     border-width: 2px!important;
@@ -982,7 +982,7 @@
     text-align: left !important;
 }
 
-.graphview-header .x-window-header-title-default .x-panel-header-title-default .x-title-text{
+.graphview-header .x-panel-header-title-default .x-title-text{
     padding: 2px!important;
     margin: 0px 5px 0px 10px !important;
     border-width: 2px!important;
