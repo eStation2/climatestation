@@ -1,6 +1,7 @@
 # FROM ubuntu:18.04 AS ubuntu
 # FROM python:3.8-slim-buster
 FROM continuumio/miniconda3
+#FROM d-prd-registry.jrc.it/ubuntu:18.04 AS ubuntu
 
 USER root
 # Security: Don't run as root!!!
@@ -8,7 +9,6 @@ USER root
 # USER adminuser
 
 # TODO: Like COPY, use ARG as late as possible!
-
 # Setup user
 ARG UID
 ARG GID
@@ -19,26 +19,21 @@ ARG GID
 #ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
 ARG DEBIAN_FRONTEND=noninteractive
 
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+ENV PATH /opt/conda/bin:$PATH
+
+RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificates git
+
 # Add optional and essential packages
 RUN apt update && apt install -y software-properties-common
-RUN apt-get update && apt-get install -y make cmake gcc nano vim wget git unzip iputils-ping locales mlocate
+RUN apt-get update && apt-get install -y make cmake gcc nano vim unzip iputils-ping locales mlocate
 #RUN apt-get install wget -y && rm -rf /var/lib/apt/lists/*
-RUN apt-get update && apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev
+RUN apt-get update && apt-get install -y build-essential libcurl4-openssl-dev libssl-dev
 # To have locate work
 RUN updatedb
 
 ENV PATH="/root/miniconda3/bin:${PATH}"
 ARG PATH="/root/miniconda3/bin:${PATH}"
-
-#RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-#    && mkdir /root/.conda \
-#    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-#    && rm -f Miniconda3-latest-Linux-x86_64.sh
-#RUN conda --version
-
-#RUN conda create --name env python=3.7
-#RUN echo "source activate env" > ~/.bashrc
-#ENV PATH /opt/conda/envs/env/bin:$PATH
 
 #ADD environment.yml /tmp/environment.yml
 #RUN conda env create -f /tmp/environment.yml
@@ -180,3 +175,12 @@ EXPOSE  80
 #    chown -R $UNAME /home/$UNAME && \
 #    echo su -l $UNAME -s /bin/bash >> /root/.bashrc
 
+#RUN apt-get install -y curl grep sed dpkg && \
+#    TINI_VERSION=`curl https://github.com/krallin/tini/releases/latest | grep -o "/v.*\"" | sed 's:^..\(.*\).$:\1:'` && \
+#    curl -L "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini_${TINI_VERSION}.deb" > tini.deb && \
+#    dpkg -i tini.deb && \
+#    rm tini.deb && \
+#    apt-get clean
+#
+#ENTRYPOINT [ "/usr/bin/tini", "--" ]
+#CMD [ "/bin/bash" ]
