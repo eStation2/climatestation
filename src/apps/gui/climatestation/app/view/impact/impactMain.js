@@ -10,7 +10,7 @@ Ext.define("climatestation.view.impact.impactMain",{
 
     requires: [
         'Ext.layout.container.Card',
-        'IMPACT.*',
+        // 'IMPACT.*',
         'climatestation.view.impact.impactMainController',
         'climatestation.view.impact.impactMainModel'
     ],

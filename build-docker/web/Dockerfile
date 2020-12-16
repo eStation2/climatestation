@@ -1,50 +1,24 @@
-# FROM ubuntu:18.04 AS ubuntu
-# FROM python:3.8-slim-buster
 FROM continuumio/miniconda3
 
-USER root
 # Security: Don't run as root!!!
+USER root
+# Setup user
 # RUN useradd --create-home adminuser
 # USER adminuser
-
-# TODO: Like COPY, use ARG as late as possible!
-
-# Setup user
 ARG UID
 ARG GID
 
-#ARG http_proxy=http://10.168.209.72:8012
-#ARG https_proxy=http://10.168.209.72:8012
-#ARG ftp_proxy=http://10.168.209.72:8012
-#ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Add optional and essential packages
 RUN apt update && apt install -y software-properties-common
 RUN apt-get update && apt-get install -y make cmake gcc nano vim wget git unzip iputils-ping locales mlocate
-#RUN apt-get install wget -y && rm -rf /var/lib/apt/lists/*
 RUN apt-get update && apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev
 # To have locate work
 RUN updatedb
 
 ENV PATH="/root/miniconda3/bin:${PATH}"
 ARG PATH="/root/miniconda3/bin:${PATH}"
-
-#RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-#    && mkdir /root/.conda \
-#    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-#    && rm -f Miniconda3-latest-Linux-x86_64.sh
-#RUN conda --version
-
-#RUN conda create --name env python=3.7
-#RUN echo "source activate env" > ~/.bashrc
-#ENV PATH /opt/conda/envs/env/bin:$PATH
-
-#ADD environment.yml /tmp/environment.yml
-#RUN conda env create -f /tmp/environment.yml
-## Pull the environment name out of the environment.yml
-#RUN echo "source activate $(head -1 /tmp/environment.yml | cut -d' ' -f2)" > ~/.bashrc
-#ENV PATH /opt/conda/envs/$(head -1 /tmp/environment.yml | cut -d' ' -f2)/bin:$PATH
 
 # Add GDAL from conda-forge -> gdal contains gdal-bin libgdal-dev
 RUN conda update conda
@@ -54,16 +28,11 @@ RUN conda install -c mc_ mapscript
 # Add GEOS and PROJ from apt-get -> needed for mapscript
 RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin
 
-#RUN add-apt-repository ppa:ubuntugis/ppa -y
-###RUN add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y
-### Add python3-mapscript from above ppa
-#RUN apt-get install -y  python3-mapscript
-
 # Add Apache2 with mod-wsgi
 RUN apt-get update && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi-py3
 
 # Install all needed Python packages, listed in the file requirements.txt
-# Some packages depend on setuptools to be installed. the reqiurements.txt does not preserve
+# Some packages depend on setuptools to be installed. The reqiurements.txt does not preserve
 # the order of install so install setuptools before the requirements.txt
 # By default pip keeps copies of the downloaded package, in case you reinstall later.
 # This wastes space, and you won't need it. Use the --no-cache-dir flag!
@@ -73,16 +42,11 @@ RUN pip install setuptools
 RUN pip install --no-cache-dir -r /etc/apache2/sites-available/requirements.txt
 RUN pip install --upgrade numpy
 
-# Install and hook mod_wsgi to apache2
-#RUN pip install mod_wsgi
-#RUN /root/miniconda3/bin/mod_wsgi-express install-module
-
+# Set secure default apache config
 ADD 00-default.conf /etc/apache2/sites-available/00-default.conf
-
 RUN ln -s /etc/apache2/sites-available/00-default.conf /etc/apache2/sites-enabled/00-default.conf && \
     mkdir -p /var/empty && unlink /etc/apache2/sites-enabled/000-default.conf
-
-# Add and enable virtualhost site
+# Add and enable virtualhost climatestation site
 ADD climatestation.conf /etc/apache2/sites-available/climatestation.conf
 RUN ln -s /etc/apache2/sites-available/climatestation.conf /etc/apache2/sites-enabled/climatestation.conf
 
@@ -96,10 +60,6 @@ ADD jre-8u251-linux-x64.tar.gz /usr/java
 #RUN tar zxvf /usr/java/jre-8u73-linux-x64.tar.gz
 ENV PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
-
-#RUN mkdir -p /root/senchacmd && chmod 755 -R /root/senchacmd
-#ADD SenchaCmd-5.1.3.61-linux-x64.run /root/senchacmd
-#RUN apt-get update && apt-get install -y ruby2.5
 
 # Configuring web folder tree
 RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
@@ -118,69 +78,16 @@ WORKDIR /var/www/climatestation
 # RUN python -m compileall yourpackage/
 
 
-# https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact
-#ENTRYPOINT ["apache2ctl", "-D", "FOREGROUND"]
 #CMD ["python", "-c", "import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces(version=1)"]
-
 #CMD ["python", "-u", "./resources/libs_python/my_server.py", "127.0.0.1", "8899", "9999"]
-
-
 
 ADD docker-entrypoint.sh /root/docker-entrypoint.sh
 RUN chmod 0775 /root/docker-entrypoint.sh
+
+# For debugging
+ENV PYTHONFAULTHANDLER=1
 
 ENTRYPOINT ["/root/docker-entrypoint.sh"]
 #CMD apache2ctl -D FOREGROUND
 
 EXPOSE 80 8899 9999
-
-
-
-
-## Install OpenJDK-11
-#RUN apt-get update && \
-#    apt-get install -y openjdk-11-jdk && \
-#    apt-get install -y ant && \
-#    apt-get clean;
-#
-## Fix certificate issues
-#RUN apt-get update && \
-#    apt-get install ca-certificates-java && \
-#    apt-get clean && \
-#    update-ca-certificates -f;
-#
-## Setup JAVA_HOME -- useful for docker commandline
-#ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
-#RUN export JAVA_HOME
-
-
-#ADD pythonpath /pythonpath
-#RUN PYTHONPATH=$(cat /pythonpath);
-#COPY docker-entrypoint.sh /usr/local/bin/
-#RUN ln -s /usr/local/bin/docker-entrypoint.sh /
-#ADD docker-entrypoint.sh /docker-entrypoint.sh
-#ADD setup_pythonenvironment.sh /setup_pythonenvironment.sh
-#ENV PYTHONPATH "${PYTONPATH}:/var/www/estation2"
-#CMD [ "python", "-c", "import sys; sys.path.append('/var/www/estation2')" ]
-#ENTRYPOINT /docker-entrypoint.sh
-#ENTRYPOINT ["docker-entrypoint.sh"]
-#ENTRYPOINT /setup_pythonenvironment.sh
-
-
-# Enable apache mod_proxy
-#RUN a2enmod proxy && \
-#    a2enmod proxy_http && \
-#    a2enmod proxy_balancer && \
-#    a2enmod lbmethod_byrequests
-
-# DEVELOPMENT TOOLS
-#RUN export UNAME=jvantklooster && \
-#    useradd $UNAME -u 1004 && \
-#    mkdir /home/$UNAME && \
-#    cp /etc/skel/.bashrc /home/$UNAME/ && \
-#    cp /etc/skel/.profile /home/$UNAME/ && \
-#    cp /etc/skel/.profile /home/$UNAME/.bash_profile && \
-#    echo "cd /var/www" >> /home/$UNAME/.bashrc && \
-#    chown -R $UNAME /home/$UNAME && \
-#    echo su -l $UNAME -s /bin/bash >> /root/.bashrc
-
