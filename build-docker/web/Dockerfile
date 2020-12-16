@@ -10,6 +10,11 @@ ARG GID
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+ENV PATH /opt/conda/bin:$PATH
+
+RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificates git
+
 # Add optional and essential packages
 RUN apt update && apt install -y software-properties-common
 RUN apt-get update && apt-get install -y make cmake gcc nano vim wget git unzip iputils-ping locales mlocate

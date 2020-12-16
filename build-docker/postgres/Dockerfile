@@ -1,5 +1,6 @@
 FROM kartoza/postgis:12.0
-# FROM d-registry.jrc.it:5000/public/postgis:12.0
+#FROM d-prd-registry.jrc.it/kartoza/postgis:12.1
+
 ADD ./build-docker/postgres/pg_hba.conf /etc/postgresql/12/main/
 RUN chown postgres:postgres /etc/postgresql/12/main/pg_hba.conf
 RUN chown postgres.postgres /var/log/postgresql
