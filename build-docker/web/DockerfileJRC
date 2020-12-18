@@ -20,7 +20,7 @@ ARG ftp_proxy=http://10.168.209.72:8012
 ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
 ARG DEBIAN_FRONTEND=noninteractive
 
-ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+#ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 #ENV PATH /opt/conda/bin:$PATH
 
 # Add optional and essential packages
@@ -61,6 +61,7 @@ RUN updatedb
 
 # Add GDAL from conda-forge -> gdal contains gdal-bin libgdal-dev
 RUN conda update conda
+RUN conda install python=3.7
 RUN conda install conda-forge::gdal
 # Add mapscript from conda
 RUN conda install -c mc_ mapscript
