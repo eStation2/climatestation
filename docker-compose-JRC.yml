@@ -3,6 +3,7 @@ version: '3.5'
 services:
 
   web:
+    env_file: .env
     build:
       context: ./build-docker/web/
       dockerfile: DockerfileJRC
@@ -34,6 +35,7 @@ services:
     - ./log/mapserver:/var/log/apache2
 
   postgres:
+    env_file: .env
     build:
       context: ./
       dockerfile: ./build-docker/postgres/DockerfileJRC
