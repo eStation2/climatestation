@@ -128,6 +128,7 @@ Ext.define("climatestation.view.system.systemsettings",{
         }];
 
         var systemsettingsstore  = Ext.data.StoreManager.lookup('SystemSettingsStore');
+
         // var systemsettingsrecord = systemsettingsstore.getModel().load(0, {
         //     scope: me,
         //     failure: function(record, operation) {
@@ -156,90 +157,91 @@ Ext.define("climatestation.view.system.systemsettings",{
         var dockedItems =  [{
             dock: 'bottom',
             xtype: 'toolbar',
-            items : [{
-                text: climatestation.Utils.getTranslation('createsystemreport'), // 'Create System Report',
-                scope: me,
-                hidden:  hiddenForWindowsVersion,
-                iconCls: 'far fa-download royalblue',
-                style: { color: 'royalblue' },
-                scale: 'medium',
-                disabled: false,
-                handler: function () {
-                    // if (!Ext.fly('app-upload-frame')) {
-                    //     var body = Ext.getBody();
-                    //     var downloadFrame = body.createChild({
-                    //         tag: 'iframe',
-                    //         cls: 'x-hidden',
-                    //         id: 'app-upload-frame',
-                    //         name: 'uploadframe'
-                    //     });
-                    //
-                    //     var downloadForm = body.createChild({
-                    //         tag: 'form',
-                    //         cls: 'x-hidden',
-                    //         id: 'app-upload-form',
-                    //         target: 'app-upload-frame'
-                    //     });
-                    // }
-
-                    if (!Ext.fly('frmExportDummy')) {
-                        var frm = document.createElement('form');
-                        frm.id = 'frmExportDummy';
-                        frm.name = frm.id;
-                        frm.className = 'x-hidden';
-                        document.body.appendChild(frm);
-                    }
-
-                    Ext.Ajax.request({
-                        method: 'POST',
-                        url: 'systemsettings/systemreport',
-                        isUpload: true,
-                        form: Ext.fly('frmExportDummy'),
-                        success: function(response, opts){
-                            var result = Ext.JSON.decode(response.responseText);
-                            if (!result.success){
-                                console.info(response.status);
-                               // Ext.toast({ html: 'Download system report', title: 'System report', width: 200, align: 't' });
-                            }
-                        },
-                        failure: function(response, opts) {
-                            console.info(response.status);
-                        }
-                    });
-                }
-            },{
-                text: climatestation.Utils.getTranslation('createinstallreport'), // 'Create Install Report',
-                scope:me,
-                hidden:  hiddenForWindowsVersion,
-                iconCls: 'far fa-download royalblue',
-                style: { color: 'royalblue' },
-                scale: 'medium',
-                disabled: false,
-                handler: function(){
-                    if (!Ext.fly('frmExportDummy')) {
-                        var frm = document.createElement('form');
-                        frm.id = 'frmExportDummy';
-                        frm.name = id;
-                        frm.className = 'x-hidden';
-                        document.body.appendChild(frm);
-                    }
-                   Ext.Ajax.request({
-                        method: 'GET',
-                        url: 'systemsettings/installreport',
-                        isUpload: true,
-                        form: Ext.fly('frmExportDummy'),
-                        success: function(response, opts){
-                            //var result = Ext.JSON.decode(response.responseText);
-                            //if (result.success){
-                            //    Ext.toast({ html: 'Download install report', title: 'Install report', width: 200, align: 't' });
-                            //}
-                        },
-                        failure: function(response, opts) {
-                            console.info(response.status);
-                        }
-                    });
-                }
-            },'->',{
+            items : [
+            //{     text: climatestation.Utils.getTranslation('createsystemreport'), // 'Create System Report',
+            //     scope: me,
+            //     hidden:  hiddenForWindowsVersion,
+            //     iconCls: 'far fa-download royalblue',
+            //     style: { color: 'royalblue' },
+            //     scale: 'medium',
+            //     disabled: false,
+            //     handler: function () {
+            //         // if (!Ext.fly('app-upload-frame')) {
+            //         //     var body = Ext.getBody();
+            //         //     var downloadFrame = body.createChild({
+            //         //         tag: 'iframe',
+            //         //         cls: 'x-hidden',
+            //         //         id: 'app-upload-frame',
+            //         //         name: 'uploadframe'
+            //         //     });
+            //         //
+            //         //     var downloadForm = body.createChild({
+            //         //         tag: 'form',
+            //         //         cls: 'x-hidden',
+            //         //         id: 'app-upload-form',
+            //         //         target: 'app-upload-frame'
+            //         //     });
+            //         // }
+            //
+            //         if (!Ext.fly('frmExportDummy')) {
+            //             var frm = document.createElement('form');
+            //             frm.id = 'frmExportDummy';
+            //             frm.name = frm.id;
+            //             frm.className = 'x-hidden';
+            //             document.body.appendChild(frm);
+            //         }
+            //
+            //         Ext.Ajax.request({
+            //             method: 'POST',
+            //             url: 'systemsettings/systemreport',
+            //             isUpload: true,
+            //             form: Ext.fly('frmExportDummy'),
+            //             success: function(response, opts){
+            //                 var result = Ext.JSON.decode(response.responseText);
+            //                 if (!result.success){
+            //                     console.info(response.status);
+            //                    // Ext.toast({ html: 'Download system report', title: 'System report', width: 200, align: 't' });
+            //                 }
+            //             },
+            //             failure: function(response, opts) {
+            //                 console.info(response.status);
+            //             }
+            //         });
+            //     }
+            // },{
+            //     text: climatestation.Utils.getTranslation('createinstallreport'), // 'Create Install Report',
+            //     scope:me,
+            //     hidden:  hiddenForWindowsVersion,
+            //     iconCls: 'far fa-download royalblue',
+            //     style: { color: 'royalblue' },
+            //     scale: 'medium',
+            //     disabled: false,
+            //     handler: function(){
+            //         if (!Ext.fly('frmExportDummy')) {
+            //             var frm = document.createElement('form');
+            //             frm.id = 'frmExportDummy';
+            //             frm.name = id;
+            //             frm.className = 'x-hidden';
+            //             document.body.appendChild(frm);
+            //         }
+            //        Ext.Ajax.request({
+            //             method: 'GET',
+            //             url: 'systemsettings/installreport',
+            //             isUpload: true,
+            //             form: Ext.fly('frmExportDummy'),
+            //             success: function(response, opts){
+            //                 //var result = Ext.JSON.decode(response.responseText);
+            //                 //if (result.success){
+            //                 //    Ext.toast({ html: 'Download install report', title: 'Install report', width: 200, align: 't' });
+            //                 //}
+            //             },
+            //             failure: function(response, opts) {
+            //                 console.info(response.status);
+            //             }
+            //         });
+            //     }
+            // },
+                '->',{
                 text: climatestation.Utils.getTranslation('resettofactorysettings'), // 'Reset to factory settings',
                 scope:me,
                 iconCls: 'far fa-undo orange',    // 'apply_globals-icon',
@@ -308,86 +310,88 @@ Ext.define("climatestation.view.system.systemsettings",{
 
         me.formItems = [{
             margin:'0 15 5 0',
-            items: [{
-                xtype: 'fieldset',
-                title: me.fieldset_title_system_settings,
-                collapsible:false,
-                height:'800',
-                defaults: {
-                    width: 350,
-                    labelWidth: 100
-                },
-                items: [{
-                    xtype: 'fieldset',
-                    hidden:  hiddenForWindowsVersion,
-                    title: '',
-                    collapsible:false,
-                    padding: 5,
-                    defaults: {
-                        labelWidth: 100,
-                        layout: 'hbox'
-                    },
-                    items:[{
-                        xtype: 'container',
-                        items: [{
-                            id: 'type_of_install',
-                            name: 'type_of_install',
-                            bind: '{system_setting.type_installation}',
-                            xtype: 'displayfield',
-                            fieldLabel: me.form_fieldlabel_type_of_install,
-                            fieldStyle: 'font-weight: bold;'
-                        }]
-                    },{
-                        xtype: 'container',
-                        items: [{
-                            id: 'role',
-                            name: 'role',
-                            bind: '{system_setting.role}',
-                            xtype: 'displayfield',
-                            fieldLabel: me.form_fieldlabel_role,
-                            fieldStyle: 'font-weight: bold;',
-                            flex: 2.2
-                        },{
-                            xtype: 'button',
-                            id: 'modify-role-btn',
-                            hidden: true,
-                            text: climatestation.Utils.getTranslation('modify'),    // 'Modify',
-                            flex: 0.8,
-                            iconCls: 'far fa-pencil-square-o',
-                            style: { color: 'white' },
-                            // glyph: 'xf055@FontAwesome',
-                            //scale: 'medium',
-                            scope:me,
-                            handler: function(){
-                                var PCRoleAdminWin = new climatestation.view.system.PCRoleAdmin({
-                                    params: {
-                                        currentrole: Ext.getCmp('role').getValue()
-                                    }
-                                });
-                                PCRoleAdminWin.show();
-                            }
-                        }]
-                    }]
-                },{
-                    xtype: 'fieldset',
-                    title: '',
+            items: [
+                // xtype: 'fieldset',
+                // title: me.fieldset_title_system_settings,
+                // collapsible:false,
+                // height:'800',
+                // defaults: {
+                //     width: 350,
+                //     labelWidth: 100
+                // },
+                // items: [{
+                //     xtype: 'fieldset',
+                //     hidden:  hiddenForWindowsVersion,
+                //     title: '',
+                //     collapsible:false,
+                //     padding: 5,
+                //     defaults: {
+                //         labelWidth: 100,
+                //         layout: 'hbox'
+                //     },
+                //     items:[{
+                //         xtype: 'container',
+                //         items: [{
+                //             id: 'type_of_install',
+                //             name: 'type_of_install',
+                //             bind: '{system_setting.type_installation}',
+                //             xtype: 'displayfield',
+                //             fieldLabel: me.form_fieldlabel_type_of_install,
+                //             fieldStyle: 'font-weight: bold;'
+                //         }]
+                //     },{
+                //         xtype: 'container',
+                //         items: [{
+                //             id: 'role',
+                //             name: 'role',
+                //             bind: '{system_setting.role}',
+                //             xtype: 'displayfield',
+                //             fieldLabel: me.form_fieldlabel_role,
+                //             fieldStyle: 'font-weight: bold;',
+                //             flex: 2.2
+                //         },{
+                //             xtype: 'button',
+                //             id: 'modify-role-btn',
+                //             hidden: true,
+                //             text: climatestation.Utils.getTranslation('modify'),    // 'Modify',
+                //             flex: 0.8,
+                //             iconCls: 'far fa-pencil-square-o',
+                //             style: { color: 'white' },
+                //             // glyph: 'xf055@FontAwesome',
+                //             //scale: 'medium',
+                //             scope:me,
+                //             handler: function(){
+                //                 var PCRoleAdminWin = new climatestation.view.system.PCRoleAdmin({
+                //                     params: {
+                //                         currentrole: Ext.getCmp('role').getValue()
+                //                     }
+                //                 });
+                //                 PCRoleAdminWin.show();
+                //             }
+                //         }]
+                //     }]
+                // },{
+
+                {   xtype: 'fieldset',
+                    title: me.fieldset_title_system_settings,
                     collapsible:false,
                     padding: 10,
                     defaults: {
+                        width: 350,
                         labelWidth: 100,
                         layout: 'hbox'
                     },
                     items:[{
-                        xtype: 'container',
-                       items:[{
-                           id: 'current_mode',
-                           hidden:  hiddenForWindowsVersion,
-                           name: 'current_mode',
-                           bind: '{system_setting.current_mode}',
-                           xtype: 'displayfield',
-                           fieldLabel: me.form_fieldlabel_current_mode,
-                           fieldStyle:'font-weight: bold;',
-                           flex: 2.2
+                       //  xtype: 'container',
+                       // items:[{
+                           // id: 'current_mode',
+                           // hidden:  true, // hiddenForWindowsVersion,
+                           // name: 'current_mode',
+                           // bind: '{system_setting.current_mode}',
+                           // xtype: 'displayfield',
+                           // fieldLabel: me.form_fieldlabel_current_mode,
+                           // fieldStyle:'font-weight: bold;',
+                           // flex: 2.2
                         //},{
                         //    xtype: 'button',
                         //    text: climatestation.Utils.getTranslation('modify'),    // 'Modify',
@@ -405,9 +409,9 @@ Ext.define("climatestation.view.system.systemsettings",{
                         //        });
                         //        PCModeAdminWin.show();
                         //    }
-                        }]
-                    },{
-                       xtype: 'container',
+                        // }]
+                    // },{
+                        xtype: 'container',
                         items:[{
                            id: 'active_version',
                            name: 'active_version',
@@ -419,7 +423,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                            flex: 2
                         },{
                             xtype: 'button',
-                            hidden:  hiddenForWindowsVersion,
+                            hidden:  true, // hiddenForWindowsVersion,
                             text: climatestation.Utils.getTranslation('modify'),    // 'Modify',
                             flex: 1,
                             iconCls: 'far fa-edit',
@@ -440,7 +444,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                             }
                         }]
                     },{
-                        xtype: 'container',
+                       xtype: 'container',
                        items:[{
                             id: 'thema',
                             name: 'thema',
@@ -468,7 +472,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                             }
                         }]
                     },{
-                        xtype: 'container',
+                       xtype: 'container',
                        items:[{
                            id: 'loglevel',
                            name: 'loglevel',
@@ -506,7 +510,6 @@ Ext.define("climatestation.view.system.systemsettings",{
                 //        labelWidth: 100,
                 //        layout: 'hbox'
                 //    }
-                }]
             },{
                 xtype: 'fieldset',
                 title: me.fieldset_title_proxy_settings,
@@ -555,6 +558,7 @@ Ext.define("climatestation.view.system.systemsettings",{
                 }]
             }]
         },{
+            margin:'0 15 5 0',
             items: [{
                 xtype: 'fieldset',
                 title: me.fieldset_title_path_settings,
@@ -570,8 +574,8 @@ Ext.define("climatestation.view.system.systemsettings",{
                    name: 'base_dir',
                    bind: '{system_setting.base_dir}',
                    xtype: 'displayfield',
-                   fieldLabel: me.form_fieldlabel_base_dir,
-                   style:'font-weight: bold;',
+                   fieldLabel: 'Code ' + me.form_fieldlabel_base_dir,
+                   style: 'font-weight: bold;',
                    allowBlank: false
                 },{
                    id: 'base_tmp_dir',
@@ -598,15 +602,15 @@ Ext.define("climatestation.view.system.systemsettings",{
                    fieldLabel: me.form_fieldlabel_ingest_dir,
                    style:'font-weight: bold;',
                    allowBlank: false
-                },{
-                   id: 'static_data_dir',
-                   name: 'static_data_dir',
-                   hidden:  hiddenForWindowsVersion,
-                   bind: '{system_setting.static_data_dir}',
-                   xtype: 'textfield',
-                   fieldLabel: me.form_fieldlabel_static_data_dir,
-                   style:'font-weight: bold;',
-                   allowBlank: false
+                // },{
+                //    id: 'static_data_dir',
+                //    name: 'static_data_dir',
+                //    hidden:  hiddenForWindowsVersion,
+                //    bind: '{system_setting.static_data_dir}',
+                //    xtype: 'textfield',
+                //    fieldLabel: me.form_fieldlabel_static_data_dir,
+                //    style:'font-weight: bold;',
+                //    allowBlank: false
                 },{
                     xtype: 'container',
                     width: 600,

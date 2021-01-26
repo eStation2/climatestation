@@ -1,2 +1,58 @@
 $tool-glyph-font-size: 18px;
 $tool-size: 20px;
+
+//--------------------------------------------------------
+// Create classes for full-size responsive items
+
+.big-100 {
+    @include responsivecolumn-item(100%);
+}
+
+.big-80 {
+    @include responsivecolumn-item(80%);
+}
+
+.big-70 {
+    @include responsivecolumn-item(70%);
+}
+
+.big-60 {
+    @include responsivecolumn-item(60%);
+}
+
+.big-50 {
+    @include responsivecolumn-item(50%);
+}
+
+.big-40 {
+    @include responsivecolumn-item(40%);
+}
+
+.big-33 {
+    @include responsivecolumn-item(33.33%);
+}
+
+.big-20 {
+    @include responsivecolumn-item(20%);
+}
+
+//--------------------------------------------------------
+// And classes for small-size responsive items
+
+.x-responsivecolumn-small {
+     > .small-100 {
+         @include responsivecolumn-item(100%);
+     }
+
+     > .small-66 {
+         @include responsivecolumn-item(66.66%);
+     }
+
+     > .small-50 {
+         @include responsivecolumn-item(50%);
+     }
+
+     > .small-33 {
+         @include responsivecolumn-item(33.33%);
+     }
+}

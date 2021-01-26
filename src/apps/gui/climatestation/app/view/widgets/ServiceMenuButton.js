@@ -14,7 +14,8 @@ Ext.define("climatestation.view.widgets.ServiceMenuButton",{
     ],
 
     glyph: "xf013@'Font Awesome 5 Free'",   // 'xf013@FontAwesome',
-    scale: 'medium',
+    scale: 'large',
+    ui: 'servicemenubutton',
 
     config: {
         iconCls: 'gray',
@@ -23,6 +24,7 @@ Ext.define("climatestation.view.widgets.ServiceMenuButton",{
         // },
         service: null,
         text: null,
+        textAlign: 'left',
     },
     // handler: null,
 
@@ -32,7 +34,7 @@ Ext.define("climatestation.view.widgets.ServiceMenuButton",{
         me.name =  me.service + 'btn';
 
         me.menu = Ext.create('Ext.menu.Menu', {
-            width: 150,
+            // width: 150,
             margin: '0 0 10 0',
             floating: true,  // usually you want this set to True (default)
             collapseDirection: 'right',

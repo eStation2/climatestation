@@ -973,6 +973,7 @@
 
 #logo{position:relative;z-index:10;min-height:0;padding:2px;background-color:#fff;}
 
+/* for Window component use .x-window-header-title-default */
 .mapview-header .x-panel-header-title-default .x-title-text{
     padding: 2px!important;
     margin: 0px 5px 0px 10px !important;
@@ -981,7 +982,7 @@
     white-space: unset!important;
     text-align: left !important;
 }
-
+/* for Window component use .x-window-header-title-default */
 .graphview-header .x-panel-header-title-default .x-title-text{
     padding: 2px!important;
     margin: 0px 5px 0px 10px !important;

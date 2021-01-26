@@ -192,3 +192,18 @@ $main-menu-glyph-color: dynamic(#ADB3B8);
         $icon-size: 28px,
         $padding: 0px
 );
+
+@include extjs-button-large-ui(
+        $ui: 'servicemenubutton',
+        $color: #919191,
+        //$glyph-color: #fff,
+        $background-color: #ECECEC,
+        $border-width: 0,
+        $inner-border-width: 0,
+        $inner-border-width-pressed: 0,
+        $inner-border-width-focus-pressed: 0,
+        //$color: $neutral-medium-dark-color,
+        $font-size: 14px,
+        $icon-size: 28px,
+        $padding: 16px
+);

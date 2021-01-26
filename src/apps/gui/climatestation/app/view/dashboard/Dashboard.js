@@ -11,9 +11,13 @@ Ext.define("climatestation.view.dashboard.Dashboard",{
     xtype  : 'dashboard-main',
 
     requires: [
+        'Ext.ux.layout.ResponsiveColumn',
         'climatestation.Utils',
         'climatestation.view.dashboard.DashboardController',
-        'climatestation.view.dashboard.DashboardModel'
+        'climatestation.view.dashboard.DashboardModel',
+        'climatestation.view.dashboard.Services',
+        'climatestation.view.dashboard.ServerStatusInfo',
+        'climatestation.view.dashboard.DatasetInformation'
     ],
 
     name:'dashboard-panel',
@@ -28,14 +32,16 @@ Ext.define("climatestation.view.dashboard.Dashboard",{
 
     store: 'dashboard',
 
-    layout: {
-        type: 'hbox'
-        // pack: 'start'
-        // ,align: 'stretch'
-    },
+    layout: 'responsivecolumn',
+
+    // layout: {
+    //     type: 'hbox'
+    //     // pack: 'start'
+    //     ,align: 'stretch'
+    // },
     frame: false,
     border: false,
-    bodyPadding: '20 30 30 30',
+    bodyPadding: '15 0 15 15',
 
     initComponent: function () {
         // var pcs_container;
@@ -45,12 +51,12 @@ Ext.define("climatestation.view.dashboard.Dashboard",{
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [
-            '->', ' ', ' ', ' ', ' ', {
-                xtype: 'tbtext',
-                reference: 'dashboardtitle',
-                text: '<span class="dashboard-header-title-style">' + climatestation.Utils.getTranslation('mesa_full_estation') + '</span>',
-                cls: 'dashboard-header-style'
-            },
+            // '->', ' ', ' ', ' ', ' ', {
+            //     xtype: 'tbtext',
+            //     reference: 'dashboardtitle',
+            //     text: '<span class="dashboard-header-title-style">' + climatestation.Utils.getTranslation('mesa_full_estation') + '</span>',
+            //     cls: 'dashboard-header-style'
+            // },
             '->',
             {
                 xtype: 'button',
@@ -64,6 +70,51 @@ Ext.define("climatestation.view.dashboard.Dashboard",{
             }]
         });
 
+        me.items = [
+            {
+                xtype: 'dashboard-server-status-info',
+                userCls: 'big-80 small-66'
+            },
+            {
+                xtype: 'dashboard-services',
+                // 60% width when viewport is big enough,
+                // 100% when viewport is small
+                userCls: 'big-20 small-33'
+            },
+            {
+                xtype: 'dashboard-datasetinfo',
+                userCls: 'big-100 small-100',
+            }
+            // {
+            //     xtype: 'panel',
+            //     title: 'PANEL 6',
+            //     userCls: 'big-40 small-100',
+            //     layout: {
+            //         type: 'hbox',
+            //         align: 'stretch'
+            //     },
+            //     bodyPadding: 15,
+            //     height: 320,
+            //     items: [
+            //         {
+            //             xtype: 'component',
+            //             flex: 1,
+            //             cls: 'top-info-container',
+            //             html: '<div class="inner"><span class="x-fa fa-chart-pie"></span><span class="dashboard-analytics-percentage"> 25% </span>server load</div>',
+            //             padding: '15 10 10 0'
+            //         },
+            //         {
+            //             xtype: 'component',
+            //             flex: 1,
+            //             cls: 'top-info-container',
+            //             html: '<div class="inner"><span class="x-fa fa-user"></span><span class="dashboard-analytics-percentage"> 156 </span> online users</div>',
+            //             padding: '15 10 10 0'
+            //         }
+            //     ]
+            // }
+        ];
+
+
         // me.tools = [
         //     {
         //         type: 'refresh',
@@ -73,30 +124,30 @@ Ext.define("climatestation.view.dashboard.Dashboard",{
         //     }
         // ]
 
-        me.pcs_container = new Ext.container.Container({
-            id: 'pcs_container',
-            name: 'pcs_container',
-            reference: 'pcs_container',
-            layout: {
-                type: 'hbox',
-                pack: 'start',
-                align: 'stretch'
-            },
-            width: 1200,
-            height: 500,
-            defaults: {
-                titleAlign: 'center',
-                frame: true,
-                border: false,
-                bodyPadding: 10
-            }
-        });
+        // me.pcs_container = new Ext.container.Container({
+        //     id: 'pcs_container',
+        //     name: 'pcs_container',
+        //     reference: 'pcs_container',
+        //     layout: {
+        //         type: 'hbox',
+        //         pack: 'start',
+        //         align: 'stretch'
+        //     },
+        //     width: 1200,
+        //     height: 500,
+        //     defaults: {
+        //         titleAlign: 'center',
+        //         frame: true,
+        //         border: false,
+        //         bodyPadding: 10
+        //     }
+        // });
+        //
+        // me.items = [
+        //     me.pcs_container,
+        // ];
 
-        me.items = [
-            me.pcs_container,
-        ];
-
-        me.controller.setupDashboard();
+        // me.controller.setupDashboard();
 
         me.callParent();
     }
