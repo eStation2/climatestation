@@ -70,6 +70,22 @@ class TestDatasets(unittest.TestCase):
     def test_class(self):
         self.assertIsInstance(Dataset(**self.kwargs), Dataset)
 
+    def test_get_filenames_over_a_period(self):
+        kwargs = {'product_code': "vgt-dmp",
+                  'version': 'V2.0',
+                  'sub_product_code': "dmp",
+                  'mapset': 'SPOTV-Africa-1km'
+                  }
+        dataset = Dataset(**kwargs)
+
+        fromdate = datetime.date(1981, 1, 1)    # '19810101'
+        todate = datetime.date(2016, 1, 20)    # '20160120'
+
+        regex = dataset.get_regex_from_range(fromdate, todate)
+        filenames = dataset.get_filenames(regex)
+
+        self.assertEqual(36, 36)
+
     def test_class_no_product(self):
         kwargs = {'product_code': "---prod---", 'sub_product_code': "---subprod---", 'mapset': '---mapset---'}
         # The dataset class was modified not to raise an exception, rather returning object with empty fields.

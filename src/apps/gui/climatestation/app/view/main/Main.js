@@ -33,7 +33,7 @@ Ext.define('climatestation.view.main.Main', {
 
         me.listeners = {
             afterrender: function(){
-                me.controller.doCardNavigation('analysismain');
+                me.controller.doCardNavigation('dashboardmain');
             }
         };
 
@@ -51,13 +51,13 @@ Ext.define('climatestation.view.main.Main', {
                 itemId: 'dashboardmain',
                 reference: 'dashboardmain',
                 scrollable: true,
-                layout : 'center',
+                // layout : 'center',
                 bodyCls:'dashboard-panel-body',
                 listeners: {
                    activate: function (dashboardcard) {
-                       if (Ext.isObject(dashboardcard.down('panel[id=dashboardpc2]'))){
-                            dashboardcard.down('panel[id=dashboardpc2]').getController().checkStatusServices();
-                       }
+                       // if (Ext.isObject(dashboardcard.down('panel[id=dashboardpc2]'))){
+                       //      dashboardcard.down('panel[id=dashboardpc2]').getController().checkStatusServices();
+                       // }
                        // console.info(me.lookupReference('header-section-title'));
                        me.lookupReference('header-section-title').setText(climatestation.Utils.getTranslation('Dashboard'));
                    }

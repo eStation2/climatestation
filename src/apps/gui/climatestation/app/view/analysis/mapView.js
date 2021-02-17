@@ -1215,42 +1215,42 @@ Ext.define("climatestation.view.analysis.mapView",{
             }
 
             ,activate: function () {
-                var objectsShown = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_')).pressed;
-                var legendShown = me.lookupReference('legendbtn_'+me.id.replace(/-/g,'_')).pressed;
-                var mapLegendObj = me.lookupReference('product-legend_' + me.id.replace(/-/g,'_')),
-                    titleObj = me.lookupReference('title_obj_' + me.id),
-                    disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
-                    logoObj = me.lookupReference('logo_obj_' + me.id),
-                    scalelineObj = me.lookupReference('scale-line_' + me.id),
-                    opacityslider = me.lookupReference('opacityslider_' + me.id.replace(/-/g,'_')),
-                    zoomFactorBtn = me.lookupReference('zoomFactorBtn_' + me.id.replace(/-/g, '_'));
-
-                if (me.onMoveHideShowObjects){
-                    me.suspendEvent('activate');
-                    if (objectsShown){
-                        titleObj.show();
-                        disclaimerObj.show();
-                        logoObj.show();
-                    }
-                    if (legendShown){
-                        mapLegendObj.show();
-                    }
-                    if (me.productcode !== '') {
-                        opacityslider.show();
-                    }
-                    zoomFactorBtn.show();
-                    scalelineObj.show();
-
-                    if (!opacityslider.hidden) {
-                        opacityslider.setPosition(me.getWidth() - 42, 155);
-                        // opacityslider.doConstrain();
-                    }
-
-                    zoomFactorBtn.setPosition(me.getWidth() - 42, 120);
-                    me.resumeEvent('activate');
-                }
-
-                me.onMoveHideShowObjects = false;
+                // var objectsShown = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_')).pressed;
+                // var legendShown = me.lookupReference('legendbtn_'+me.id.replace(/-/g,'_')).pressed;
+                // var mapLegendObj = me.lookupReference('product-legend_' + me.id.replace(/-/g,'_')),
+                //     titleObj = me.lookupReference('title_obj_' + me.id),
+                //     disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
+                //     logoObj = me.lookupReference('logo_obj_' + me.id),
+                //     scalelineObj = me.lookupReference('scale-line_' + me.id),
+                //     opacityslider = me.lookupReference('opacityslider_' + me.id.replace(/-/g,'_')),
+                //     zoomFactorBtn = me.lookupReference('zoomFactorBtn_' + me.id.replace(/-/g, '_'));
+                //
+                // if (me.onMoveHideShowObjects){
+                //     me.suspendEvent('activate');
+                //     if (objectsShown){
+                //         titleObj.show();
+                //         disclaimerObj.show();
+                //         logoObj.show();
+                //     }
+                //     if (legendShown){
+                //         mapLegendObj.show();
+                //     }
+                //     if (me.productcode !== '') {
+                //         opacityslider.show();
+                //     }
+                //     zoomFactorBtn.show();
+                //     scalelineObj.show();
+                //
+                //     if (!opacityslider.hidden) {
+                //         opacityslider.setPosition(me.getWidth() - 42, 155);
+                //         // opacityslider.doConstrain();
+                //     }
+                //
+                //     zoomFactorBtn.setPosition(me.getWidth() - 42, 120);
+                //     me.resumeEvent('activate');
+                // }
+                //
+                // me.onMoveHideShowObjects = false;
 
             }
             ,move: function () {
@@ -1267,26 +1267,26 @@ Ext.define("climatestation.view.analysis.mapView",{
                     opacityslider = me.lookupReference('opacityslider_' + me.id.replace(/-/g,'_')),
                     zoomFactorBtn = me.lookupReference('zoomFactorBtn_' + me.id.replace(/-/g, '_'));
 
-                if (!opacityslider.hidden) {
-                    opacityslider.hide();
-                }
-
-                zoomFactorBtn.hide();
-
-                if (!mapLegendObj.hidden) {
-                    mapLegendObj.hide();
-                }
-                if (!titleObj.hidden) {
-                    titleObj.hide();
-                }
-                if (!disclaimerObj.hidden) {
-                    disclaimerObj.hide();
-                }
-                if (!logoObj.hidden) {
-                    logoObj.hide();
-                }
-
-                scalelineObj.hide();
+                // if (!opacityslider.hidden) {
+                //     opacityslider.hide();
+                // }
+                //
+                // zoomFactorBtn.hide();
+                //
+                // if (!mapLegendObj.hidden) {
+                //     mapLegendObj.hide();
+                // }
+                // if (!titleObj.hidden) {
+                //     titleObj.hide();
+                // }
+                // if (!disclaimerObj.hidden) {
+                //     disclaimerObj.hide();
+                // }
+                // if (!logoObj.hidden) {
+                //     logoObj.hide();
+                // }
+                //
+                // scalelineObj.hide();
 
                 me.onMoveHideShowObjects = false;
 

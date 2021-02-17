@@ -33,7 +33,7 @@ Ext.define('climatestation.view.widgets.ServiceMenuButtonController', {
                         });
                     }
                     // menuitem.up().up().fireEvent('click', this);
-                    menuitem.up().up().up().up().getController().checkStatusServices(menuitem.up().up());
+                    menuitem.up().up().up().getController().checkStatusServices(menuitem.up().up());
                 }
             },
             failure: function(response, opts) {

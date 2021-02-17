@@ -15,29 +15,30 @@ Ext.define('climatestation.view.analysis.workspaceController', {
         var me = this.getView();
         var mapViewWindows = me.query('mapview-window');
         var tsGraphWindows = me.query('timeserieschart-window');
-        // var gridview = me.lookupReference('gridview');
+        var gridview = me.lookupReference('gridview');
 
         if (btn.pressed) {
             btn.setIconCls('fas fa-th green');
+            gridview.show();
 
-            me.gridoptions = {
-                column: 8,
-                minRow: 4, // don't collapse when empty
-                // cellHeight: 70,
-                disableOneColumnMode: true,
-                float: false,
-                alwaysShowResizeHandle: false,
-                margin: 5,
-                minWidth:'613px',
-                minHeight:'415px',
-                placeholderClass: 'grid-stack-placeholder', // <- default value
-                placeholderText: '',
-              // dragIn: '.sidebar .grid-stack-item', // class that can be dragged from outside
-              // dragInOptions: { revert: 'invalid', scroll: false, appendTo: 'body', helper: 'clone' }, // clone
-              // removable: '.trash', // drag-out delete class
-              // removeTimeout: 100,
-                acceptWidgets: function(el) { return true; } // function example, else can be simple: true | false | '.someClass' value
-            };
+            // me.gridoptions = {
+            //     column: 8,
+            //     minRow: 4, // don't collapse when empty
+            //     // cellHeight: 70,
+            //     disableOneColumnMode: true,
+            //     float: false,
+            //     alwaysShowResizeHandle: false,
+            //     margin: 5,
+            //     minWidth:'613px',
+            //     minHeight:'415px',
+            //     placeholderClass: 'grid-stack-placeholder', // <- default value
+            //     placeholderText: '',
+            //   // dragIn: '.sidebar .grid-stack-item', // class that can be dragged from outside
+            //   // dragInOptions: { revert: 'invalid', scroll: false, appendTo: 'body', helper: 'clone' }, // clone
+            //   // removable: '.trash', // drag-out delete class
+            //   // removeTimeout: 100,
+            //     acceptWidgets: function(el) { return true; } // function example, else can be simple: true | false | '.someClass' value
+            // };
 
             // me.griditems = [
             //     {x: 0, y: 0, width: 2, height: 2, content: '<div id="gridcell_'+me.id+'">adfasd</div>'},
@@ -89,22 +90,22 @@ Ext.define('climatestation.view.analysis.workspaceController', {
                 grid.removeWidget(this.parentNode.parentNode)
             }
 
-            me.grids = GridStack.initAll(me.gridoptions);
-            console.info(me.grids);
-            // me.grids[0].load(me.griditems);
-
-            me.grids.forEach(function(grid){
-                console.info(grid.el.id);
-                if (grid.el.id === me.gridstackElementID){
-                    me.grid = grid
-                    console.info(grid);
-                }
-            })
+            // me.grids = GridStack.initAll(me.gridoptions);
+            // console.info(me.grids);
+            // // me.grids[0].load(me.griditems);
+            //
+            // me.grids.forEach(function(grid){
+            //     console.info(grid.el.id);
+            //     if (grid.el.id === me.gridstackElementID){
+            //         me.grid = grid
+            //         console.info(grid);
+            //     }
+            // })
 
             Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
                 // console.info(mapview_window);
                 console.info(me.grid);
-                addWidget(me.grid, mapview_window);
+                // addWidget(me.grid, mapview_window);
 
                 // mapview_window.setFloating(false);
                 // mapview_window.setDragable(false);
@@ -123,7 +124,7 @@ Ext.define('climatestation.view.analysis.workspaceController', {
 
             Ext.Object.each(tsGraphWindows, function(id, tsgraph_window, thisObj) {
                 console.info(tsgraph_window);
-                addWidget(me.grid, tsgraph_window);
+                // addWidget(me.grid, tsgraph_window);
 
                 // tsgraph_window.setFloating(false);
                 // tsgraph_window.setDragable(false);
