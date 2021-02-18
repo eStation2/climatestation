@@ -16,6 +16,8 @@ services:
     image: "climatestation/web:1.0"
     ports:
     - 8080:80
+    - 8899:8899
+    - 9999:9999
     restart: unless-stopped
     volumes:
     - ./log/web:/var/log/apache2
