@@ -3,25 +3,26 @@ version: '3.8'
 services:
 
   web:
-    env_file: ./.env
+    env_file:
+      - ./dev-compose-settings.env
     build:
       context: ./build-docker/web/
-      dockerfile: Dockerfile
+      dockerfile: DockerfileDEV
     container_name: web
     #links:
     #  - postgres
     #environment:
-    #  - PYTHONPATH=/var/www/climatestation/
-    #  - PROJ_LIB=/opt/conda/share/proj/
-    image: "prd_climatestation/web:1.0"
+    #  - PYTHONPATH=${PYTHONPATH}
+    #  - PROJ_LIB=${PROJ_LIB}
+    image: "climatestation/web:1.0"
     ports:
     - 8080:80
-    - 8899:8899
-    - 9999:9999
+    # - 8899:8899
+    # - 9999:9999
     restart: unless-stopped
-    #privileged: true
+    # privileged: true
     volumes: 
-    #- /var/run/docker.sock:/var/run/docker.sock:rw
+    # - /var/run/docker.sock:/var/run/docker.sock:rw
     - ./log/web:/var/log/apache2
     - ./src:/var/www/climatestation:rw
     - ${DATA_VOLUME}:/data:rw
@@ -33,14 +34,15 @@ services:
       context: ./build-docker/mapserver/
       dockerfile: Dockerfile
     container_name: mapserver
-    image: "prd_climatestation/mapserver:1.0"
+    image: "climatestation/mapserver:1.0"
     restart: unless-stopped
     volumes:
     - ./log/mapserver:/var/log/apache2
     # - /data/mapserver/cgi-bin:/usr/lib/cgi-bin:rw
 
   postgres:
-    env_file: ./.env
+    env_file:
+      - ./dev-compose-settings.env
     build:
       context: ./
       dockerfile: ./build-docker/postgres/Dockerfile
@@ -50,38 +52,32 @@ services:
       POSTGRES_USER: "estation"
       POSTGRES_PASS: "mesadmin"
       POSTGRES_DBNAME: "estationdb"
-      # SINGLE_DB: "estationdb"
       POSTGRES_PORT: "5432"
       DEFAULT_ENCODING: "UTF8"
       DEFAULT_COLLATION: "en_US.UTF-8"
       DEFAULT_CTYPE: "en_US.UTF-8"
-      # POSTGRES_MULTIPLE_EXTENSIONS: "postgis,adminpack,postgis_topology"
       POSTGRES_MULTIPLE_EXTENSIONS: "postgis,adminpack"
       POSTGRES_TEMPLATE_EXTENSIONS: "true"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
       WAL_SIZE: "4GB"
       MIN_WAL_SIZE: "2048MB"
       WAL_SEGSIZE: "1024"
       MAINTAINANCE_WORK_MEM: "128MB"
+      COMPOSE_HTTP_TIMEOUT: "200"
       DB_VERSION: "101"
-    image: "prd_climatestation/postgis:12"
+    image: "climatestation/postgis:12"
     ports:
     - 5432:5432
     restart: unless-stopped
-    #privileged: true
+    # privileged: true
     volumes:
     - ${CS_VOLUME}/db_dump:/climatestation/db_dump:rw
     - ./src:/var/www/climatestation:rw
     - ./log/postgres:/var/log/climatestation:rw
-    - ./postgresql:/var/lib/postgresql:rw
-
-    # - /var/run/docker.sock:/var/run/docker.sock:rw
-    # - ./build-docker/postgres/setup_estationdb.sh:/docker-entrypoint-initdb.d/setup_estationdb.sh
-    # - ./src/database/dbInstall/products_dump_structure_only.sql:/docker-entrypoint-initdb.d/products_dump_structure_only.sql
-    # - ./src/database/dbInstall/init_update_cs_db.sql:/docker-entrypoint-initdb.d/init_update_cs_db.sql
-    # - cs-database-volume:/var/lib/postgresql:rw
+    - cs-docker-postgresql12-volume:/var/lib/postgresql:rw
+    # - ./postgresql:/var/lib/postgresql:rw
+    # - "/var/run/docker.sock:/var/run/docker.sock"-
 
 # create an external docker volume: docker volume create --name cs-docker-postgresql12-volume -d local
-#volumes:
-#  cs-docker-postgresql12-volume:
-#    external: true
+volumes:
+  cs-docker-postgresql12-volume:
+    external: true

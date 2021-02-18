@@ -574,45 +574,45 @@ Ext.define("climatestation.view.analysis.workspace",{
             bodyPadding: 0
         };
         me.items = [{
-            xtype: 'dashboard',
-            reference: 'gridview',
-            hidden: true,
-            stateful: !1,
-            columnWidths: [0.25, 0.25, 0.25],
-            parts: {
-                mapView: {
-                    viewTemplate: {
-                        // title: 'Map',
-                        // items: []
-                        items: [{
-                            xtype: 'mapview-window'
-                        }]
-                    }
-                },
-                graphView: {
-                    viewTemplate: {
-                        // title: 'Graph',
-                        // items: []
-                        items: [{
-                            xtype: 'timeserieschart-window'
-                        }]
-                    }
-                }
-            },
-            defaultContent: [{
-                type: 'mapView',
-                columnIndex: 0,
-                rowIndex: 0
-            },{
-                type: 'mapView',
-                columnIndex: 1,
-                rowIndex: 0
-            },{
-                type: 'graphView',
-                columnIndex: 1,
-                rowIndex: 0
-            }]
-        }, {
+        //     xtype: 'dashboard',
+        //     reference: 'gridview',
+        //     hidden: true,
+        //     stateful: !1,
+        //     columnWidths: [0.25, 0.25, 0.25],
+        //     parts: {
+        //         mapView: {
+        //             viewTemplate: {
+        //                 // title: 'Map',
+        //                 // items: []
+        //                 items: [{
+        //                     xtype: 'mapview-window'
+        //                 }]
+        //             }
+        //         },
+        //         graphView: {
+        //             viewTemplate: {
+        //                 // title: 'Graph',
+        //                 // items: []
+        //                 items: [{
+        //                     xtype: 'timeserieschart-window'
+        //                 }]
+        //             }
+        //         }
+        //     },
+        //     defaultContent: [{
+        //         type: 'mapView',
+        //         columnIndex: 0,
+        //         rowIndex: 0
+        //     },{
+        //         type: 'mapView',
+        //         columnIndex: 1,
+        //         rowIndex: 0
+        //     },{
+        //         type: 'graphView',
+        //         columnIndex: 1,
+        //         rowIndex: 0
+        //     }]
+        // }, {
             xtype: 'timeserieschartselection',
             // id: 'timeserieschartselection'+me.id,
             reference: 'timeserieschartselection'+me.id,

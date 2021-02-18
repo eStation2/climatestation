@@ -708,6 +708,6 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
 
     }
     ,onClose: function(win, ev) {
-        Ext.data.StoreManager.lookup('ProductsStore').load();
+        // Ext.data.StoreManager.lookup('ProductsStore').load();
     }
 });

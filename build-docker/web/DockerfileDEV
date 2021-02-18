@@ -74,12 +74,28 @@ RUN a2enmod headers rewrite proxy wsgi
 RUN service apache2 restart
 WORKDIR /var/www/climatestation
 
+# Pre-compile bytecode for faster startup.
+# Compile installed code:
+# RUN python -c "import compileall; compileall.compile_path(maxlevels=10)"
+# Compile code in a directory:
+# RUN python -m compileall yourpackage/
+
+
 #CMD ["python", "-c", "import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces(version=1)"]
 #CMD ["python", "-u", "./resources/libs_python/my_server.py", "127.0.0.1", "8899", "9999"]
+
+#ADD wait-for-it.sh /root/wait-for-it.sh
+#RUN chmod 0775 /root/wait-for-it.sh
 
 ADD docker-entrypoint.sh /root/docker-entrypoint.sh
 RUN chmod 0775 /root/docker-entrypoint.sh
 
-# CMD apache2ctl -D FOREGROUND
-ENTRYPOINT ["/root/docker-entrypoint.sh"]
-EXPOSE 80 8899 9999
+# For debugging
+# ENV PYTHONFAULTHANDLER=1
+
+CMD apache2ctl -D FOREGROUND
+#ENTRYPOINT ["/root/docker-entrypoint.sh"]
+#EXPOSE 80 8899 9999
+#CMD ["/root/wait-for-it.sh", "postgres:5432 -s -t 60 -- python database/dbInstall/install_update_db.py "]
+
+

@@ -42,7 +42,7 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
         // focusOnToFront: false
     },
 
-    bufferedRenderer: true,
+    bufferedRenderer: false,
     scrollable: true,
     collapsible: false,
     suspendLayout: false,

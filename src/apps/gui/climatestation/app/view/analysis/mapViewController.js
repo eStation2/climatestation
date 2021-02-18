@@ -460,7 +460,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
         }
 
         if (climatestation.Utils.objectExists(me.productsensor) && me.productsensor.trim() != '' && climatestation.Utils.objectExists(me.productname) && me.productname.trim() != '') {
-            mapviewTitle = productdateHTML + ' - ' + me.productsensor + ' - ' + me.productname + '<BR>' + productcodetitle + versiontitle;    // + mapsetcodeHTML
+            mapviewTitle = productdateHTML + ' - ' + me.productsensor + ' - ' + me.productname + productcodetitle + versiontitle;    // + mapsetcodeHTML
         }
 // console.info(mapviewTitle);
         if (mapviewTitle != ''){

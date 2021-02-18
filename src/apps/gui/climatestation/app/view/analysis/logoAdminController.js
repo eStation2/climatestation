@@ -30,8 +30,7 @@ Ext.define('climatestation.view.analysis.logoAdminController', {
     ,addLogo: function(){
         // Create a new layer record and pass it. With the bind the store will automaticaly saved (through CRUD) on the server!
         var logosgridstore  = Ext.data.StoreManager.lookup('LogosStore');
-        var newLogoRecord = new climatestation.model.Logo(
-            {
+        var newLogoRecord = new climatestation.model.Logo({
                 'logo_id': 'newlogo',
                 'logo_filename': '',
                 'logo_description': '',
@@ -43,8 +42,7 @@ Ext.define('climatestation.view.analysis.logoAdminController', {
                 'src': '',
                 'width': '',
                 'height': ''
-            }
-        );
+        });
         //layersgridstore.add(newLayerRecord);
 
         var fileUploadWin = new Ext.Window({
@@ -89,9 +87,9 @@ Ext.define('climatestation.view.analysis.logoAdminController', {
                     ,msgTarget: 'side'
                     ,allowBlank: false
                     ,anchor: '100%'
-                    ,buttonText: ''
+                    ,buttonText: ' '
                     ,buttonConfig: {
-                        iconCls: 'far fa-folder-open-o'
+                        iconCls: 'far fa-folder-open'
                     }
                 }],
                 buttons: [{
@@ -119,7 +117,10 @@ Ext.define('climatestation.view.analysis.logoAdminController', {
                                     logosgridstore.load();
 
                                     fileUploadWin.close();
-                                }
+                                },
+                                failure: function(fp, operation) {
+                                    //console.info('failure');
+                                },
                             });
                         }
                         else {
@@ -159,7 +160,8 @@ Ext.define('climatestation.view.analysis.logoAdminController', {
 
     ,deleteLogo: function(grid, rowIndex, row){
         var record = grid.getStore().getAt(rowIndex);
-        if (record.get('deletable')){
+        var user = climatestation.getUser();
+        if ((record.get('deletable')) || (climatestation.Utils.objectExists(user) && user.userlevel === 1)){
             Ext.Msg.show({
                 title: climatestation.Utils.getTranslation('deletelogoquestion'),     // 'Delete logo?',
                 message: climatestation.Utils.getTranslation('deletelogoquestion2') + ' "' + record.get('logo_filename') + '"?',     // Are you sure you want to delete the logo?

@@ -16,4 +16,4 @@ TABLESPACE pg_default;
 ALTER TABLE products.db_version
     OWNER to estation;
 
-INSERT INTO products.db_version(db_version) VALUES (2200);
+INSERT INTO products.db_version(db_version) VALUES (100);

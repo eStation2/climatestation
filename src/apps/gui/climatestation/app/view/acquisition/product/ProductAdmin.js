@@ -39,7 +39,7 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
     maximizable: false,
 
     // minWidth: 700,
-    width: 700,
+    width: 720,
     height: Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-10 : 650,  // 600,
     maxHeight: Ext.getBody().getViewSize().height,
 
@@ -60,10 +60,10 @@ Ext.define("climatestation.view.acquisition.product.ProductAdmin",{
         me.setTitle('<div class="">' + climatestation.Utils.getTranslation('productadministration') + '</div>');
 
         if ((climatestation.Utils.objectExists(user) && user.userlevel == 1)) {
-           me.width = 700;
+           me.width = 720;
         }
         else {
-           me.width = 610;
+           me.width = 625;
         }
 
         me.listeners = {

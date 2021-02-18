@@ -1,7 +1,7 @@
 
 Ext.define("climatestation.view.analysis.timeseriesChartView",{
-    // extend: "Ext.panel.Panel",
-    extend: "Ext.window.Window",
+    extend: "Ext.panel.Panel",
+    // extend: "Ext.window.Window",
     controller: "analysis-timeserieschartview",
     viewModel: {
         type: "analysis-timeserieschartview"
