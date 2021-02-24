@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.5'
 
 services:
 
@@ -13,7 +13,7 @@ services:
     #environment:
     #  - PYTHONPATH=/var/www/climatestation/
     #  - PROJ_LIB=/opt/conda/share/proj/
-    image: "prd_climatestation/web:1.0"
+    image: "climatestation/web:1.0"
     ports:
     - 8080:80
     - 8899:8899
@@ -25,19 +25,18 @@ services:
     - ./log/web:/var/log/apache2
     - ./src:/var/www/climatestation:rw
     - ${DATA_VOLUME}:/data:rw
-    - ${CS_VOLUME}:/climatestation:rw
-    - ${TMP_VOLUME}:/tmp/climatestation:rw
+    - ${DATA_VOLUME}/static_data:/data/static_data:rw
+    - /tmp/climatestation:/tmp/climatestation:rw
 
   mapserver:
     build:
       context: ./build-docker/mapserver/
       dockerfile: Dockerfile
     container_name: mapserver
-    image: "prd_climatestation/mapserver:1.0"
+    image: "climatestation/mapserver:1.0"
     restart: unless-stopped
     volumes:
     - ./log/mapserver:/var/log/apache2
-    # - /data/mapserver/cgi-bin:/usr/lib/cgi-bin:rw
 
   postgres:
     env_file: ./.env
@@ -64,13 +63,13 @@ services:
       WAL_SEGSIZE: "1024"
       MAINTAINANCE_WORK_MEM: "128MB"
       DB_VERSION: "101"
-    image: "prd_climatestation/postgis:12"
+    image: "climatestation/postgis:12"
     ports:
     - 5432:5432
     restart: unless-stopped
     #privileged: true
     volumes:
-    - ${CS_VOLUME}/db_dump:/climatestation/db_dump:rw
+    - ${DATA_VOLUME}/static_data/db_dump:/data/static_data/db_dump:rw
     - ./src:/var/www/climatestation:rw
     - ./log/postgres:/var/log/climatestation:rw
     - ./postgresql:/var/lib/postgresql:rw

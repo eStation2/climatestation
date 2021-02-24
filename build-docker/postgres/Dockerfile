@@ -37,8 +37,8 @@ ENV PGPASSFILE=/home/postgres/.pgpass
 #ADD ./build-docker/postgres/postgres-docker-entrypoint.sh /postgres-docker-entrypoint.sh
 #RUN chmod 0775 /postgres-docker-entrypoint.sh
 
-ADD ./src/database/dbInstall/setup_estationdb.sh /
-RUN chmod 0775 /setup_estationdb.sh
+ADD ./src/database/dbInstall/install_update_db.sh /
+RUN chmod 0775 /install_update_db.sh
 
 # CMD ["bash", "/postgres-docker-entrypoint.sh"]
 

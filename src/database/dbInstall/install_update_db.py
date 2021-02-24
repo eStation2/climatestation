@@ -6,7 +6,7 @@ from docker import Client
 
 def install_update_db():
     c = Client(base_url='unix://var/run/docker.sock')
-    command = ["/setup_estationdb.sh"]
+    command = ["/install_update_db.sh"]
     commandid = c.exec_create('postgres', command)
     response = c.exec_start(commandid)
     return response

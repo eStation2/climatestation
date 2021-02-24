@@ -51,16 +51,24 @@ RUN ln -s /etc/apache2/sites-available/00-default.conf /etc/apache2/sites-enable
 ADD climatestation.conf /etc/apache2/sites-available/climatestation.conf
 RUN ln -s /etc/apache2/sites-available/climatestation.conf /etc/apache2/sites-enabled/climatestation.conf
 
-# SNAP Installation
-#ADD esa-snap_all_unix_7_0.sh /tmp
-#RUN chmod 755 -R /tmp
-#RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
 
+# Install Java JRE for the Synctool
 RUN mkdir -p /usr/java && chmod 755 -R /usr/java
 ADD jre-8u251-linux-x64.tar.gz /usr/java
 #RUN tar zxvf /usr/java/jre-8u73-linux-x64.tar.gz
+#RUN apt update
+#RUN apt install default-jre
 ENV PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
+
+
+# SNAP Installation
+#ADD esa-snap_all_unix_7_0.sh /tmp
+
+RUN cd /tmp & wget https://download.esa.int/step/snap/8.0/installers/esa-snap_all_unix_8_0.sh
+RUN chmod +x /tmp/esa-snap_all_unix_8_0.sh
+RUN /tmp/esa-snap_all_unix_8_0.sh -q -dir "/usr/local"
+RUN rm /tmp/esa-snap_all_unix_8_0.sh
 
 # Configuring web folder tree
 RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
@@ -69,10 +77,19 @@ ENV PROJ_LIB /opt/conda/share/proj/
 #ENV APACHE_RUN_USER www-data
 #ENV APACHE_RUN_GROUP www-data
 
+# For debugging
+# ENV PYTHONFAULTHANDLER=1
+
 # Enable these Apache modules wsgi
 RUN a2enmod headers rewrite proxy wsgi
 RUN service apache2 restart
 WORKDIR /var/www/climatestation
+
+# Pre-compile bytecode for faster startup.
+# Compile installed code:
+# RUN python -c "import compileall; compileall.compile_path(maxlevels=10)"
+# Compile code in a directory:
+# RUN python -m compileall yourpackage/
 
 #CMD ["python", "-c", "import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces(version=1)"]
 #CMD ["python", "-u", "./resources/libs_python/my_server.py", "127.0.0.1", "8899", "9999"]
