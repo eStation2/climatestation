@@ -196,6 +196,7 @@ $main-menu-glyph-color: dynamic(#ADB3B8);
 @include extjs-button-large-ui(
         $ui: 'servicemenubutton',
         $color: #919191,
+        $arrow-glyph-color: #fff,
         //$glyph-color: #fff,
         $background-color: #ECECEC,
         $border-width: 0,
@@ -203,7 +204,25 @@ $main-menu-glyph-color: dynamic(#ADB3B8);
         $inner-border-width-pressed: 0,
         $inner-border-width-focus-pressed: 0,
         //$color: $neutral-medium-dark-color,
-        $font-size: 14px,
-        $icon-size: 28px,
-        $padding: 16px
+        $line-height: 20px,
+        $font-size: 17px,
+        $icon-size: 32px,
+        $padding: 8px
+);
+
+@include extjs-button-medium-ui(
+        $ui: 'servicemenubutton',
+        $color: #919191,
+        $arrow-glyph-color: #fff,
+        //$glyph-color: #fff,
+        $background-color: #ECECEC,
+        $border-width: 0,
+        $inner-border-width: 0,
+        $inner-border-width-pressed: 0,
+        $inner-border-width-focus-pressed: 0,
+        //$color: $neutral-medium-dark-color,
+        //$line-height: 20px,
+        //$font-size: 13px,
+        //$icon-size: 24px,
+        //$padding: 8px
 );

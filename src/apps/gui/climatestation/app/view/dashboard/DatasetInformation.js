@@ -9,6 +9,7 @@ Ext.define('climatestation.view.dashboard.DatasetInformation', {
 
     requires: [
         'Ext.chart.theme.DefaultGradients',
+        'Ext.chart.PolarChart',
         'climatestation.Utils'
     ],
 

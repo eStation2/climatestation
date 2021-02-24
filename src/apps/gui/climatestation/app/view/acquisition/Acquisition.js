@@ -207,6 +207,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
         }];
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
+            padding: 0,
             items: [{
                 xtype: 'button',
                 id: 'lockunlock',

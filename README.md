@@ -1,7 +1,7 @@
 # Climate Station - Python 3.7.7 in Docker 
 ## Introduction
 
-This installation contains the Climate Station code (from the master branch) converted to Python 3.6 or higher
+This installation contains the Climate Station code (from the master branch) converted to Python 3.7 or higher
 For the database PostgreSQL 12 is used, for which the code had to be adapted to the latest version of SQLAlchemy.
 
 Docker compose is used to create/build three images and run the three services (containers).
@@ -19,7 +19,8 @@ There is one docker-compose.yml file for setting up the three containers.
 
     You should have [Git](https://git-scm.com/downloads) installed. 
     
-    After you installed Git on your computer, open a CMD or Powershell (Windows) or a Terminal (LINUX) and run the following command.
+    After you installed Git on your computer, open a CMD or Powershell (Windows) or a Terminal (LINUX) and 
+    run the following command.
     First CD to the directory where you want to create the clone.
     ```bash
     cd /Develop/

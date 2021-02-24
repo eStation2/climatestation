@@ -490,6 +490,7 @@ class ImportLogo(object):
 
         logosfiledir = es_constants.es2globals['estation2_logos_dir']
         if 'logofilename' in getparams:  # to check if the file-object is created
+            print('Filename passed')
             try:
                 filepath = getparams.logofilename.replace('\\',
                                                           '/')  # replaces the windows-style slashes with linux ones.
@@ -501,11 +502,16 @@ class ImportLogo(object):
                 # Initial new name
                 new_name = os.path.join(logosfiledir, filename).encode('utf-8').decode()
                 new_name_final = logosfiledir + '/' + filename
-
+                print(new_name)
+                print(new_name_final)
                 if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
+                    print('Save new file logo')
                     fout = open(new_name, 'w')  # creates the file where the uploaded file should be stored
+                    print('file opened')
                     fout.write(getparams.logofile)  # .read()  writes the uploaded file to the newly created file.
+                    print('file written')
                     fout.close()  # closes the file, upload complete.
+                    print('file closed')
                 else:  # file exists in <logosfiledir>
                     ii = 1
                     while True:
@@ -522,11 +528,13 @@ class ImportLogo(object):
                 # splits the and chooses the last part (the filename with extension)
                 finalfilename = new_name_final.split('/')[-1]
                 success = True
+                print(finalfilename)
             except:
+                print('exception')
                 success = False
         else:
             success = False
-
+        print(success)
         if success:
             status = '{"success":"true", "filename":"' + finalfilename + '","message":"Logo imported!"}'
         else:

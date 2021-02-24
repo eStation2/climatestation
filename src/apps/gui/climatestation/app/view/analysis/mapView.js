@@ -1,6 +1,6 @@
 Ext.define("climatestation.view.analysis.mapView",{
-    extend: "Ext.panel.Panel",
-    // extend: "Ext.window.Window",
+    // extend: "Ext.panel.Panel",
+    extend: "Ext.window.Window",
     controller: "analysis-mapview",
     viewModel: {
         type: "analysis-mapview"
@@ -52,9 +52,9 @@ Ext.define("climatestation.view.analysis.mapView",{
     border: true,
     bodyBorder: false,
 
-    width: 613,  // 603,
-    height: 415,    // Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-100 : 415,
-    minWidth:613,
+    width: 615,  // 603,
+    height: 615,    // Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-100 : 415,
+    minWidth:615,
     minHeight:415,
     // x: 20,
     // y: 20,
@@ -675,7 +675,7 @@ Ext.define("climatestation.view.analysis.mapView",{
             }
 
             ,afterrender: function () {
-                Ext.util.Observable.capture(me, function(e){console.log('mapView - ' + me.id + ': ' + e);});
+                // Ext.util.Observable.capture(me, function(e){console.log('mapView - ' + me.id + ': ' + e);});
 
                 var mousePositionControl = new ol.control.MousePosition({
                     coordinateFormat: function(coord) {

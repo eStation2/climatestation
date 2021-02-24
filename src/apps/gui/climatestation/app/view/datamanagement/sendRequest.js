@@ -23,7 +23,7 @@ Ext.define("climatestation.view.datamanagement.sendRequest", {
     // constrain: true,
     modal: true,
     closable: true,
-    closeAction: 'destroy', // 'hide',
+    closeAction: 'hide', // 'destroy',
     resizable: true,
     scrollable: true,
     maximizable: false,

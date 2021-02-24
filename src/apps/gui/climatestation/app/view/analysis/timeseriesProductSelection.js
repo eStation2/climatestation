@@ -223,6 +223,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     items: [{
                         tooltip: climatestation.Utils.getTranslation('reference'),
                         getClass: function (v, meta, rec) {
+                            // console.info(rec);
                             if (rec.get('reference') === ' '){
                                 return ''
                             }
@@ -243,7 +244,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                                 grid.getStore().each(function(rec){
                                     //console.info(rec);
                                     rec.set('reference', false);
-                                    if (rec.get('frequency_id') != record.get('frequency_id')){
+                                    if (rec.get('frequency_id') !== record.get('frequency_id')){
                                         rec.set('difference', ' ');
                                     }
                                 });
@@ -270,6 +271,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                     items: [{
                         tooltip: climatestation.Utils.getTranslation('difference'),
                         getClass: function (v, meta, rec) {
+                            console.info(rec);
                             if (rec.get('difference') === ' '){
                                 return ''
                             }
@@ -287,7 +289,7 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                             if (!record.get('difference')){
                                 grid.getStore().each(function(rec){
                                     rec.set('difference', false);
-                                    if (rec.get('frequency_id') != record.get('frequency_id')){
+                                    if (rec.get('frequency_id') !== record.get('frequency_id')){
                                         rec.set('reference', ' ');
                                     }
                                 });

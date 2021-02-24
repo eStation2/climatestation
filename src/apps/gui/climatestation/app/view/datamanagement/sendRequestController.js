@@ -272,6 +272,7 @@ Ext.define('climatestation.view.datamanagement.sendRequestController', {
         //    failure: function ( result, request) {}
         //});
     }
+
     ,onCancelClick: function () {
         this.getView().close();
         // Ext.destroy(this.getView());

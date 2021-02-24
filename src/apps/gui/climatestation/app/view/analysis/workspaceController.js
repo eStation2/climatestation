@@ -392,7 +392,6 @@ Ext.define('climatestation.view.analysis.workspaceController', {
         var opengraphs = [];
 
         // me.workspacename = me.title;
-        // console.info(me);
         // console.info(me.workspaceid);
         Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
             openmaps.push(mapview_window.getController().getMapSettings());
@@ -401,6 +400,7 @@ Ext.define('climatestation.view.analysis.workspaceController', {
         Ext.Object.each(tsGraphWindows, function(id, tsgraph_window, thisObj) {
             opengraphs.push(tsgraph_window.getController().getGraphSettings());
         });
+
         me.workspacename = me.title;
         params.userid = climatestation.getUser().userid;
         params.workspaceid = me.saveAs ? -1 : me.workspaceid;
@@ -465,12 +465,14 @@ Ext.define('climatestation.view.analysis.workspaceController', {
         newLayerAdminWin.show();
         // this.getView().lookupReference('analysismain_layersbtn').disable();
     }
+
     ,logosAdmin: function(){
         var newLogosAdminWin = new climatestation.view.analysis.logoAdmin();
         this.getView().add(newLogosAdminWin);
         newLogosAdminWin.show();
         // this.getView().lookupReference('analysismain_logosbtn').disable();
     }
+
     ,legendAdmin: function(){
         var newLegendAdminWin = new climatestation.view.analysis.legendAdmin();
         this.getView().add(newLegendAdminWin);

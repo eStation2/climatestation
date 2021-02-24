@@ -14,7 +14,7 @@ Ext.define("climatestation.view.widgets.ServiceMenuButton",{
     ],
 
     glyph: "xf013@'Font Awesome 5 Free'",   // 'xf013@FontAwesome',
-    scale: 'large',
+
     ui: 'servicemenubutton',
 
     config: {
@@ -25,6 +25,7 @@ Ext.define("climatestation.view.widgets.ServiceMenuButton",{
         service: null,
         text: null,
         textAlign: 'left',
+        scale: 'medium'
     },
     // handler: null,
 

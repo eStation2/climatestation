@@ -72,18 +72,18 @@ Ext.define("climatestation.view.dashboard.Dashboard",{
 
         me.items = [
             {
+                xtype: 'dashboard-datasetinfo',
+                userCls: 'big-100 small-100',
+            },
+            {
                 xtype: 'dashboard-server-status-info',
-                userCls: 'big-80 small-66'
+                userCls: 'big-50 small-33'
             },
             {
                 xtype: 'dashboard-services',
                 // 60% width when viewport is big enough,
                 // 100% when viewport is small
                 userCls: 'big-20 small-33'
-            },
-            {
-                xtype: 'dashboard-datasetinfo',
-                userCls: 'big-100 small-100',
             }
             // {
             //     xtype: 'panel',
