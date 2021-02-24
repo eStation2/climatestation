@@ -26,8 +26,8 @@ ADD ./src/database/dbInstall/create_table_db_version.sql /var/tmp/
 #ADD ./build-docker/postgres12/estation2-docker-entrypoint.sh /root/estation2-docker-entrypoint.sh
 #RUN chmod 0775 /root/estation2-docker-entrypoint.sh
 
-ADD ./build-docker/postgres/setup_estationdb.sh /root/setup_estationdb.sh
-RUN chmod 0775 /root/setup_estationdb.sh
+ADD ./src/database/dbInstall/install_update_db.sh /
+RUN chmod 0775 /install_update_db.sh
 
 # ENTRYPOINT presumes the container runs as an executable and runs the command before the container starts!
 # The postgres container restarts continiously!
