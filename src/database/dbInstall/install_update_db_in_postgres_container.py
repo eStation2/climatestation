@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from docker import Client
 from lib.python import es_logging as log
 

@@ -22,6 +22,7 @@ ARG PATH="/root/miniconda3/bin:${PATH}"
 
 # Add GDAL from conda-forge -> gdal contains gdal-bin libgdal-dev
 RUN conda update conda
+RUN conda install python=3.7
 RUN conda install conda-forge::gdal
 # Add mapscript from conda
 RUN conda install -c mc_ mapscript

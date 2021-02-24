@@ -1,4 +1,3 @@
-#!/usr/bin/python
 #
 #   Re-project WBD-GEE monthly to WD-GEE-ECOWAS-AVG mapset
 #

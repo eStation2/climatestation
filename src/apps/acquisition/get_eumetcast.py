@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 #
 #	purpose: Define the get_eumetcast service
 #	author:  M.Clerici & Jurriaan van 't Klooster
