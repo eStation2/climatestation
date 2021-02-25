@@ -12,8 +12,11 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Add optional and essential packages
 RUN apt update && apt install -y software-properties-common
-RUN apt-get update && apt-get install -y make cmake gcc nano vim wget git unzip iputils-ping locales mlocate
-RUN apt-get update && apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev
+RUN apt-get update --fix-missing && \
+    apt-get install -y make cmake gcc nano vim wget git unzip iputils-ping locales mlocate && \
+    apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev && \
+    apt-get install -y bzip2 libglib2.0-0 libxext6 libsm6 libxrender1  && \
+    apt-get clean
 # To have locate work
 RUN updatedb
 
