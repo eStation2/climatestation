@@ -68,10 +68,10 @@ ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 # SNAP Installation
 #ADD esa-snap_all_unix_7_0.sh /tmp
 
-RUN cd /tmp & wget https://download.esa.int/step/snap/8.0/installers/esa-snap_all_unix_8_0.sh
-RUN chmod +x /tmp/esa-snap_all_unix_8_0.sh
-RUN /tmp/esa-snap_all_unix_8_0.sh -q -dir "/usr/local"
-RUN rm /tmp/esa-snap_all_unix_8_0.sh
+#RUN cd /tmp & wget https://download.esa.int/step/snap/8.0/installers/esa-snap_all_unix_8_0.sh
+#RUN chmod +x /tmp/esa-snap_all_unix_8_0.sh
+#RUN /tmp/esa-snap_all_unix_8_0.sh -q -dir "/usr/local"
+#RUN rm /tmp/esa-snap_all_unix_8_0.sh
 
 # Configuring web folder tree
 RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
