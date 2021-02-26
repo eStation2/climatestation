@@ -26,7 +26,7 @@ services:
     - ./src:/var/www/climatestation:rw
     - ${DATA_VOLUME}:/data:rw
     - ${DATA_VOLUME}/static_data:/data/static_data:rw
-    - /tmp/climatestation:/tmp/climatestation:rw
+    - ${TMP_VOLUME}:/tmp/climatestation:rw
 
   mapserver:
     build:
@@ -78,7 +78,7 @@ services:
     # - ./build-docker/postgres/setup_estationdb.sh:/docker-entrypoint-initdb.d/setup_estationdb.sh
     # - ./src/database/dbInstall/products_dump_structure_only.sql:/docker-entrypoint-initdb.d/products_dump_structure_only.sql
     # - ./src/database/dbInstall/init_update_cs_db.sql:/docker-entrypoint-initdb.d/init_update_cs_db.sql
-    # - cs-database-volume:/var/lib/postgresql:rw
+    # - cs-docker-postgresql12-volume:/var/lib/postgresql:rw
 
 # create an external docker volume: docker volume create --name cs-docker-postgresql12-volume -d local
 #volumes:
