@@ -102,4 +102,4 @@ RUN chmod 0775 /root/docker-entrypoint.sh
 
 # CMD apache2ctl -D FOREGROUND
 ENTRYPOINT ["/root/docker-entrypoint.sh"]
-EXPOSE 80 8899 9999
+EXPOSE 80

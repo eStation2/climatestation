@@ -30,21 +30,20 @@ mkdir -p /tmp/climatestation/services
 
 chmod 775 -R /data
 
-USER_SETTINGS=/climatestation/settings/user_settings.ini
+USER_SETTINGS=/data/static_data/settings/user_settings.ini
 if [ ! -f "$USER_SETTINGS" ]; then
     echo "$USER_SETTINGS does not exist. Copy from source code."
-    cp /var/www/climatestation/config/install/user_settings.ini /climatestation/settings/
+    cp /var/www/climatestation/config/install/user_settings.ini /data/static_data/settings/
 fi
-SYSTEM_SETTINGS=/climatestation/settings/system_settings.ini
+SYSTEM_SETTINGS=/data/static_data/settings/system_settings.ini
 if [ ! -f "$SYSTEM_SETTINGS" ]; then
     echo "$SYSTEM_SETTINGS does not exist. Copy from source code."
-    cp /var/www/climatestation/config/install/system_settings.ini /climatestation/settings/
+    cp /var/www/climatestation/config/install/system_settings.ini /data/static_data/settings/
 fi
 
 # Start Impact toolbox
-python apps/impact/Gui/libs_python/my_server.py localhost 8899 9999 &
+# python apps/impact/Gui/libs_python/my_server.py localhost 8899 9999 &
 
 # Start the Climate Station
 apache2ctl -D FOREGROUND
-
 
