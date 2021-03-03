@@ -22,16 +22,17 @@ Ext.define('climatestation.view.main.MainController', {
     },
 
     launchImpact: function(impactWindow) {
+        let impacturl = window.location.protocol + "//" + window.location.host.split(':')[0] + ':8899/IMPACT';
+        console.info(impacturl);
+        if(impactWindow !== null && impactWindow.closed == false ) {
+            alert("Window already open");
+            impactWindow.focus();
+            return impactWindow
 
-                if(impactWindow !== null && impactWindow.closed == false ) {
-                    alert("Window already open");
-                    impactWindow.focus();
-                    return impactWindow
-
-                } else {
-                     return window.open('http://localhost:8899/IMPACT', "IMPACT Toolbox");
-                }
-                // url and port should be taken from configuration file
-                //window.open('http://localhost:8899/IMPACT', "IMPACT Toolbox");
+        } else {
+             return window.open(impacturl, "IMPACT Toolbox");
+        }
+        // url and port should be taken from configuration file
+        //window.open('http://localhost:8899/IMPACT', "IMPACT Toolbox");
     }
 });

@@ -16,12 +16,13 @@ RUN mkdir -p /var/www/climatestation/
 ADD ./build-docker/postgres/.pgpass /home/postgres/
 RUN chmod 0775 -R /home/postgres/
 RUN chown postgres:postgres -R /home/postgres/
+ENV PGPASSFILE=/home/postgres/.pgpass
 
 #USER root
-ADD ./src/database/dbInstall/products_dump_structure_only.sql /var/tmp/
-ADD ./src/database/dbInstall/update_db_structure.sql /var/tmp/
-ADD ./src/database/dbInstall/update_insert_jrc_data.sql /var/tmp/
-ADD ./src/database/dbInstall/create_table_db_version.sql /var/tmp/
+#ADD ./src/database/dbInstall/products_dump_structure_only.sql /var/tmp/
+#ADD ./src/database/dbInstall/update_db_structure.sql /var/tmp/
+#ADD ./src/database/dbInstall/update_insert_jrc_data.sql /var/tmp/
+#ADD ./src/database/dbInstall/create_table_db_version.sql /var/tmp/
 
 #ADD ./build-docker/postgres12/estation2-docker-entrypoint.sh /root/estation2-docker-entrypoint.sh
 #RUN chmod 0775 /root/estation2-docker-entrypoint.sh

@@ -12,8 +12,11 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Add optional and essential packages
 RUN apt update && apt install -y software-properties-common
-RUN apt-get update && apt-get install -y make cmake gcc nano vim wget git unzip iputils-ping locales mlocate
-RUN apt-get update && apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev
+RUN apt-get update --fix-missing && \
+    apt-get install -y make cmake gcc nano vim wget git unzip iputils-ping locales mlocate && \
+    apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev && \
+    apt-get install -y bzip2 libglib2.0-0 libxext6 libsm6 libxrender1  && \
+    apt-get clean
 # To have locate work
 RUN updatedb
 
@@ -65,10 +68,10 @@ ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 # SNAP Installation
 #ADD esa-snap_all_unix_7_0.sh /tmp
 
-RUN cd /tmp & wget https://download.esa.int/step/snap/8.0/installers/esa-snap_all_unix_8_0.sh
-RUN chmod +x /tmp/esa-snap_all_unix_8_0.sh
-RUN /tmp/esa-snap_all_unix_8_0.sh -q -dir "/usr/local"
-RUN rm /tmp/esa-snap_all_unix_8_0.sh
+#RUN cd /tmp & wget https://download.esa.int/step/snap/8.0/installers/esa-snap_all_unix_8_0.sh
+#RUN chmod +x /tmp/esa-snap_all_unix_8_0.sh
+#RUN /tmp/esa-snap_all_unix_8_0.sh -q -dir "/usr/local"
+#RUN rm /tmp/esa-snap_all_unix_8_0.sh
 
 # Configuring web folder tree
 RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
@@ -99,4 +102,4 @@ RUN chmod 0775 /root/docker-entrypoint.sh
 
 # CMD apache2ctl -D FOREGROUND
 ENTRYPOINT ["/root/docker-entrypoint.sh"]
-EXPOSE 80 8899 9999
+EXPOSE 80

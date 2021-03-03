@@ -24,40 +24,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 #ENV PATH /opt/conda/bin:$PATH
 
 # Add optional and essential packages
+RUN apt update && apt install -y software-properties-common
 RUN apt-get update --fix-missing && \
-    apt-get install -y make cmake gcc nano vim unzip iputils-ping locales mlocate && \
-    apt-get install -y build-essential libcurl4-openssl-dev libssl-dev && \
-    apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 git mercurial subversion && \
+    apt-get install -y make cmake gcc nano vim wget git unzip iputils-ping locales mlocate && \
+    apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev && \
+    apt-get install -y bzip2 libglib2.0-0 libxext6 libsm6 libxrender1  && \
     apt-get clean
+# To have locate work
 RUN updatedb
 
-#RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Linux-x86_64.sh -O ~/miniconda.sh && \
-#    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
-#    rm ~/miniconda.sh && \
-#    /opt/conda/bin/conda clean -tipsy && \
-#    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-#    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-#    echo "conda activate base" >> ~/.bashrc && \
-#    find /opt/conda/ -follow -type f -name '*.a' -delete && \
-#    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
-#    /opt/conda/bin/conda clean -afy
-
-# CMD alias python3=/opt/conda/bin/python3.7
-
-#RUN conda create --name climatestation python=3.7 -y
-#RUN conda init bash
-#RUN conda activate climatestation
-#RUN echo "source activate climatestation" > ~/.bashrc
-#ENV PATH /opt/conda/envs/climatestation/bin:$PATH
-
-#ENV PATH="/root/miniconda3/bin:${PATH}"
-#ARG PATH="/root/miniconda3/bin:${PATH}"
-
-#ADD environment.yml /tmp/environment.yml
-#RUN conda env create -f /tmp/environment.yml
-## Pull the environment name out of the environment.yml
-#RUN echo "source activate $(head -1 /tmp/environment.yml | cut -d' ' -f2)" > ~/.bashrc
-#ENV PATH /opt/conda/envs/$(head -1 /tmp/environment.yml | cut -d' ' -f2)/bin:$PATH
+ENV PATH="/root/miniconda3/bin:${PATH}"
+ARG PATH="/root/miniconda3/bin:${PATH}"
 
 # Add GDAL from conda-forge -> gdal contains gdal-bin libgdal-dev
 RUN conda update conda
@@ -68,17 +45,8 @@ RUN conda install -c mc_ mapscript
 # Add GEOS and PROJ from apt-get -> needed for mapscript
 RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin
 
-#RUN add-apt-repository ppa:ubuntugis/ppa -y
-###RUN add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y
-### Add python3-mapscript from above ppa
-#RUN apt-get install -y  python3-mapscript
-
 # Add Apache2 with mod-wsgi
 RUN apt-get update && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi-py3
-RUN service apache2 stop
-# Enable these Apache modules wsgi
-RUN a2dismod wsgi
-RUN a2enmod headers rewrite proxy wsgi
 
 # Install all needed Python packages, listed in the file requirements.txt
 # Some packages depend on setuptools to be installed. the reqiurements.txt does not preserve
@@ -89,11 +57,7 @@ ADD requirements.txt /etc/apache2/sites-available/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install setuptools
 RUN pip install --no-cache-dir -r /etc/apache2/sites-available/requirements.txt
-# RUN pip install --upgrade numpy
-# RUN conda install numpy
-# Install and hook mod_wsgi to apache2
-#RUN pip install mod_wsgi
-#RUN /root/miniconda3/bin/mod_wsgi-express install-module
+RUN pip install --upgrade numpy
 
 ADD 00-default.conf /etc/apache2/sites-available/00-default.conf
 
@@ -104,10 +68,6 @@ RUN ln -s /etc/apache2/sites-available/00-default.conf /etc/apache2/sites-enable
 ADD climatestation.conf /etc/apache2/sites-available/climatestation.conf
 RUN ln -s /etc/apache2/sites-available/climatestation.conf /etc/apache2/sites-enabled/climatestation.conf
 
-# SNAP Installation
-#ADD esa-snap_all_unix_7_0.sh /tmp
-#RUN chmod 755 -R /tmp
-#RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
 
 RUN mkdir -p /usr/java && chmod 755 -R /usr/java
 ADD jre-8u251-linux-x64.tar.gz /usr/java
@@ -115,19 +75,41 @@ ADD jre-8u251-linux-x64.tar.gz /usr/java
 ENV PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 
-#RUN mkdir -p /root/senchacmd && chmod 755 -R /root/senchacmd
-#ADD SenchaCmd-5.1.3.61-linux-x64.run /root/senchacmd
-#RUN apt-get update && apt-get install -y ruby2.5
+# SNAP Installation
+#ADD esa-snap_all_unix_7_0.sh /tmp
+#RUN chmod 755 -R /tmp
+#RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
 
 # Configuring web folder tree
 RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
+ENV PYTHONPATH /var/www/climatestation/
+ENV PROJ_LIB /opt/conda/share/proj/
 #ENV APACHE_RUN_USER www-data
 #ENV APACHE_RUN_GROUP www-data
 
+# RUN service apache2 stop
+# RUN a2dismod wsgi
+# Enable these Apache modules wsgi
+RUN a2enmod headers rewrite proxy wsgi
 RUN service apache2 restart
 WORKDIR /var/www/climatestation
-CMD apache2ctl -D FOREGROUND
-EXPOSE  80
+
+ADD docker-entrypoint.sh /root/docker-entrypoint.sh
+RUN chmod 0775 /root/docker-entrypoint.sh
+
+# For debugging
+# ENV PYTHONFAULTHANDLER=1
+
+ENTRYPOINT ["/root/docker-entrypoint.sh"]
+#CMD apache2ctl -D FOREGROUND
+
+EXPOSE 80
+
+
+
+
+
+
 
 # Pre-compile bytecode for faster startup.
 # Compile installed code:
@@ -144,9 +126,6 @@ EXPOSE  80
 
 #ENTRYPOINT ["/root/docker-entrypoint.sh"]
 
-
-
-
 ## Install OpenJDK-11
 #RUN apt-get update && \
 #    apt-get install -y openjdk-11-jdk && \
@@ -162,7 +141,6 @@ EXPOSE  80
 ## Setup JAVA_HOME -- useful for docker commandline
 #ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 #RUN export JAVA_HOME
-
 
 #ADD pythonpath /pythonpath
 #RUN PYTHONPATH=$(cat /pythonpath);
