@@ -82,7 +82,7 @@ class _ImportData:
             str_exc = 'Unknown File Type: Files with extension .' + ext + ' cannot be handled.'
             raise CustomError(str_exc)
 
-        p0 = './utilities/Climatology/'
+        p0 = './f4p_utilities/Climatology/'
         # p0 = '/cleo02/projects/CLEO/Coherence_Analysis/Climatology_GlobAlbedo/'
         if not os.path.exists(p0):
             os.makedirs(p0)

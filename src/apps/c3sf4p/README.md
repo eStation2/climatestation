@@ -1,1 +1,1 @@
-This directory contains all python code for the C3S-F4P tool.
+/home/cappufa/miniconda3/bin/python/home/cappufa/miniconda3/bin/python/home/cappufa/minicthis (onda3/bin/pythonThis directory contains all python code for the C3S-F4P tool.
