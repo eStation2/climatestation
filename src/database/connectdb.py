@@ -9,6 +9,7 @@ import sys
 import sqlalchemy
 import sqlsoup
 from sqlalchemy.orm import *
+from sqlalchemy.dialects.postgresql import *
 
 from lib.python import es_logging as log
 from config import es_constants

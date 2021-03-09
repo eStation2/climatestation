@@ -964,31 +964,6 @@ class DeleteMapTemplate(object):
         return status
 
 
-class __DeleteMapTemplate(object):
-    def __init__(self):
-        self.lang = "eng"
-        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
-
-    def DELETE(self):
-        getparams = json.loads(web.data())  # get PUT data
-        # getparams = web.input() # get POST data
-        if 'usermaptemplate' in getparams:  # hasattr(getparams, "layer")
-            maptemplatePK = {
-                'userid': getparams['usermaptemplate']['userid'],
-                'templatename': getparams['usermaptemplate']['templatename'],
-            }
-
-            if self.crud_db.delete('map_templates', **maptemplatePK):
-                status = '{"success":"true", "message":"Map Template deleted!"}'
-            else:
-                status = '{"success":false, "message":"An error occured while deleting the Map Template!"}'
-
-        else:
-            status = '{"success":false, "message":"No Map Template info passed!"}'
-
-        return status
-
-
 class SaveMapTemplate(object):
     def __init__(self):
         self.lang = "eng"
@@ -997,68 +972,6 @@ class SaveMapTemplate(object):
     def POST(self):
         params = web.input()
         return webpy_esapp_helpers.saveMapTemplate(params)
-
-
-class __SaveMapTemplate(object):
-    def __init__(self):
-        self.lang = "eng"
-        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
-
-    def POST(self):
-        getparams = web.input()
-        # getparams = json.loads(web.data())  # get PUT data
-
-        createstatus = '{"success":false, "message":"An error occured while saving the Map Template!"}'
-
-        if 'userid' in getparams and 'templatename' in getparams:
-            legendid = getparams['legendid']
-            if getparams['legendid'] == '':
-                legendid = None
-
-            mapTemplate = {
-                'userid': getparams['userid'],
-                'templatename': getparams['templatename'],
-                'mapviewposition': getparams['mapviewPosition'],
-                'mapviewsize': getparams['mapviewSize'],
-                'productcode': getparams['productcode'],
-                'subproductcode': getparams['subproductcode'],
-                'productversion': getparams['productversion'],
-                'mapsetcode': getparams['mapsetcode'],
-                'legendid': legendid,
-                'legendlayout': getparams['legendlayout'],
-                'legendobjposition': getparams['legendObjPosition'],
-                'showlegend': getparams['showlegend'],
-                'titleobjposition': getparams['titleObjPosition'],
-                'titleobjcontent': getparams['titleObjContent'],
-                'disclaimerobjposition': getparams['disclaimerObjPosition'],
-                'disclaimerobjcontent': getparams['disclaimerObjContent'],
-                'logosobjposition': getparams['logosObjPosition'],
-                'logosobjcontent': getparams['logosObjContent'],
-                'showobjects': getparams['showObjects'],
-                'scalelineobjposition': getparams['scalelineObjPosition'],
-                'vectorlayers': getparams['vectorLayers'],
-                'outmask': getparams['outmask'],
-                'outmaskfeature': getparams['outmaskFeature'],
-                'auto_open': getparams['auto_open'],
-                'zoomextent': getparams['zoomextent'],
-                'mapsize': getparams['mapsize'],
-                'mapcenter': getparams['mapcenter']
-            }
-
-            # print getparams
-            if getparams['newtemplate'] == 'true':
-                if self.crud_db.create('map_templates', mapTemplate):
-                    createstatus = '{"success":true, "message":"Map Template created!"}'
-                else:
-                    createstatus = '{"success":false, "message":"Error saving the Map Template! Name already exists!"}'
-            else:
-                if self.crud_db.update('map_templates', mapTemplate):
-                    createstatus = '{"success":true, "message":"Map Template updated!"}'
-
-        else:
-            createstatus = '{"success":false, "message":"No Map Template data given!"}'
-
-        return createstatus
 
 
 class getGraphTemplates(object):
@@ -1688,14 +1601,14 @@ class AssignInternetSource(object):
 
         productinfo = {
             'productcode': getparams['productcode'],
-            'subproductcode': getparams['subproductcode'],
+            # 'subproductcode': getparams['subproductcode'],
             'version': version,
             'data_source_id': getparams['data_source_id'],
             'defined_by': getparams['defined_by'],
             'type': 'INTERNET'
         }
 
-        if self.crud_db.create('product_acquisition_data_source', productinfo):
+        if self.crud_db.create('acquisition', productinfo):
             insertstatus = '{"success":"true", "message":"Internet source assigned!"}'
         else:
             insertstatus = '{"success":false, "message":"An error occured while assigning the internet source!"}'
@@ -1719,14 +1632,14 @@ class AssignEumetcastSource(object):
 
         productinfo = {
             'productcode': getparams['productcode'],
-            'subproductcode': getparams['subproductcode'],
+            # 'subproductcode': getparams['subproductcode'],
             'version': version,
             'data_source_id': getparams['data_source_id'],
             'defined_by': getparams['defined_by'],
             'type': 'EUMETCAST'
         }
 
-        if self.crud_db.create('product_acquisition_data_source', productinfo):
+        if self.crud_db.create('acquisition', productinfo):
             insertstatus = '{"success":"true", "message":"Internet source assigned!"}'
         else:
             insertstatus = '{"success":false, "message":"An error occured while assigning the internet source!"}'
@@ -1745,12 +1658,12 @@ class UnassignProductDataSource(object):
 
         productinfo = {
             'productcode': getparams['productcode'],
-            'subproductcode': getparams['subproductcode'],
+            # 'subproductcode': getparams['subproductcode'],
             'version': getparams['version'],
             'data_source_id': getparams['data_source_id']
         }
 
-        if self.crud_db.delete('product_acquisition_data_source', **productinfo):
+        if self.crud_db.delete('acquisition', **productinfo):
             unassignstatus = '{"success":"true", "message":"Data source unassigned!"}'
         else:
             unassignstatus = '{"success":false, "message":"An error occured while assigning the internet source!"}'
@@ -2957,7 +2870,7 @@ class CreateMapset(object):
                            }
 
             if bboxexists:
-                if self.crud_db.create('mapset_new', mapsetinfo):
+                if self.crud_db.create('mapset', mapsetinfo):
                     message = 'Mapset created ' + bboxstatus
                     createstatus = '{"success":true, "message":"' + message + '"}'
                 else:
@@ -3029,7 +2942,7 @@ class UpdateMapset(object):
                            }
 
             if bboxexists:
-                if self.crud_db.update('mapset_new', mapsetinfo):
+                if self.crud_db.update('mapset', mapsetinfo):
                     message = 'Mapset updated ' + bboxstatus
                     createstatus = '{"success":true, "message":"' + message + '"}'
                 else:
@@ -3053,7 +2966,7 @@ class DeleteMapset(object):
 
             mapsetinfo = {'mapsetcode': getparams['mapsets']['mapsetcode']}
 
-            if self.crud_db.delete('mapset_new', **mapsetinfo):
+            if self.crud_db.delete('mapset', **mapsetinfo):
                 deletetatus = '{"success":true, "message":"Mapset deleted!"}'
             else:
                 deletetatus = '{"success":false, "message":"An error occured while deleting the Mapset!"}'
@@ -4659,7 +4572,7 @@ class UpdateDataAcquisition(object):
     def PUT(self):
         getparams = json.loads(web.data())
         dataacquisitioninfo = {'productcode': getparams['dataacquisitions']['productcode'],
-                               'subproductcode': getparams['dataacquisitions']['subproductcode'],
+                               # 'subproductcode': getparams['dataacquisitions']['subproductcode'],
                                'version': getparams['dataacquisitions']['version'],
                                'data_source_id': getparams['dataacquisitions']['data_source_id'],
                                'defined_by': getparams['dataacquisitions']['defined_by'],
@@ -4667,7 +4580,7 @@ class UpdateDataAcquisition(object):
                                'store_original_data': functions.str_to_bool(getparams['dataacquisitions']['store_original_data'])}
 
         # ToDO: distinguish upodate of activated and store_original_data! Different queries?
-        if self.crud_db.update('product_acquisition_data_source', dataacquisitioninfo):
+        if self.crud_db.update('acquisition', dataacquisitioninfo):
             if getparams['dataacquisitions']['store_original_data']:
                 message = '<b>Activated</b> Store Native for data source <b>' + getparams['dataacquisitions'][
                     'data_source_id'] + '</b></br>' + \

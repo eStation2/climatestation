@@ -235,7 +235,7 @@ FROM products.bbox;
 
 RETURN QUERY SELECT chr(10);
 
-RETURN QUERY SELECT 'SELECT products.update_insert_mapset_new('
+RETURN QUERY SELECT 'SELECT products.update_insert_mapset('
     || 'mapsetcode := ''' || mapsetcode || ''''
     || ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
     || ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
@@ -249,7 +249,7 @@ RETURN QUERY SELECT 'SELECT products.update_insert_mapset_new('
     || ', center_of_pixel:= ' || center_of_pixel
     || ', full_copy := ' || FALSE
     || ' );'  as inserts
-FROM products.mapset_new
+FROM products.mapset
 WHERE mapsetcode in (
         SELECT DISTINCT native_mapset as mapsetcode
         FROM products.datasource_description dd
@@ -656,7 +656,7 @@ FROM products.bbox;
 
 RETURN NEXT cursor6;
 
-OPEN cursor7 FOR SELECT 'SELECT products.update_insert_mapset_new('
+OPEN cursor7 FOR SELECT 'SELECT products.update_insert_mapset('
     || 'mapsetcode := ''' || mapsetcode || ''''
     || ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
     || ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
@@ -670,7 +670,7 @@ OPEN cursor7 FOR SELECT 'SELECT products.update_insert_mapset_new('
     || ', center_of_pixel:= ' || center_of_pixel
     || ', full_copy := ' || FALSE
     || ' );'  as inserts
-FROM products.mapset_new
+FROM products.mapset
 WHERE mapsetcode in (
         SELECT DISTINCT native_mapset as mapsetcode
         FROM products.datasource_description dd

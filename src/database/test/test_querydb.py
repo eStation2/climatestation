@@ -346,6 +346,7 @@ class TestQuerydb(TestCase):
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
+    @unittest.skipIf(True, "DB not yet populated automaically with Users WS - to be updated")
     def test_get_graph_yaxes(self):
         query = "SELECT graph_tpl_id FROM analysis.user_graph_templates where userid = 'jrc_ref' LIMIT 1"
         queryresult = dbschema_analysis.execute(query)
@@ -1046,7 +1047,6 @@ class TestQuerydb(TestCase):
     def test_get_timeseries_subproducts(self):
         params = {
             'productcode': 'fewsnet-rfe',
-            'subproductcode': '10d',
             'version': '2.0'
         }
         result1 = querydb.get_timeseries_subproducts(**params)
@@ -1170,6 +1170,7 @@ class TestQuerydb(TestCase):
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
+    @unittest.skipIf(True, "DB not yet populated automaically with Users WS - to be updated")
     def test_getCreatedUserWorkspace(self):
         query = "SELECT workspacename FROM analysis.user_workspaces where userid = 'jrc_ref' LIMIT 1"
         queryresult = dbschema_analysis.execute(query)
@@ -1283,7 +1284,7 @@ class TestQuerydb(TestCase):
 
     def test_update_ingest_subproduct_info(self):
         subproduct = {'productcode': 'chirps-dekad', 'subproductcode': '10d', 'version': '2.0'}
-        subproductinfo = crud_db_products.read('product', **subproduct)
+        subproductinfo = crud_db_products.read('sub_product', **subproduct)
 
         ingestsubproductinfo = {'productcode': subproductinfo[0]['productcode'],
                                 'version': subproductinfo[0]['version'],
@@ -1291,10 +1292,10 @@ class TestQuerydb(TestCase):
                                 'orig_subproductcode': subproductinfo[0]['subproductcode'],
                                 'descriptive_name': subproductinfo[0]['descriptive_name'] if subproductinfo[0]['descriptive_name'] != 'None' else 'NULL',
                                 'description': subproductinfo[0]['description'] if subproductinfo[0]['description'] != 'None' else 'NULL',
-                                'provider': subproductinfo[0]['provider'] if subproductinfo[0]['provider'] != 'None' else 'NULL',
-                                'category_id': subproductinfo[0]['category_id'] if subproductinfo[0]['category_id'] != 'None' else 'NULL',
+                                # 'provider': subproductinfo[0]['provider'] if subproductinfo[0]['provider'] != 'None' else 'NULL',
+                                # 'category_id': subproductinfo[0]['category_id'] if subproductinfo[0]['category_id'] != 'None' else 'NULL',
                                 'defined_by': subproductinfo[0]['defined_by'] if subproductinfo[0]['defined_by'] != 'None' else 'NULL',
-                                'activated': subproductinfo[0]['activated'],
+                                # 'activated': subproductinfo[0]['activated'],
                                 'frequency_id': subproductinfo[0]['frequency_id'] if subproductinfo[0]['frequency_id'] != 'None' else 'NULL',
                                 'date_format': subproductinfo[0]['date_format'] if subproductinfo[0]['date_format'] != 'None' else 'NULL',
                                 'data_type_id': subproductinfo[0]['data_type_id'] if subproductinfo[0]['data_type_id'] != 'None' else 'NULL',
@@ -1418,7 +1419,7 @@ class TestQuerydb(TestCase):
                 print(result['message'])
 
     def test_update_product_info(self):
-        nativeproduct = {'productcode': 'chirps-dekad', 'subproductcode': 'chirps-dekad_native', 'version': '2.0'}
+        nativeproduct = {'productcode': 'chirps-dekad', 'version': '2.0'}
         nativeproductinfo = crud_db_products.read('product', **nativeproduct)
 
         nativeproductinfo = {'productcode': 'chirps-dekad-test',
