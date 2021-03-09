@@ -14,11 +14,14 @@ USER root
 ARG UID
 ARG GID
 
-ARG http_proxy=http://10.168.209.72:8012
-ARG https_proxy=http://10.168.209.72:8012
-ARG ftp_proxy=http://10.168.209.72:8012
-ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
-ARG DEBIAN_FRONTEND=noninteractive
+ENV http_proxy=http://10.168.209.73:8012
+ENV HTTP_PROXY=http://10.168.209.73:8012
+ENV https_proxy=http://10.168.209.73:8012
+ENV HTTPS_PROXY=http://10.168.209.73:8012
+ENV ftp_proxy=http://10.168.209.73:8012
+ENV FTP_PROXY=http://10.168.209.73:8012
+ENV NO_PROXY="127.0.0.1, 10.169.11.29, 10.169.11.35, 139.191.149.56, localhost, localaddress, localdomain.com, localdomain, jrc.it, jrc.org, jrc.ec.europa.eu, testa.eu, cec.eu.int, cc.cec, jrc.eu, emergency.copernicus.eu, postgres, mapserver"
+ENV DEBIAN_FRONTEND=noninteractive
 
 #ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 #ENV PATH /opt/conda/bin:$PATH
@@ -84,8 +87,8 @@ ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
 ENV PYTHONPATH /var/www/climatestation/
 ENV PROJ_LIB /opt/conda/share/proj/
-#ENV APACHE_RUN_USER www-data
-#ENV APACHE_RUN_GROUP www-data
+# ENV APACHE_RUN_USER www-data
+# ENV APACHE_RUN_GROUP www-data
 
 # RUN service apache2 stop
 # RUN a2dismod wsgi
@@ -100,8 +103,8 @@ RUN chmod 0775 /root/docker-entrypoint.sh
 # For debugging
 # ENV PYTHONFAULTHANDLER=1
 
-ENTRYPOINT ["/root/docker-entrypoint.sh"]
-#CMD apache2ctl -D FOREGROUND
+#ENTRYPOINT ["/root/docker-entrypoint.sh"]
+CMD apache2ctl -D FOREGROUND
 
 EXPOSE 80
 

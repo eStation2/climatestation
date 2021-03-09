@@ -45,11 +45,11 @@ standard_library.install_aliases()
 # Used to detect if called by unittest (for disabling logging)
 # Reference: https://stackoverflow.com/questions/25025928/how-can-a-piece-of-python-code-tell-if-its-running-under-unittest
 def in_unit_test():
-  current_stack = inspect.stack()
-  for stack_frame in current_stack:
-    for program_line in stack_frame[4]:    # This element of the stack frame contains
-      if "unittest" in program_line:       # some contextual program lines
-        return True
+  # current_stack = inspect.stack()
+  # for stack_frame in current_stack:
+  #   for program_line in stack_frame[4]:    # This element of the stack frame contains
+  #     if "unittest" in program_line:       # some contextual program lines
+  #       return True
   return False
 
 if 'check_unittest' not in locals():
@@ -95,7 +95,7 @@ def my_logger(name):
     console_handler = logging.StreamHandler()
 
     if platform == 'win32':
-        # TODO: Pierluigi select the correct replacment
+        # TODO: Pierluigi select the correct replacement
         name = name.replace(':', '_')
 
     file_handler = logging.handlers.RotatingFileHandler(log_dir + name + '.log', maxBytes=50000, backupCount=3)
