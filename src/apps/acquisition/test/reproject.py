@@ -16,10 +16,11 @@ file='0001_NDV.HDF'
 
 # Import third-party modules
 from osgeo.gdalconst import *
-from osgeo import gdal
-from osgeo import osr
+from osgeo import gdal, osr, gdalconst
 from lib.python import mapset
 from config import es_constants
+# Moved here (see CS-81)
+es_constants.ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour
 
 # Open the file
 orig_ds=gdal.Open(dir+file)

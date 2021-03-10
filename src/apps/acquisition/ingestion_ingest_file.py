@@ -64,6 +64,7 @@ if sys.platform == 'win32':
 import fnmatch
 from osgeo import gdal
 from osgeo import osr
+from osgeo import gdalconst
 
 logger = log.my_logger(__name__)
 
@@ -72,6 +73,9 @@ ingest_error_dir = es_constants.ingest_error_dir
 data_dir_out = es_constants.processing_dir
 
 python_version = sys.version_info[0]
+
+# Moved here (see CS-81)
+es_constants.ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour
 
 def ingest_archives_eumetcast(dry_run=False):
 
