@@ -23,15 +23,19 @@ import calendar
 import numpy as NP
 import base64
 import configparser
+import random
 import subprocess
 from subprocess import *
+
 import matplotlib as mpl
 
 mpl.use('Agg')
 mpl.rcParams['savefig.pad_inches'] = 0
 
 from matplotlib import pyplot as plt
-import random
+# It is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory,
+# in particular to speed up the import of Matplotlib and to better support multiprocessing.
+os.environ['MPLCONFIGDIR'] = '/tmp/matplotlib/'
 
 from lib.python import reloadmodules
 from config import es_constants
@@ -270,26 +274,6 @@ def checkCreateSubproductDir(productcode, version):
                 mapsets = querydb.get_product_active_derived_mapsets(productcode=productcode,
                                                                      subproductcode=subproductcode,
                                                                      version=version)
-                for mapset in mapsets:
-                    mapsetcode = mapset['mapsetcode']
-                    subproductdir = functions.set_path_sub_directory(productcode,
-                                                                     subproductcode,
-                                                                     product_type,
-                                                                     version,
-                                                                     mapsetcode)
-                    subproductdir = es_constants.es2globals['processing_dir'] + os.path.sep + subproductdir
-                    functions.check_output_dir(subproductdir)
-
-
-def __checkCreateSubproductDir(productcode, version):
-    subproducts = querydb.get_product_subproducts(productcode=productcode, version=version)
-    mapsets = querydb.get_product_active_mapsets(productcode=productcode, version=version)
-    if hasattr(subproducts, "__len__") and subproducts.__len__() > 0:
-        if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
-            for subproduct in subproducts:
-                # subproduct = functions.row2dict(subproduct)
-                subproductcode = subproduct['subproductcode']
-                product_type = subproduct['product_type']
                 for mapset in mapsets:
                     mapsetcode = mapset['mapsetcode']
                     subproductdir = functions.set_path_sub_directory(productcode,
@@ -2282,64 +2266,6 @@ def getGraphTemplates(params):
     return graphtemplates_json
 
 
-def __getGraphTemplates(params):
-    graphtemplate_dict_all = []
-
-    if 'userid' in params:
-        usergraphtemplates = querydb.get_user_graph_templates(params['userid'])
-        if hasattr(usergraphtemplates, "__len__") and usergraphtemplates.__len__() > 0:
-            for row_dict in usergraphtemplates:
-                # row_dict = functions.row2dict(row)
-
-                graphTemplate = {
-                    'userid': row_dict['userid'],
-                    'graph_tpl_name': row_dict['graph_tpl_name'],
-                    'graphviewposition': row_dict['graphviewposition'],
-                    'graphviewsize': row_dict['graphviewsize'],
-                    'graph_type': row_dict['graph_type'],
-                    'selectedtimeseries': row_dict['selectedtimeseries'],
-                    'yearts': row_dict['yearts'],
-                    'tsfromperiod': row_dict['tsfromperiod'],
-                    'tstoperiod': row_dict['tstoperiod'],
-                    'yearstocompare': row_dict['yearstocompare'],
-                    'tsfromseason': row_dict['tsfromseason'],
-                    'tstoseason': row_dict['tstoseason'],
-                    'wkt_geom': row_dict['wkt_geom'],
-                    'selectedregionname': row_dict['selectedregionname'],
-                    'disclaimerobjposition': row_dict['disclaimerobjposition'],
-                    'disclaimerobjcontent': row_dict['disclaimerobjcontent'],
-                    'logosobjposition': row_dict['logosobjposition'],
-                    'logosobjcontent': row_dict['logosobjcontent'],
-                    'showobjects': row_dict['showobjects'],
-                    'auto_open': row_dict['auto_open']
-                }
-
-                graphtemplate_dict_all.append(graphTemplate)
-
-            graphtemplates_json = json.dumps(graphtemplate_dict_all,
-                                             ensure_ascii=False,
-                                             # encoding='utf-8',
-                                             sort_keys=True,
-                                             indent=4,
-                                             separators=(', ', ': '))
-
-            graphtemplates_json = '{"success":"true", "total":' \
-                                  + str(usergraphtemplates.__len__()) \
-                                  + ',"usergraphtemplates":' + graphtemplates_json + '}'
-
-        else:
-            graphtemplates_json = '{"success":"true", "total":' \
-                                  + str(usergraphtemplates.__len__()) \
-                                  + ',"usergraphtemplates":[]}'
-            # graphtemplates_json = '{"success":true, "error":"No Graph Templates defined for user!"}'
-            # OR RETURN A DEFAULT GRAPH TEMPLATE?????
-
-    else:
-        graphtemplates_json = '{"success":false, "error":"Userid not given!"}'
-
-    return graphtemplates_json
-
-
 def saveGraphTemplate(params):
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
@@ -2445,62 +2371,6 @@ def saveGraphTemplate(params):
                 createstatus = '{"success":true, "message":"Graph Template updated!"}'
             else:
                 createstatus = '{"success":false, "message":"Error updating the Graph Template!"}'
-    else:
-        createstatus = '{"success":false, "message":"No Graph Template data given!"}'
-
-    return createstatus
-
-
-def __saveGraphTemplate(params):
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
-
-    createstatus = '{"success":false, "message":"An error occured while saving the Graph Template!"}'
-
-    if 'userid' in params and 'graph_tpl_name' in params:
-
-        # graphProperties:{"localRefresh": false, "title": "Polygon", "subtitle": 2017, "filename": "Polygon_2017",
-        #                  "graph_title_font_size": "26", "graph_title_font_color": "#000000",
-        #                  "graph_subtitle_font_size": "22", "graph_subtitle_font_color": "#808080",
-        #                  "xaxe_font_size": "22", "xaxe_font_color": "#000000", "legend_title_font_size": "22",
-        #                  "legend_title_font_color": "#000000", "width": "1100", "height": "800"}
-
-        # selectedTimeseries:[{"productcode": "vgt-ndvi", "version": "sv2-pv2.1", "subproductcode": "ndvi-linearx2",
-        #                      "mapsetcode": "SPOTV-Africa-1km", "date_format": "YYYYMMDD", "frequency_id": "e1dekad",
-        #                      "cumulative": false, "difference": false, "reference": false, "colorramp": false,
-        #                      "legend_id": null, "zscore": false}]
-
-        graphTemplate = {
-            'userid': params['userid'],
-            'graph_tpl_name': params['graph_tpl_name'],
-            'graphviewposition': params['graphviewposition'],
-            'graphviewsize': params['graphviewsize'],
-            'graph_type': params['graph_type'],
-            'selectedtimeseries': params['selectedtimeseries'],
-            'yearts': params['yearts'],
-            'tsfromperiod': params['tsfromperiod'],
-            'tstoperiod': params['tstoperiod'],
-            'yearstocompare': params['yearstocompare'],
-            'tsfromseason': params['tsfromseason'],
-            'tstoseason': params['tstoseason'],
-            'wkt_geom': params['wkt_geom'],
-            'selectedregionname': params['selectedregionname'],
-
-            'disclaimerobjposition': params['disclaimerObjPosition'],
-            'disclaimerobjcontent': params['disclaimerObjContent'],
-            'logosobjposition': params['logosObjPosition'],
-            'logosobjcontent': params['logosObjContent'],
-            'showobjects': params['showObjects']
-        }
-
-        # print params
-        if params['newtemplate'] == 'true':
-            if crud_db.create('user_graph_templates', graphTemplate):
-                createstatus = '{"success":true, "message":"Graph Template created!"}'
-            else:
-                createstatus = '{"success":false, "message":"Error saving the Graph Template! Name already exists!"}'
-        else:
-            if crud_db.update('user_graph_templates', graphTemplate):
-                createstatus = '{"success":true, "message":"Graph Template updated!"}'
     else:
         createstatus = '{"success":false, "message":"No Graph Template data given!"}'
 
@@ -4067,354 +3937,6 @@ def classicTimeseries(params):
     return ts_json
 
 
-def __classicTimeseries(params):
-    # params = web.input()
-    yearts = params.yearTS
-    wkt = params.WKT
-    requestedtimeseries = json.loads(params.selectedTimeseries)
-    tsFromPeriod = params.tsFromPeriod
-    tsToPeriod = params.tsToPeriod
-    yearsToCompare = params.yearsToCompare
-    tsFromSeason = params.tsFromSeason
-    tsToSeason = params.tsToSeason
-    showYearInTicks = True
-    data_available = False
-    cumulative = False
-    if params.graphtype == 'cumulative':
-        cumulative = True
-
-    # if isinstance(yearsToCompare, basestring):  # One year passed but is not a list so make it a list.
-    #     # yearsToCompare = list(yearsToCompare)
-    #     yearsToCompare = []
-    #     yearsToCompare.append(getparams.yearsToCompare)
-
-    if tsFromSeason != '' and tsToSeason != '' and yearsToCompare != '':
-        yearsToCompare = json.loads(yearsToCompare)
-        showYearInTicks = False
-        if len(yearsToCompare) == 1:
-            for year in yearsToCompare:
-                from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
-                to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
-                if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                    to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
-
-    elif yearsToCompare != '':
-        yearsToCompare = json.loads(yearsToCompare)
-        showYearInTicks = False
-        if len(yearsToCompare) == 1:
-            for year in yearsToCompare:
-                from_date = datetime.date(int(year), 1, 1)
-                to_date = datetime.date(int(year), 12, 31)
-
-    elif params.yearTS != '':
-        if tsFromSeason != '' and tsToSeason != '':
-            if tsToSeason != '':
-                from_date = datetime.date(int(params.yearTS), int(tsFromSeason[:2]), int(tsFromSeason[3:]))
-                to_date = datetime.date(int(params.yearTS), int(tsToSeason[:2]), int(tsToSeason[3:]))
-                if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                    to_date = datetime.date(int(params.yearTS) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
-            else:
-                from_date = datetime.date(int(params.yearTS), int(tsFromSeason[:2]), int(tsFromSeason[3:]))
-                to_date = datetime.date(int(params.yearTS), 12, 31)
-        else:
-            from_date = datetime.date(int(params.yearTS), 1, 1)
-            to_date = datetime.date(int(params.yearTS), 12, 31)
-        showYearInTicks = False
-
-    elif tsFromPeriod != '' and tsToPeriod != '':
-        from_date = datetime.datetime.strptime(tsFromPeriod, '%Y-%m-%d').date()
-        to_date = datetime.datetime.strptime(tsToPeriod, '%Y-%m-%d').date()
-
-    cum_yaxe = []
-    timeseries = []
-    for timeserie in requestedtimeseries:
-        productcode = timeserie['productcode']
-        subproductcode = timeserie['subproductcode']
-        version = timeserie['version']
-        mapsetcode = timeserie['mapsetcode']
-        date_format = timeserie['date_format']
-
-        product = {"productcode": productcode,
-                   "subproductcode": subproductcode,
-                   "version": version}
-
-        # Set defaults in case no entry exists in the DB
-        aggregate = {'aggregation_type': 'mean',
-                     'aggregation_min': None,
-                     'aggregation_max': None}
-        timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product)
-        for ts_drawprops in timeseries_drawproperties:
-            aggregate = {'aggregation_type': ts_drawprops.aggregation_type,
-                         'aggregation_min': ts_drawprops.aggregation_min,
-                         'aggregation_max': ts_drawprops.aggregation_max}
-
-            # if timeserie['cumulative']:
-            if cumulative:
-                cum_yaxe.append(ts_drawprops.yaxes_id)
-
-        mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
-        product_info = querydb.get_product_out_info(productcode=productcode,
-                                                    subproductcode=subproductcode,
-                                                    version=version)
-
-        if date_format == 'MMDD' and len(yearsToCompare) > 1:
-            year = yearsToCompare[0]
-            showYearInTicks = False
-            from_date = datetime.date(year, 1, 1)
-            to_date = datetime.date(year, 12, 31)
-
-            if tsFromSeason != '' and tsToSeason != '':
-                from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
-                to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
-                if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                    to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
-
-            # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format,
-            #                                         from_date, to_date)
-            # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
-            #         aggregate, mapset_info, product_info, list_files, dates_list]
-            # p = Process(target=getTimeseries, args=args)
-            # p.start()
-            # p.join()
-            # list_values = self.out_queue.get()
-            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
-                                        aggregate)
-
-            data = []
-            for val in list_values:
-                value = []
-                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' \
-                #           + str(val['date'].day) + ')'
-                valdate = functions.unix_time_millis(val['date'])
-                # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
-                value.append(valdate)
-                value.append(val['meanvalue'])
-                data.append(value)
-            if len(data) > 0:
-                data_available = True
-
-            # Set defaults in case no entry exists in the DB
-            ts = {'name': productcode + '-' + version + '-' + subproductcode,
-                  'type': 'line',
-                  'dashStyle': 'Solid',
-                  'lineWidth': 2,
-                  'color': '#000000',
-                  # 'xAxis': str(year),
-                  'yAxis': productcode + ' - ' + version,
-                  'data': data,
-                  'visible': True,
-                  'cumulative': cumulative,  # timeserie['cumulative'],
-                  'difference': timeserie['difference'],
-                  'reference': timeserie['reference']
-                  }
-            for ts_drawprops in timeseries_drawproperties:
-                # print ts_drawprops.color
-                ts = {'name': ts_drawprops.tsname_in_legend,
-                      'type': ts_drawprops.charttype,
-                      'dashStyle': ts_drawprops.linestyle,
-                      'lineWidth': ts_drawprops.linewidth,
-                      'color': ts_drawprops.color.replace("  ", " "),
-                      # 'xAxis': str(year),
-                      'yAxis': ts_drawprops.yaxes_id,
-                      'data': data,
-                      'visible': True,
-                      'cumulative': cumulative,  # timeserie['cumulative'],
-                      'difference': timeserie['difference'],
-                      'reference': timeserie['reference']
-                      }
-            timeseries.append(ts)
-
-        elif len(yearsToCompare) > 1:  # yearsToCompare != '' or
-            # yearsToCompare = json.loads(yearsToCompare)
-            colorAdd = 0
-            colorSubstract = 0
-            for year in yearsToCompare:
-                showYearInTicks = False
-                from_date = datetime.date(int(year), 1, 1)
-                to_date = datetime.date(int(year), 12, 31)
-
-                if tsFromSeason != '' and tsToSeason != '':
-                    from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
-                    to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
-                    if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                        to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
-
-                if ts_drawprops.color[0] == '#':  # Transform HTML HEX color code to RGB
-                    h = ts_drawprops.color.lstrip('#')
-                    rgb = tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
-                    rgb = list(rgb)
-                else:
-                    # print ts_drawprops.color
-                    # rgb = ts_drawprops.color.replace("  ", " ").split(' ')
-                    if functions.isValidRGB(ts_drawprops.color.replace("  ", " ")):
-                        rgb = ts_drawprops.color.replace("  ", " ").split(' ')
-                    else:
-                        # RGB value stored in the database is not correct so define as default value BLACK.
-                        rgb = '0 0 0'.split(' ')
-                # print rgb
-                rgb = list(map(int, rgb))
-                rgb[-1] = rgb[-1] + colorAdd
-                rgb[-2] = rgb[-2] + colorAdd
-                rgb[-3] = rgb[-3] - colorSubstract
-                tsColor = ' '.join([str(i) for i in rgb])
-                colorAdd += 65
-                colorSubstract += 50
-
-                # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode,
-                #                                         date_format, from_date, to_date)
-                # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
-                #         aggregate, mapset_info, product_info, list_files, dates_list]
-                # p = Process(target=getTimeseries, args=args)
-                # p.start()
-                # p.join()
-                # list_values = self.out_queue.get()
-                # self.out_queue.empty()
-                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
-                                            aggregate)
-
-                data = []
-                for val in list_values:
-                    value = []
-                    # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ','
-                    #           + str(val['date'].day) + ')'
-                    valdate = functions.unix_time_millis(val['date'])
-                    # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
-                    value.append(valdate)
-                    value.append(val['meanvalue'])
-                    data.append(value)
-                if len(data) > 0:
-                    data_available = True
-
-                # Set defaults in case no entry exists in the DB
-                ts = {'name': str(year) + ' ' + productcode + '-' + version + '-' + subproductcode,
-                      'type': 'line',
-                      'dashStyle': 'Solid',
-                      'lineWidth': 2,
-                      'color': '#000000',
-                      'xAxis': str(year),
-                      'yAxis': productcode + ' - ' + version,
-                      'data': data,
-                      'visible': True,
-                      'cumulative': cumulative,  # timeserie['cumulative'],
-                      'difference': timeserie['difference'],
-                      'reference': timeserie['reference']
-                      }
-                for ts_drawprops in timeseries_drawproperties:
-                    ts = {'name': str(year) + ' ' + ts_drawprops.tsname_in_legend,
-                          'type': ts_drawprops.charttype,
-                          'dashStyle': ts_drawprops.linestyle,
-                          'lineWidth': ts_drawprops.linewidth,
-                          'color': tsColor,
-                          'xAxis': str(year),
-                          'yAxis': ts_drawprops.yaxes_id,
-                          'data': data,
-                          'visible': True,
-                          'cumulative': cumulative,  # timeserie['cumulative'],
-                          'difference': timeserie['difference'],
-                          'reference': timeserie['reference']
-                          }
-                timeseries.append(ts)
-
-        else:
-            # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format,
-            #                                         from_date, to_date)
-            # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
-            #         aggregate, mapset_info, product_info, list_files, dates_list]
-            # p = Process(target=getTimeseries, args=args)
-            # p.start()
-            # p.join()
-            # list_values = self.out_queue.get()
-            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
-                                        aggregate)
-
-            data = []
-            for val in list_values:
-                value = []
-                # valdate = 'Date.UTC(' + str(val['date'].year) + ',' + str(val['date'].month) + ',' \
-                #           + str(val['date'].day) + ')'
-                valdate = functions.unix_time_millis(val['date'])
-                # valdate = str(val['date'].year) + str(val['date'].month) + str(val['date'].day)
-                value.append(valdate)
-                value.append(val['meanvalue'])
-                data.append(value)
-
-            if len(data) > 0:
-                data_available = True
-
-            # Set defaults in case no entry exists in the DB
-            ts = {'name': productcode + '-' + version + '-' + subproductcode,
-                  'type': 'line',
-                  'dashStyle': 'Solid',
-                  'lineWidth': 2,
-                  'color': '#000000',
-                  'yAxis': productcode + ' - ' + version,
-                  'data': data,
-                  'cumulative': cumulative,  # timeserie['cumulative'],
-                  'difference': timeserie['difference'],
-                  'reference': timeserie['reference']
-                  }
-            for ts_drawprops in timeseries_drawproperties:
-                # print ts_drawprops.color
-                ts = {'name': ts_drawprops.tsname_in_legend,
-                      'type': ts_drawprops.charttype,
-                      'dashStyle': ts_drawprops.linestyle,
-                      'lineWidth': ts_drawprops.linewidth,
-                      'color': ts_drawprops.color.replace("  ", " "),
-                      'yAxis': ts_drawprops.yaxes_id,
-                      'data': data,
-                      'cumulative': cumulative,  # timeserie['cumulative'],
-                      'difference': timeserie['difference'],
-                      'reference': timeserie['reference']
-                      }
-            timeseries.append(ts)
-
-    yaxes = []
-    count = 0
-    timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries)
-    axes = len(timeseries_yaxes)
-    for yaxe in timeseries_yaxes:
-        # count += 1
-        # opposite = "false"
-        # # if axes >= 2 and count % 2 == 0:   # and yaxe.opposite == "f"
-        # #     opposite = "false"
-        # # if axes >= 2 and count % 2 != 0:   # and yaxe.opposite == "t"
-        # #     opposite = "true"
-        # if axes >= 2:
-        #     if yaxe.opposite:
-        #         opposite = "true"
-        # if axes == 1:
-        #     opposite = "false"
-
-        if yaxe.yaxes_id in cum_yaxe:
-            min = ''
-            max = ''
-        else:
-            min = yaxe.min
-            max = yaxe.max
-        yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "),
-                'unit': yaxe.unit, 'opposite': yaxe.opposite,
-                'min': min, 'max': max, 'aggregation_type': yaxe.aggregation_type,
-                'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
-        yaxes.append(yaxe)
-
-    ts_json = {"data_available": data_available,
-               "showYearInTicks": showYearInTicks,
-               "showYearInToolTip": "true",
-               "yaxes": yaxes,
-               "timeseries": timeseries}
-
-    ts_json = json.dumps(ts_json,
-                         ensure_ascii=False,
-                         sort_keys=True,
-                         # indent=4,
-                         separators=(', ', ': '))
-
-    # print ts_json
-    # timeseries_json = '{"success":"true", "total":' + str(timeline.__len__()) + ',"timeline":'+timeline_json+'}'
-    # timeline_json = '{"success":"true"}'
-    return ts_json
-
-
 def updateGraphProperties(params, graphtpl_info):
     updatestatus = '{"success":false, "message":"An error occured while updating the graph draw properties!"}'
 
@@ -4429,37 +3951,6 @@ def updateGraphProperties(params, graphtpl_info):
 
     else:
         updatestatus = '{"success":false, "message":"No graph properties given!"}'
-
-    return updatestatus
-
-
-def __updateChartProperties(params):
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
-
-    if 'chartproperty' in params:  # hasattr(getparams, "chartproperty")
-        chartdrawprobs = {'chart_type': params['chartproperty']['chart_type'],
-                          'chart_width': params['chartproperty']['chart_width'],
-                          'chart_height': params['chartproperty']['chart_height'],
-                          'chart_title_font_size': params['chartproperty']['chart_title_font_size'],
-                          'chart_title_font_color': params['chartproperty']['chart_title_font_color'],
-                          'chart_subtitle_font_size': params['chartproperty']['chart_subtitle_font_size'],
-                          'chart_subtitle_font_color': params['chartproperty']['chart_subtitle_font_color'],
-                          'yaxe1_font_size': params['chartproperty']['yaxe1_font_size'],
-                          'yaxe2_font_size': params['chartproperty']['yaxe2_font_size'],
-                          'legend_font_size': params['chartproperty']['legend_font_size'],
-                          'legend_font_color': params['chartproperty']['legend_font_color'],
-                          'xaxe_font_size': params['chartproperty']['xaxe_font_size'],
-                          'xaxe_font_color': params['chartproperty']['xaxe_font_color'],
-                          'yaxe3_font_size': params['chartproperty']['yaxe3_font_size']
-                          }
-
-        if crud_db.update('chart_drawproperties', chartdrawprobs):
-            updatestatus = '{"success":"true", "message":"Chart draw properties updated!"}'
-        else:
-            updatestatus = '{"success":false, "message":"An error occured while updating the chart draw properties!"}'
-
-    else:
-        updatestatus = '{"success":false, "message":"No chart properties passed!"}'
 
     return updatestatus
 
@@ -4512,54 +4003,6 @@ def getGraphProperties(params):
     return graphproperties_json
 
 
-def __getChartProperties(params):
-    charttype = 'default'
-    if hasattr(params, "charttype") and params['charttype'] != '':
-        charttype = params['charttype']
-
-    chartproperties_dict_all = []
-    chartproperties = querydb.get_chart_drawproperties(charttype)
-
-    if hasattr(chartproperties, "__len__") and chartproperties.__len__() > 0:
-        for row in chartproperties:
-            row_dict = functions.row2dict(row)
-
-            chartproperty = {'chart_type': row_dict['chart_type'],
-                             'chart_width': row_dict['chart_width'],
-                             'chart_height': row_dict['chart_height'],
-                             'chart_title_font_size': row_dict['chart_title_font_size'],
-                             'chart_title_font_color': row_dict['chart_title_font_color'],
-                             'chart_subtitle_font_size': row_dict['chart_subtitle_font_size'],
-                             'chart_subtitle_font_color': row_dict['chart_subtitle_font_color'],
-                             'yaxe1_font_size': row_dict['yaxe1_font_size'],
-                             'yaxe2_font_size': row_dict['yaxe2_font_size'],
-                             'yaxe3_font_size': row_dict['yaxe3_font_size'],
-                             'yaxe4_font_size': row_dict['yaxe4_font_size'],
-                             'legend_font_size': row_dict['legend_font_size'],
-                             'legend_font_color': row_dict['legend_font_color'],
-                             'xaxe_font_size': row_dict['xaxe_font_size'],
-                             'xaxe_font_color': row_dict['xaxe_font_color']
-                             }
-
-            chartproperties_dict_all.append(chartproperty)
-
-        chartproperties_json = json.dumps(chartproperties_dict_all,
-                                          ensure_ascii=False,
-                                          # encoding='utf-8',
-                                          sort_keys=True,
-                                          indent=4,
-                                          separators=(', ', ': '))
-
-        chartproperties_json = '{"success":"true", "total":' \
-                               + str(chartproperties.__len__()) \
-                               + ',"chartproperties":' + chartproperties_json + '}'
-
-    else:
-        chartproperties_json = '{"success":false, "error":"No chart properties defined!"}'
-
-    return chartproperties_json
-
-
 def updateTimeseriesDrawProperties(params):
     # crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
     updatestatus = '{"success":"false", "message":"An error occured while updating the Timeseries Draw Properties!"}'
@@ -4608,7 +4051,7 @@ def createTimeseriesDrawProperties(params):
     if 'tsdrawproperties' in params:
         tsdrawproperties = params['tsdrawproperties']
 
-        if crud_db.create('timeseries_drawproperties_new', tsdrawproperties):
+        if crud_db.create('timeseries_drawproperties', tsdrawproperties):
             createstatus = '{"success":"true", "message":"Timeseries Draw Properties created!"}'
     else:
         createstatus = '{"success":"false", "message":"No Timeseries Draw Properties given!"}'
@@ -4635,55 +4078,6 @@ def getTimeseriesDrawProperties(params):
                 'linewidth': row_dict['linewidth'],
                 'color': row_dict['color'],
                 'yaxe_id': row_dict['yaxe_id']
-            }
-
-            tsdrawproperties_dict_all.append(tsdrawproperty)
-
-        tsdrawproperties_json = json.dumps(tsdrawproperties_dict_all,
-                                           ensure_ascii=False,
-                                           # encoding='utf-8',
-                                           sort_keys=True,
-                                           indent=4,
-                                           separators=(', ', ': '))
-
-        tsdrawproperties_json = '{"success":"true", "total":' \
-                                + str(tsdrawproperties.__len__()) \
-                                + ',"tsdrawproperties":' + tsdrawproperties_json + '}'
-
-    else:
-        tsdrawproperties_json = '{"success":false, "error":"No timeseries draw properties defined!"}'
-
-    return tsdrawproperties_json
-
-
-def __getTimeseriesDrawProperties():
-    tsdrawproperties_dict_all = []
-    tsdrawproperties = querydb.get_timeseries_drawproperties()
-
-    if hasattr(tsdrawproperties, "__len__") and tsdrawproperties.__len__() > 0:
-        for row in tsdrawproperties:
-            # row_dict = functions.row2dict(row)
-            row_dict = row
-
-            tsdrawproperty = {
-                'productcode': row_dict['productcode'],
-                'subproductcode': row_dict['subproductcode'],
-                'version': row_dict['version'],
-                'title': row_dict['title'],
-                'unit': row_dict['unit'],
-                'min': row_dict['min'],
-                'max': row_dict['max'],
-                'oposite': row_dict['oposite'],
-                'tsname_in_legend': row_dict['tsname_in_legend'],
-                'charttype': row_dict['charttype'],
-                'linestyle': row_dict['linestyle'],
-                'linewidth': row_dict['linewidth'],
-                'color': row_dict['color'],
-                'yaxes_id': row_dict['yaxes_id'],
-                'title_color': row_dict['title_color'],
-                'aggregation_type': row_dict['aggregation_type'],
-                'aggregation_min': row_dict['aggregation_min'],
-                'aggregation_max': row_dict['aggregation_max']
             }
 
             tsdrawproperties_dict_all.append(tsdrawproperty)
@@ -6016,7 +5410,7 @@ def TimeseriesProducts():
             prod_dict = {}
             prod_record = functions.row2dict(row)
             productcode = prod_record['productcode']
-            subproductcode = prod_record['subproductcode']
+            # subproductcode = prod_record['subproductcode']
             version = prod_record['version']
 
             prod_dict['category_id'] = prod_record['category_id']
@@ -6026,7 +5420,7 @@ def TimeseriesProducts():
             prod_dict['productid'] = prod_record['productid']
             prod_dict['productcode'] = prod_record['productcode']
             prod_dict['version'] = prod_record['version']
-            prod_dict['subproductcode'] = prod_record['subproductcode']
+            # prod_dict['subproductcode'] = prod_record['subproductcode']
             # prod_dict['mapsetcode'] = ""
             # prod_dict['mapset_name'] = ""
             prod_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
@@ -6039,7 +5433,7 @@ def TimeseriesProducts():
             prod_dict['cumulative'] = False
             prod_dict['difference'] = False
             prod_dict['reference'] = False
-            # prod_dict['years'] = []
+            prod_dict['years'] = []
 
             # does the product have mapsets?
             # t1 = time.time()
@@ -6060,44 +5454,44 @@ def TimeseriesProducts():
                         tmp_prod_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_info['mapsetcode']
                         tmp_prod_dict['mapsetcode'] = mapset_info['mapsetcode']
                         tmp_prod_dict['mapset_name'] = mapset_info['descriptive_name']
+                        products_dict_all.append(tmp_prod_dict)
 
-                        # t3 = time.time()
-                        # print 'before getting dataset info: ' + str(t3)
-
-                        dataset = p.get_dataset(mapset=mapset, sub_product_code=tmp_prod_dict['subproductcode'])
-                        # dataset.get_filenames()
-                        all_present_product_dates = dataset.get_dates()
-
-                        # t4 = time.time()
-                        # tot_get_dataset = t4-t3
-                        # print 'after getting dataset info: ' + str(tot_get_dataset)
-
-                        # t5 = time.time()
-                        # print 'before getting years: ' + str(t5)
-
-                        distinctyears = []
-                        for product_date in all_present_product_dates:
-                            if product_date is not None and product_date.year not in distinctyears:
-                                distinctyears.append(product_date.year)
-                        tmp_prod_dict['years'] = distinctyears
-
-                        # If there is data available on disk, include the subproduct with
-                        # timeseries_role='Initial' in the list!
-                        if tmp_prod_dict['years'].__len__() > 0:
-                            products_dict_all.append(tmp_prod_dict)
-                            # tmp_prod_dict = copy.deepcopy(prod_dict)
-                            #
-                            # products_dict_all.append(tmp_prod_dict)
-                            # tmp_prod_dict = []
-
-                        # t6 = time.time()
-                        # total = t6-t5
-                        # print 'after getting years: ' + str(total)
+                        # # t3 = time.time()
+                        # # print 'before getting dataset info: ' + str(t3)
+                        #
+                        # dataset = p.get_dataset(mapset=mapset, sub_product_code=tmp_prod_dict['subproductcode'])
+                        # # dataset.get_filenames()
+                        # all_present_product_dates = dataset.get_dates()
+                        #
+                        # # t4 = time.time()
+                        # # tot_get_dataset = t4-t3
+                        # # print 'after getting dataset info: ' + str(tot_get_dataset)
+                        #
+                        # # t5 = time.time()
+                        # # print 'before getting years: ' + str(t5)
+                        #
+                        # distinctyears = []
+                        # for product_date in all_present_product_dates:
+                        #     if product_date is not None and product_date.year not in distinctyears:
+                        #         distinctyears.append(product_date.year)
+                        # tmp_prod_dict['years'] = distinctyears
+                        #
+                        # # If there is data available on disk, include the subproduct with
+                        # # timeseries_role='Initial' in the list!
+                        # if tmp_prod_dict['years'].__len__() > 0:
+                        #     products_dict_all.append(tmp_prod_dict)
+                        #     # tmp_prod_dict = copy.deepcopy(prod_dict)
+                        #     #
+                        #     # products_dict_all.append(tmp_prod_dict)
+                        #     # tmp_prod_dict = []
+                        #
+                        # # t6 = time.time()
+                        # # total = t6-t5
+                        # # print 'after getting years: ' + str(total)
 
                         # Get all subproducts which have as timeseries_role = subproductcode ('Initial')
                         timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
-                                                                                        version=version,
-                                                                                        subproductcode=subproductcode)
+                                                                                        version=version)
                         # t7 = time.time()
                         # print 'before getting subproduct info: ' + str(t7)
 
@@ -6181,81 +5575,6 @@ def TimeseriesProducts():
     return timeseriesproducts_json
 
 
-def __TimeseriesProducts():
-    import copy
-
-    db_products = querydb.get_timeseries_products()
-
-    if hasattr(db_products, "__len__") and db_products.__len__() > 0:
-        products_dict_all = []
-        # loop the products list
-        for row in db_products:
-            prod_dict = functions.row2dict(row)
-            productcode = prod_dict['productcode']
-            subproductcode = prod_dict['subproductcode']
-            version = prod_dict['version']
-
-            p = Product(product_code=productcode, version=version)
-
-            # does the product have mapsets?
-            all_prod_mapsets = p.mapsets
-            # print productcode
-            # print all_prod_mapsets
-            if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
-                prod_dict['productmapsets'] = []
-                for mapset in all_prod_mapsets:
-                    mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
-                    # mapset_dict = functions.row2dict(mapset_info)
-                    mapset_info['timeseriesmapsetdatasets'] = []
-                    timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
-                                                                                    version=version,
-                                                                                    subproductcode=subproductcode)
-                    for subproduct in timeseries_mapset_datasets:
-                        if subproduct is not None:
-                            dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
-                            dataset.get_filenames()
-                            all_present_product_dates = dataset.get_dates()
-
-                            distinctyears = []
-                            for product_date in all_present_product_dates:
-                                if product_date.year not in distinctyears:
-                                    distinctyears.append(product_date.year)
-
-                            dataset_dict = functions.row2dict(subproduct)
-
-                            # if productcode == 'vgt-ndvi':
-                            #     print dataset.get_filenames()
-                            #     print all_present_product_dates
-                            #     print distinctyears
-
-                            dataset_dict['years'] = distinctyears
-                            dataset_dict['mapsetcode'] = mapset
-                            mapset_info['timeseriesmapsetdatasets'].append(dataset_dict)
-
-                    if dataset_dict['years'].__len__() > 0:
-                        # tmp_prod_dict = prod_dict.copy()
-                        tmp_prod_dict = copy.deepcopy(prod_dict)
-
-                        tmp_prod_dict['productmapsets'].append(mapset_info)
-                        products_dict_all.append(tmp_prod_dict)
-                        tmp_prod_dict = []
-
-        prod_json = json.dumps(products_dict_all,
-                               ensure_ascii=False,
-                               sort_keys=True,
-                               indent=4,
-                               separators=(', ', ': '))
-
-        datamanagement_json = '{"success":"true", "total":' \
-                              + str(db_products.__len__()) \
-                              + ',"products":' + prod_json + '}'
-
-    else:
-        datamanagement_json = '{"success":false, "error":"No data sets defined!"}'
-
-    return datamanagement_json
-
-
 def TimeseriesProductsTree():
     import copy
 
@@ -6268,7 +5587,7 @@ def TimeseriesProductsTree():
             prod_dict = {}
             prod_record = functions.row2dict(row)
             productcode = prod_record['productcode']
-            subproductcode = prod_record['subproductcode']
+            # subproductcode = prod_record['subproductcode']
             version = prod_record['version']
 
             prod_dict['category_id'] = prod_record['category_id']
@@ -6277,7 +5596,7 @@ def TimeseriesProductsTree():
             prod_dict['productid'] = prod_record['productid']
             prod_dict['productcode'] = prod_record['productcode']
             prod_dict['version'] = prod_record['version']
-            prod_dict['subproductcode'] = prod_record['subproductcode']
+            # prod_dict['subproductcode'] = prod_record['subproductcode']
             # prod_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
             # prod_dict['group_product_description'] = prod_record['group_product_description']
             prod_dict['product_descriptive_name'] = prod_record['descriptive_name']
@@ -6358,8 +5677,7 @@ def TimeseriesProductsTree():
 
                         # Get all subproducts which have as timeseries_role = subproductcode ('Initial')
                         timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
-                                                                                        version=version,
-                                                                                        subproductcode=subproductcode)
+                                                                                        version=version)
 
                         for subproduct in timeseries_mapset_datasets:
                             if subproduct is not None:

@@ -25,7 +25,7 @@ class TestCrud(unittest.TestCase):
             "subproductcode": 'ndvi-linearx2',
             "version": 'sv2-pv2.2'
         }
-        self.assertEqual(len(crud_db_analysis.read('timeseries_drawproperties_new', **product_key)), 1)
+        self.assertEqual(len(crud_db_analysis.read('timeseries_drawproperties', **product_key)), 1)
 
     def test_crud(self):
         records = len(crud_db_products.read('date_format'))

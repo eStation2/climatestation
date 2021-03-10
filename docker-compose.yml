@@ -8,11 +8,6 @@ services:
       context: ./build-docker/web/
       dockerfile: Dockerfile
     container_name: web
-    #links:
-    #  - postgres
-    #environment:
-    #  - PYTHONPATH=/var/www/climatestation/
-    #  - PROJ_LIB=/opt/conda/share/proj/
     image: "climatestation/web:1.0"
     ports:
     - 8080:80
@@ -60,7 +55,7 @@ services:
       MIN_WAL_SIZE: "2048MB"
       WAL_SEGSIZE: "1024"
       MAINTAINANCE_WORK_MEM: "128MB"
-      DB_VERSION: "101"
+      DB_VERSION: "100"
     image: "climatestation/postgis:12"
     ports:
     - 5432:5432
@@ -73,9 +68,6 @@ services:
     - ./postgresql:/var/lib/postgresql:rw
 
     # - /var/run/docker.sock:/var/run/docker.sock:rw
-    # - ./build-docker/postgres/setup_estationdb.sh:/docker-entrypoint-initdb.d/setup_estationdb.sh
-    # - ./src/database/dbInstall/products_dump_structure_only.sql:/docker-entrypoint-initdb.d/products_dump_structure_only.sql
-    # - ./src/database/dbInstall/init_update_cs_db.sql:/docker-entrypoint-initdb.d/init_update_cs_db.sql
     # - cs-docker-postgresql12-volume:/var/lib/postgresql:rw
 
 # create an external docker volume: docker volume create --name cs-docker-postgresql12-volume -d local

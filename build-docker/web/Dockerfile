@@ -74,9 +74,13 @@ ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 #RUN rm /tmp/esa-snap_all_unix_8_0.sh
 
 # Configuring web folder tree
-RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
+RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/ && mkdir -p /tmp/matplotlib
+RUN chmod 0777 /tmp/matplotlib
 ENV PYTHONPATH /var/www/climatestation/
 ENV PROJ_LIB /opt/conda/share/proj/
+# It is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory,
+# in particular to speed up the import of Matplotlib and to better support multiprocessing.
+ENV MPLCONFIGDIR /tmp/matplotlib
 #ENV APACHE_RUN_USER www-data
 #ENV APACHE_RUN_GROUP www-data
 

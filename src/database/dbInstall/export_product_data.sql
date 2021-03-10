@@ -81,7 +81,7 @@ for allrecords in(
         || ' );'  as inserts
     FROM products.internet_source
     WHERE internet_id IN (SELECT pads.data_source_id
-                          FROM products.product_acquisition_data_source pads
+                          FROM products.acquisition pads
                           WHERE pads.productcode = _productcode
                             AND pads.version = _version)
 ) loop
@@ -138,7 +138,7 @@ for allrecords in(
         || ' );'  as inserts
     FROM products.eumetcast_source es
     WHERE eumetcast_id IN (SELECT pads.data_source_id
-                           FROM products.product_acquisition_data_source pads
+                           FROM products.acquisition pads
                            WHERE pads.productcode = _productcode
                              AND pads.version = _version)
 ) loop
@@ -198,7 +198,7 @@ end loop;
 
 
 for allrecords in(
-    SELECT 'SELECT products.update_insert_mapset_new('
+    SELECT 'SELECT products.update_insert_mapset('
         || 'mapsetcode := ''' || mapsetcode || ''''
         || ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
         || ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
@@ -212,12 +212,12 @@ for allrecords in(
         || ', center_of_pixel:= ' || center_of_pixel
         || ', full_copy := ' || 'FALSE'
         || ' );'  as inserts
-    FROM products.mapset_new
+    FROM products.mapset
     WHERE mapsetcode in (
             SELECT DISTINCT native_mapset as mapsetcode
             FROM products.datasource_description dd
             WHERE dd.datasource_descr_id IN (SELECT pads.data_source_id
-                                             FROM products.product_acquisition_data_source pads
+                                             FROM products.acquisition pads
                                              WHERE pads.productcode = _productcode
                                                AND pads.version = _version)
             UNION
@@ -260,7 +260,7 @@ for allrecords in(
         || ' );'  as inserts
     FROM products.datasource_description dd
     WHERE dd.datasource_descr_id IN (SELECT pads.data_source_id
-                                     FROM products.product_acquisition_data_source pads
+                                     FROM products.acquisition pads
                                      WHERE pads.productcode = _productcode
                                        AND pads.version = _version)
 ) loop
@@ -270,7 +270,7 @@ end loop;
 
 
 for allrecords in(
-    SELECT 'SELECT products.update_insert_product_acquisition_data_source('
+    SELECT 'SELECT products.update_insert_acquisition('
         || ' productcode := ''' || pads.productcode || ''''
         || ', subproductcode := ''' || pads.subproductcode || ''''
         || ', version := ''' || pads.version || ''''
@@ -281,7 +281,7 @@ for allrecords in(
         || ', store_original_data := ' || pads.store_original_data
         || ', full_copy := ' || _full_copy
         || ' );'  as inserts
-    FROM products.product_acquisition_data_source pads
+    FROM products.acquisition pads
     WHERE pads.productcode = _productcode
       AND pads.version = _version
 ) loop

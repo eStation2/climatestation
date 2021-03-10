@@ -3354,6 +3354,7 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
 		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
+        || ', activated := ' || activated
 		|| ' );'  as inserts
 	FROM products.thema;
 

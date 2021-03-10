@@ -9,12 +9,15 @@ from builtins import object
 import sys
 
 # Import eStation lib modules
+from sqlalchemy.exc import SQLAlchemyError
+
 from lib.python import es_logging as log
 from config import es_constants
 from database import connectdb
 
 import sqlalchemy
 from sqlalchemy.orm import *
+from sqlalchemy.dialects.postgresql import *
 
 standard_library.install_aliases()
 logger = log.my_logger(__name__)
@@ -49,11 +52,14 @@ class CrudDB(object):
             try:
                 mapper(table_class, sqlalchemy.Table(table_name, metadata, autoload=True))
                 self.table_map[table_name] = table_class
-            except:
-                # exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+            except SQLAlchemyError:
+                exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
                 # print "could not map table ", table_name
                 # Exit the script and print an error telling what happened.
                 logger.error("CrudDB: could not map table %s!" % table_name)
+                logger.error("CrudDB: Exceptiontype: " % exceptiontype)
+                logger.error("CrudDB: Exceptionvalue: " % exceptionvalue)
+                logger.error("CrudDB: Exceptiontraceback: " % exceptiontraceback)
 
         # create a Session template that requires commit to be called explicit
         # self.session = sessionmaker(bind=db, autoflush=True)

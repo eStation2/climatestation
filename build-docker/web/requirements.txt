@@ -22,7 +22,8 @@ nose
 psycopg2-binary
 requests
 ruffus
-SQLAlchemy
+#SQLAlchemy
+sqlalchemy
 sqlsoup
 scipy
 sentinelsat
@@ -36,16 +37,20 @@ psutil
 scikit-image
 docker-py
 
+###################
 # For C3SF4P
+###################
 #statsmodels
 #pandas
 #Basemap
 
-# For IMPACT
-tornado
-gitpython
+###################
+## For IMPACT
+###################
+# tornado
+# gitpython
 # pysqlite3
-mahotas
-sklearn
-xlsxwriter
-wheel
+# mahotas
+# sklearn
+# xlsxwriter
+# wheel
