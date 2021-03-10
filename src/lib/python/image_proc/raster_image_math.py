@@ -55,13 +55,16 @@ from database import querydb
 
 # Import third-party modules
 from osgeo.gdalconst import *
-from osgeo import gdal, osr
+from osgeo import gdal, osr, gdalconst
 import numpy as N
 import copy
 import os, re, os.path, time, sys
 # import pymorph
 import tempfile
 import shutil
+
+# Moved here (see CS-81)
+es_constants.ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour
 
 # Jur: not working in windows version. Conflict with scipy version 1.1.0 and its ndimage functionality.
 # I tried to install scipy version 0.15.1 but need older numpy version 1.19.2 (numpy 1.11.0 is installed)

@@ -19,7 +19,7 @@ import tarfile
 import shutil
 import tempfile
 import re
-from osgeo import gdal, osr
+from osgeo import gdal, osr, gdalconst
 
 from config import es_constants
 from lib.python import es_logging as log
@@ -33,7 +33,8 @@ from .datasets import Dataset
 from .mapsets import Mapset
 from .helpers import *
 # from .helpers import str_to_date
-
+# Moved here (see CS-81)
+es_constants.ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour
 logger = log.my_logger(__name__)
 
 #

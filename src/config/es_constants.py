@@ -23,7 +23,10 @@ from future import standard_library
 import os
 import sys
 import configparser
-from osgeo import gdalconst
+
+
+# Commented (see CS-81)
+# from osgeo import gdalconst
 
 #from lib.python import functions
 # logger = log.my_logger(__name__)
@@ -92,4 +95,5 @@ for setting, value in factorysettings:
 ES2_OUTFILE_FORMAT = 'GTiff'
 ES2_OUTFILE_EXTENSION = '.tif'
 ES2_OUTFILE_OPTIONS = 'COMPRESS=LZW'
-ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour
+# Commented (see CS-81)
+# ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour

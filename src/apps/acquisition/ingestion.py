@@ -62,8 +62,7 @@ if sys.platform == 'win32':
     import pygrib
 
 import fnmatch
-from osgeo import gdal
-from osgeo import osr
+from osgeo import gdal, osr, gdalconst
 
 logger = log.my_logger(__name__)
 
@@ -72,6 +71,9 @@ ingest_error_dir = es_constants.ingest_error_dir
 data_dir_out = es_constants.processing_dir
 
 python_version = sys.version_info[0]
+
+# Moved here (see CS-81)
+es_constants.ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour
 
 def loop_ingestion(dry_run=False, test_one_product=None):
 

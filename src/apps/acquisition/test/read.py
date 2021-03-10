@@ -31,11 +31,13 @@ native_mapsetcode = lsasaf_disk_mapset
 
 # Import third-party modules
 # from osgeo.gdalconst import *
-from osgeo import gdal
+from osgeo import gdal, gdalconst
 from osgeo import osr
 from lib.python import mapset
 from config import es_constants
 
+# Moved here (see CS-81)
+es_constants.ES2_OUTFILE_INTERP_METHOD = gdalconst.GRA_NearestNeighbour
 # Open the testfile
 orig_ds = gdal.Open(input_file, gdal.GF_Write)
 
