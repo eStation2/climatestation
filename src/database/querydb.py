@@ -8,24 +8,22 @@
 #   For every new query function created in this file, create a unittest function in ./test/test_querydb.py
 ####################################################################################################################
 
-from __future__ import print_function
-from __future__ import unicode_literals
 from __future__ import absolute_import
 from __future__ import division
-from future import standard_library
-from builtins import str
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import sys
 import traceback
+from builtins import str
 
-from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
-from sqlalchemy.orm import aliased
+from future import standard_library
 from sqlalchemy.orm import exc
 
-from lib.python import es_logging as log
+from config import es_constants
 from database import connectdb
 from database import crud
-from config import es_constants
+from lib.python import es_logging as log
 from lib.python import functions
 
 standard_library.install_aliases()
@@ -774,7 +772,7 @@ def update_yaxe(yaxe_info):
 
         graph_tpl_id = yaxe_info['graph_tpl_id']
         if yaxe_info['graph_tpl_name'] == 'default' and yaxe_info['graph_tpl_id'] == '-1' and yaxe_info[
-           'istemplate'] == 'false':
+            'istemplate'] == 'false':
             graph_tpl_id = getDefaultUserGraphTemplateID(yaxe_info['userid'], yaxe_info['graphtype'])
             if not graph_tpl_id:
                 return status
@@ -2051,7 +2049,6 @@ def get_timeseries_products(masked=None):
         # db = None
 
 
-
 ######################################################################################
 #   get_all_legends()
 #   Purpose: Query the database to get all the difined legends.
@@ -2751,7 +2748,8 @@ def get_products(activated=None, masked=None):
                 "       pc.descriptive_name as cat_descr_name, " + \
                 "       pc.order_index " + \
                 "from products.product p " + \
-                "     left outer join products.product_category pc on p.category_id = pc.category_id "
+                "     left outer join products.product_category pc on p.category_id = pc.category_id " + \
+                "where 1=1 "
 
         if masked is None:
             and_masked = ""
@@ -3764,7 +3762,6 @@ def get_processingchain_output_products(process_id=None):
             result = db.execute(query)
             processing_chain_output_products = result.fetchall()
 
-
             # myprocess_id = process_id
             # processfinaloutput = db.process_product._table
             # product = db.product._table
@@ -4064,7 +4061,6 @@ def get_processing_chain_products(process_id, type='All'):
 #   Output: OK / error
 #
 def update_processing_chain_products(productcode, version, proc_sub_product, input_product_info):
-
     updatestatus = {'success': False, 'message': ''}
     # 'Hard-coded' definitions
     product_type = 'Derived'

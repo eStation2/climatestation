@@ -4506,18 +4506,18 @@ class CreateProduct(object):
             version = getparams['version']
 
         productinfo = {'productcode': getparams['productcode'],
-                       'subproductcode': getparams['productcode'] + '_native',
+                       # 'subproductcode': getparams['productcode'] + '_native',
                        'version': version,
-                       'product_type': 'Native',
+                       # 'product_type': 'Native',
                        'defined_by': getparams['defined_by'],
                        'activated': functions.str_to_bool(getparams['activated']),
                        'provider': getparams['provider'].replace("'", "''"),
                        'descriptive_name': getparams['prod_descriptive_name'].replace("'", "''"),
                        'description': getparams['description'].strip(u'\u200b').replace("'", "''"),
                        'category_id': getparams['category_id'],
-                       'frequency_id': 'undefined',
-                       'date_format': 'undefined',
-                       'data_type_id': 'undefined',
+                       # 'frequency_id': 'undefined',
+                       # 'date_format': 'undefined',
+                       # 'data_type_id': 'undefined',
                        'masked': False
                        }
 

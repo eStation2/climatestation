@@ -5943,10 +5943,10 @@ def CreateIngestSubProduct(params):
     productinfo = {'productcode': params['productcode'],
                    'version': version,
                    'subproductcode': params['subproductcode'],
-                   'category_id': params['category_id'],
+                   # 'category_id': params['category_id'],
                    'product_type': 'Ingest',
                    'activated': False,
-                   'provider': params['provider'].replace("'", "''"),
+                   # 'provider': params['provider'].replace("'", "''"),
                    'descriptive_name': params['descriptive_name'].replace("'", "''"),
                    'description': params['description'].strip(u'\u200b').replace("'", "''"),
                    'defined_by': params['defined_by'],
@@ -5964,7 +5964,7 @@ def CreateIngestSubProduct(params):
                    'display_index': int(params['display_index']) if params['display_index'].isdigit() else None
                    }
 
-    if crud_db.create('product', productinfo):
+    if crud_db.create('sub_product', productinfo):
         createstatus = '{"success":true, "message":"Ingest Sub Product created!"}'
     else:
         createstatus = '{"success":false, "message":"An error occured while creating the Ingest Sub Product!"}'
@@ -6024,7 +6024,7 @@ def DeleteIngestSubProduct(params):
             'subproductcode': params['subproductcode']
         }
 
-        if crud_db.delete('product', **ingest_sub_product):
+        if crud_db.delete('sub_product', **ingest_sub_product):
             deletestatus = '{"success":true, "productcode": "' + params['productcode'] + '", "version": "' + params[
                 'version'] + '",' + \
                            ' "subproductcode": "' + params['subproductcode'] + '", ' + \
