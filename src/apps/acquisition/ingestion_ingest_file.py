@@ -320,7 +320,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             trg_ds.GetRasterBand(1).WriteArray(scaled_data)
             trg_ds = None
           else:
-            my_logger.debug('Doing only rescaling/format conversion')
+            my_logger.info('Doing only rescaling/format conversion')
 
             # Read from input file
             band = orig_ds.GetRasterBand(1)
@@ -456,11 +456,11 @@ def get_geo_ref_parameters(native_mapset_code, native_mapset, orig_ds, my_logger
               orig_size_x = orig_ds.RasterXSize
               orig_size_y = orig_ds.RasterYSize
             except:
-              my_logger.debug('Cannot read geo-reference from file .. Continue')
+              my_logger.error('Cannot read geo-reference from file .. Continue')
 
         return orig_cs, orig_geo_transform, orig_size_x, orig_size_y
     except:
-        my_logger.debug('Error in getting or assigning geo-reference parameters')
+        my_logger.error('Error in getting or assigning geo-reference parameters')
 
 def get_old_file_list(output_filename, my_logger):
     try:
@@ -472,7 +472,7 @@ def get_old_file_list(output_filename, my_logger):
         return old_file_list
 
     except:
-        my_logger.debug('Error in getting old file metadata ')
+        my_logger.error('Error in getting old file metadata ')
 
 # Merge to existing file if any return and return the final list of files used to write to metadata.
 def merge_files_to_existings(in_files, out_nodata, old_file_list, tmp_output_file, my_output_filename, output_filename, my_logger):
@@ -616,7 +616,7 @@ def do_reprojection(trg_mapset, in_data_type_gdal, out_nodata, out_data_type_gda
         res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
                                   es_constants.ES2_OUTFILE_INTERP_METHOD)
 
-        my_logger.debug('Re-projection to target done.')
+        my_logger.info('Re-projection to target done.')
 
         # Read from the dataset in memory
         out_data = mem_ds.ReadAsArray()
@@ -630,7 +630,7 @@ def do_reprojection(trg_mapset, in_data_type_gdal, out_nodata, out_data_type_gda
         # trg_ds.GetRasterBand(1).WriteArray(scaled_data)
         return out_data, out_ds
     except:
-        my_logger.debug('Error in Reprojection')
+        my_logger.error('Error in Reprojection')
 
 
 # -------------------------------------------------------------------------
@@ -649,7 +649,7 @@ def assign_metadata_generic(product, subproduct, mapset_id, out_date_str_final, 
         sds_meta.assign_input_files(final_list_files)
         sds_meta.write_to_file(file_write_metadata)
     except:
-        my_logger.debug('Cannot read geo-reference from file .. Continue')
+        my_logger.warning('Error in assigning metadata .. Continue')
 
 def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete=False):
 # -------------------------------------------------------------------------------------------------------
@@ -756,7 +756,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
             orig_size_x = orig_ds.RasterXSize
             orig_size_y = orig_ds.RasterYSize
         except:
-            logger.debug('Cannot read geo-reference from file .. Continue')
+            logger.error('Cannot read geo-reference from file .. Continue')
 
         # TODO-M.C.: add a test on the mapset-id in DB table !
         trg_mapset = mapset.MapSet()
@@ -858,48 +858,77 @@ def rescale_data(in_data, in_scale_factor, in_offset, product_in_info, product_o
 #
 #   Returns: output data
 #
-    in_scale_type = product_in_info.scale_type
-    in_nodata = product_in_info.no_data
-    in_mask_min = product_in_info.mask_min
-    in_mask_max = product_in_info.mask_max
-    in_data_type = product_in_info.data_type_id
+    try:
+        in_scale_type = product_in_info.scale_type
+        in_nodata = product_in_info.no_data
+        in_mask_min = product_in_info.mask_min
+        in_mask_max = product_in_info.mask_max
+        in_data_type = product_in_info.data_type_id
 
-    # out_data_type = product_out_info.data_type_id
-    out_scale_factor = product_out_info.scale_factor
-    out_offset = product_out_info.scale_offset
-    out_nodata = product_out_info.nodata
-    out_date_format = product_out_info.date_format
+        # out_data_type = product_out_info.data_type_id
+        out_scale_factor = product_out_info.scale_factor
+        out_offset = product_out_info.scale_offset
+        out_nodata = product_out_info.nodata
+        out_date_format = product_out_info.date_format
 
-    # Check input
-    if not isinstance(in_data, N.ndarray):
-        my_logger.error('Input argument must be a numpy array. Exit')
-        return 1
+        # Check input
+        if not isinstance(in_data, N.ndarray):
+            my_logger.error('Input argument must be a numpy array. Exit')
+            return 1
 
-    # Create output array
-    trg_data = N.zeros(in_data.shape, dtype=out_data_type)
+        # Create output array
+        trg_data = N.zeros(in_data.shape, dtype=out_data_type)
 
-    # Get position of input nodata
-    if in_nodata is not None:
-        idx_nodata = (in_data == in_nodata)
-    else:
-        idx_nodata = N.zeros(1, dtype=bool)
+        # Get position of input nodata
+        if in_nodata is not None:
+            idx_nodata = (in_data == in_nodata)
+        else:
+            idx_nodata = N.zeros(1, dtype=bool)
 
-    # Get position of values exceeding in_mask_min value
-    if in_mask_min is not None:
-        idx_mask_min = (in_data <= in_mask_min)
-    else:
-        idx_mask_min = N.zeros(1, dtype=bool)
+        # Get position of values exceeding in_mask_min value
+        if in_mask_min is not None:
+            idx_mask_min = (in_data <= in_mask_min)
+        else:
+            idx_mask_min = N.zeros(1, dtype=bool)
 
-    # Get position of values below in_mask_max value
-    if in_mask_max is not None:
-        idx_mask_max = (in_data >= in_mask_max)
-    else:
-        idx_mask_max = N.zeros(1, dtype=bool)
+        # Get position of values below in_mask_max value
+        if in_mask_max is not None:
+            idx_mask_max = (in_data >= in_mask_max)
+        else:
+            idx_mask_max = N.zeros(1, dtype=bool)
 
-    # # ES2-385 If input scale factor , offset and output scale factor, offsets are the same then return trg_data as in_data
-    if in_scale_factor == out_scale_factor and in_offset == out_offset:
-        trg_data = in_data
-        my_logger.info('Skip rescaling because input scale factor , offset and output scale factor, offsets are the same')
+        # # ES2-385 If input scale factor , offset and output scale factor, offsets are the same then return trg_data as in_data
+        if in_scale_factor == out_scale_factor and in_offset == out_offset:
+            trg_data = in_data
+            my_logger.info('Skip rescaling because input scale factor , offset and output scale factor, offsets are the same')
+
+            # Assign output nodata to in_nodata and mask range
+            if idx_nodata.any():
+                trg_data[idx_nodata] = out_nodata
+
+            if idx_mask_min.any():
+                trg_data[idx_mask_min] = out_nodata
+
+            if idx_mask_max.any():
+                trg_data[idx_mask_max] = out_nodata
+
+            return trg_data
+
+        # Check if input rescaling has to be done
+        if in_scale_factor != 1 or in_offset != 0:
+            phys_value = in_data * in_scale_factor + in_offset
+        else:
+            phys_value = in_data
+
+        if in_scale_type=='log10':
+            phys_value =  N.power(10,phys_value)
+
+        # Assign to the output array
+        # Option 2: ES2-385 Check if Output rescaling has to be done
+        if out_scale_factor != 1 or out_offset != 0:
+            trg_data = (phys_value - out_offset) / out_scale_factor
+        else:
+            trg_data = phys_value
 
         # Assign output nodata to in_nodata and mask range
         if idx_nodata.any():
@@ -911,36 +940,11 @@ def rescale_data(in_data, in_scale_factor, in_offset, product_in_info, product_o
         if idx_mask_max.any():
             trg_data[idx_mask_max] = out_nodata
 
+        # Return the output array
         return trg_data
-
-    # Check if input rescaling has to be done
-    if in_scale_factor != 1 or in_offset != 0:
-        phys_value = in_data * in_scale_factor + in_offset
-    else:
-        phys_value = in_data
-
-    if in_scale_type=='log10':
-        phys_value =  N.power(10,phys_value)
-
-    # Assign to the output array
-    # Option 2: ES2-385 Check if Output rescaling has to be done
-    if out_scale_factor != 1 or out_offset != 0:
-        trg_data = (phys_value - out_offset) / out_scale_factor
-    else:
-        trg_data = phys_value
-
-    # Assign output nodata to in_nodata and mask range
-    if idx_nodata.any():
-        trg_data[idx_nodata] = out_nodata
-
-    if idx_mask_min.any():
-        trg_data[idx_mask_min] = out_nodata
-
-    if idx_mask_max.any():
-        trg_data[idx_mask_max] = out_nodata
-
-    # Return the output array
-    return trg_data
+    except:
+        logger.error('Error in rescale data')
+        raise NameError('Error in rescale data')
 
 #
 #   Converts the string data type to numpy types
