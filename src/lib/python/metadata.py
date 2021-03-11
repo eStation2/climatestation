@@ -186,15 +186,23 @@ class SdsMetadata(object):
         self.sds_metadata['eStation2_comp_time'] = str_datetime
 
     def assign_from_product(self, product, subproduct, version):
+
+        subproductcode = subproduct
+
         try:
-            product_out_info = querydb.get_product_out_info(productcode=product, subproductcode=subproduct,
-                                                            version=version)
+            product_native = querydb.get_product_native(productcode=product, version=version)
         except:
             logger.error('The product is not defined in the DB')
             return 1
 
-        product_out_info = functions.list_to_element(product_out_info)
+        try:
+            subproduct = querydb.get_subproduct(productcode=product, version=version, subproductcode=subproductcode,)
+        except:
+            logger.error('The subproduct is not defined in the DB')
+            return 1
 
+        product_native = functions.list_to_element(product_native)
+        subproduct = functions.list_to_element(subproduct)
         #   Assign prod/subprod/version
         self.sds_metadata['eStation2_product'] = str(product)
         self.sds_metadata['eStation2_subProduct'] = str(subproduct)
@@ -203,17 +211,17 @@ class SdsMetadata(object):
         else:
             self.sds_metadata['eStation2_product_version'] = 'undefined'
 
-        self.sds_metadata['eStation2_defined_by'] = product_out_info.defined_by
-        self.sds_metadata['eStation2_category'] = product_out_info.category_id
-        self.sds_metadata['eStation2_descr_name'] = product_out_info.descriptive_name
-        self.sds_metadata['eStation2_description'] = product_out_info.description
-        self.sds_metadata['eStation2_provider'] = product_out_info.provider
-        self.sds_metadata['eStation2_date_format'] = product_out_info.date_format
-        self.sds_metadata['eStation2_frequency'] = product_out_info.frequency_id
-        self.sds_metadata['eStation2_scaling_factor'] = product_out_info.scale_factor
-        self.sds_metadata['eStation2_scaling_offset'] = product_out_info.scale_offset
-        self.sds_metadata['eStation2_unit'] = product_out_info.unit
-        self.sds_metadata['eStation2_nodata'] = product_out_info.nodata
+        self.sds_metadata['eStation2_defined_by'] = product_native.defined_by
+        self.sds_metadata['eStation2_category'] = product_native.category_id
+        self.sds_metadata['eStation2_descr_name'] = subproduct.descriptive_name
+        self.sds_metadata['eStation2_description'] = subproduct.description
+        self.sds_metadata['eStation2_provider'] = product_native.provider
+        self.sds_metadata['eStation2_date_format'] = subproduct.date_format
+        self.sds_metadata['eStation2_frequency'] = subproduct.frequency_id
+        self.sds_metadata['eStation2_scaling_factor'] = subproduct.scale_factor
+        self.sds_metadata['eStation2_scaling_offset'] = subproduct.scale_offset
+        self.sds_metadata['eStation2_unit'] = subproduct.unit
+        self.sds_metadata['eStation2_nodata'] = subproduct.nodata
 
     def assign_product_elements(self, product, subproduct, version):
         #   Assign prod/subprod/version
