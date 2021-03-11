@@ -503,4 +503,36 @@ def delete_files(date_fileslist, logger_spec):
         except:
             logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
 
+def get_subrproducts_from_ingestion(product, datasource_descr_id):
+    # Get list of ingestions triggers [prod/subprod/mapset]
+    ingestions = querydb.get_ingestion_subproduct(allrecs=False, **product)
 
+    # Loop over ingestion triggers
+    subproducts = list()
+    for ingest in ingestions:
+
+        dates_not_in_filename = False
+        if ingest.input_to_process_re == 'dates_not_in_filename':
+            dates_not_in_filename = True
+
+        logger.debug(" --> processing subproduct: %s" % ingest.subproductcode)
+        args = {"productcode": product['productcode'],
+                "subproductcode": ingest.subproductcode,
+                "datasource_descr_id": datasource_descr_id,
+                "version": product['version']}
+        product_in_info = querydb.get_product_in_info(**args)
+        try:
+            re_process = product_in_info.re_process
+            re_extract = product_in_info.re_extract
+            nodata_value = product_in_info.no_data
+            sprod = {'subproduct': ingest.subproductcode,
+                     'mapsetcode': ingest.mapsetcode,
+                     're_extract': re_extract,
+                     're_process': re_process,
+                     'nodata': nodata_value}
+            subproducts.append(sprod)
+        except:
+            logger.warning("Subproduct %s not defined for source %s" % (
+            ingest.subproductcode, datasource_descr_id))
+
+    return subproducts

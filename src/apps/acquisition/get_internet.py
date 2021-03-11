@@ -42,7 +42,6 @@ from database import querydb
 from apps.productmanagement import datasets
 from lib.python.api import coda_eum_api, jeodpp_api, motu_api, cds_api
 from lib.python import functions
-from apps.acquisition.ingestion import get_list_ingestion_trigger
 from apps.acquisition import ingestion
 
 logger = log.my_logger(__name__)
@@ -1754,7 +1753,7 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
                                 datasource_descr = datasource_descr[0]
                                 # Get list of subproducts
 
-                                subproducts = get_list_ingestion_trigger(product, datasource_descr.datasource_descr_id)
+                                subproducts = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
 
                                 try:
                                     current_list = build_list_matching_files_jeodpp_catalog(jeodpp_internet_url,
