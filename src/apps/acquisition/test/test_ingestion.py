@@ -322,7 +322,7 @@ class TestIngestion(unittest.TestCase):
         mapsetcode = 'MODIS-Africa-1-1km'
         datasource_descrID = 'JRC:DRO:FAPAR:10DFAPAR'
         input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
-        date_fileslist = [os.path.join(input_dir, 'fAPAR_MOD_2021_01.tif')]
+        date_fileslist = [os.path.join(input_dir, 'fAPAR_anom_MOD_2020_25.tif')]
         in_date = '2021_01'
         out_date = '20210101'
         product = {"productcode": productcode,
@@ -353,7 +353,7 @@ class TestIngestion(unittest.TestCase):
 
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                         version=productversion, mapsetcode=mapsetcode, date=out_date)
-        self.assertEqual(status, 1)
+        self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - NDVI V2.2.1 //Ok 30-04-2020 Vijay//
