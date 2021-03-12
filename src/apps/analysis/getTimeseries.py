@@ -26,7 +26,7 @@ from database import querydb
 
 # from apps.productmanagement.datasets import Dataset
 from apps.productmanagement.products import Product
-from apps.acquisition.ingestion import conv_data_type_to_gdal
+from apps.acquisition.ingestion_ingest_file import conv_data_type_to_gdal
 from lib.python import functions
 from lib.python import es_logging as log
 
