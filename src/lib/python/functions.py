@@ -1143,7 +1143,7 @@ def conv_yyyydk_2_yyyymmdd(yyyydk):
     else:
         day = '41'
 
-    month = ((dekad-1)/3)+1
+    month = int((dekad-1)/3)+1
     month = str(month).zfill(2)
 
     date_yyyymmdd = str(year)+month+day
