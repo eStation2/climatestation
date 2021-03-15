@@ -221,7 +221,7 @@ def my_proc_tamsat_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None,
 
     # Create the list of dates -> returns empty if start==end==None
     if start_date is not None and end_date is not None:
-        starting_dates = proc_functions.get_list_dates_for_dataset('tamsat-rfe', '10d', '3.0', start_date=start_date, end_date=end_date)
+        starting_dates = proc_functions.get_list_dates_for_dataset('tamsat-rfe', '10d', '3.1', start_date=start_date, end_date=end_date)
     else:
         starting_dates = None
 
@@ -232,7 +232,7 @@ def my_proc_tamsat_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None,
             'starting_sprod':'10d',\
             'starting_dates': starting_dates,\
             'mapset': 'TAMSAT-Africa-4km',\
-            'version':'3.0',
+            'version':'3.1',
             'logfile':'log-tamsat.log'}
 
     res_queue = None
@@ -888,7 +888,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 #my_proc_std_modis_kd490(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_modis_pp(pipe_run=0, pipe_print=4, touch_files_only=False)
 #my_proc_std_median_filter()
-#my_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
+my_proc_tamsat_rfe(pipe_run=0, pipe_print=4, start_date='19830101', end_date='20201231', touch_files_only=False)
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
 
 # my_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date='20180101', end_date='20181231', upsert_db=False, touch_files_only=False)
@@ -911,7 +911,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 #my_proc_vgt_dmp(pipe_run=4, pipe_print=0, start_date='19990101', end_date='20171231', touch_files_only=False)
 #my_proc_std_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False)
 #my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=False)
-test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
+#test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
 #   ---------------------------------------------------------------------
 #   OFF-LINE Tests (on raster-math functions)
 #   ---------------------------------------------------------------------
