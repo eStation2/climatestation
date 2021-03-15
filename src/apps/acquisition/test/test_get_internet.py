@@ -394,7 +394,7 @@ class TestGetInternet(unittest.TestCase):
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
                                                   multi_template=False)
-            if self.pattern:
+            if False: #self.pattern:
                 self.assertTrue(file_to_check in list)
 
             # Test download (dynamic dates
