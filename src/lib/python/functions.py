@@ -1162,7 +1162,7 @@ def conv_yyyymmdd_2_dky(year_month_day):
     month = int(str(year_month_day)[4:6])
     day = int(str(year_month_day)[6:8])
 
-    dekad = (month -1)*3+((day-1)/10)+1
+    dekad = int((month -1)*3+((day-1)/10)+1)  #(month -1)*3+((day-1)/10)+1
 
     return str(dekad).zfill(2)
 
