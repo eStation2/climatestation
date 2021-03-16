@@ -1,18 +1,18 @@
-# FROM ubuntu:18.04 AS ubuntu
-# FROM python:3.8-slim-buster
-# FROM continuumio/miniconda3
 #FROM d-prd-registry.jrc.it/ubuntu:18.04 AS ubuntu
 FROM d-prd-registry.jrc.it/continuumio/miniconda3:latest
 
-USER root
+# USER root
 # Security: Don't run as root!!!
 # RUN useradd --create-home adminuser
 # USER adminuser
 
 # TODO: Like COPY, use ARG as late as possible!
 # Setup user
-ARG UID
-ARG GID
+# ARG UID
+# ARG GID
+
+ARG USER_ID
+ARG GROUP_ID
 
 ENV http_proxy=http://10.168.209.73:8012
 ENV HTTP_PROXY=http://10.168.209.73:8012
@@ -87,8 +87,10 @@ ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
 ENV PYTHONPATH /var/www/climatestation/
 ENV PROJ_LIB /opt/conda/share/proj/
-# ENV APACHE_RUN_USER www-data
-# ENV APACHE_RUN_GROUP www-data
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+# For debugging
+# ENV PYTHONFAULTHANDLER=1
 
 # RUN service apache2 stop
 # RUN a2dismod wsgi
@@ -97,13 +99,25 @@ RUN a2enmod headers rewrite proxy wsgi
 RUN service apache2 restart
 WORKDIR /var/www/climatestation
 
-ADD docker-entrypoint.sh /root/docker-entrypoint.sh
-RUN chmod 0775 /root/docker-entrypoint.sh
+ADD docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod 0775 /docker-entrypoint.sh
 
-# For debugging
-# ENV PYTHONFAULTHANDLER=1
+# create a docker user with same uid and gid of host, www-data is just an internal alias
+RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
+    userdel -f www-data &&\
+    if getent group www-data ; then groupdel www-data; fi &&\
+    groupadd -g ${GROUP_ID} www-data &&\
+    useradd -l -u ${USER_ID} -g www-data www-data &&\
+    install -d -m 0755 -o www-data -g www-data /var/www/impact &&\
+    chown --changes --silent --no-dereference --recursive \
+          --from=0:0 ${USER_ID}:${GROUP_ID} \
+          ${WORKDIR} \
+          /docker-entrypoint.sh \
+;fi
 
-#ENTRYPOINT ["/root/docker-entrypoint.sh"]
+USER www-data
+
+#ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD apache2ctl -D FOREGROUND
 
 EXPOSE 80
