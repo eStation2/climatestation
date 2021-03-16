@@ -2879,15 +2879,23 @@ def get_product_out_info(allrecs=False, productcode='', subproductcode='', versi
     global db
 
     try:
-        query = " SELECT * FROM products.sub_product "
+        query = " SELECT p.*, cat.provider, cat.category_id, cat.descriptive_name, cat.order_index " + \
+                " FROM products.sub_product p " + \
+                "       INNER JOIN ( " + \
+                "           SELECT p.productcode, p.version, p.provider, pc.*  " + \
+                "           FROM products.product p " + \
+                "           INNER JOIN products.product_category pc  " + \
+                "           ON p.category_id = pc.category_id  " + \
+                "       ) cat " + \
+                "       ON p.productcode = cat.productcode AND p.version = cat.version "
 
         where = ""
         if not allrecs:
-            where = " WHERE productcode = '" + productcode + "'" + \
-                    "   AND subproductcode = '" + subproductcode + "'" + \
-                    "   AND version = '" + version + "'"
+            where = " WHERE p.productcode = '" + productcode + "'" + \
+                    "   AND p.subproductcode = '" + subproductcode + "'" + \
+                    "   AND p.version = '" + version + "'"
         query += where
-        query += " ORDER BY productcode"
+        query += " ORDER BY p.productcode"
 
         product_out_info = db.execute(query)
         product_out_info = product_out_info.fetchall()
@@ -2928,7 +2936,16 @@ def get_product_out_info(allrecs=False, productcode='', subproductcode='', versi
 def get_product_out_info_connect(allrecs=False, productcode='', subproductcode='', version='undefined'):
     global db
     try:
-        query = " SELECT * FROM products.sub_product "
+        # query = " SELECT * FROM products.sub_product "
+        query = " SELECT p.*, cat.provider, cat.category_id, cat.descriptive_name, cat.order_index " + \
+                " FROM products.sub_product p " + \
+                "       INNER JOIN ( " + \
+                "           SELECT p.productcode, p.version, p.provider, pc.*  " + \
+                "           FROM products.product p " + \
+                "           INNER JOIN products.product_category pc  " + \
+                "           ON p.category_id = pc.category_id  " + \
+                "       ) cat " + \
+                "       ON p.productcode = cat.productcode AND p.version = cat.version "
 
         where = ""
         if not allrecs:

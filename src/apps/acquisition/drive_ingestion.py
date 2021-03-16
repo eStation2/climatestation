@@ -8,7 +8,7 @@ _author__ = "Jurriaan van 't Klooster"
 
 import os, time
 from config import es_constants
-from apps.acquisition import ingestion_2_0 as ingestion
+from apps.acquisition import ingestion
 from apps.acquisition import acquisition
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)

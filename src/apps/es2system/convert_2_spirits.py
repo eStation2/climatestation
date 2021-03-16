@@ -27,7 +27,7 @@ from lib.python import functions
 from database import querydb
 from apps.productmanagement.datasets import Dataset
 from apps.productmanagement.products import Product
-from apps.acquisition.ingestion import rescale_data, conv_data_type_to_gdal, conv_data_type_to_numpy
+from apps.acquisition.ingestion_ingest_file import rescale_data, conv_data_type_to_gdal, conv_data_type_to_numpy
 from lib.python import metadata
 
 logger = log.my_logger(__name__)
