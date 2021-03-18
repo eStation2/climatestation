@@ -1,15 +1,4 @@
-#FROM d-prd-registry.jrc.it/ubuntu:18.04 AS ubuntu
 FROM d-prd-registry.jrc.it/continuumio/miniconda3:latest
-
-# USER root
-# Security: Don't run as root!!!
-# RUN useradd --create-home adminuser
-# USER adminuser
-
-# TODO: Like COPY, use ARG as late as possible!
-# Setup user
-# ARG UID
-# ARG GID
 
 ARG USER_ID
 ARG GROUP_ID
@@ -23,13 +12,11 @@ ENV FTP_PROXY=http://10.168.209.73:8012
 ENV NO_PROXY="127.0.0.1, 10.169.11.29, 10.169.11.35, 139.191.149.56, localhost, localaddress, localdomain.com, localdomain, jrc.it, jrc.org, jrc.ec.europa.eu, testa.eu, cec.eu.int, cc.cec, jrc.eu, emergency.copernicus.eu, postgres, mapserver"
 ENV DEBIAN_FRONTEND=noninteractive
 
-#ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-#ENV PATH /opt/conda/bin:$PATH
 
 # Add optional and essential packages
 RUN apt update && apt install -y software-properties-common
 RUN apt-get update --fix-missing && \
-    apt-get install -y make cmake gcc nano vim wget git unzip iputils-ping locales mlocate && \
+    apt-get install -y sudo make cmake gcc nano vim wget git unzip iputils-ping locales mlocate && \
     apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev && \
     apt-get install -y bzip2 libglib2.0-0 libxext6 libsm6 libxrender1  && \
     apt-get clean
@@ -62,15 +49,6 @@ RUN pip install setuptools
 RUN pip install --no-cache-dir -r /etc/apache2/sites-available/requirements.txt
 RUN pip install --upgrade numpy
 
-ADD 00-default.conf /etc/apache2/sites-available/00-default.conf
-
-RUN ln -s /etc/apache2/sites-available/00-default.conf /etc/apache2/sites-enabled/00-default.conf && \
-    mkdir -p /var/empty && unlink /etc/apache2/sites-enabled/000-default.conf
-
-# Add and enable virtualhost site
-ADD climatestation.conf /etc/apache2/sites-available/climatestation.conf
-RUN ln -s /etc/apache2/sites-available/climatestation.conf /etc/apache2/sites-enabled/climatestation.conf
-
 
 RUN mkdir -p /usr/java && chmod 755 -R /usr/java
 ADD jre-8u251-linux-x64.tar.gz /usr/java
@@ -83,118 +61,128 @@ ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 #RUN chmod 755 -R /tmp
 #RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
 
+
+# Setup dummy default apache config for security
+# ADD 00-default.conf /etc/apache2/sites-available/00-default.conf
+# RUN ln -s /etc/apache2/sites-available/00-default.conf /etc/apache2/sites-enabled/00-default.conf && \
+#     mkdir -p /var/empty && unlink /etc/apache2/sites-enabled/000-default.conf
+
+# Add and enable virtualhost site
+ADD climatestation.conf /etc/apache2/sites-available/climatestation.conf
+RUN ln -s /etc/apache2/sites-available/climatestation.conf /etc/apache2/sites-enabled/climatestation.conf
+
 # Configuring web folder tree
 RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
 ENV PYTHONPATH /var/www/climatestation/
 ENV PROJ_LIB /opt/conda/share/proj/
+
 ENV APACHE_RUN_USER www-data
 ENV APACHE_RUN_GROUP www-data
-# For debugging
-# ENV PYTHONFAULTHANDLER=1
 
-# RUN service apache2 stop
-# RUN a2dismod wsgi
 # Enable these Apache modules wsgi
 RUN a2enmod headers rewrite proxy wsgi
-RUN service apache2 restart
+# RUN service apache2 restart
+
 WORKDIR /var/www/climatestation
 
 ADD docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod 0775 /docker-entrypoint.sh
 
 # create a docker user with same uid and gid of host, www-data is just an internal alias
-RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
-    userdel -f www-data &&\
-    if getent group www-data ; then groupdel www-data; fi &&\
-    groupadd -g ${GROUP_ID} www-data &&\
-    useradd -l -u ${USER_ID} -g www-data www-data &&\
-    install -d -m 0755 -o www-data -g www-data /var/www/impact &&\
-    chown --changes --silent --no-dereference --recursive \
-          --from=0:0 ${USER_ID}:${GROUP_ID} \
+#RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
+#    userdel -f www-data &&\
+#    if getent group www-data ; then groupdel www-data; fi &&\
+#    groupadd -g ${GROUP_ID} www-data &&\
+#    useradd -l -u ${USER_ID} -g www-data www-data &&\
+#    install -d -m 0755 -o www-data -g www-data /var/www/climatestation /var/log/apache2/ &&\
+#    touch /var/log/apache2/error.log &&\
+#    touch /var/log/apache2/access.log &&\
+#    chown --changes --silent --no-dereference --recursive \
+#          --from=0:0 ${USER_ID}:${GROUP_ID} \
+#          ${WORKDIR} \
+#          /var/log/apache2/error.log \
+#          /var/log/apache2/access.log \
+#          /run/apache2/ \
+#          /var/run/apache2/ \
+#          /var/lock/apache2/ \
+#          /usr/sbin/apache2ctl \
+#          /etc/init.d/apache2 \
+#          /docker-entrypoint.sh \
+#;fi
+
+
+#RUN chmod 0777 /usr/sbin/apache2ctl
+#RUN chmod 0777 /etc/init.d/apache2
+#RUN chmod 0777 -R /run/apache2/
+#RUN chmod 0777 -R /var/run/apache2/
+#RUN chmod 0777 -R /var/lock/apache2/
+RUN mkdir -p /var/log
+RUN mkdir -p /var/log/apache2
+RUN mkdir -p /tmp/climatestation
+RUN mkdir -p /tmp/climatestation/services
+RUN mkdir -p /home/www-data
+
+RUN chmod 0777 -R /var/log/
+RUN chmod 0777 -R /var/log/apache2/
+RUN chmod 0777 -R /tmp/
+
+#CMD ["chmod", "0777", "-R", "/var/log/"]
+#CMD ["chmod", "0777", "-R", "/var/log/apache2/"]
+#CMD ["chmod", "0777", "-R", "/tmp/"]
+
+RUN sed -i "s/80/8080/g" /etc/apache2/ports.conf
+RUN userdel -f www-data
+RUN if getent group www-data ; then groupdel www-data; fi
+RUN groupadd -g 501 www-data
+RUN useradd -l -u 501 -g www-data www-data
+RUN install -d -m 0777 -o www-data -g www-data /var/www/climatestation/
+RUN install -d -m 0777 -o www-data -g www-data /data/
+RUN install -d -m 0777 -o www-data -g www-data /tmp/climatestation/
+RUN touch /var/log/apache2/error.log
+RUN touch /var/log/apache2/access.log
+RUN chmod 0777 -R /var/log/apache2/error.log
+RUN chmod 0777 -R /var/log/apache2/access.log
+RUN chown --changes --silent --no-dereference --recursive \
+          --from=0:0 501:501 \
           ${WORKDIR} \
-          /docker-entrypoint.sh \
-;fi
+          /data/ \
+          /tmp/climatestation/ \
+          /var/log/apache2/error.log \
+          /var/log/apache2/access.log \
+          /run/apache2/ \
+          /var/run/apache2/ \
+          /var/lock/apache2/ \
+          /usr/sbin/apache2ctl \
+          /etc/init.d/apache2 \
+          /docker-entrypoint.sh
+
+RUN sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
+    sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
+    sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' && \
+    echo "www-data ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers;  su - www-data -c id
 
 USER www-data
 
-#ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD apache2ctl -D FOREGROUND
+#RUN mkdir -p /data
+#RUN mkdir -p /data/processing
+#RUN mkdir -p /data/ingest
+#RUN mkdir -p /data/ingest.wrong
+#RUN mkdir -p /data/static_data
+#RUN mkdir -p /data/static_data/completeness_bars
+#RUN mkdir -p /data/static_data/db_dump
+#RUN mkdir -p /data/static_data/docs
+#RUN mkdir -p /data/static_data/get_lists
+#RUN mkdir -p /data/static_data/layers
+#RUN mkdir -p /data/static_data/log
+#RUN mkdir -p /data/static_data/logos
+#RUN mkdir -p /data/static_data/requests
+#RUN mkdir -p /data/static_data/settings
+#RUN mkdir -p /tmp/climatestation
+#RUN mkdir -p /tmp/climatestation/services
 
-EXPOSE 80
+ENTRYPOINT ["/docker-entrypoint.sh"]
+# CMD ["python", "&"]
+# apache2ctl -D FOREGROUND
+# CMD [ "sudo", "-c", "service apache2 start" ]
 
-
-
-
-
-
-
-# Pre-compile bytecode for faster startup.
-# Compile installed code:
-# RUN python -c "import compileall; compileall.compile_path(maxlevels=10)"
-# Compile code in a directory:
-# RUN python -m compileall yourpackage/
-
-# https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact
-#ENTRYPOINT ["apache2ctl", "-D", "FOREGROUND"]
-#CMD ["python", "-c", "import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces(version=1)"]
-
-#ADD docker-entrypoint.sh /root/docker-entrypoint.sh
-#RUN chmod 0775 /root/docker-entrypoint.sh
-
-#ENTRYPOINT ["/root/docker-entrypoint.sh"]
-
-## Install OpenJDK-11
-#RUN apt-get update && \
-#    apt-get install -y openjdk-11-jdk && \
-#    apt-get install -y ant && \
-#    apt-get clean;
-#
-## Fix certificate issues
-#RUN apt-get update && \
-#    apt-get install ca-certificates-java && \
-#    apt-get clean && \
-#    update-ca-certificates -f;
-#
-## Setup JAVA_HOME -- useful for docker commandline
-#ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
-#RUN export JAVA_HOME
-
-#ADD pythonpath /pythonpath
-#RUN PYTHONPATH=$(cat /pythonpath);
-#COPY docker-entrypoint.sh /usr/local/bin/
-#RUN ln -s /usr/local/bin/docker-entrypoint.sh /
-#ADD docker-entrypoint.sh /docker-entrypoint.sh
-#ADD setup_pythonenvironment.sh /setup_pythonenvironment.sh
-#ENV PYTHONPATH "${PYTONPATH}:/var/www/estation2"
-#CMD [ "python", "-c", "import sys; sys.path.append('/var/www/estation2')" ]
-#ENTRYPOINT /docker-entrypoint.sh
-#ENTRYPOINT ["docker-entrypoint.sh"]
-#ENTRYPOINT /setup_pythonenvironment.sh
-
-
-# Enable apache mod_proxy
-#RUN a2enmod proxy && \
-#    a2enmod proxy_http && \
-#    a2enmod proxy_balancer && \
-#    a2enmod lbmethod_byrequests
-
-# DEVELOPMENT TOOLS
-#RUN export UNAME=jvantklooster && \
-#    useradd $UNAME -u 1004 && \
-#    mkdir /home/$UNAME && \
-#    cp /etc/skel/.bashrc /home/$UNAME/ && \
-#    cp /etc/skel/.profile /home/$UNAME/ && \
-#    cp /etc/skel/.profile /home/$UNAME/.bash_profile && \
-#    echo "cd /var/www" >> /home/$UNAME/.bashrc && \
-#    chown -R $UNAME /home/$UNAME && \
-#    echo su -l $UNAME -s /bin/bash >> /root/.bashrc
-
-#RUN apt-get install -y curl grep sed dpkg && \
-#    TINI_VERSION=`curl https://github.com/krallin/tini/releases/latest | grep -o "/v.*\"" | sed 's:^..\(.*\).$:\1:'` && \
-#    curl -L "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini_${TINI_VERSION}.deb" > tini.deb && \
-#    dpkg -i tini.deb && \
-#    rm tini.deb && \
-#    apt-get clean
-#
-#ENTRYPOINT [ "/usr/bin/tini", "--" ]
-#CMD [ "/bin/bash" ]
+EXPOSE 8080
