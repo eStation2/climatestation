@@ -7,12 +7,14 @@ services:
     build:
       context: ./build-docker/web/
       dockerfile: DockerfileJRC
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+        HTTP_PROXY: ${HTTP_PROXY}
+        HTTPS_PROXY: ${HTTPS_PROXY}
+        FTP_PROXY: ${FTP_PROXY}
+        NO_PROXY: ${NO_PROXY}
     container_name: web
-    environment:
-      HTTP_PROXY: ${HTTP_PROXY}
-      HTTPS_PROXY: ${HTTPS_PROXY}
-      FTP_PROXY: ${FTP_PROXY}
-      NO_PROXY: ${NO_PROXY}
     image: "climatestation/web:1.0"
     ports:
     - 8080:80
