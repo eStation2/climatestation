@@ -2,10 +2,11 @@
 
 set -e
 
+# If the database does not exist on the target machine create and populate it (with version 100 structure and data)
 if [[ `su - postgres -c "psql postgres -d estationdb -c \"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'products' AND table_name = 'mapset') as x;\"" 2> /dev/null|grep t` == '' ]]; then
     # First install from scratch the database structure
     echo "`date +'%Y-%m-%d %H:%M '` Create database structure"
-    # Create database initial version (2.0.2)
+    # Create database initial version (100)
     psql -h postgres -U estation -d estationdb -w -f /var/www/climatestation/database/dbInstall/install_db_structure.sql >/var/log/climatestation/install_db_structure.log 2>/var/log/climatestation/install_db_structure.err
     # Update Tables data (both for upgrade and installation from scratch)
     echo "`date +'%Y-%m-%d %H:%M '` Populate/update tables"
@@ -18,7 +19,7 @@ else
     echo "`date +'%Y-%m-%d %H:%M '` Database structure already exists. Continue"
 fi
 
-
+# If the database exist, but it is not the latest version -> do the upgrade to the current version
 if [[ `su - postgres -c "psql postgres -d estationdb -c \"select db_version from products.db_version;\""  2>/dev/null|grep -m1 -o '[0-9]\+'` < ${DB_VERSION} ]]; then
     # Update database structure to current release
     echo "`date +'%Y-%m-%d %H:%M '` Update database structure"
