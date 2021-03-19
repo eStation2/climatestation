@@ -12,7 +12,6 @@ ENV FTP_PROXY=http://10.168.209.73:8012
 ENV NO_PROXY="127.0.0.1, 10.169.11.29, 10.169.11.35, 139.191.149.56, localhost, localaddress, localdomain.com, localdomain, jrc.it, jrc.org, jrc.ec.europa.eu, testa.eu, cec.eu.int, cc.cec, jrc.eu, emergency.copernicus.eu, postgres, mapserver"
 ENV DEBIAN_FRONTEND=noninteractive
 
-
 # Add optional and essential packages
 RUN apt update && apt install -y software-properties-common
 RUN apt-get update --fix-missing && \
@@ -49,7 +48,7 @@ RUN pip install setuptools
 RUN pip install --no-cache-dir -r /etc/apache2/sites-available/requirements.txt
 RUN pip install --upgrade numpy
 
-
+# Install the Java JRE needed for the Data Management SyncTool with aruba server.
 RUN mkdir -p /usr/java && chmod 755 -R /usr/java
 ADD jre-8u251-linux-x64.tar.gz /usr/java
 #RUN tar zxvf /usr/java/jre-8u73-linux-x64.tar.gz
@@ -61,25 +60,24 @@ ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 #RUN chmod 755 -R /tmp
 #RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
 
-
 # Setup dummy default apache config for security
-# ADD 00-default.conf /etc/apache2/sites-available/00-default.conf
-# RUN ln -s /etc/apache2/sites-available/00-default.conf /etc/apache2/sites-enabled/00-default.conf && \
-#     mkdir -p /var/empty && unlink /etc/apache2/sites-enabled/000-default.conf
+ADD 00-default.conf /etc/apache2/sites-available/00-default.conf
+RUN ln -s /etc/apache2/sites-available/00-default.conf /etc/apache2/sites-enabled/00-default.conf && \
+    mkdir -p /var/empty && unlink /etc/apache2/sites-enabled/000-default.conf
 
-# Add and enable virtualhost site
+# Enable virtualhost site for the climatestation
 ADD climatestation.conf /etc/apache2/sites-available/climatestation.conf
 RUN ln -s /etc/apache2/sites-available/climatestation.conf /etc/apache2/sites-enabled/climatestation.conf
 
 # Configuring web folder tree
-RUN mkdir -p /var/www/climatestation && mkdir -p /var/log/apache2/
+RUN mkdir -p /var/www/climatestation
 ENV PYTHONPATH /var/www/climatestation/
 ENV PROJ_LIB /opt/conda/share/proj/
 
 ENV APACHE_RUN_USER www-data
 ENV APACHE_RUN_GROUP www-data
 
-# Enable these Apache modules wsgi
+# Enable these Apache modules
 RUN a2enmod headers rewrite proxy wsgi
 # RUN service apache2 restart
 
@@ -88,18 +86,37 @@ WORKDIR /var/www/climatestation
 ADD docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod 0775 /docker-entrypoint.sh
 
+#RUN chmod 0777 /usr/sbin/apache2ctl
+#RUN chmod 0777 /etc/init.d/apache2
+#RUN chmod 0777 -R /run/apache2/
+#RUN chmod 0777 -R /var/run/apache2/
+#RUN chmod 0777 -R /var/lock/apache2/
+#RUN mkdir -p /tmp/climatestation
+#RUN mkdir -p /tmp/climatestation/services
+#RUN mkdir -p /var/log
+RUN mkdir -p /var/log/apache2
+RUN mkdir -p /home/www-data
+#RUN chmod 0775 -R /var/log
+RUN chmod 0775 -R /var/log/apache2
+RUN chmod 0775 -R /tmp
+RUN touch /var/log/apache2/error.log
+RUN touch /var/log/apache2/access.log
+RUN chmod 0775 -R /var/log/apache2/error.log
+RUN chmod 0775 -R /var/log/apache2/access.log
+
 # create a docker user with same uid and gid of host, www-data is just an internal alias
-#RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
-#    userdel -f www-data &&\
-#    if getent group www-data ; then groupdel www-data; fi &&\
-#    groupadd -g ${GROUP_ID} www-data &&\
-#    useradd -l -u ${USER_ID} -g www-data www-data &&\
-#    install -d -m 0755 -o www-data -g www-data /var/www/climatestation /var/log/apache2/ &&\
-#    touch /var/log/apache2/error.log &&\
-#    touch /var/log/apache2/access.log &&\
-#    chown --changes --silent --no-dereference --recursive \
-#          --from=0:0 ${USER_ID}:${GROUP_ID} \
+#RUN userdel -f www-data
+#RUN if getent group www-data ; then groupdel www-data; fi
+#RUN groupadd -g 501 www-data
+#RUN useradd -l -u 501 -g www-data www-data
+#RUN install -d -m 0755 -o www-data -g www-data /var/www/climatestation
+#RUN install -d -m 0755 -o www-data -g www-data /data/
+#RUN install -d -m 0755 -o www-data -g www-data /tmp/climatestation
+#RUN chown --changes --silent --no-dereference --recursive \
+#          --from=0:0 501:501 \
 #          ${WORKDIR} \
+#          /data/ \
+#          /tmp/climatestation/ \
 #          /var/log/apache2/error.log \
 #          /var/log/apache2/access.log \
 #          /run/apache2/ \
@@ -107,55 +124,35 @@ RUN chmod 0775 /docker-entrypoint.sh
 #          /var/lock/apache2/ \
 #          /usr/sbin/apache2ctl \
 #          /etc/init.d/apache2 \
-#          /docker-entrypoint.sh \
-#;fi
+#          /docker-entrypoint.sh
 
+RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
+    userdel -f www-data &&\
+    if getent group www-data ; then groupdel www-data; fi &&\
+    groupadd -g ${GROUP_ID} www-data &&\
+    useradd -l -u ${USER_ID} -g www-data www-data &&\
+    install -d -m 0755 -o www-data -g www-data /var/www/climatestation &&\
+    install -d -m 0755 -o www-data -g www-data /data/ &&\
+    install -d -m 0755 -o www-data -g www-data /tmp/climatestation &&\
+    chown --changes --silent --no-dereference --recursive \
+              --from=0:0 ${USER_ID}:${GROUP_ID} \
+              ${WORKDIR} \
+              /data/ \
+              /tmp/climatestation/ \
+              /var/log/apache2/error.log \
+              /var/log/apache2/access.log \
+              /run/apache2/ \
+              /var/run/apache2/ \
+              /var/lock/apache2/ \
+              /usr/sbin/apache2ctl \
+              /etc/init.d/apache2 \
+              /docker-entrypoint.sh \
+;fi
 
-#RUN chmod 0777 /usr/sbin/apache2ctl
-#RUN chmod 0777 /etc/init.d/apache2
-#RUN chmod 0777 -R /run/apache2/
-#RUN chmod 0777 -R /var/run/apache2/
-#RUN chmod 0777 -R /var/lock/apache2/
-RUN mkdir -p /var/log
-RUN mkdir -p /var/log/apache2
-RUN mkdir -p /tmp/climatestation
-RUN mkdir -p /tmp/climatestation/services
-RUN mkdir -p /home/www-data
-
-RUN chmod 0777 -R /var/log/
-RUN chmod 0777 -R /var/log/apache2/
-RUN chmod 0777 -R /tmp/
-
-#CMD ["chmod", "0777", "-R", "/var/log/"]
-#CMD ["chmod", "0777", "-R", "/var/log/apache2/"]
-#CMD ["chmod", "0777", "-R", "/tmp/"]
-
+# Set the default Apache port to 8080 because www-data who runs apache does not have the permissions to use port 80.
 RUN sed -i "s/80/8080/g" /etc/apache2/ports.conf
-RUN userdel -f www-data
-RUN if getent group www-data ; then groupdel www-data; fi
-RUN groupadd -g 501 www-data
-RUN useradd -l -u 501 -g www-data www-data
-RUN install -d -m 0777 -o www-data -g www-data /var/www/climatestation/
-RUN install -d -m 0777 -o www-data -g www-data /data/
-RUN install -d -m 0777 -o www-data -g www-data /tmp/climatestation/
-RUN touch /var/log/apache2/error.log
-RUN touch /var/log/apache2/access.log
-RUN chmod 0777 -R /var/log/apache2/error.log
-RUN chmod 0777 -R /var/log/apache2/access.log
-RUN chown --changes --silent --no-dereference --recursive \
-          --from=0:0 501:501 \
-          ${WORKDIR} \
-          /data/ \
-          /tmp/climatestation/ \
-          /var/log/apache2/error.log \
-          /var/log/apache2/access.log \
-          /run/apache2/ \
-          /var/run/apache2/ \
-          /var/lock/apache2/ \
-          /usr/sbin/apache2ctl \
-          /etc/init.d/apache2 \
-          /docker-entrypoint.sh
 
+# Give www-data sudo rights in the container
 RUN sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
     sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
     sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' && \
@@ -163,25 +160,7 @@ RUN sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' && 
 
 USER www-data
 
-#RUN mkdir -p /data
-#RUN mkdir -p /data/processing
-#RUN mkdir -p /data/ingest
-#RUN mkdir -p /data/ingest.wrong
-#RUN mkdir -p /data/static_data
-#RUN mkdir -p /data/static_data/completeness_bars
-#RUN mkdir -p /data/static_data/db_dump
-#RUN mkdir -p /data/static_data/docs
-#RUN mkdir -p /data/static_data/get_lists
-#RUN mkdir -p /data/static_data/layers
-#RUN mkdir -p /data/static_data/log
-#RUN mkdir -p /data/static_data/logos
-#RUN mkdir -p /data/static_data/requests
-#RUN mkdir -p /data/static_data/settings
-#RUN mkdir -p /tmp/climatestation
-#RUN mkdir -p /tmp/climatestation/services
-
 ENTRYPOINT ["/docker-entrypoint.sh"]
-# CMD ["python", "&"]
 # apache2ctl -D FOREGROUND
 # CMD [ "sudo", "-c", "service apache2 start" ]
 
