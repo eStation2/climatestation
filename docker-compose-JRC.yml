@@ -22,7 +22,7 @@ services:
     #privileged: true
     volumes:
     #- /var/run/docker.sock:/var/run/docker.sock:rw
-    #- ./log/web:/var/log/apache2
+    - ./log/web:/var/log/apache2
     - ./src:/var/www/climatestation:rw
     - ${DATA_VOLUME}:/data:rw
     - ${DATA_VOLUME}/static_data:/data/static_data:rw

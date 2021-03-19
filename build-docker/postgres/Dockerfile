@@ -1,14 +1,4 @@
 FROM kartoza/postgis:12.0
-# FROM d-prd-registry.jrc.it/kartoza/postgis:12.1
-# FROM postgres:12
-
-
-# Add optional and essential packages
-#RUN apt update && apt install -y software-properties-common
-#RUN apt-get update && apt-get install -y make cmake gcc nano vim wget git unzip iputils-ping locales mlocate
-#RUN apt-get update && apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev
-## To have locate work
-#RUN updatedb
 
 ADD ./build-docker/postgres/pg_hba.conf /etc/postgresql/12/main/
 RUN chown postgres:postgres /etc/postgresql/12/main/pg_hba.conf
@@ -20,22 +10,10 @@ RUN mkdir /home/postgres/
 RUN mkdir /var/log/climatestation/
 RUN mkdir -p /var/www/climatestation/
 
-#USER postgres
-# RUN export PGPASSWORD='mesadmin'; -> Done in docker-compose file.
 ADD ./build-docker/postgres/.pgpass /home/postgres/
 RUN chmod 0775 -R /home/postgres/
 RUN chown postgres:postgres -R /home/postgres/
 ENV PGPASSFILE=/home/postgres/.pgpass
-
-#USER root
-#ADD ./src/database/dbInstall/products_dump_structure_only.sql /var/tmp/
-#ADD ./src/database/dbInstall/update_db_structure.sql /var/tmp/
-#ADD ./src/database/dbInstall/update_insert_jrc_data.sql /var/tmp/
-#ADD ./src/database/dbInstall/create_table_db_version.sql /var/tmp/
-#ADD ./src/database/dbInstall/climsoft_schema_structure.sql /var/tmp/
-
-#ADD ./build-docker/postgres/postgres-docker-entrypoint.sh /postgres-docker-entrypoint.sh
-#RUN chmod 0775 /postgres-docker-entrypoint.sh
 
 ADD ./src/database/dbInstall/install_update_db.sh /
 RUN chmod 0775 /install_update_db.sh
@@ -43,6 +21,12 @@ RUN chmod 0775 /install_update_db.sh
 ADD ./src/database/dbInstall/install_update_db_old.sh /
 RUN chmod 0775 /install_update_db_old.sh
 
+
+
+
+
+#ADD ./build-docker/postgres/postgres-docker-entrypoint.sh /postgres-docker-entrypoint.sh
+#RUN chmod 0775 /postgres-docker-entrypoint.sh
 # CMD ["bash", "/postgres-docker-entrypoint.sh"]
 
 #RUN head -2 /docker-entrypoint.sh &gt; /docker-entrypoint.sh.tmp

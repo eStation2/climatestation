@@ -4,7 +4,6 @@
 #
 
 # Ubuntu 18.04 Bionic Beaver
-# FROM ubuntu:18.04 AS ubuntu
 FROM d-prd-registry.jrc.it/ubuntu:18.04 AS ubuntu
 
 USER root

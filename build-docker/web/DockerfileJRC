@@ -86,46 +86,7 @@ WORKDIR /var/www/climatestation
 ADD docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod 0775 /docker-entrypoint.sh
 
-#RUN chmod 0777 /usr/sbin/apache2ctl
-#RUN chmod 0777 /etc/init.d/apache2
-#RUN chmod 0777 -R /run/apache2/
-#RUN chmod 0777 -R /var/run/apache2/
-#RUN chmod 0777 -R /var/lock/apache2/
-#RUN mkdir -p /tmp/climatestation
-#RUN mkdir -p /tmp/climatestation/services
-#RUN mkdir -p /var/log
-RUN mkdir -p /var/log/apache2
-RUN mkdir -p /home/www-data
-#RUN chmod 0775 -R /var/log
-RUN chmod 0775 -R /var/log/apache2
-RUN chmod 0775 -R /tmp
-RUN touch /var/log/apache2/error.log
-RUN touch /var/log/apache2/access.log
-RUN chmod 0775 -R /var/log/apache2/error.log
-RUN chmod 0775 -R /var/log/apache2/access.log
-
 # create a docker user with same uid and gid of host, www-data is just an internal alias
-#RUN userdel -f www-data
-#RUN if getent group www-data ; then groupdel www-data; fi
-#RUN groupadd -g 501 www-data
-#RUN useradd -l -u 501 -g www-data www-data
-#RUN install -d -m 0755 -o www-data -g www-data /var/www/climatestation
-#RUN install -d -m 0755 -o www-data -g www-data /data/
-#RUN install -d -m 0755 -o www-data -g www-data /tmp/climatestation
-#RUN chown --changes --silent --no-dereference --recursive \
-#          --from=0:0 501:501 \
-#          ${WORKDIR} \
-#          /data/ \
-#          /tmp/climatestation/ \
-#          /var/log/apache2/error.log \
-#          /var/log/apache2/access.log \
-#          /run/apache2/ \
-#          /var/run/apache2/ \
-#          /var/lock/apache2/ \
-#          /usr/sbin/apache2ctl \
-#          /etc/init.d/apache2 \
-#          /docker-entrypoint.sh
-
 RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
     userdel -f www-data &&\
     if getent group www-data ; then groupdel www-data; fi &&\
@@ -134,11 +95,19 @@ RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
     install -d -m 0755 -o www-data -g www-data /var/www/climatestation &&\
     install -d -m 0755 -o www-data -g www-data /data/ &&\
     install -d -m 0755 -o www-data -g www-data /tmp/climatestation &&\
+    mkdir -p /var/log/apache2 &&\
+    mkdir -p /home/www-data &&\
+    chmod 0777 -R /var/log/apache2 &&\
+    touch /var/log/apache2/error.log &&\
+    touch /var/log/apache2/access.log &&\
+    chmod 0777 -R /var/log/apache2/error.log &&\
+    chmod 0777 -R /var/log/apache2/access.log &&\
     chown --changes --silent --no-dereference --recursive \
               --from=0:0 ${USER_ID}:${GROUP_ID} \
               ${WORKDIR} \
               /data/ \
               /tmp/climatestation/ \
+              /var/log/apache2/ \
               /var/log/apache2/error.log \
               /var/log/apache2/access.log \
               /run/apache2/ \
@@ -153,10 +122,10 @@ RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
 RUN sed -i "s/80/8080/g" /etc/apache2/ports.conf
 
 # Give www-data sudo rights in the container
-RUN sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
-    sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
-    sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' && \
-    echo "www-data ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers;  su - www-data -c id
+#RUN sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
+#    sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
+#    sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' && \
+#    echo "www-data ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers;  su - www-data -c id
 
 USER www-data
 
