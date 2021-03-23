@@ -10,10 +10,9 @@ import unittest
 import re
 import os
 from database import querydb
-from apps.acquisition import get_internet
-#from apps.acquisition.test import test_get_interneT
-from apps.acquisition import acquisition
-
+from apps.acquisition import get_cds, ingestion_netcdf, ingestion
+from lib.python import es_logging as log
+logger = log.my_logger(__name__)
 class SourceEOS:
     def __init__(self,
                  url=None,
@@ -34,7 +33,9 @@ class SourceEOS:
                  frequency_id=None,
                  start_date=None,
                  end_date=None,
-                 https_params=None):
+                 https_params=None,
+                 productcode=None,
+                 version=None ):
         self.url = url
         self.internet_id = internet_id
         self.defined_by = defined_by
@@ -54,6 +55,8 @@ class SourceEOS:
         self.start_date = start_date
         self.end_date = end_date
         self.https_params = https_params
+        self.productcode = productcode
+        self.version = version
 #
 class TestGetEOS(unittest.TestCase):
 
@@ -80,12 +83,12 @@ class TestGetEOS(unittest.TestCase):
 
 
     def testRemote_CDS_SST_1DAY(self):
-        internet_id = 'JRC:MARS:WSI:CROP'
+        internet_id = 'CDS:ERA5:REANALYSIS:RFE:DAY'
         template= {"resourcename_uuid":"reanalysis-era5-single-levels", "format": "netcdf", "product_type": "reanalysis",
         "variable": "sea_surface_temperature", "year": None,"month": None, "day":None }
         remote_url='https://cds.climate.copernicus.eu/api/v2'
         from_date = '20200619'
-        to_date = '20200620'
+        to_date = '20200621'
         frequency = 'e1day'
         my_source = SourceEOS(internet_id=internet_id,
                               url=remote_url,
@@ -98,14 +101,16 @@ class TestGetEOS(unittest.TestCase):
                               end_date=to_date,
                               frequency_id=frequency,
                               type='cds_api',
-                              files_filter_expression='sst',
-                              https_params='')
+                              files_filter_expression='cds-total-precip',
+                              https_params='',
+                              productcode='cds-total-precip',
+                              version='1.0')
 
         #files_list = get_internet.build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        result = get_internet.loop_get_internet(test_one_source=internet_id, my_source=my_source)
+        result = get_cds.loop_get_internet(test_one_source=internet_id, my_source=my_source)
 
     def testRemote_CDS_SST_1Month(self):
-        internet_id = "JRC:MARS:WSI:CROP"#'CDS:ERA5:REANALYSIS:SST:MONTH'
+        internet_id = "CDS:ERA5:REANALYSIS:SST:MONTH"#'CDS:ERA5:REANALYSIS:SST:MONTH'
 
         template_month = {"resourcename_uuid":"reanalysis-era5-single-levels-monthly-means", "format": "netcdf", "product_type": "monthly_averaged_reanalysis",
         "variable": "sea_surface_temperature", "year": None,"month": None, "time":None }
@@ -118,9 +123,9 @@ class TestGetEOS(unittest.TestCase):
         template = template_hour_pressure
         remote_url = 'https://cds.climate.copernicus.eu/api/v2'
         from_date = '20200701'
-        to_date = '20200702'
-        #frequency = 'e1month'
-        frequency = 'e1hour'
+        to_date = '20201002'
+        frequency = 'e1month'
+        # frequency = 'e1hour'
         files_filter_expression='reanalysis-era5-single-levels-monthly-means'
         files_filter_expression = 'reanalysis-era5-single-levels'
         files_filter_expression = 'reanalysis-era5-pressure-levels'
@@ -139,5 +144,68 @@ class TestGetEOS(unittest.TestCase):
                               https_params='')
 
         # files_list = get_internet.build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        result = get_internet.loop_get_internet(test_one_source=internet_id, my_source=my_source)
+        result = get_cds.loop_get_internet(test_one_source=internet_id, my_source=my_source)
 
+
+
+    def testRemote_IRI_surfacetemp_1Month(self):
+        internet_id = "IRI:NOAA:SURFACETEMP:MONTH"#'CDS:ERA5:REANALYSIS:SST:MONTH'
+
+        template_hour_pressure = {"resourcename_uuid":"reanalysis-era5-pressure-levels", "format": "netcdf", "product_type": "reanalysis",
+            "variable": "temperature","pressure_level": "925", "year": None,"month": None, "day":None,"time":None}
+        template = None
+        remote_url = 'http://iridl.ldeo.columbia.edu/'
+        from_date = '20200101'
+        to_date = '20201201'
+        frequency = 'e1month'
+        files_filter_expression=None
+        my_source = SourceEOS(internet_id=internet_id,
+                              url=remote_url,
+                              descriptive_name='IRI',
+                              include_files_expression=template,
+                              pull_frequency=3,
+                              user_name='anonymous',
+                              password='anonymous',
+                              start_date=from_date,
+                              end_date=to_date,
+                              frequency_id=frequency,
+                              type='iri_api',
+                              files_filter_expression=files_filter_expression,
+                              https_params='',
+                              productcode= 'iri-surface-temp',
+                              version='1.0')
+
+        # files_list = get_internet.build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
+        result = get_cds.loop_get_internet(test_one_source=internet_id, my_source=my_source)
+
+
+    def debug_IRI_surfacetemp_1Month_ingest_netcdf(self):
+        internet_id = "IRI:NOAA:SURFACETEMP:MONTH"#'CDS:ERA5:REANALYSIS:SST:MONTH'
+        product = {"productcode": "iri-surface-temp", "version": "1.0"}
+        downloaded_file = '/data/ingest/20200701_iri-surface-temp_iri-surface-temp_default_1.0.nc'
+        in_date = '20200701'
+        # Datasource description
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
+        datasource_descr = datasource_descr[0]
+        # Get list of subproducts
+
+        sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
+
+        ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
+                                                             datasource_descr, logger)
+
+
+    def debug_CDS_RFE_DAY_netcdf(self):
+        internet_id = "CDS:ERA5:REANALYSIS:RFE:DAY"
+        product = {"productcode": "cds-total-precip", "version": "1.0"}
+        downloaded_file = '/data/ingest/20200701000000_reanalysis-era5-single-levels-monthly-means_monthly_averaged_reanalysis_sea_surface_temperature.nc'
+        in_date = '20200701'
+        # Datasource description
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
+        datasource_descr = datasource_descr[0]
+        # Get list of subproducts
+
+        sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
+
+        ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
+                                                             datasource_descr, logger)
