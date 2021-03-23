@@ -1464,11 +1464,18 @@ def get_mapset(mapsetcode='', allrecs=False):
                 " 	0.0 as rotation_factor_lat, " + \
                 " 	mapset.pixel_size_x, " + \
                 " 	mapset.pixel_size_y, " + \
-                " 	mapset.footprint_image " + \
+                " 	mapset.footprint_image, " + \
+                "   bbox.bboxcode, " + \
+                "   bbox.descriptive_name AS bbox_descriptive_name, " + \
+                "   bbox.upper_left_long, " + \
+                "   bbox.upper_left_lat, " + \
+                "   bbox.lower_right_long, " + \
+                "   bbox.lower_right_lat, " + \
+                "   bbox.predefined " + \
                 " FROM products.mapset AS mapset " + \
                 " INNER JOIN products.projection AS projection ON mapset.proj_code = projection.proj_code " + \
                 " INNER JOIN products.resolution AS resolution ON mapset.resolutioncode=resolution.resolutioncode " + \
-                " INNER JOIN products.bbox ON mapset.bboxcode = bbox.bboxcode "
+                " INNER JOIN products.bbox AS bbox ON mapset.bboxcode = bbox.bboxcode "
 
         order_by = " ORDER BY mapset.mapsetcode "
         if allrecs:
