@@ -2956,9 +2956,9 @@ def get_product_out_info_connect(allrecs=False, productcode='', subproductcode='
 
         where = ""
         if not allrecs:
-            where = " WHERE productcode = '" + productcode + "'" + \
-                    "   AND subproductcode = '" + subproductcode + "'" + \
-                    "   AND version = '" + version + "'"
+            where = " WHERE p.productcode = '" + productcode + "'" + \
+                    "   AND p.subproductcode = '" + subproductcode + "'" + \
+                    "   AND p.version = '" + version + "'"
         query += where
         query += " ORDER BY productcode"
 
