@@ -17,10 +17,10 @@ services:
     container_name: web
     image: "climatestation/web:1.0"
     ports:
-    - 8080:80
+    - 8080:8080
     restart: unless-stopped
     #privileged: true
-    volumes: 
+    volumes:
     #- /var/run/docker.sock:/var/run/docker.sock:rw
     - ./log/web:/var/log/apache2
     - ./src:/var/www/climatestation:rw
@@ -43,6 +43,9 @@ services:
     build:
       context: ./
       dockerfile: ./build-docker/postgres/DockerfileJRC
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
     container_name: postgres
     environment:
       PGPASSWORD: "mesadmin"
@@ -70,8 +73,9 @@ services:
     volumes:
     - ${DATA_VOLUME}/static_data/db_dump:/data/static_data/db_dump:rw
     - ./src:/var/www/climatestation:rw
-    - ./log/postgres:/var/log/climatestations:rw
+    - ./log/postgres:/var/log/climatestation:rw
     - cs-docker-postgresql12-volume:/var/lib/postgresql:rw
+
     # - ./postgresql:/var/lib/postgresql:rw
     # - /var/run/docker.sock:/var/run/docker.sock:rw
     # - ./build-docker/postgres/setup_estationdb.sh:/docker-entrypoint-initdb.d/setup_estationdb.sh

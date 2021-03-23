@@ -3,7 +3,6 @@
 # pygdal    -> needed only when installing GDAL in virtualenv
 # pygrib    -> not used in online version. comment the use in the code!
 # mapscript -> installed through apt install python3-mapscript, see Dockerfile
-# SQLAlchemy==1.1.3
 future
 urllib3
 certifi
