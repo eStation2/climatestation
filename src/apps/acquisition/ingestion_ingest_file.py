@@ -403,13 +403,13 @@ def get_product_out_info(product, subproduct, my_logger):
     except:
         my_logger.error('Error defining Output product info ')
 
-def define_output_dir_filename(product, subproduct, mapset_id, out_date_str_final, my_logger):
+def define_output_dir_filename(product, subproduct, mapset_id, out_date_str_final, my_logger, file_extension='.tif'):
     try:
         output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
                                                                            subproduct,
                                                                            'Ingest',
                                                                            product['version'],
-                                                                           mapset_id, )
+                                                                           mapset_id )
         my_logger.debug('Output Directory is: %s' % output_directory)
         try:
             if not os.path.exists(output_directory):
@@ -424,7 +424,7 @@ def define_output_dir_filename(product, subproduct, mapset_id, out_date_str_fina
                                                                          subproduct,
                                                                          mapset_id,
                                                                          product['version'],
-                                                                         '.tif')
+                                                                         file_extension)
         return output_directory, output_filename
 
     except:
