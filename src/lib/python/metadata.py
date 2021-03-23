@@ -21,7 +21,7 @@ from config import es_constants
 from osgeo import gdal
 from osgeo import gdalconst
 from .functions import *
-
+from netCDF4 import Dataset
 # Import eStation2 modules
 from lib.python import es_logging as log
 from lib.python import functions
@@ -126,6 +126,24 @@ class SdsMetadata(object):
                 else:
                     wrt_value = str(value)
                 dataset.SetMetadataItem(key, wrt_value)
+
+    def write_to_nc_var(self, nc_variable):
+        #   Writes  metadata to a target dataset (already opened gdal dataset)
+        #   Args:
+        #       dataset: osgeo.gdal dataset (open and georeferenced)
+
+        # # Check argument ok
+        # if not isinstance(nc_variable, Dataset.variables):
+        #     logger.error('The argument should be an netCDF4 Dataset Variable. Exit')
+        # else:
+        #     # Go through the metadata list and write to sds
+        for key, value in list(self.sds_metadata.items()):
+            # Check length of value
+            if len(str(value)) > 1000:
+                wrt_value = str(value)[0:1000] + ' + others ...'
+            else:
+                wrt_value = str(value)
+            nc_variable.setncattr(key, wrt_value)
 
     def write_to_file(self, filepath):
         #   Writes  metadata to a target file
