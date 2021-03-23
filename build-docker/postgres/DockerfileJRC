@@ -21,6 +21,11 @@ RUN chown postgres:postgres -R /var/log/climatestation
 ADD ./src/database/dbInstall/install_update_db.sh /
 RUN chmod 0775 /install_update_db.sh
 
+RUN chown --changes --silent --no-dereference --recursive \
+    --from=101:102 ${USER_ID}:${GROUP_ID} \
+    /var/log/climatestation \
+    /data/static_data/db_dump
+
 
 # Set the docker user postgres with same uid and gid of host
 #RUN mkdir -p /var/lib/postgresql
@@ -46,11 +51,6 @@ RUN chmod 0775 /install_update_db.sh
 #        /var/lib/postgresql \
 #        /var/lib/postgresql/12 \
 #        /var/lib/postgresql/12/main
-
-RUN chown --changes --silent --no-dereference --recursive \
-    --from=101:102 ${USER_ID}:${GROUP_ID} \
-    /var/log/climatestation \
-    /data/static_data/db_dump
 
 #CMD ["chmod", "0775", "-R", "/var/lib/postgresql/12/main"]
 

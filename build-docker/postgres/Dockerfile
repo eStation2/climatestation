@@ -1,53 +1,82 @@
-FROM kartoza/postgis:12.0
+FROM kartoza/postgis:12.1
+
+ARG USER_ID
+ARG GROUP_ID
 
 ADD ./build-docker/postgres/pg_hba.conf /etc/postgresql/12/main/
 RUN chown postgres:postgres /etc/postgresql/12/main/pg_hba.conf
-RUN chown postgres.postgres /var/log/postgresql
+RUN chown postgres.postgres -R /var/log/postgresql
 
-#RUN apt-get update && apt-get install -y nano
-
-RUN mkdir /home/postgres/
-RUN mkdir /var/log/climatestation/
-RUN mkdir -p /var/www/climatestation/
-
+RUN mkdir -p /home/postgres/
 ADD ./build-docker/postgres/.pgpass /home/postgres/
 RUN chmod 0775 -R /home/postgres/
 RUN chown postgres:postgres -R /home/postgres/
 ENV PGPASSFILE=/home/postgres/.pgpass
 
+RUN mkdir -p /var/www/climatestation
+RUN mkdir -p /var/log/climatestation
+RUN chmod 0775 -R /var/log/climatestation
+RUN chown postgres:postgres -R /var/log/climatestation
+
 ADD ./src/database/dbInstall/install_update_db.sh /
 RUN chmod 0775 /install_update_db.sh
 
-ADD ./src/database/dbInstall/install_update_db_old.sh /
-RUN chmod 0775 /install_update_db_old.sh
+#RUN chown --changes --silent --no-dereference --recursive \
+#    --from=101:102 ${USER_ID}:${GROUP_ID} \
+#    /var/log/climatestation \
+#    /data/static_data/db_dump
 
 
+# Set the docker user postgres with same uid and gid of host
+#RUN mkdir -p /var/lib/postgresql
+#RUN mkdir -p /var/lib/postgresql/12
+#RUN mkdir -p /var/lib/postgresql/12/main
+#
+#RUN chmod -R 0777 /var/lib/postgresql
+#RUN chmod -R 0777 /var/lib/postgresql/12
+#RUN chmod -R 0777 /var/lib/postgresql/12/main
+#
+#RUN chown postgres:postgres -R /var/lib/postgresql
+#RUN chown postgres:postgres -R /var/lib/postgresql/12
+#RUN chown postgres:postgres -R /var/lib/postgresql/12/main
+#
+#RUN install -d -m 0777 -o postgres -g postgres /var/lib/postgresql
+#RUN install -d -m 0777 -o postgres -g postgres /var/lib/postgresql/12
+#RUN install -d -m 0777 -o postgres -g postgres /var/lib/postgresql/12/main
+#RUN install -d -m 0777 -o postgres -g postgres /var/log/climatestation
+#RUN install -d -m 0777 -o postgres -g postgres /data/static_data/db_dump
+#
+#RUN chown --changes --silent --no-dereference --recursive \
+#        --from=postgres:postgres ${USER_ID}:${GROUP_ID} \
+#        /var/lib/postgresql \
+#        /var/lib/postgresql/12 \
+#        /var/lib/postgresql/12/main
 
+#CMD ["chmod", "0775", "-R", "/var/lib/postgresql/12/main"]
+
+# Map the container user postgres with same uid and gid of host
+# postgres user id = 101 and group = 102
+#RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
+#    chown postgres:postgres -R /var/lib/postgresql &&\
+#    chown postgres:postgres -R /var/lib/postgresql/12 &&\
+#    install -d -m 0755 -o postgres -g postgres /var/lib/postgresql &&\
+#    install -d -m 0755 -o postgres -g postgres /var/lib/postgresql/12 &&\
+#    install -d -m 0755 -o postgres -g postgres /var/log/climatestation &&\
+#    install -d -m 0755 -o postgres -g postgres /data/static_data/db_dump &&\
+#    chown --changes --silent --no-dereference --recursive \
+#              --from=0:0 ${USER_ID}:${GROUP_ID} \
+#              /var/lib/postgresql/12 &&\
+#    chown --changes --silent --no-dereference --recursive \
+#              --from=101:102 ${USER_ID}:${GROUP_ID} \
+#              /var/lib/postgresql \
+#              /var/log/climatestation \
+#              /data/static_data/db_dump \
+#;fi
 
 
 #ADD ./build-docker/postgres/postgres-docker-entrypoint.sh /postgres-docker-entrypoint.sh
 #RUN chmod 0775 /postgres-docker-entrypoint.sh
-# CMD ["bash", "/postgres-docker-entrypoint.sh"]
-
-#RUN head -2 /docker-entrypoint.sh &gt; /docker-entrypoint.sh.tmp
-#RUN all_lines=`wc -l /docker-entrypoint.sh | cut -d' ' -f1` &amp;&amp; \
-#    new_lines=`expr $all_lines - 3` &amp;&amp; \
-#    tail -$new_lines /docker-entrypoint.sh &gt;&gt; /docker-entrypoint.sh.tmp &amp;&amp; \
-#    mv /docker-entrypoint.sh.tmp /docker-entrypoint.sh
-
-#ADD ./build-docker/postgres/postgis-docker-entrypoint.sh /docker-entrypoint.sh.tmp
-#RUN mv /docker-entrypoint.sh.tmp /docker-entrypoint.sh
-#RUN chmod 777 /docker-entrypoint.sh
-
-#RUN cp /docker-entrypoint.sh /docker-entrypoint.sh.tmp
-#RUN sed -i '$ d' /docker-entrypoint.sh.tmp && \
-#    echo "source /setup_estationdb.sh\n"  >> /docker-entrypoint.sh.tmp && \
-#    tail -1 /docker-entrypoint.sh >> /docker-entrypoint.sh.tmp && \
-#    mv /docker-entrypoint.sh.tmp /docker-entrypoint.sh
-
-# ENTRYPOINT presumes the container runs as an executable and runs the command before the container starts!
-# The postgres container restarts continiously!
-# ENTRYPOINT ["bash", "/root/setup_estationdb.sh"]
-# ENTRYPOINT ["/root/estation2-docker-entrypoint.sh"]
-# ENTRYPOINT ["/usr/bin/env"]
-# CMD ["bash", "/root/postgres-docker-entrypoint.sh"]
+#
+## ENTRYPOINT presumes the container runs as an executable and runs the command before the container starts!
+## The postgres container restarts continiously!
+#ENTRYPOINT ["/postgres-docker-entrypoint.sh"]

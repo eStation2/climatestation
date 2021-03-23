@@ -21,8 +21,13 @@ mkdir -p /data/static_data/settings
 mkdir -p /tmp/climatestation
 mkdir -p /tmp/climatestation/services
 
+# TODO: get layers and logos (and docs?) from our JRC FTP and extract them into their respective dir under static_data.
+
 chmod 775 -R /data
 chmod 775 -R /tmp
+
+# create an external docker volume for the postgresql data:
+docker volume create --name cs-docker-postgresql12-volume -d local
 
 # Build and run the climate station containers: mapserver, potsgres and web
 docker-compose -f ./docker-compose-JRC.yml up -d --build

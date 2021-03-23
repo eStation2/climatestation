@@ -10,6 +10,58 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 
+
+ALTER TABLE products.product DROP CONSTRAINT product_pk CASCADE;
+ALTER TABLE products.product ADD CONSTRAINT product_pk PRIMARY KEY (productcode, version, defined_by);
+
+ALTER TABLE products.sub_product DROP CONSTRAINT sub_product_pk CASCADE;
+ALTER TABLE products.sub_product ADD CONSTRAINT sub_product_pk PRIMARY KEY (productcode, subproductcode, version, defined_by);
+ALTER TABLE products.sub_product
+    DROP CONSTRAINT IF EXISTS fk_sub_product_product,
+    ADD CONSTRAINT fk_sub_product_product FOREIGN KEY (productcode, version, defined_by)
+            REFERENCES products.product (productcode, version, defined_by) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE products.acquisition DROP CONSTRAINT IF EXISTS product_acquisition_data_source_pk CASCADE;
+ALTER TABLE products.acquisition ADD CONSTRAINT product_acquisition_data_source_pk PRIMARY KEY (productcode, version, defined_by, data_source_id);
+ALTER TABLE products.acquisition
+    DROP CONSTRAINT IF EXISTS product_acquisition_fk,
+    ADD CONSTRAINT product_acquisition_fk FOREIGN KEY (productcode, version, defined_by)
+        REFERENCES products.product (productcode, version, defined_by) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE;
+
+ALTER TABLE products.ingestion DROP CONSTRAINT IF EXISTS ingestion_pk CASCADE;
+ALTER TABLE products.ingestion ADD CONSTRAINT ingestion_pk PRIMARY KEY (productcode, subproductcode, version, defined_by, mapsetcode);
+ALTER TABLE products.ingestion
+    DROP CONSTRAINT IF EXISTS sub_product_ingestion_fk,
+    ADD CONSTRAINT sub_product_ingestion_fk FOREIGN KEY (productcode, subproductcode, version, defined_by)
+        REFERENCES products.sub_product (productcode, subproductcode, version, defined_by) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE;
+
+ALTER TABLE products.sub_datasource_description ADD COLUMN defined_by character varying NOT NULL DEFAULT 'JRC'::character varying;
+ALTER TABLE products.sub_datasource_description DROP CONSTRAINT IF EXISTS sub_datasource_description_pk CASCADE;
+ALTER TABLE products.sub_datasource_description ADD CONSTRAINT sub_datasource_description_pk PRIMARY KEY (productcode, subproductcode, version, defined_by, datasource_descr_id);
+ALTER TABLE products.sub_datasource_description
+    DROP CONSTRAINT IF EXISTS sub_product_sub_datasource_description_fk,
+    ADD CONSTRAINT sub_product_sub_datasource_description_fk FOREIGN KEY (productcode, subproductcode, version, defined_by)
+        REFERENCES products.sub_product (productcode, subproductcode, version, defined_by) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE;
+
+ALTER TABLE products.process_product ADD COLUMN defined_by character varying NOT NULL DEFAULT 'JRC'::character varying;
+ALTER TABLE products.process_product DROP CONSTRAINT IF EXISTS process_input_product_pk CASCADE;
+ALTER TABLE products.process_product ADD CONSTRAINT process_input_product_pk PRIMARY KEY (process_id, productcode, subproductcode, version, mapsetcode, defined_by);
+ALTER TABLE products.process_product
+    DROP CONSTRAINT IF EXISTS sub_product_dependencies_fk,
+    ADD CONSTRAINT sub_product_dependencies_fk FOREIGN KEY (productcode, subproductcode, version, defined_by)
+        REFERENCES products.sub_product (productcode, subproductcode, version, defined_by) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE;
+
+
+
 DROP TABLE IF EXISTS products.product_new CASCADE;
 
 CREATE TABLE IF NOT EXISTS products.product_new
