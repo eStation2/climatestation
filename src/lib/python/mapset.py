@@ -44,6 +44,7 @@ class MapSet(object):
         self.size_y = 0
         self.short_name = ''
         self.pixel_area = None
+        self.bbox = [-90, 90, -180, 180]
 
     def assigndb(self, mapsetcode):
         mapset = querydb.get_mapset(mapsetcode)
@@ -60,6 +61,7 @@ class MapSet(object):
         self.size_x = int(mapset.pixel_size_x)
         self.size_y = int(mapset.pixel_size_y)
         self.short_name = mapset.mapsetcode
+        self.bbox =self.get_bbox(mapset)
 
     def assign(self, spatial_ref_wkt, geo_transform, size_x, size_y, short_name):
         # Assign to passed arguments
@@ -335,6 +337,12 @@ class MapSet(object):
         output_ds.SetGeoTransform(orig_geotranform)
         output_ds.GetRasterBand(1).WriteArray(areas)
         output_ds = None
+
+    def get_bbox(self, mapset):
+        # Return bbox
+        # # :param zc: geographic # extensions, default = [-90S, 90N, -180W, 180E]
+        bbox = [float(mapset.lower_right_lat), float(mapset.upper_left_lat), float(mapset.upper_left_long), float(mapset.lower_right_long)]
+        return bbox
 
     # def assign_ecowas(self):
     #     # Assign the VGT4Africa default mapset for ECOWAS region

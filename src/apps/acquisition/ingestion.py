@@ -525,11 +525,15 @@ def get_subrproducts_from_ingestion(product, datasource_descr_id):
             re_process = product_in_info.re_process
             re_extract = product_in_info.re_extract
             nodata_value = product_in_info.no_data
+            in_scale_factor = product_in_info.scale_factor
+            in_offset = product_in_info.scale_offset
             sprod = {'subproduct': ingest.subproductcode,
                      'mapsetcode': ingest.mapsetcode,
                      're_extract': re_extract,
                      're_process': re_process,
-                     'nodata': nodata_value}
+                     'nodata': nodata_value,
+                     'in_scale_factor': in_scale_factor,
+                     'in_offset': in_offset}
             subproducts.append(sprod)
         except:
             logger.warning("Subproduct %s not defined for source %s" % (

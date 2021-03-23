@@ -34,7 +34,7 @@ psutil
 #pymorph
 scikit-image
 docker-py
-
+netCDF4
 ###################
 # For C3SF4P
 ###################

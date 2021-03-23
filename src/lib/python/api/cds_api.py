@@ -12,6 +12,8 @@ import pycurl
 import certifi
 import base64
 from lib.python import es_logging as log
+from database import querydb
+from apps.acquisition import ingestion_netcdf, ingestion
 from io import BytesIO
 logger = log.my_logger(__name__)
 from datetime import datetime
@@ -500,7 +502,7 @@ def create_list_cds(dates, template, base_url, resourcename_uuid):
     resourcename_identifier = create_basic_resourcename_identifier(resources_parameters, resourcename_uuid)
     list_resource = []
     for date in dates:
-        list_resource.append(date.strftime("%Y%m%d%H%M%S")+':'+resourcename_identifier+':'+variable)
+        list_resource.append(date.strftime("%Y%m%d%H%M")+':'+resourcename_identifier+':'+variable)
 
     return list_resource
 
@@ -628,7 +630,7 @@ def remove_resoucename(dict):
 def read_cds_parameter_file(internet_id):
     #Read the CDS parameters from the file.
     try:
-        parameter_file = '/eStation2/get_lists/get_cds/' +internet_id.replace(":", "_")+'.txt'
+        parameter_file ='/data/static_data/config_cds/' +internet_id.replace(":", "_")+'.txt'
         with open(parameter_file) as json_file:
             data = json.load(json_file)
     except:
@@ -662,3 +664,19 @@ def build_list_matching_files_cds_period(base_url, template, resourcename_uuid):
         raise
 
     return list_input_files
+
+#######################
+### Ingest Netcdf
+#######################
+def ingest_netcdf_cds(internet_source, downloaded_file, processed_item):
+    product = {"productcode": internet_source.productcode,
+               "version": internet_source.version}
+
+    # Datasource description
+    datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_source.internet_id)
+    datasource_descr = datasource_descr[0]
+    # Get list of subproducts
+
+    sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
+    ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, processed_item.split(':')[0], product, sub_datasource,
+                                                             datasource_descr, logger)
