@@ -1,0 +1,4 @@
+psql:/var/www/climatestation/database/dbInstall/update_db_structure.sql:725: ERROR:  column "defined_by" of relation "layers" already exists
+psql:/var/www/climatestation/database/dbInstall/update_db_structure.sql:726: ERROR:  column "open_in_mapview" of relation "layers" already exists
+psql:/var/www/climatestation/database/dbInstall/update_db_structure.sql:727: ERROR:  column "provider" of relation "layers" already exists
+psql:/var/www/climatestation/database/dbInstall/update_db_structure.sql:1525: ERROR:  function products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean) does not exist

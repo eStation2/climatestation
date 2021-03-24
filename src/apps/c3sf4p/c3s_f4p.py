@@ -1,12 +1,11 @@
 """
 # ###############################################################################
-# version:          R1.0                                                        #
+# version:          R1.0.0                                                      #
 # created by:       F.Cappucci  --- fabrizio.cappucci@ext.ec.europa.eu          #
 # creation date:    23 Feb 2021                                                 #
 # property of:      JRC                                                         #
 # purpose:          Main class that links web interface and function libraries  #
-#             --------------------------------------------------                #
-# last edit:        in development                                              #
+# last edit:        today => under development                                  #
 #  --------------------------------------------------------------------------   #
 #  --------------------------------------------------------------------------   #
 #                                                                               #
@@ -16,10 +15,10 @@
 #  --------------------------------------------------------------------------   #
 # ###############################################################################
 """
-
-from src.apps.c3sf4p.read_raster import RasterDataset
+import os
+from src.lib.python.image_proc.read_write_raster import RasterDataset
 import numpy as np
-from src.apps.c3sf4p.pytrend.TrendStarter import TrendClass
+from src.apps.c3sf4p.pytrend import TrendStarter as Ts
 from inspect import currentframe, getframeinfo
 import src.apps.c3sf4p.f4p_utilities.stats_funcions as sf
 import psutil
@@ -30,7 +29,7 @@ class Fitness4Purpose(object):
     """
     Entry point to trigger the c3sf4p capabilities
     """
-    def __init__(self, file_list, ecv, band_names, region_name='', region_coordinates=None):
+    def __init__(self, file_list, ecv, band_names, region_name='', region_coordinates=None, dbg=False):
         """
         :param file_list:           LIST of Strings: file or list of files to analyse,
                                     this parameter should be specified as a list-of-lists, where len(file_list)
@@ -71,13 +70,15 @@ class Fitness4Purpose(object):
                                     In this convention the following condition should always be verified: S<N and W<E
                                     the tools also implements this test, and if wrong it throws an exception
 
+        :param dbg:                 enables debug mode
+
         """
         self.lof = file_list
         self.ecv = ecv
         self.bands = band_names
         self.zn = region_name
         self.zc = region_coordinates
-        self.dbg = True
+        self.dbg = dbg
         self.n_cores = psutil.cpu_count(logical=False)
         self._check_input()
 
@@ -180,7 +181,7 @@ class Fitness4Purpose(object):
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             print(info)
-            print('Generating the plot for testing purposes')
+            print('Generating the scatter plot for testing purposes')
             from src.apps.c3sf4p.f4p_plot_functions.plot_scatter import graphical_render
 
             graphical_render(data[0], data[1], x_label=data_labels[0], y_label=data_labels[1], figure_title=fig_title)
@@ -205,9 +206,138 @@ class Fitness4Purpose(object):
 
         # initialise data matrix to host hovmoller calculation
         data = np.zeros([sz, len(filelist)])
-        #stop
-        # out = Parallel(n_jobs=self.n_cores)(delayed(sf.par_hov)(filelist, band_name, k, 0,
-        #                                                 n_land, is_anomaly, is_absolute, self.zc, self.mask,
-        #                                                 self.lc_val, self.lc_type, tfl=tfl) for k in x_set)
 
+        # notice that if self.n_cores = 1 the parallel statement behave like a normal for loop
+        out = Parallel(n_jobs=self.n_cores)(delayed(sf.par_hov)(filelist, band_name, k) for k in x_set)
 
+        # unrol the output of parallel computation
+        for j in x_set:
+
+            ii = int(out[j][0][1])
+            d = out[j][0][0]
+            data[:, ii] = d
+            rd = RasterDataset(filelist[j])
+            x_tick_labels.append(rd.date)
+
+        hov_matrix = np.array(data)
+
+        y_tick_spaces = [np.linspace(self.zc[0], self.zc[1], 10)]
+
+        y_tick_labels = []
+        for tick in y_tick_spaces:
+            if tick < 0:
+                card = 'S'
+            else:
+                card = 'N'
+
+            y_tick_labels.append(str("{:.1f}".format(tick)) + '$^\circ$' + card)
+
+        sens_name = RasterDataset(filelist[0]).sensor_code
+
+        """from here one must call a routine to render the plot, to be seen with Jurriaan"""
+
+        # for testing the function call a matplotlib function to plot data
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            print(info)
+            print('Generating latitudinal average plot for testing purposes')
+            from src.apps.c3sf4p.f4p_plot_functions.plot_hovmoller import graphical_render
+
+            graphical_render(hov_matrix, band_name, sensor_name=sens_name, x_tick_labels=x_tick_labels,
+                             y_tick_labels=y_tick_labels)
+
+    def trend_analysis(self, num_jobs=10, num_partitions=10):
+        """
+        this function implements the analysis of trend given a timeseries of data. The Analysis is performed in
+        compliance with the Mann Kendall method [TODO...to be completed...]
+        :param num_jobs:
+        :param num_partitions:
+        :return:
+        """
+        '''
+        freq2number correlates the frequency string with a integer number which express the number of 
+        observation in one year. The numbers answer the question: How many files in one year?  
+        '''
+        freq2number = {'2pday': 730,
+                       'e15minute': 4*24*365,
+                       'e1cgldekad': 3*12,
+                       'e1day': 365,
+                       'e1decad': 3*12,
+                       'e1modis16day': 23,
+                       'e1modis8day': 46,
+                       'e1month': 12,
+                       'e1motu7day': 4*12,
+                       'e1pentad': 6*12,
+                       'e1year': 1,
+                       'e30minute': 24*2*365,
+                       'e3hour': 24/3 * 365,
+                       'e3month': 4,
+                       'e6month': 2}
+
+        for nd in range(len(self.lof)):
+            rd0 = RasterDataset(self.lof[nd][0])
+            sn = rd0.sensor_code
+            try:
+                frequency = freq2number[rd0.frequency]
+            except KeyError:
+                frequency = None
+                msg = 'frequency not allowed'
+                print(msg)
+                exit()
+
+            mk_tag = 'MK'
+            trend_flag = 'Mann-Kendall-Trend'
+            date = rd0.year + '-' + RasterDataset(self.lof[nd][-1]).year
+
+            # TODO define a trend name to be saved in a predefined folder-structure to not repeat the calc
+            #  when done once
+
+            trend_path = './'
+            tmp_path = trend_path + 'TMP' + os.sep
+            trend_name = trend_path + ''
+
+            # todo this parameter triggers the calc of trend in a sub-region of the nominal geographical coverage of
+            #  the product
+            try_reshape = False
+
+            #  this parameter triggers the actual calculation, if it is already run once i.e. trend_name exists, then
+            #  do cal is set to False
+            do_calc = True
+
+            if try_reshape:
+                if os.path.exists(trend_name):
+                    do_calc = False
+            if os.path.exists(trend_name):
+                do_calc = False
+
+            if do_calc:
+                if not os.path.exists(tmp_path):
+                    try:
+                        os.makedirs(tmp_path)
+                    except IOError:
+                        msg = 'Cannot write on ' + tmp_path + 'please check. programm exit!'
+                        raise Exception(msg)
+
+                tc = Ts.TrendClass(self.lof[nd], self.bands[nd], tmp_path, coordinates=self.zc, njobs=num_jobs,
+                                   partitions=num_partitions, freq=frequency)
+                slopes, intercepts, pvalues = tc.start_loop()
+
+                if os.path.exists(tmp_path):
+                    rm_dir = os.removedirs(tmp_path)
+
+                rdw = RasterDataset(trend_name)
+
+                rdw.write_nc([slopes, intercepts, pvalues], ['slopes', 'intercepts', 'pvalues'],
+                             fill_value=np.nan, scale_factor=1, offset=0, dtype='float', zc=self.zc, mode='w')
+
+            else:
+                rd = RasterDataset(trend_name)
+
+                slopes = rd.get_data('slopes', subsample_coordinates=self.zc)
+                pvalues = rd.get_data('pvalues', subsample_coordinates=self.zc)
+
+            slopes[pvalues > 0.05] = np.nan
+
+            pf.plot_map(slopes, sensor_name=sn, product=self.product[nd], ecv_type=self.ecv, plot_type='Trend',
+                        zone_name=self.zn, zone_coord=self.zc, is_save=is_save, is_show=is_show,
+                        is_mk=do_mk, water_mask=self.water_mask, str_output_fname=save_name)
