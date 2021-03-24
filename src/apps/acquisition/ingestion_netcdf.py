@@ -185,7 +185,7 @@ def ingestion_post_processing(composed_file_list, in_date, product, subproducts,
 
             if os.path.isfile(tmp_file):
                 shutil.move(tmp_file, output_path_filename)
-                ingestion_status = write_status
+                ingestion_status = True
     except:
         my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
         shutil.rmtree(tmpdir)
