@@ -176,12 +176,12 @@ def ingestion_post_processing(composed_file_list, in_date, product, subproducts,
             product_out_info = querydb.get_subproduct(productcode=product['productcode'],version=product['version'],subproductcode=subproduct['subproduct'])
 
             tmp_file = tmpdir+'tmp_file.nc'
-            # write_status = NetCDF_Writer.write_nc(file_name=tmp_file, data=[data_numpy_array], dataset_tag=[product_out_info.subproductcode],
-            #                                       zc=trg_mapset.bbox, fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
-            #                                       write_CS_metadata=metadata)
             write_status = NetCDF_Writer.write_nc(file_name=tmp_file, data=[data_numpy_array], dataset_tag=[product_out_info.subproductcode],
-                                                  fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
+                                                  zc=trg_mapset.bbox, fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
                                                   write_CS_metadata=metadata)
+            # write_status = NetCDF_Writer.write_nc(file_name=tmp_file, data=[data_numpy_array], dataset_tag=[product_out_info.subproductcode],
+            #                                       fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
+            #                                       write_CS_metadata=metadata)
 
             if os.path.isfile(tmp_file):
                 shutil.move(tmp_file, output_path_filename)
@@ -407,7 +407,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
     try:
         if preproc_type == 'IRI':
-            sprod_data_list = pre_process_iri(subproducts, input_file, tmpdir, my_logger)
+            sprod_data_list = pre_process_iri(subproducts, input_file, native_mapset_code, tmpdir, my_logger)
 
         else:
             my_logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
@@ -435,7 +435,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
     # set_geoTransform_projection(native_mapset_code, georef_already_done, list_interm_files, my_logger)
     return sprod_data_list
 
-def pre_process_iri(subproducts, input_file,my_logger, in_date=None):
+def pre_process_iri(subproducts, input_file, native_mapset_code, my_logger, in_date=None):
     try:
         # This pre processed list contains list of object(subproduct,data(numpy array))key value pair
         pre_processed_list = []
@@ -451,7 +451,8 @@ def pre_process_iri(subproducts, input_file,my_logger, in_date=None):
             raster.set_CS_subproduct_parameter(subproduct)
             # NATIVE bbox [s, n, w, e], [lat_0, lon_0]
             # native_bbox, nativelat0long0 = raster.get_coordinates()
-            data_numpy_array = raster.get_data() # conversion to physical value by applying nodatavalue
+            # data_numpy_array = raster.get_data() # conversion to physical value by applying nodatavalue
+            data_numpy_array = raster.get_data_CS_netcdf(target_mapset_name=mapsetcode, native_mapset_name=native_mapset_code) # conversion to physical value by applying nodatavalue
             pre_processed_data = {'subproduct': subproduct,  'data_array': data_numpy_array}
             pre_processed_list.append(pre_processed_data)
     except:

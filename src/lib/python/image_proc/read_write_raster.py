@@ -18,7 +18,7 @@
 # ###############################################################################
 """
 
-from osgeo import gdal, osr
+from osgeo import gdal, osr, gdalconst
 import numpy as np
 import os
 import re
@@ -28,10 +28,11 @@ try:
 except ModuleNotFoundError:
     SdsMetadata = None
 from netCDF4 import Dataset
+from lib.python import mapset
 
 
 class RasterDataset(object):
-    def __init__(self, filename, product=None, data_provider=None):
+    def __init__(self, filename, product=None):
         """
         :param filename: filename of the raster file to read (can be either a geotif or a netCDF file)
                         The routine uses the right method to read the file in relation to its file extension
@@ -142,22 +143,41 @@ class RasterDataset(object):
         else:
             return self._get_netcdf()
 
+    def get_data_CS_netcdf(self, target_mapset_name, native_mapset_name):
+        # Read original dataset
+        native_dataset = self._get_GDAL_dataset()
+        # Clip the native dataset to target bbox ? or change resolution
+        pre_proccessed_dataset = self.do_reproject(native_dataset, target_mapset_name=target_mapset_name, native_mapset_name=native_mapset_name)
+        # Apply input scaling factor offset nodata and get physical value data
+        pre_processed_data_array = np.array(pre_proccessed_dataset.ReadAsArray())
+        physicalvalue_data_array = self._process_data(pre_processed_data_array, pre_proccessed_dataset)
+
+        return physicalvalue_data_array
+
     def _get_netcdf(self):
         """
         read the band layer and return it as numpy array
         the function is based on gdal
         :return:
         """
-        if self.band is None:
-            fid = self.filename
-        else:
-            fid = 'NETCDF:' + '"' + self.filename + '":' + self.band
-        gobj = gdal.Open(fid)
+        # if self.band is None:
+        #     fid = self.filename
+        # else:
+        #     fid = 'NETCDF:' + '"' + self.filename + '":' + self.band
+        gobj = self._get_GDAL_dataset()
         self.meta = gobj.GetMetadata()
         # data_type, fv, sf, add_of, vmin, vmax = self._get_netcdf_attr()
         _data = np.array(gobj.ReadAsArray())
 
         return self._process_data(_data, gobj)
+
+    def _get_GDAL_dataset(self):
+        if self.band is None:
+            fid = self.filename
+        else:
+            fid = 'NETCDF:' + '"' + self.filename + '":' + self.band
+        gobj = gdal.Open(fid)
+        return gobj
 
     def _process_data(self, data, gobj):
         """
@@ -420,3 +440,65 @@ class RasterDataset(object):
             self.add_offset = subproduct['in_offset']
             self.band = subproduct['re_extract']
 
+    #This reproject is basically used to 3 purpose
+    # 1. Assign Projection information to the netcdf dataset since this information is avaialble as lat lon
+    # 2. Clip the target bounding box (target bbox is taken from target mapset)
+    # 3. Resampling or resolution change (conversion of resolution eg.10km to 1km)
+    def do_reproject(self, orig_ds, target_mapset_name, native_mapset_name=None):
+
+        # Open the input file
+        # orig_ds = gdal.Open(self.filename)
+
+        if native_mapset_name is not None:
+            native_mapset = mapset.MapSet()
+            native_mapset.assigndb(native_mapset_name)
+            orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
+            # orig_size_x = native_mapset.size_x
+            # orig_size_y = native_mapset.size_y
+            orig_band = orig_ds.GetRasterBand(1)
+            # orig_ds.SetGeoTransform(native_mapset.geo_transform)
+            orig_ds.SetProjection(orig_cs.ExportToWkt())
+        else:
+            orig_cs = osr.SpatialReference()
+            orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+            orig_band = orig_ds.GetRasterBand(1)
+            # orig_ds.SetGeoTransform(native_mapset.geo_transform)
+            # orig_ds.SetProjection(native_mapset.spatial_ref.ExportToWkt())
+
+        in_data_type = orig_band.DataType
+
+        # Get the Target mapset
+        trg_mapset = mapset.MapSet()
+        trg_mapset.assigndb(target_mapset_name)
+        out_cs = trg_mapset.spatial_ref
+        out_size_x = trg_mapset.size_x
+        out_size_y = trg_mapset.size_y
+
+        # Create target in memory
+        mem_driver = gdal.GetDriverByName('MEM')
+
+        # Assign mapset to dataset in memory
+        out_data_type_gdal = in_data_type
+        mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+        mem_ds.SetGeoTransform(trg_mapset.geo_transform)
+        mem_ds.SetProjection(out_cs.ExportToWkt())
+
+        # Do the Re-projection
+        orig_wkt = orig_cs.ExportToWkt()
+        res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
+                                  gdalconst.GRA_NearestNeighbour)
+
+        # out_data = mem_ds.ReadAsArray()
+        #
+        # output_driver = gdal.GetDriverByName('GTiff')
+        # output_ds = output_driver.Create('/data/ingest/reproject_cliped_iri_default.tif', out_size_x, out_size_y, 1, in_data_type)
+        # output_ds.SetGeoTransform(trg_mapset.geo_transform)
+        # output_ds.SetProjection(out_cs.ExportToWkt())
+        # output_ds.GetRasterBand(1).WriteArray(out_data, 0, 0)
+        #
+        # trg_ds = None
+        # mem_ds = None
+        # orig_ds = None
+        # output_driver = None
+        # output_ds = None
+        return mem_ds
