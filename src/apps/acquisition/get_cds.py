@@ -213,13 +213,13 @@ def get_file_from_url(remote_url_file, target_dir, target_file=None, userpwd='',
 
 
 ######################################################################################
-#   loop_get_internet
-#   Purpose: drive the get_internet as a service
-#   Author: Marco Clerici, JRC, European Commission
-#   Date: 2014/09/01
+#   loop_get_cds_iri
+#   Purpose: drive the get_cds as a service
+#   Author: VIJAY CHARAN, JRC, European Commission
+#   Date: 2021/03/24
 #   Inputs: none
 #   Arguments: dry_run -> if set, read tables and report activity ONLY
-def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
+def loop_get_cds_iri(dry_run=False, test_one_source=False, my_source=None):
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info
 
@@ -257,125 +257,124 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
             # else:
 
             logger.info("Reading active INTERNET data sources from database")
-            # internet_sources_list = querydb.get_active_internet_sources()
+            internet_sources_list = querydb.get_active_internet_sources()
 
             # Loop over active triggers
-            # for internet_source in internet_sources_list:
-            try:
-                # # In case of test_one_source, skip all other sources
-                # if test_one_source:
-                #     if (internet_source.internet_id != test_one_source):
-                #         logger.debug("Running in test mode, and source is not %s. Continue.", test_one_source)
-                #         continue
-                #     else:
-                        # Overwrite DB definitions with the passed object (if defined - for testing purposes)
-                if my_source:
-                    internet_source = my_source
+            for internet_source in internet_sources_list:
+                try:
+                    # In case of test_one_source, skip all other sources
+                    if test_one_source:
+                        if (internet_source.internet_id != test_one_source):
+                            logger.debug("Running in test mode, and source is not %s. Continue.", test_one_source)
+                            continue
+                        else:
+                            # Overwrite DB definitions with the passed object (if defined - for testing purposes)
+                            if my_source:
+                                internet_source = my_source
 
-                execute_trigger = True
-                # Get this from the pads database table (move from internet_source 'pull_frequency' to the pads table,
-                # so that it can be exploited by eumetcast triggers as well). It is in minute
-                pull_frequency = internet_source.pull_frequency
-
-                # Manage the case of files to be continuously downloaded (delay < 0)
-                if pull_frequency < 0:
-                    do_not_consider_processed_list = True
-                    delay_time_source_minutes = -pull_frequency
-                else:
-                    do_not_consider_processed_list = False
-                    delay_time_source_minutes = pull_frequency
-
-                if sys.platform == 'win32':
-                    internet_id = str(internet_source.internet_id).replace(':', '_')
-                else:
-                    internet_id = str(internet_source.internet_id)
-
-                logger_spec = log.my_logger('apps.get_internet.' + internet_id)
-                logger.info("Processing internet source  %s.", internet_source.descriptive_name)
-
-                # Create objects for list and info
-                processed_info_filename = es_constants.get_internet_processed_list_prefix + str(
-                    internet_id) + '.info'
-
-                # Restore/Create Info
-                processed_info = None
-                processed_info = functions.restore_obj_from_pickle(processed_info, processed_info_filename)
-                if processed_info is not None:
-                    # Check the delay
-                    current_delta = datetime.datetime.now() - processed_info['time_latest_exec']
-                    current_delta_minutes = int(old_div(current_delta.seconds, 60))
-                    if current_delta_minutes < delay_time_source_minutes:
-                        logger.debug("Still waiting up to %i minute - since latest execution.",
-                                     delay_time_source_minutes)
-                        execute_trigger = False
-                else:
-                    # Create processed_info object
-                    processed_info = {'lenght_proc_list': 0,
-                                      'time_latest_exec': datetime.datetime.now(),
-                                      'time_latest_copy': datetime.datetime.now()}
                     execute_trigger = True
+                    # Get this from the pads database table (move from internet_source 'pull_frequency' to the pads table,
+                    # so that it can be exploited by eumetcast triggers as well). It is in minute
+                    pull_frequency = internet_source.pull_frequency
 
-                if execute_trigger:
-                    # Restore/Create List
-                    processed_list = []
-                    if not do_not_consider_processed_list:
-                        processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_id + '.list'
-                        processed_list = functions.restore_obj_from_pickle(processed_list,
-                                                                           processed_list_filename)
-
-                    processed_info['time_latest_exec'] = datetime.datetime.now()
-
-                    logger.debug("Create current list of file to process for source %s.",
-                                 internet_source.internet_id)
-                    if internet_source.user_name is None:
-                        user_name = "anonymous"
+                    # Manage the case of files to be continuously downloaded (delay < 0)
+                    if pull_frequency < 0:
+                        do_not_consider_processed_list = True
+                        delay_time_source_minutes = -pull_frequency
                     else:
-                        user_name = internet_source.user_name
+                        do_not_consider_processed_list = False
+                        delay_time_source_minutes = pull_frequency
 
-                    if internet_source.password is None:
-                        password = "anonymous"
+                    if sys.platform == 'win32':
+                        internet_id = str(internet_source.internet_id).replace(':', '_')
                     else:
-                        password = internet_source.password
+                        internet_id = str(internet_source.internet_id)
 
-                    usr_pwd = str(user_name) + ':' + str(password)
+                    logger_spec = log.my_logger('apps.get_internet.' + internet_id)
+                    logger.info("Processing internet source  %s.", internet_source.descriptive_name)
 
-                    logger_spec.debug("              Url is %s.", internet_source.url)
-                    logger_spec.debug("              usr/pwd is %s.", usr_pwd)
-                    logger_spec.debug("              regex   is %s.", internet_source.include_files_expression)
+                    # Create objects for list and info
+                    processed_info_filename = es_constants.get_internet_processed_list_prefix + str(
+                        internet_id) + '.info'
 
-                    internet_type = internet_source.type
-
-                    if internet_type == 'cds_api':
-                        current_list = cds_api_loop_internet(internet_source)
-                    elif internet_type == 'iri_api':
-                        current_list = iri_api_loop_internet(internet_source)
-
+                    # Restore/Create Info
+                    processed_info = None
+                    processed_info = functions.restore_obj_from_pickle(processed_info, processed_info_filename)
+                    if processed_info is not None:
+                        # Check the delay
+                        current_delta = datetime.datetime.now() - processed_info['time_latest_exec']
+                        current_delta_minutes = int(old_div(current_delta.seconds, 60))
+                        if current_delta_minutes < delay_time_source_minutes:
+                            logger.debug("Still waiting up to %i minute - since latest execution.",
+                                         delay_time_source_minutes)
+                            execute_trigger = False
                     else:
-                        logger.error("No correct type for this internet source type: %s" % internet_type)
-                        current_list = []
+                        # Create processed_info object
+                        processed_info = {'lenght_proc_list': 0,
+                                          'time_latest_exec': datetime.datetime.now(),
+                                          'time_latest_copy': datetime.datetime.now()}
+                        execute_trigger = True
 
-                    return True
-                #         logger_spec.debug("Number of files currently available for source %s is %i", internet_id,
-                #                           len(current_list))
-                #
-                #
-                #         if not dry_run:
-                #             functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-                #             functions.dump_obj_to_pickle(processed_info, processed_info_filename)
-                #
-                #     if test_one_source:
-                #         b_loop = False
-                #     else:
-                #         sleep(float(user_def_sleep))
-            # # Loop over sources
-            except Exception as inst:
-                logger.error("Error while processing source %s. Continue" % internet_source.descriptive_name)
-                b_error = True
-    #             sleep(float(user_def_sleep))
-    # if not test_one_source:
-    #     exit(0)
-    # else:
-    #     return b_error
+                    if execute_trigger:
+                        # Restore/Create List
+                        processed_list = []
+                        if not do_not_consider_processed_list:
+                            processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_id + '.list'
+                            processed_list = functions.restore_obj_from_pickle(processed_list,
+                                                                               processed_list_filename)
+
+                        processed_info['time_latest_exec'] = datetime.datetime.now()
+
+                        logger.debug("Create current list of file to process for source %s.",
+                                     internet_source.internet_id)
+                        if internet_source.user_name is None:
+                            user_name = "anonymous"
+                        else:
+                            user_name = internet_source.user_name
+
+                        if internet_source.password is None:
+                            password = "anonymous"
+                        else:
+                            password = internet_source.password
+
+                        usr_pwd = str(user_name) + ':' + str(password)
+
+                        logger_spec.debug("              Url is %s.", internet_source.url)
+                        logger_spec.debug("              usr/pwd is %s.", usr_pwd)
+                        logger_spec.debug("              regex   is %s.", internet_source.include_files_expression)
+
+                        internet_type = internet_source.type
+
+                        if internet_type == 'cds_api':
+                            current_list = cds_api_loop_internet(internet_source)
+                        elif internet_type == 'iri_api':
+                            current_list = iri_api_loop_internet(internet_source)
+
+                        else:
+                            logger.debug("No correct type for this internet source type: %s" % internet_type)
+                            current_list = []
+
+                        logger_spec.debug("Number of files currently available for source %s is %i", internet_id,
+                                          len(current_list))
+
+
+                        if not dry_run:
+                            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                            functions.dump_obj_to_pickle(processed_info, processed_info_filename)
+
+                    # if test_one_source:
+                    #     b_loop = False
+                    # else:
+                    #     sleep(float(user_def_sleep))
+                # # Loop over sources
+                except Exception as inst:
+                    logger.error("Error while processing source %s. Continue" % internet_source.descriptive_name)
+                    b_error = True
+            sleep(float(user_def_sleep))
+    if not test_one_source:
+        exit(0)
+    else:
+        return b_error
 
 def cds_api_loop_internet(internet_source):
     logger_spec = log.my_logger('apps.get_internet.' + internet_source.internet_id)
@@ -398,13 +397,10 @@ def cds_api_loop_internet(internet_source):
     #Read the CDS parameters from the file.
     parameter = cds_api.read_cds_parameter_file(internet_source.internet_id)
 
-    # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:MONTH"
-    # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:HOUR"
-    # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:DAY"
-    # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:HOUR:PRESSURE925"
-    # internet_source.resourcename_uuid = internet_source.files_filter_expression
-    # internet_source.include_files_expression = {"resourcename_uuid":"reanalysis-era5-single-levels", "format": "netcdf", "product_type": "reanalysis",
-    #     "variable": "sea_surface_temperature", "year": None,"month": None, "day":None }
+    if internet_source.productcode is None or internet_source.version is None:
+        logger.error("Product is not passed")
+        return
+
     if parameter is not None:
         resourcename_uuid = parameter.get('resourcename_uuid')
         template_paramater = parameter.get('template')
@@ -548,22 +544,10 @@ def iri_api_loop_internet(internet_source):
     # Create the full filename from a 'template' which contains
     internet_url = str(internet_source.url)
 
-    # #Read the CDS parameters from the file.
-    # parameter = iri_api.read_parameter_file(internet_source.internet_id)
-
-    # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:MONTH"
-
-    # if parameter is not None:
-    # resourcename_uuid = parameter.get('resourcename_uuid')
-    # template_paramater = parameter.get('template')
-    # else:
-    # resourcename_uuid = internet_source.files_filter_expression
-    # template_paramater = internet_source.include_files_expression
-
-    processed_list = []
-    processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_source.internet_id + '.list'
-    processed_list = functions.restore_obj_from_pickle(processed_list,
-    processed_list_filename)
+    # processed_list = []
+    # processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_source.internet_id + '.list'
+    # processed_list = functions.restore_obj_from_pickle(processed_list,
+    # processed_list_filename)
     try:
         # Check if template is dict or string them create resources_parameters
         # if type(template_paramater) is dict:
@@ -585,9 +569,9 @@ def iri_api_loop_internet(internet_source):
         subproducts = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
         dates = build_list_dates_generic(from_date=internet_source.start_date, to_date=internet_source.end_date, frequency_id=str(internet_source.frequency_id))
         # Dates defined are dynamic not based on the configuration file
-        processed_list = iri_api.process_list_matching_url(datasource_descr, product, subproducts, dates, processed_list)
+        processed_list = iri_api.process_list_matching_url(datasource_descr, product, subproducts, dates)
 
-        functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+        # functions.dump_obj_to_pickle(processed_list, processed_list_filename)
 
     except:
         logger.error("Error in IRI service. Continue")
@@ -596,7 +580,7 @@ def iri_api_loop_internet(internet_source):
     finally:
         logger.info("IRI service Ending")
         current_list = []
-        # return current_list
+        return current_list
 
 
 
