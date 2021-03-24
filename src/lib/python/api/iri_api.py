@@ -16,6 +16,7 @@ import shutil
 import urllib
 from lib.python import es_logging as log
 from lib.python import functions
+from apps.acquisition import ingestion_netcdf
 from io import BytesIO
 logger = log.my_logger(__name__)
 from datetime import datetime
@@ -281,7 +282,7 @@ def build_parameter_http(parameters_file):
         return None
     return url
 
-def process_list_matching_url(datasource_descr, product, subproducts, dates, processed_list):
+def process_list_matching_url(datasource_descr, product, subproducts, dates):
     #Read the IRI parameters from the file and build http url
     # Read the CDS parameters from the file.
     tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + datasource_descr.datasource_descr_id,
@@ -290,6 +291,10 @@ def process_list_matching_url(datasource_descr, product, subproducts, dates, pro
     internet_url = datasource_descr.url
     try:
         parameter_url = build_parameter_http(parameter)
+        processed_list = []
+        processed_list_filename = es_constants.get_internet_processed_list_prefix + datasource_descr.datasource_descr_id + '.list'
+        processed_list = functions.restore_obj_from_pickle(processed_list,
+                                                           processed_list_filename)
         for date in dates:
             # iri_month = date.strftime("%b")
             # iri_year = date.strftime("%Y")
@@ -307,16 +312,17 @@ def process_list_matching_url(datasource_descr, product, subproducts, dates, pro
                 continue
             # Move the file to cs folder
             # ingestion_status = ingestion_iri(datasource_descr, product, subproducts[0], in_date, downloaded_file, logger)
-            from apps.acquisition import ingestion_netcdf
+
             ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, subproducts, datasource_descr, logger)
             processed_list.append(parameter_url+time_url)
+            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
     except:
         logger.error('Error in processing IRIDL URL')
-        os.removedirs(tmpdir)
-        return processed_list
+        # os.removedirs(tmpdir)
+        # return processed_list
     finally:
         os.removedirs(tmpdir)
-    return processed_list
+    # return processed_list
 
 # def manage_IRI_time(time_line):
 #     listofwords = time_line.split()
