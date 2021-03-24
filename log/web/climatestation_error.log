@@ -1,0 +1,209 @@
+[Fri Oct 16 12:09:58.414402 2020] [wsgi:error] [pid 9:tid 140587823154944] Matplotlib created a temporary config/cache directory at /tmp/matplotlib-at5n3vs4 because the default path (/var/www/.config/matplotlib) is not a writable directory; it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[Fri Oct 16 12:10:01.937612 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52466] mod_wsgi (pid=9): Failed to exec Python script file '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:10:01.938385 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52466] mod_wsgi (pid=9): Exception occurred processing WSGI script '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:10:01.951924 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52466] Traceback (most recent call last):
+[Fri Oct 16 12:10:01.951995 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52466]   File "/var/www/climatestation/webpy_esapp.py", line 22, in <module>
+[Fri Oct 16 12:10:01.952010 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52466]     import webpy_esapp_helpers
+[Fri Oct 16 12:10:01.952029 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52466]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 37, in <module>
+[Fri Oct 16 12:10:01.952040 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52466]     from database import querydb
+[Fri Oct 16 12:10:01.952054 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52466]   File "/var/www/climatestation/database/querydb.py", line 21, in <module>
+[Fri Oct 16 12:10:01.952064 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52466]     from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
+[Fri Oct 16 12:10:01.952099 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52466] ImportError: cannot import name 'func' from 'sqlalchemy.sql' (/opt/conda/lib/python3.7/site-packages/sqlalchemy/sql/__init__.py)
+[Fri Oct 16 12:12:56.562715 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:52558] mod_wsgi (pid=9): Failed to exec Python script file '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:12:56.563589 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:52558] mod_wsgi (pid=9): Exception occurred processing WSGI script '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:12:56.563798 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:52558] Traceback (most recent call last):
+[Fri Oct 16 12:12:56.563857 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:52558]   File "/var/www/climatestation/webpy_esapp.py", line 22, in <module>
+[Fri Oct 16 12:12:56.563870 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:52558]     import webpy_esapp_helpers
+[Fri Oct 16 12:12:56.563884 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:52558]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 37, in <module>
+[Fri Oct 16 12:12:56.563893 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:52558]     from database import querydb
+[Fri Oct 16 12:12:56.563905 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:52558]   File "/var/www/climatestation/database/querydb.py", line 21, in <module>
+[Fri Oct 16 12:12:56.563914 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:52558]     from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
+[Fri Oct 16 12:12:56.563944 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:52558] ImportError: cannot import name 'func' from 'sqlalchemy.sql' (/opt/conda/lib/python3.7/site-packages/sqlalchemy/sql/__init__.py)
+[Fri Oct 16 12:13:23.161205 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52620] mod_wsgi (pid=9): Failed to exec Python script file '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:13:23.161906 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52620] mod_wsgi (pid=9): Exception occurred processing WSGI script '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:13:23.162110 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52620] Traceback (most recent call last):
+[Fri Oct 16 12:13:23.162172 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52620]   File "/var/www/climatestation/webpy_esapp.py", line 22, in <module>
+[Fri Oct 16 12:13:23.162184 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52620]     import webpy_esapp_helpers
+[Fri Oct 16 12:13:23.162197 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52620]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 37, in <module>
+[Fri Oct 16 12:13:23.162206 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52620]     from database import querydb
+[Fri Oct 16 12:13:23.162219 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52620]   File "/var/www/climatestation/database/querydb.py", line 21, in <module>
+[Fri Oct 16 12:13:23.162235 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52620]     from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
+[Fri Oct 16 12:13:23.162264 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:52620] ImportError: cannot import name 'func' from 'sqlalchemy.sql' (/opt/conda/lib/python3.7/site-packages/sqlalchemy/sql/__init__.py)
+[Fri Oct 16 12:23:45.750887 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:53004] mod_wsgi (pid=9): Failed to exec Python script file '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:23:45.772870 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:53004] mod_wsgi (pid=9): Exception occurred processing WSGI script '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:23:45.773102 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:53004] Traceback (most recent call last):
+[Fri Oct 16 12:23:45.773168 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:53004]   File "/var/www/climatestation/webpy_esapp.py", line 22, in <module>
+[Fri Oct 16 12:23:45.773183 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:53004]     import webpy_esapp_helpers
+[Fri Oct 16 12:23:45.773199 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:53004]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 37, in <module>
+[Fri Oct 16 12:23:45.773210 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:53004]     from database import querydb
+[Fri Oct 16 12:23:45.773225 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:53004]   File "/var/www/climatestation/database/querydb.py", line 21, in <module>
+[Fri Oct 16 12:23:45.773236 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:53004]     from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
+[Fri Oct 16 12:23:45.773271 2020] [wsgi:error] [pid 9:tid 140587705657088] [remote 172.18.0.1:53004] ImportError: cannot import name 'func' from 'sqlalchemy.sql' (/opt/conda/lib/python3.7/site-packages/sqlalchemy/sql/__init__.py)
+[Fri Oct 16 12:31:36.995665 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:53272] mod_wsgi (pid=9): Failed to exec Python script file '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:31:36.996447 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:53272] mod_wsgi (pid=9): Exception occurred processing WSGI script '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:31:36.996630 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:53272] Traceback (most recent call last):
+[Fri Oct 16 12:31:36.996702 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:53272]   File "/var/www/climatestation/webpy_esapp.py", line 22, in <module>
+[Fri Oct 16 12:31:36.996716 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:53272]     import webpy_esapp_helpers
+[Fri Oct 16 12:31:36.996741 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:53272]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 37, in <module>
+[Fri Oct 16 12:31:36.996751 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:53272]     from database import querydb
+[Fri Oct 16 12:31:36.996771 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:53272]   File "/var/www/climatestation/database/querydb.py", line 21, in <module>
+[Fri Oct 16 12:31:36.996779 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:53272]     from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
+[Fri Oct 16 12:31:36.996810 2020] [wsgi:error] [pid 9:tid 140587823154944] [remote 172.18.0.1:53272] ImportError: cannot import name 'func' from 'sqlalchemy.sql' (/opt/conda/lib/python3.7/site-packages/sqlalchemy/sql/__init__.py)
+[Fri Oct 16 12:45:46.509419 2020] [wsgi:error] [pid 9:tid 140616824080128] Matplotlib created a temporary config/cache directory at /tmp/matplotlib-9whfvk3l because the default path (/var/www/.config/matplotlib) is not a writable directory; it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[Fri Oct 16 12:45:48.012846 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098] mod_wsgi (pid=9): Failed to exec Python script file '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:45:48.012955 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098] mod_wsgi (pid=9): Exception occurred processing WSGI script '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:45:48.036101 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098] Traceback (most recent call last):
+[Fri Oct 16 12:45:48.036218 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]   File "/var/www/climatestation/webpy_esapp.py", line 22, in <module>
+[Fri Oct 16 12:45:48.036231 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]     import webpy_esapp_helpers
+[Fri Oct 16 12:45:48.036245 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 37, in <module>
+[Fri Oct 16 12:45:48.036254 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]     from database import querydb
+[Fri Oct 16 12:45:48.036266 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]   File "/var/www/climatestation/database/querydb.py", line 26, in <module>
+[Fri Oct 16 12:45:48.036275 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]     from database import connectdb
+[Fri Oct 16 12:45:48.036287 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]   File "/var/www/climatestation/database/connectdb.py", line 18, in <module>
+[Fri Oct 16 12:45:48.036296 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]     logger = log.my_logger(__name__)
+[Fri Oct 16 12:45:48.036308 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]   File "/var/www/climatestation/lib/python/es_logging.py", line 101, in my_logger
+[Fri Oct 16 12:45:48.036317 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]     file_handler = logging.handlers.RotatingFileHandler(log_dir + name + '.log', maxBytes=50000, backupCount=3)
+[Fri Oct 16 12:45:48.036329 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]   File "/opt/conda/lib/python3.7/logging/handlers.py", line 148, in __init__
+[Fri Oct 16 12:45:48.036338 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]     BaseRotatingHandler.__init__(self, filename, mode, encoding, delay)
+[Fri Oct 16 12:45:48.036350 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]   File "/opt/conda/lib/python3.7/logging/handlers.py", line 55, in __init__
+[Fri Oct 16 12:45:48.036359 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]     logging.FileHandler.__init__(self, filename, mode, encoding, delay)
+[Fri Oct 16 12:45:48.036379 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]   File "/opt/conda/lib/python3.7/logging/__init__.py", line 1087, in __init__
+[Fri Oct 16 12:45:48.036389 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]     StreamHandler.__init__(self, self._open())
+[Fri Oct 16 12:45:48.036401 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]   File "/opt/conda/lib/python3.7/logging/__init__.py", line 1116, in _open
+[Fri Oct 16 12:45:48.036410 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098]     return open(self.baseFilename, self.mode, encoding=self.encoding)
+[Fri Oct 16 12:45:48.036442 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38098] PermissionError: [Errno 13] Permission denied: '/climatestation/log/database.connectdb.log'
+[Fri Oct 16 12:45:51.059126 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106] mod_wsgi (pid=9): Failed to exec Python script file '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:45:51.059673 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106] mod_wsgi (pid=9): Exception occurred processing WSGI script '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:45:51.059977 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106] Traceback (most recent call last):
+[Fri Oct 16 12:45:51.060068 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]   File "/var/www/climatestation/webpy_esapp.py", line 22, in <module>
+[Fri Oct 16 12:45:51.060080 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]     import webpy_esapp_helpers
+[Fri Oct 16 12:45:51.060094 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 37, in <module>
+[Fri Oct 16 12:45:51.060103 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]     from database import querydb
+[Fri Oct 16 12:45:51.060115 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]   File "/var/www/climatestation/database/querydb.py", line 26, in <module>
+[Fri Oct 16 12:45:51.060124 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]     from database import connectdb
+[Fri Oct 16 12:45:51.060136 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]   File "/var/www/climatestation/database/connectdb.py", line 18, in <module>
+[Fri Oct 16 12:45:51.060145 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]     logger = log.my_logger(__name__)
+[Fri Oct 16 12:45:51.060157 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]   File "/var/www/climatestation/lib/python/es_logging.py", line 101, in my_logger
+[Fri Oct 16 12:45:51.060167 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]     file_handler = logging.handlers.RotatingFileHandler(log_dir + name + '.log', maxBytes=50000, backupCount=3)
+[Fri Oct 16 12:45:51.060180 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]   File "/opt/conda/lib/python3.7/logging/handlers.py", line 148, in __init__
+[Fri Oct 16 12:45:51.060189 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]     BaseRotatingHandler.__init__(self, filename, mode, encoding, delay)
+[Fri Oct 16 12:45:51.060201 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]   File "/opt/conda/lib/python3.7/logging/handlers.py", line 55, in __init__
+[Fri Oct 16 12:45:51.060209 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]     logging.FileHandler.__init__(self, filename, mode, encoding, delay)
+[Fri Oct 16 12:45:51.060221 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]   File "/opt/conda/lib/python3.7/logging/__init__.py", line 1087, in __init__
+[Fri Oct 16 12:45:51.060230 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]     StreamHandler.__init__(self, self._open())
+[Fri Oct 16 12:45:51.060249 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]   File "/opt/conda/lib/python3.7/logging/__init__.py", line 1116, in _open
+[Fri Oct 16 12:45:51.060259 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106]     return open(self.baseFilename, self.mode, encoding=self.encoding)
+[Fri Oct 16 12:45:51.060288 2020] [wsgi:error] [pid 9:tid 140616706582272] [remote 172.19.0.1:38106] PermissionError: [Errno 13] Permission denied: '/climatestation/log/database.connectdb.log'
+[Fri Oct 16 12:47:34.569633 2020] [wsgi:error] [pid 9:tid 140616824080128] /opt/conda/lib/python3.7/site-packages/sqlalchemy/sql/base.py:302: SAWarning: Can't validate argument 'dialect_options'; can't locate any SQLAlchemy dialect named 'dialect'
+[Fri Oct 16 12:47:34.570323 2020] [wsgi:error] [pid 9:tid 140616824080128]   % (k, dialect_name)
+[Fri Oct 16 12:47:35.727608 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168] mod_wsgi (pid=9): Failed to exec Python script file '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:47:35.727761 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168] mod_wsgi (pid=9): Exception occurred processing WSGI script '/var/www/climatestation/webpy_esapp.py'.
+[Fri Oct 16 12:47:35.739267 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168] Traceback (most recent call last):
+[Fri Oct 16 12:47:35.739364 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168]   File "/var/www/climatestation/webpy_esapp.py", line 22, in <module>
+[Fri Oct 16 12:47:35.739381 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168]     import webpy_esapp_helpers
+[Fri Oct 16 12:47:35.739396 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 39, in <module>
+[Fri Oct 16 12:47:35.739407 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168]     from apps.acquisition import acquisition
+[Fri Oct 16 12:47:35.739421 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168]   File "/var/www/climatestation/apps/acquisition/acquisition.py", line 16, in <module>
+[Fri Oct 16 12:47:35.739431 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168]     from lib.python.daemon import DaemonDryRunnable
+[Fri Oct 16 12:47:35.739445 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168]   File "/var/www/climatestation/lib/python/daemon.py", line 31, in <module>
+[Fri Oct 16 12:47:35.739455 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168]     os.makedirs(es_constants.pid_file_dir)
+[Fri Oct 16 12:47:35.739469 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168]   File "/opt/conda/lib/python3.7/os.py", line 223, in makedirs
+[Fri Oct 16 12:47:35.739479 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168]     mkdir(name, mode)
+[Fri Oct 16 12:47:35.739524 2020] [wsgi:error] [pid 9:tid 140616824080128] [remote 172.19.0.1:38168] PermissionError: [Errno 13] Permission denied: '/tmp/climatestation/services'
+[Fri Oct 16 12:48:23.603043 2020] [wsgi:error] [pid 9:tid 140616748545792] [remote 172.19.0.1:38206] DEBUG:docker.auth.auth:Trying paths: <filter object at 0x7fe38f343b70>
+[Fri Oct 16 12:48:23.604242 2020] [wsgi:error] [pid 9:tid 140616748545792] [remote 172.19.0.1:38206] DEBUG:docker.auth.auth:No config file found
+[Tue Oct 20 06:36:11.101405 2020] [wsgi:error] [pid 9:tid 140616740153088] [remote 172.19.0.1:49316] DEBUG:docker.auth.auth:Trying paths: <filter object at 0x7fe38f570198>
+[Tue Oct 20 06:36:11.102712 2020] [wsgi:error] [pid 9:tid 140616740153088] [remote 172.19.0.1:49316] DEBUG:docker.auth.auth:No config file found
+[Tue Oct 20 12:48:59.255620 2020] [wsgi:error] [pid 9:tid 139957314483968] Matplotlib created a temporary config/cache directory at /tmp/matplotlib-37adtvb9 because the default path (/var/www/.config/matplotlib) is not a writable directory; it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[Tue Oct 20 12:49:06.153506 2020] [wsgi:error] [pid 9:tid 139957314483968] /opt/conda/lib/python3.7/site-packages/sqlalchemy/sql/base.py:302: SAWarning: Can't validate argument 'dialect_options'; can't locate any SQLAlchemy dialect named 'dialect'
+[Tue Oct 20 12:49:06.154455 2020] [wsgi:error] [pid 9:tid 139957314483968]   % (k, dialect_name)
+[Tue Oct 20 12:49:17.159955 2020] [wsgi:error] [pid 9:tid 139957238949632] [remote 172.19.0.1:44464] DEBUG:docker.auth.auth:Trying paths: <filter object at 0x7f4a016d62e8>
+[Tue Oct 20 12:49:17.161280 2020] [wsgi:error] [pid 9:tid 139957238949632] [remote 172.19.0.1:44464] DEBUG:docker.auth.auth:No config file found
+[Wed Feb 24 11:11:00.298171 2021] [wsgi:error] [pid 10:tid 140001744135936] Matplotlib created a temporary config/cache directory at /tmp/matplotlib-311hfpcz because the default path (/var/www/.config/matplotlib) is not a writable directory; it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[Wed Feb 24 11:11:01.440038 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606] mod_wsgi (pid=10): Failed to exec Python script file '/var/www/climatestation/webpy_esapp.py'.
+[Wed Feb 24 11:11:01.440088 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606] mod_wsgi (pid=10): Exception occurred processing WSGI script '/var/www/climatestation/webpy_esapp.py'.
+[Wed Feb 24 11:11:01.440469 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606] Traceback (most recent call last):
+[Wed Feb 24 11:11:01.440496 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606]   File "/var/www/climatestation/webpy_esapp.py", line 22, in <module>
+[Wed Feb 24 11:11:01.440500 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606]     import webpy_esapp_helpers
+[Wed Feb 24 11:11:01.440505 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 40, in <module>
+[Wed Feb 24 11:11:01.440508 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606]     from apps.acquisition import acquisition
+[Wed Feb 24 11:11:01.440513 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606]   File "/var/www/climatestation/apps/acquisition/acquisition.py", line 16, in <module>
+[Wed Feb 24 11:11:01.440516 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606]     from lib.python.daemon import DaemonDryRunnable
+[Wed Feb 24 11:11:01.440520 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606]   File "/var/www/climatestation/lib/python/daemon.py", line 31, in <module>
+[Wed Feb 24 11:11:01.440523 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606]     os.makedirs(es_constants.pid_file_dir)
+[Wed Feb 24 11:11:01.440527 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606]   File "/opt/conda/lib/python3.7/os.py", line 223, in makedirs
+[Wed Feb 24 11:11:01.440530 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606]     mkdir(name, mode)
+[Wed Feb 24 11:11:01.440540 2021] [wsgi:error] [pid 10:tid 140001744135936] [remote 172.18.0.1:44606] PermissionError: [Errno 13] Permission denied: '/tmp/climatestation/services'
+[Wed Feb 24 11:11:15.295952 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636] mod_wsgi (pid=10): Failed to exec Python script file '/var/www/climatestation/webpy_esapp.py'.
+[Wed Feb 24 11:11:15.295990 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636] mod_wsgi (pid=10): Exception occurred processing WSGI script '/var/www/climatestation/webpy_esapp.py'.
+[Wed Feb 24 11:11:15.296100 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636] Traceback (most recent call last):
+[Wed Feb 24 11:11:15.296131 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636]   File "/var/www/climatestation/webpy_esapp.py", line 22, in <module>
+[Wed Feb 24 11:11:15.296136 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636]     import webpy_esapp_helpers
+[Wed Feb 24 11:11:15.296141 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 40, in <module>
+[Wed Feb 24 11:11:15.296144 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636]     from apps.acquisition import acquisition
+[Wed Feb 24 11:11:15.296148 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636]   File "/var/www/climatestation/apps/acquisition/acquisition.py", line 16, in <module>
+[Wed Feb 24 11:11:15.296151 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636]     from lib.python.daemon import DaemonDryRunnable
+[Wed Feb 24 11:11:15.296155 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636]   File "/var/www/climatestation/lib/python/daemon.py", line 31, in <module>
+[Wed Feb 24 11:11:15.296159 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636]     os.makedirs(es_constants.pid_file_dir)
+[Wed Feb 24 11:11:15.296163 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636]   File "/opt/conda/lib/python3.7/os.py", line 223, in makedirs
+[Wed Feb 24 11:11:15.296166 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636]     mkdir(name, mode)
+[Wed Feb 24 11:11:15.296175 2021] [wsgi:error] [pid 10:tid 140001735743232] [remote 172.18.0.1:44636] PermissionError: [Errno 13] Permission denied: '/tmp/climatestation/services'
+[Wed Feb 24 11:17:06.704259 2021] [wsgi:error] [pid 10:tid 140349809985280] Matplotlib created a temporary config/cache directory at /tmp/matplotlib-dxkovgk8 because the default path (/var/www/.config/matplotlib) is not a writable directory; it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[Wed Feb 24 11:19:10.033054 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876] Traceback (most recent call last):
+[Wed Feb 24 11:19:10.033078 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]   File "/opt/conda/lib/python3.7/site-packages/web/application.py", line 280, in process
+[Wed Feb 24 11:19:10.033084 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]     return self.handle()
+[Wed Feb 24 11:19:10.033089 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]   File "/opt/conda/lib/python3.7/site-packages/web/application.py", line 271, in handle
+[Wed Feb 24 11:19:10.033094 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]     return self._delegate(fn, self.fvars, args)
+[Wed Feb 24 11:19:10.033098 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]   File "/opt/conda/lib/python3.7/site-packages/web/application.py", line 517, in _delegate
+[Wed Feb 24 11:19:10.033103 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]     return handle_class(cls)
+[Wed Feb 24 11:19:10.033107 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]   File "/opt/conda/lib/python3.7/site-packages/web/application.py", line 495, in handle_class
+[Wed Feb 24 11:19:10.033111 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]     return tocall(*args)
+[Wed Feb 24 11:19:10.033116 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]   File "/var/www/climatestation/webpy_esapp.py", line 4878, in GET
+[Wed Feb 24 11:19:10.033120 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]     return webpy_esapp_helpers.getProductAcquisition(params.activated)
+[Wed Feb 24 11:19:10.033124 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]   File "/var/www/climatestation/webpy_esapp_helpers.py", line 84, in getProductAcquisition
+[Wed Feb 24 11:19:10.033134 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]     products_json = functions.tojson(products)
+[Wed Feb 24 11:19:10.033139 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]   File "/var/www/climatestation/lib/python/functions.py", line 580, in tojson
+[Wed Feb 24 11:19:10.033144 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876]     for row in queryresult:
+[Wed Feb 24 11:19:10.033148 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876] TypeError: 'bool' object is not iterable
+[Wed Feb 24 11:19:10.033159 2021] [wsgi:error] [pid 10:tid 140349717665536] [remote 172.18.0.1:44876] 
+[Wed Feb 24 11:22:29.274877 2021] [wsgi:error] [pid 10:tid 140670214407936] Matplotlib created a temporary config/cache directory at /tmp/matplotlib-puwizkpc because the default path (/var/www/.config/matplotlib) is not a writable directory; it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[Wed Feb 24 11:27:35.361418 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: Matching sans\\-serif:style=normal:variant=normal:weight=bold:stretch=normal:size=6.0.
+[Wed Feb 24 11:27:35.361583 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'cmb10' (cmb10.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.361655 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Serif' (DejaVuSerif.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.361711 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXGeneral' (STIXGeneralBol.ttf) normal normal 700 normal>) = 10.05
+[Wed Feb 24 11:27:35.361761 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXSizeFourSym' (STIXSizFourSymBol.ttf) normal normal 700 normal>) = 10.05
+[Wed Feb 24 11:27:35.361810 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXNonUnicode' (STIXNonUniBol.ttf) normal normal 700 normal>) = 10.05
+[Wed Feb 24 11:27:35.361858 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'cmr10' (cmr10.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.361907 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Serif' (DejaVuSerif-Italic.ttf) italic normal 400 normal>) = 11.335
+[Wed Feb 24 11:27:35.361955 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'cmss10' (cmss10.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.362002 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'cmtt10' (cmtt10.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.362051 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Sans' (DejaVuSans-Bold.ttf) normal normal 700 normal>) = 0.05
+[Wed Feb 24 11:27:35.362099 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXSizeThreeSym' (STIXSizThreeSymReg.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.362147 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXGeneral' (STIXGeneral.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.362207 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Serif' (DejaVuSerif-BoldItalic.ttf) italic normal 700 normal>) = 11.05
+[Wed Feb 24 11:27:35.362255 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'cmmi10' (cmmi10.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.362302 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXNonUnicode' (STIXNonUniBolIta.ttf) italic normal 700 normal>) = 11.05
+[Wed Feb 24 11:27:35.362349 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'cmex10' (cmex10.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.362403 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXNonUnicode' (STIXNonUniIta.ttf) italic normal 400 normal>) = 11.335
+[Wed Feb 24 11:27:35.362457 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Serif' (DejaVuSerif-Bold.ttf) normal normal 700 normal>) = 10.05
+[Wed Feb 24 11:27:35.362503 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXNonUnicode' (STIXNonUni.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.362551 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Sans Mono' (DejaVuSansMono-Oblique.ttf) oblique normal 400 normal>) = 11.335
+[Wed Feb 24 11:27:35.362598 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Sans Mono' (DejaVuSansMono.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.362693 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Sans Mono' (DejaVuSansMono-Bold.ttf) normal normal 700 normal>) = 10.05
+[Wed Feb 24 11:27:35.362775 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Serif Display' (DejaVuSerifDisplay.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.362838 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'cmsy10' (cmsy10.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.362927 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Sans Mono' (DejaVuSansMono-BoldOblique.ttf) oblique normal 700 normal>) = 11.05
+[Wed Feb 24 11:27:35.362986 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Sans' (DejaVuSans-BoldOblique.ttf) oblique normal 700 normal>) = 1.05
+[Wed Feb 24 11:27:35.363038 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Sans' (DejaVuSans.ttf) normal normal 400 normal>) = 0.33499999999999996
+[Wed Feb 24 11:27:35.363087 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXSizeOneSym' (STIXSizOneSymReg.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.363135 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXSizeFourSym' (STIXSizFourSymReg.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.363183 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Sans Display' (DejaVuSansDisplay.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.363237 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXSizeThreeSym' (STIXSizThreeSymBol.ttf) normal normal 700 normal>) = 10.05
+[Wed Feb 24 11:27:35.363284 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXSizeTwoSym' (STIXSizTwoSymReg.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.363333 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'DejaVu Sans' (DejaVuSans-Oblique.ttf) oblique normal 400 normal>) = 1.335
+[Wed Feb 24 11:27:35.363381 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXGeneral' (STIXGeneralItalic.ttf) italic normal 400 normal>) = 11.335
+[Wed Feb 24 11:27:35.363438 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXSizeTwoSym' (STIXSizTwoSymBol.ttf) normal normal 700 normal>) = 10.05
+[Wed Feb 24 11:27:35.363492 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXGeneral' (STIXGeneralBolIta.ttf) italic normal 700 normal>) = 11.05
+[Wed Feb 24 11:27:35.363539 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXSizeFiveSym' (STIXSizFiveSymReg.ttf) normal normal 400 normal>) = 10.335
+[Wed Feb 24 11:27:35.363586 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: score(<Font 'STIXSizeOneSym' (STIXSizOneSymBol.ttf) normal normal 700 normal>) = 10.05
+[Wed Feb 24 11:27:35.363684 2021] [wsgi:error] [pid 10:tid 140670105302784] [remote 172.18.0.1:45152] DEBUG:matplotlib.font_manager:findfont: Matching sans\\-serif:style=normal:variant=normal:weight=bold:stretch=normal:size=6.0 to DejaVu Sans ('/opt/conda/lib/python3.7/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSans-Bold.ttf') with score of 0.050000.

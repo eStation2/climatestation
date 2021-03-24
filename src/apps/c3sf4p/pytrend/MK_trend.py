@@ -1,37 +1,35 @@
+"""
 # ###############################################################################
-# version:          R1.3.0                                                      #
+# version:          R1.0.0                                                      #
 # created by:       F.Cappucci  --- fabrizio.cappucci@ext.ec.europa.eu          #
-# creation date:    11 Dec 2019                                                 #
+# creation date:    08 Mar 2021                                                 #
 # property of:      JRC                                                         #
 # purpose:          main library containing the functions for trend handler     #
 #             --------------------------------------------------                #
-# last edit:        18 Mar 2020                                                 #
+# last edit:        Under development                                           #
 #  *************************************************************************    #
-#      UPDATED CLEAN VERSION                                                    #
-#                                                                               #
 # ###############################################################################
+"""
 from statsmodels.tsa.seasonal import seasonal_decompose
 import numpy as np
 from scipy.stats import norm, stats
 import pandas as pd
-import statsmodels.api as sm
+from datetime import datetime
 
 
 class TrendAnalyser(object):
-    def __init__(self, data_series, time_series, frequency=12, alpha=0.05, deseasonal=True, rlm=True):
+    def __init__(self, data_series, time_series, frequency=12, alpha=0.05, dbg=False):
         """
         :param data_series: 1D np.array data series
         :param time_series: 1D np.array temporal coordinates
         :param frequency:   frequency of the series, Must be used if x is not a pandas object.
                             Overrides default periodicity of x if x is a pandas object with a timeseries index.
         :param alpha:       scalar, float, greater than zero significance level of the statistical test (Type I error)
-        :param deseasonal:  whether or not to apply mann kendal analysis
         """
-        self.isRLM = rlm
+
         self.clima_dict = {}
         self.d = data_series
         self.t = time_series
-        self.deseasonal = deseasonal
         self.months = []
         self.years = []
         for t in self.t:
@@ -48,22 +46,23 @@ class TrendAnalyser(object):
         self.h = False
         self.trend_type = 'no trend'
         self.trend = None
+        self.dbg = dbg
 
     def test_trend(self):
-        if self.deseasonal:
-            self._gap_filler()
-            if np.count_nonzero(np.isnan(self.d)) == 0:
-                self.ts = pd.Series(self.d, index=pd.to_datetime(self.t))
-                self._deseasonalize()
-                self._mk_test()
-                out = [self.slope, self.intercept, self.p, self.trend_type, self.h]
-            else:
-                out = [np.nan, np.nan, np.nan, 'undefined', 'False']
+        # fill potential gaps in the timeseries (nan values)
+        self._gap_filler()
+        if np.count_nonzero(np.isnan(self.d)) == 0:
+            self.ts = pd.Series(self.d, index=pd.to_datetime(self.t))
+            self._deseasonalize()
+            self._mk_test()
+            out = [self.slope, self.intercept, self.p, self.trend_type, self.h]
         else:
-            if self.isRLM:
-                out = self._robust_linear_model()
-            else:
-                out = self._linear_regression()
+            '''
+            in the cas that the _gap_filler didn't succeed in filling all the gaps, some nan are still present in the 
+            timeseries, in this case the trend cannot be calculated and the function return an "undefined" situation
+            '''
+            out = [np.nan, np.nan, np.nan, 'undefined', 'False']
+
         return out
 
     def _mk_test(self):
@@ -77,21 +76,15 @@ class TrendAnalyser(object):
         z: normalized test statistics
 
         """
-        # nobs = len(self.trend)
 
         # calculate S
-
         trend_component = np.array(self.trend)
-
         test_trend = trend_component[~np.isnan(trend_component)]
-
         test_trend *= 100
-        # print(test_trend)
+
         test_trend = test_trend.astype('int')
-        # print(test_trend)
+
         test_trend = test_trend.astype('float') / 100.
-        # print(test_trend)
-        # exit()
 
         s = 0
         nobs = len(test_trend)
@@ -99,9 +92,6 @@ class TrendAnalyser(object):
             for j in range(k + 1, nobs):
                 s += np.sign(test_trend[j] - test_trend[k])
 
-        # print(s)
-        # exit()
-        # calculate the unique data
         unique_x = np.unique(test_trend)
         g = len(unique_x)
         # calculate the var(s)
@@ -112,7 +102,7 @@ class TrendAnalyser(object):
             tp = np.zeros(unique_x.shape)
             for i in range(len(unique_x)):
                 tp[i] = sum(unique_x[i] == test_trend)
-                # print(unique_x[i], tp[i])
+
             var_s = (nobs * (nobs - 1.) * (2. * nobs + 5.) + np.sum(tp * (tp - 1.) * (2. * tp + 5.))) / 18.
 
         if s > 0:
@@ -123,45 +113,19 @@ class TrendAnalyser(object):
             self.z = 0
 
         # calculate the p_value
-        # print(abs(self.z), norm.ppf(1 - self.alpha / 2))
-        # exit()
         self.h = abs(self.z) > norm.ppf(1 - self.alpha / 2)
-
-        # if (self.z < 0) and self.h:
-        #     self.trend_type = 'decreasing'
-        # elif (self.z > 0) and self.h:
-        #     self.trend_type = 'increasing'
-
         if self.h:
             if self.z < 0:
                 self.trend_type = 'decreasing'
             elif self.z > 0:
                 self.trend_type = 'increasing'
 
-            # self.p = 2 * (1 - norm.cdf(abs(self.z)))  # two tail test
             if self.trend_type != 'no trend':
                 xx = np.arange(0., len(trend_component), 1.)
                 xx = xx[~np.isnan(trend_component)]
                 self.slope, self.intercept, r_value, self.p, std_err = stats.linregress(xx, test_trend)
 
-            # self.slope = slope
-            # self.intercept = intercept
-        # print()
-        # print(self.trend_type)
-        #
-        # xx = np.arange(len(self.trend))
-        # yy = self.intercept + self.slope * xx
-        # import matplotlib.pyplot as plt
-        # plt.plot(xx, yy, ls='-', color='k', lw=2, label='trend line')
-        # plt.legend()
-        # plt.show()
-
-        # exit()
-
     def _deseasonalize(self):
-
-        # self.trend = seasonal_decompose(self.ts, model='addictive', filt=[0, 0, 0]).trend
-
         try:
             result = seasonal_decompose(self.ts, model='addictive')
         except ValueError:
@@ -169,15 +133,26 @@ class TrendAnalyser(object):
 
         self.trend = result.trend
 
-        # T = result.observed - result.seasonal
-        # result.plot()
-        # plt.show()
-        # x = result.trend
-        # plt.figure()
-        # plt.plot(x)
-        # plt.plot(T, ls='--', color='r', lw=3)
-
     def _gap_filler(self):
+        """
+        fills potential gaps (namely nan values) in the timeseries with climatological value.
+        The main limitation of this approach is that if given a determined month, all the values are nan also the
+        associated climatology is nan, and the method fails.
+
+        Possible solution:
+        in such case of failure a reasonable workaround could be to interpolate surrounding values with a linear
+        function. This approach works well in all the cases when the vacancy is located in a monotonic increasing or
+        decreasing part of the seasonality, whereas it will dramatically fail in all the cases when the vacancy is
+        located in a local maximum (minimum), in this case the interpolated value is more than questionable.
+
+        Another possible solution is to apply the Ibanez Conversi (IBANEZ and CONVERSI, 2002) methodology, which is
+        working pretty well in all scenarios. Here the main disadvantage is the complexity of the method
+        (and of the associated code) and the computational time which increases using this method.
+
+
+
+        :return:
+        """
         ind_nan = np.where(np.isnan(self.d))[0]
         if any(ind_nan):
             to_fill = self.d.copy()
@@ -191,46 +166,15 @@ class TrendAnalyser(object):
                 to_fill[i] = _fill
             self.d = to_fill
 
-    def _robust_linear_model(self):
-        """
-        :return: trend_type parameters, errors and p-value
-
-        NOTICE: Null hypothesis is that the slope is zero.
-        p-value here is relative to t-value:
-        The larger the absolute value of the t-value, the smaller the p-value,
-        and the greater the evidence AGAINST the null hypothesis.
-        The lower is the the absolute value of t-value, the larger is the p-value,
-        and the greater the evidence IN SUPPORT to the null hypothesis.
-
-        """
-        sm_slope = sm_int = r2 = pv = slope_error = np.nan
-        try:
-            line = np.asarray(self.d).copy()
-
-            if line[~np.isnan(line)].size > 0:
-                xx = np.arange(0, len(line), 1)
-                big_x = sm.add_constant(xx[~np.isnan(line)])
-                rlm = sm.RLM(line[~np.isnan(line)], big_x, M=sm.robust.norms.HuberT())
-                res = rlm.fit()
-                sm_int, sm_slope = res.params
-                pv = res.pvalues[1]  # res.pvalues = [pv_intercept, pv_slope] so take [1] for slope!
-
-                slope_error = res.bse[1]
-
-                model = sm_int + xx * sm_slope
-                r2 = np.square(1. / len(line) * np.nansum((line - np.nanmean(line)) * (model - np.nanmean(model))) /
-                               (np.nanstd(line) * np.nanstd(model)))
-            else:
-                pass
-                # print('lamierd!')
-        except ZeroDivisionError:
-            pass
-            # sm_slope = sm_int = r2 = pv = slope_error = np.nan
-        return sm_slope, sm_int, pv, r2, slope_error
-
     def _linear_regression(self):
+        """
+        Final trend is expressed as a linear interpolation of the trend-signal obtained after the deseasonal processor
+        of the input signal.
+        :return:
+        """
         line = np.asarray(self.d).copy()
         # line = filter_outlier(np.asarray(temporal_series).copy(), nsigma=1)
         xx = np.arange(0, len(line), 1)
         slope, intercept, r_value, p_value, std_err = stats.linregress(xx[~np.isnan(line)], line[~np.isnan(line)])
         return slope, intercept, p_value, np.square(r_value), std_err
+

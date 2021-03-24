@@ -1,13 +1,13 @@
 """
 # ###############################################################################
-# version:          R1.0.1                                                      #
+# version:          R1.0.0                                                      #
 # created by:       F.Cappucci  --- fabrizio.cappucci@ext.ec.europa.eu          #
 # creation date:    25 Oct 2020                                                 #
 # property of:      JRC                                                         #
 # purpose:          main Class containing the functions for read and import     #
 #                   raster dataset in geotif format                             #
 #             --------------------------------------------------                #
-# last edit:        in development                                              #
+# last edit:        under development                                           #
 #  *************************************************************************    #
 # If the tif file contains a data_mask along with physical data, the user can   #
 # decide to apply such mask on the fly, specifying just the mask name and the   #
@@ -26,7 +26,7 @@ try:
     from src.lib.python.metadata import SdsMetadata
 except ModuleNotFoundError:
     SdsMetadata = None
-from netCDF4 import Dataset
+# from netCDF4 import Dataset
 
 
 class RasterDataset(object):
@@ -344,25 +344,6 @@ class RasterDataset(object):
 
         lats_boundaries = np.arange(self.native_zc[0], self.native_zc[1], step_lat)
 
-        """
-        if lat to extract coincides with a boundary then the situation is undetermined. 
-        Example: 
-        one would like to extract the point of the lat, lon coordinates = (0., 0.) in a global raster 
-        (-180W, 180E,-90S, 90N) at 0.5 deg spatial_resolution. The point 0., 0. is clearly lying on the border 
-        between the four points (lat, lon)**: 
-
-                (0.25, -0.25) | (0.25, 0.25)
-                --------------+--------------   the + sign correspond to the point (0., 0.)
-                (-0.25, -0.25)| (-0.25, 0.25)
-
-        Notice that the distance fom these points to (0, 0) is the same!
-        Different codes give different results! for instance python would extract the point (0.25, -0.25)
-        IDL the point (-0.25, -0.25) etc...
-        Since this is an undetermined situation, in order to be consistent with IDL, a small offset is subtracted to the 
-        extraction latitude forcing the code to extract (-0.25, -0.25).     
-                -------
-                ** python is top-bottom oriented
-        """
         if self.local_zc[0] in lats_boundaries:
             self.lat_offset -= hb_lat / size[0]
         i = np.argmin(abs(lats - np.array(self.local_zc[0] + self.lat_offset)))
@@ -441,6 +422,7 @@ class RasterDataset(object):
         width = gobj.RasterXSize
         height = gobj.RasterYSize
         gt = gobj.GetGeoTransform()
+
         x = gt[0] + gt[1] * width
         y = gt[3] + gt[5] * height
 

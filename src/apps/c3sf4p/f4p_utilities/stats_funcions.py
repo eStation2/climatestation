@@ -1,7 +1,17 @@
 """
-Statistical tools in support for C3S-F4P class
+# ###############################################################################
+# version:          R1.0.0                                                      #
+# created by:       F.Cappucci  --- fabrizio.cappucci@ext.ec.europa.eu          #
+# creation date:    08 Mar 2021                                                 #
+# property of:      JRC                                                         #
+# purpose:          Statistical tools in support for C3S-F4P class              #
+#             --------------------------------------------------                #
+# last edit:        Under development                                           #
+#  *************************************************************************    #
+# ###############################################################################
 """
 import numpy as np
+from src.apps.c3sf4p.read_raster import RasterDataset
 
 
 def get_spatial_consistency(data_in):
@@ -25,3 +35,21 @@ def get_spatial_consistency(data_in):
 
     data_out = data_in * np.array(mask)
     return data_out
+
+
+def par_hov(lof, product, k):
+    """
+    single element of parallel calculation of hovmoller matrix with index k
+    :param lof:         list of files
+    :param product:     band name
+    :param k:           index representing the element of filelist (lof) to handle within the parallel loop
+    """
+    nax = 1  # latitude!
+    out = list()
+
+    rd = RasterDataset(lof[k])
+    data_tmp = rd.get_data(product)
+    # average value along longitude, d is an array with lengh==n.pixels along latitude
+    d = np.squeeze(np.nanmean(data_tmp, axis=nax))
+    out.append([d, k])
+    return out

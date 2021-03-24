@@ -78,6 +78,7 @@ class RasterDataset(object):
         self.fill_value = None
         self.add_offset = None
         self.band = None
+        self.frequency = None
         # Initialize the parameters for local site (punctual) extraction
         self.neigh = 0
         self.lat_offset = 0.  # used in _haversine formulae
@@ -85,8 +86,10 @@ class RasterDataset(object):
         self.filename = filename
         self.product = product
         # Read relevant metadata fields
-        # TODO: be sure that this works also with netcdf!!!!
-        # self.get_sds_metadata()  # This work only with Climatestation where metadata is already written
+        try:
+            self.get_sds_metadata()  # This work only with Climatestation where metadata is already written
+        except Exception:  # general error handling, to be better refined in future (TODO!)
+            pass
 
     def get_data(self, band=None, subsample_coordinates=None, make_extraction=False, local_site_lat=None,
                  local_site_lon=None, neighbors=0, mask_name=None, threshold=None):
@@ -373,43 +376,75 @@ class RasterDataset(object):
         return d
 
     def get_coordinates(self):
-        gobj = gdal.Open(self.filename)
-        old_cs = osr.SpatialReference()
-        old_cs.ImportFromWkt(gobj.GetProjectionRef())
-        # create the new coordinate system
-        wgs84_wkt = """
-            GEOGCS["WGS 84",
-            DATUM["WGS_1984",
-            SPHEROID["WGS 84",6378137,298.257223563,
-            AUTHORITY["EPSG","7030"]],
-            AUTHORITY["EPSG","6326"]],
-            PRIMEM["Greenwich",0,
-            AUTHORITY["EPSG","8901"]],
-            UNIT["degree",0.01745329251994328,
-            AUTHORITY["EPSG","9122"]],
-            AUTHORITY["EPSG","4326"]]"""
-        new_cs = osr.SpatialReference()
-        new_cs.ImportFromWkt(wgs84_wkt)
-        # create a transform object to convert between coordinate systems
-        transform = osr.CoordinateTransformation(old_cs, new_cs)
+        if self.raster_type == 'geofit':
+            gobj = gdal.Open(self.filename)
+            old_cs = osr.SpatialReference()
+            old_cs.ImportFromWkt(gobj.GetProjectionRef())
+            # create the new coordinate system
+            wgs84_wkt = """
+                GEOGCS["WGS 84",
+                DATUM["WGS_1984",
+                SPHEROID["WGS 84",6378137,298.257223563,
+                AUTHORITY["EPSG","7030"]],
+                AUTHORITY["EPSG","6326"]],
+                PRIMEM["Greenwich",0,
+                AUTHORITY["EPSG","8901"]],
+                UNIT["degree",0.01745329251994328,
+                AUTHORITY["EPSG","9122"]],
+                AUTHORITY["EPSG","4326"]]"""
+            new_cs = osr.SpatialReference()
+            new_cs.ImportFromWkt(wgs84_wkt)
+            # create a transform object to convert between coordinate systems
+            transform = osr.CoordinateTransformation(old_cs, new_cs)
 
-        # get the point to transform, pixel (0,0) in this case
-        width = gobj.RasterXSize
-        height = gobj.RasterYSize
-        gt = gobj.GetGeoTransform()
-        x = gt[0] + gt[1] * width
-        y = gt[3] + gt[5] * height
+            # get the point to transform, pixel (0,0) in this case
+            width = gobj.RasterXSize
+            height = gobj.RasterYSize
+            gt = gobj.GetGeoTransform()
+            x = gt[0] + gt[1] * width
+            y = gt[3] + gt[5] * height
 
-        center_x = (gt[0] + x) / 2
-        center_y = (gt[3] + y) / 2
+            center_x = (gt[0] + x) / 2
+            center_y = (gt[3] + y) / 2
 
-        lon_0, lat_0, _ = transform.TransformPoint(center_x, center_y)
+            lon_0, lat_0, _ = transform.TransformPoint(center_x, center_y)
 
-        w, n, _ = transform.TransformPoint(gt[0], gt[3])
-        e, s, _ = transform.TransformPoint(x, y)
+            w, n, _ = transform.TransformPoint(gt[0], gt[3])
+            e, s, _ = transform.TransformPoint(x, y)
+
+        else:
+            # else is a netcdf data, so we expect lat and lon array inside
+            ds_lats = None
+            ds_lons = None
+            s = n = e = w = lat_0 = lon_0 = None
+            ds = Dataset(self.filename)
+
+            for dim in ds.dimensions.keys():
+                if 'lat' in dim.lower():
+                    ds_lats = ds.variables[dim][:]
+                elif 'lon' in dim.lower():
+                    ds_lons = ds.variables[dim][:]
+
+            if ds_lats is not None and ds_lons is not None:
+                s_try = ds_lats[0]
+                n_try = ds_lats[-1]
+                if n_try < s_try:
+                    n = s_try
+                    s = n_try
+                else:
+                    n = n_try
+                    s = s_try
+                w_try = ds_lons[0]
+                e_try = ds_lons[-1]
+
+                if e_try < w_try:
+                    e = w_try
+                    w = e_try
+                else:
+                    e = e_try
+                    w = w_try
 
         self.native_zc = [s, n, w, e]
-
         return [s, n, w, e], [lat_0, lon_0]
 
     def set_CS_subproduct_parameter(self, subproduct):
@@ -420,3 +455,51 @@ class RasterDataset(object):
             self.add_offset = subproduct['in_offset']
             self.band = subproduct['re_extract']
 
+    def get_sds_metadata(self):
+        # get the boundary coordinates
+        self.get_coordinates()
+
+        # TODO
+        #  remove the if-else condition (and also the try-except at the import level) and maintains only the
+        #  SdsMetadata().read_from_file(self.filename) part, as in future this class might be potentially integrated
+        #  into ClimateStation architecture, in which src.lib.python.metadata will always be available.
+        if SdsMetadata is not None:
+            # TODO when required, modify eStation_* with ClimateStation_*
+            meta = SdsMetadata().read_from_file(self.filename)
+            self.date = meta.sds_metadata['eStation2_date']
+            self.year = self.date[:4]
+            self.month = self.date[0][4:6]
+            self.day = self.date[0][6:]
+            self.sensor_code = meta.sds_metadata['eStation2_product']
+            self.prod_code = meta.sds_metadata['eStation2_subProduct']
+            self.date_long = date(int(self.year), int(self.month), int(self.day)).strftime('%Y-%b-%d')
+            self.scale_factor = meta.sds_metadata['eStation2_nodata']
+            self.fill_value = meta.sds_metadata['eStation2_scaling_factor']
+            self.add_offset = meta.sds_metadata['eStation2_scaling_offset']
+            self.frequency = meta.sds_metadata['eStation_frequency']
+        else:
+            seed = os.path.basename(self.filename).split('_')
+            self.date = seed[0]
+            self.year = seed[0][:4]
+            self.month = seed[0][4:6]
+            self.day = seed[0][6:]
+            self.prod_code = seed[1]
+            self.date_long = date(int(self.year), int(self.month), int(self.day)).strftime('%Y-%b-%d')
+            metadata = gdal.Open(self.filename).GetMetadata()
+
+            for el in metadata.keys():
+                if 'scaling_factor' in str(el).lower():
+                    try:
+                        self.scale_factor = float(metadata[el])
+                    except ValueError:
+                        self.scale_factor = None
+                if 'nodata' in str(el).lower():
+                    try:
+                        self.fill_value = float(metadata[el])
+                    except ValueError:
+                        self.fill_value = None
+                if 'offset' in str(el).lower():
+                    try:
+                        self.add_offset = float(metadata[el])
+                    except ValueError:
+                        self.add_offset = None

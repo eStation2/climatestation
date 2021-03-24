@@ -1,0 +1,40 @@
+[Fri Oct 16 11:51:47.755893 2020] [core:warn] [pid 8:tid 140305774961792] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Fri Oct 16 11:51:47.833898 2020] [mpm_event:notice] [pid 8:tid 140305774961792] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Fri Oct 16 11:51:47.833945 2020] [core:notice] [pid 8:tid 140305774961792] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Fri Oct 16 12:09:39.422585 2020] [core:warn] [pid 8:tid 140587854083200] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Fri Oct 16 12:09:39.424492 2020] [mpm_event:notice] [pid 8:tid 140587854083200] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Fri Oct 16 12:09:39.424533 2020] [core:notice] [pid 8:tid 140587854083200] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Fri Oct 16 12:45:30.643756 2020] [core:warn] [pid 8:tid 140616855008384] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Fri Oct 16 12:45:30.662787 2020] [mpm_event:notice] [pid 8:tid 140616855008384] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Fri Oct 16 12:45:30.662836 2020] [core:notice] [pid 8:tid 140616855008384] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Tue Oct 20 12:43:54.228914 2020] [core:warn] [pid 8:tid 139957345412224] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Tue Oct 20 12:43:54.308506 2020] [wsgi:warn] [pid 8:tid 139957345412224] (98)Address already in use: mod_wsgi (pid=8): Removing stale unix domain socket '/var/run/apache2/wsgi.8.0.1.sock'.
+[Tue Oct 20 12:43:54.363994 2020] [mpm_event:notice] [pid 8:tid 139957345412224] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Tue Oct 20 12:43:54.364048 2020] [core:notice] [pid 8:tid 139957345412224] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Mon Oct 26 07:37:06.020334 2020] [core:warn] [pid 8:tid 140666857563264] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Mon Oct 26 07:37:06.082117 2020] [wsgi:warn] [pid 8:tid 140666857563264] (98)Address already in use: mod_wsgi (pid=8): Removing stale unix domain socket '/var/run/apache2/wsgi.8.0.1.sock'.
+[Mon Oct 26 07:37:06.112169 2020] [mpm_event:notice] [pid 8:tid 140666857563264] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Mon Oct 26 07:37:06.112220 2020] [core:notice] [pid 8:tid 140666857563264] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Mon Oct 26 07:39:46.716328 2020] [core:warn] [pid 8:tid 140551630021760] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Mon Oct 26 07:39:46.787937 2020] [wsgi:warn] [pid 8:tid 140551630021760] (98)Address already in use: mod_wsgi (pid=8): Removing stale unix domain socket '/var/run/apache2/wsgi.8.0.1.sock'.
+[Mon Oct 26 07:39:46.890456 2020] [mpm_event:notice] [pid 8:tid 140551630021760] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Mon Oct 26 07:39:46.890506 2020] [core:notice] [pid 8:tid 140551630021760] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Tue Oct 27 07:39:50.790204 2020] [core:warn] [pid 8:tid 140202486060160] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Tue Oct 27 07:39:50.887061 2020] [wsgi:warn] [pid 8:tid 140202486060160] (98)Address already in use: mod_wsgi (pid=8): Removing stale unix domain socket '/var/run/apache2/wsgi.8.0.1.sock'.
+[Tue Oct 27 07:39:50.930871 2020] [mpm_event:notice] [pid 8:tid 140202486060160] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Tue Oct 27 07:39:50.930929 2020] [core:notice] [pid 8:tid 140202486060160] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Wed Feb 24 11:09:35.806371 2021] [core:warn] [pid 9:tid 140001775064192] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Wed Feb 24 11:09:35.807516 2021] [mpm_event:notice] [pid 9:tid 140001775064192] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Wed Feb 24 11:09:35.807540 2021] [core:notice] [pid 9:tid 140001775064192] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Wed Feb 24 11:16:19.871149 2021] [core:warn] [pid 9:tid 140349840913536] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Wed Feb 24 11:16:19.871992 2021] [mpm_event:notice] [pid 9:tid 140349840913536] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Wed Feb 24 11:16:19.872010 2021] [core:notice] [pid 9:tid 140349840913536] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Wed Feb 24 11:22:20.075974 2021] [core:warn] [pid 9:tid 140670245336192] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Wed Feb 24 11:22:20.077139 2021] [mpm_event:notice] [pid 9:tid 140670245336192] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Wed Feb 24 11:22:20.077165 2021] [core:notice] [pid 9:tid 140670245336192] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Wed Mar 03 14:25:46.162679 2021] [core:warn] [pid 10:tid 139963029673088] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Wed Mar 03 14:25:46.163658 2021] [mpm_event:notice] [pid 10:tid 139963029673088] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Wed Mar 03 14:25:46.163676 2021] [core:notice] [pid 10:tid 139963029673088] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Wed Mar 10 09:14:16.718833 2021] [core:warn] [pid 9:tid 140454620558464] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Wed Mar 10 09:14:16.720686 2021] [mpm_event:notice] [pid 9:tid 140454620558464] AH00489: Apache/2.4.38 (Debian) mod_wsgi/4.6.5 Python/3.7 configured -- resuming normal operations
+[Wed Mar 10 09:14:16.720698 2021] [core:notice] [pid 9:tid 140454620558464] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'

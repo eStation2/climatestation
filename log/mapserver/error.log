@@ -1,0 +1,38 @@
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.2. Set the 'ServerName' directive globally to suppress this message
+[Fri Oct 16 11:51:43.319929 2020] [mpm_event:notice] [pid 8:tid 140466184612800] AH00489: Apache/2.4.29 (Ubuntu) configured -- resuming normal operations
+[Fri Oct 16 11:51:43.320063 2020] [core:notice] [pid 8:tid 140466184612800] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.2. Set the 'ServerName' directive globally to suppress this message
+[Fri Oct 16 12:09:38.916844 2020] [mpm_event:notice] [pid 8:tid 139645342645184] AH00489: Apache/2.4.29 (Ubuntu) configured -- resuming normal operations
+[Fri Oct 16 12:09:38.916969 2020] [core:notice] [pid 8:tid 139645342645184] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.19.0.2. Set the 'ServerName' directive globally to suppress this message
+[Fri Oct 16 12:45:27.582799 2020] [mpm_event:notice] [pid 8:tid 139884499819456] AH00489: Apache/2.4.29 (Ubuntu) configured -- resuming normal operations
+[Fri Oct 16 12:45:27.582949 2020] [core:notice] [pid 8:tid 139884499819456] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.19.0.2. Set the 'ServerName' directive globally to suppress this message
+[Tue Oct 20 12:43:52.910523 2020] [core:warn] [pid 8:tid 140003518741440] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Tue Oct 20 12:43:52.910472 2020] [cgid:error] [pid 9:tid 140003518741440] (98)Address already in use: AH01243: Couldn't bind unix domain socket /var/run/apache2/cgisock.8
+[Tue Oct 20 12:43:52.953649 2020] [mpm_event:notice] [pid 8:tid 140003518741440] AH00489: Apache/2.4.29 (Ubuntu) configured -- resuming normal operations
+[Tue Oct 20 12:43:52.953711 2020] [core:notice] [pid 8:tid 140003518741440] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Tue Oct 20 12:43:52.980680 2020] [cgid:crit] [pid 8:tid 140003518741440] AH01238: cgid daemon failed to initialize
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.19.0.2. Set the 'ServerName' directive globally to suppress this message
+[Mon Oct 26 07:37:04.928858 2020] [core:warn] [pid 8:tid 140682613242816] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Mon Oct 26 07:37:04.947460 2020] [mpm_event:notice] [pid 8:tid 140682613242816] AH00489: Apache/2.4.29 (Ubuntu) configured -- resuming normal operations
+[Mon Oct 26 07:37:04.947512 2020] [core:notice] [pid 8:tid 140682613242816] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.19.0.2. Set the 'ServerName' directive globally to suppress this message
+[Mon Oct 26 07:39:44.857274 2020] [core:warn] [pid 8:tid 140362961001408] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Mon Oct 26 07:39:44.857200 2020] [cgid:error] [pid 9:tid 140362961001408] (98)Address already in use: AH01243: Couldn't bind unix domain socket /var/run/apache2/cgisock.8
+[Mon Oct 26 07:39:44.858781 2020] [mpm_event:notice] [pid 8:tid 140362961001408] AH00489: Apache/2.4.29 (Ubuntu) configured -- resuming normal operations
+[Mon Oct 26 07:39:44.859816 2020] [core:notice] [pid 8:tid 140362961001408] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Mon Oct 26 07:39:45.882512 2020] [cgid:crit] [pid 8:tid 140362961001408] AH01238: cgid daemon failed to initialize
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.19.0.2. Set the 'ServerName' directive globally to suppress this message
+[Tue Oct 27 07:39:50.241826 2020] [core:warn] [pid 8:tid 139846409530304] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Tue Oct 27 07:39:50.274721 2020] [mpm_event:notice] [pid 8:tid 139846409530304] AH00489: Apache/2.4.29 (Ubuntu) configured -- resuming normal operations
+[Tue Oct 27 07:39:50.274780 2020] [core:notice] [pid 8:tid 139846409530304] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.2. Set the 'ServerName' directive globally to suppress this message
+[Wed Feb 24 11:09:35.143069 2021] [mpm_event:notice] [pid 9:tid 140026716027840] AH00489: Apache/2.4.29 (Ubuntu) configured -- resuming normal operations
+[Wed Feb 24 11:09:35.143137 2021] [core:notice] [pid 9:tid 140026716027840] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.2. Set the 'ServerName' directive globally to suppress this message
+[Wed Mar 10 09:14:16.471058 2021] [cgid:error] [pid 10:tid 140168035285952] (98)Address already in use: AH01243: Couldn't bind unix domain socket /var/run/apache2/cgisock.9
+[Wed Mar 10 09:14:16.471147 2021] [core:warn] [pid 9:tid 140168035285952] AH00098: pid file /var/run/apache2/apache2.pid overwritten -- Unclean shutdown of previous Apache run?
+[Wed Mar 10 09:14:16.472098 2021] [mpm_event:notice] [pid 9:tid 140168035285952] AH00489: Apache/2.4.29 (Ubuntu) configured -- resuming normal operations
+[Wed Mar 10 09:14:16.472115 2021] [core:notice] [pid 9:tid 140168035285952] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+[Wed Mar 10 09:14:16.472164 2021] [cgid:crit] [pid 9:tid 140168035285952] AH01238: cgid daemon failed to initialize
