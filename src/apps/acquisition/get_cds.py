@@ -77,7 +77,7 @@ def signal_handler(signal, frame):
 
     logger.info("Length of processed list is %i" % len(processed_list))
 
-    functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+    # functions.dump_obj_to_pickle(processed_list, processed_list_filename)
     functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
     print('Exit ' + sys.argv[0])
@@ -320,8 +320,8 @@ def loop_get_cds_iri(dry_run=False, test_one_source=False, my_source=None):
                         processed_list = []
                         if not do_not_consider_processed_list:
                             processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_id + '.list'
-                            processed_list = functions.restore_obj_from_pickle(processed_list,
-                                                                               processed_list_filename)
+                            # processed_list = functions.restore_obj_from_pickle(processed_list,
+                            #                                                    processed_list_filename)
 
                         processed_info['time_latest_exec'] = datetime.datetime.now()
 
@@ -359,7 +359,7 @@ def loop_get_cds_iri(dry_run=False, test_one_source=False, my_source=None):
 
 
                         if not dry_run:
-                            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                            # functions.dump_obj_to_pickle(processed_list, processed_list_filename)
                             functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
                     # if test_one_source:
@@ -569,7 +569,7 @@ def iri_api_loop_internet(internet_source):
         subproducts = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
         dates = build_list_dates_generic(from_date=internet_source.start_date, to_date=internet_source.end_date, frequency_id=str(internet_source.frequency_id))
         # Dates defined are dynamic not based on the configuration file
-        processed_list = iri_api.process_list_matching_url(datasource_descr, product, subproducts, dates)
+        iri_api.process_list_matching_url(datasource_descr, product, subproducts, dates)
 
         # functions.dump_obj_to_pickle(processed_list, processed_list_filename)
 
