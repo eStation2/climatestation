@@ -6,7 +6,7 @@ services:
     env_file: ./.env
     build:
       context: ./build-docker/web/
-      dockerfile: build-docker/web/myDockerfileJRC
+      dockerfile: DockerfileJRC
       args:
         USER_ID: ${USER_ID}
         GROUP_ID: ${GROUP_ID}
@@ -31,7 +31,7 @@ services:
   mapserver:
     build:
       context: ./build-docker/mapserver/
-      dockerfile: build-docker/mapserver/myDockerfileJRC
+      dockerfile: DockerfileJRC
     container_name: mapserver
     image: "climatestation/mapserver:1.0"
     restart: unless-stopped
