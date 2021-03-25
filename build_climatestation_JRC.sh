@@ -4,6 +4,11 @@ export USER_ID=$(id -u)
 export GROUP_ID=$(id -g)
 
 # Create mandatory directories and set their permission
+mkdir -p log
+mkdir -p log/mapserver
+mkdir -p log/postgres
+mkdir -p log/web
+
 mkdir -p /data
 mkdir -p /data/processing
 mkdir -p /data/ingest
