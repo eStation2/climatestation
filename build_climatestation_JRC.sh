@@ -34,11 +34,6 @@ mkdir -p /tmp/climatestation/services
 chmod 775 -R ${DATA_VOLUME}
 chmod 775 -R /tmp/climatestation
 
-# TODO: get layers and logos (and docs?) from our JRC FTP and extract them into their respective dir under static_data.
-
-chmod 775 -R /data
-chmod 775 -R /tmp
-
 # create an external docker volume for the postgresql data:
 docker volume create --name cs-docker-postgresql12-volume -d local
 

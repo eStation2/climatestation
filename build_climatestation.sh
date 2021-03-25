@@ -3,26 +3,34 @@
 export USER_ID=$(id -u)
 export GROUP_ID=$(id -g)
 
+export DATA_VOLUME=/data
+export TMP_VOLUME=/tmp/climatestation
+
 # Create mandatory directories and set their permission
-mkdir -p /data
-mkdir -p /data/processing
-mkdir -p /data/ingest
-mkdir -p /data/ingest.wrong
-mkdir -p /data/static_data
-mkdir -p /data/static_data/completeness_bars
-mkdir -p /data/static_data/db_dump
-mkdir -p /data/static_data/docs
-mkdir -p /data/static_data/get_lists
-mkdir -p /data/static_data/layers
-mkdir -p /data/static_data/log
-mkdir -p /data/static_data/logos
-mkdir -p /data/static_data/requests
-mkdir -p /data/static_data/settings
+mkdir -p log
+mkdir -p log/mapserver
+mkdir -p log/postgres
+mkdir -p log/web
+
+mkdir -p ${DATA_VOLUME}
+mkdir -p ${DATA_VOLUME}/processing
+mkdir -p ${DATA_VOLUME}/ingest
+mkdir -p ${DATA_VOLUME}/ingest.wrong
+mkdir -p ${DATA_VOLUME}/static_data
+mkdir -p ${DATA_VOLUME}/static_data/completeness_bars
+mkdir -p ${DATA_VOLUME}/static_data/db_dump
+mkdir -p ${DATA_VOLUME}/static_data/docs
+mkdir -p ${DATA_VOLUME}/static_data/get_lists
+mkdir -p ${DATA_VOLUME}/static_data/layers
+mkdir -p ${DATA_VOLUME}/static_data/log
+mkdir -p ${DATA_VOLUME}/static_data/logos
+mkdir -p ${DATA_VOLUME}/static_data/requests
+mkdir -p ${DATA_VOLUME}/static_data/settings
 mkdir -p /tmp/climatestation
 mkdir -p /tmp/climatestation/services
 
-chmod 775 -R /data
-chmod 775 -R /tmp
+chmod 775 -R ${DATA_VOLUME}
+chmod 775 -R /tmp/climatestation
 
 # TODO: get layers and logos (and docs?) from our JRC FTP and extract them into their respective dir under static_data.
 
