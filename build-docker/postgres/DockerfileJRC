@@ -13,6 +13,7 @@ RUN chmod 0775 -R /home/postgres/
 RUN chown postgres:postgres -R /home/postgres/
 ENV PGPASSFILE=/home/postgres/.pgpass
 
+RUN mkdir -p /data/static_data/db_dump
 RUN mkdir -p /var/www/climatestation
 RUN mkdir -p /var/log/climatestation
 RUN chmod 0775 -R /var/log/climatestation
@@ -21,10 +22,10 @@ RUN chown postgres:postgres -R /var/log/climatestation
 ADD ./src/database/dbInstall/install_update_db.sh /
 RUN chmod 0775 /install_update_db.sh
 
-#RUN chown --changes --silent --no-dereference --recursive \
-#    --from=101:102 ${USER_ID}:${GROUP_ID} \
-#    /var/log/climatestation \
-#    /data/static_data/db_dump
+RUN chown --changes --silent --no-dereference --recursive \
+    --from=0:0 ${USER_ID}:${GROUP_ID} \
+    /var/log/climatestation \
+    /data/static_data/db_dump
 
 
 # Set the docker user postgres with same uid and gid of host
