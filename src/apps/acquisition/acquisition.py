@@ -9,7 +9,7 @@ from future import standard_library
 standard_library.install_aliases()
 
 from apps.acquisition import get_eumetcast
-from apps.acquisition import get_internet
+from apps.acquisition import get_internet, get_datastore
 from apps.acquisition import ingestion
 from lib.python import functions
 
@@ -36,5 +36,10 @@ class GetEumetcastDaemon(DaemonDryRunnable):
 class GetInternetDaemon(DaemonDryRunnable):
     def run(self):
         get_internet.loop_get_internet(dry_run=self.dry_run)
+
+
+class GetDataStoresDaemon(DaemonDryRunnable):
+    def run(self):
+        get_datastore.loop_get_datastore(dry_run=self.dry_run)
 
 

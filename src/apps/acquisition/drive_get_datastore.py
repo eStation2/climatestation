@@ -8,7 +8,7 @@ _author__ = "VIJAY CHARAN"
 
 import os, time
 from config import es_constants
-from apps.acquisition import get_cds
+from apps.acquisition import get_datastore
 from apps.acquisition import acquisition
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
@@ -47,8 +47,8 @@ if service:
             daemon.stop()
 else:   # For windows version and for testing
     if only_source is not None:
-        get_cds.loop_get_cds_iri(dry_run=dry_run, test_one_source=only_source)
+        get_datastore.loop_get_datastore(dry_run=dry_run, test_one_source=only_source)
         logger.warning('Get internet running for a single source: %s', only_source)
     else:
-        get_cds.loop_get_cds_iri(dry_run=dry_run)
+        get_datastore.loop_get_datastore(dry_run=dry_run)
 
