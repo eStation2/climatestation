@@ -3563,6 +3563,45 @@ def get_active_internet_sources():
             db.session.close()
         # db = None
 
+######################################################################################
+#   get_active_datastore_sources()
+#   Purpose: Query the database to get the sources of all the active product Datastore(internet_type - CDS, IRI) data sources.
+#            Mainly used in get_datastore.py
+#   Author: Vijay Charan
+#   Date: 2021/03/29
+#
+#   Output: Return the internet of all the active product Datastore(internet_type - CDS, IRI) data sources.
+def get_active_datastore_sources():
+    global db
+
+    try:
+
+        query = "SELECT pads1.*, i.* FROM products.internet_source i " + \
+                " INNER JOIN products.acquisition pads1 " + \
+                " ON i.internet_id = pads1.data_source_id " + \
+                "WHERE i.type IN ('cds_api','iri_api') AND i.internet_id IN (  " + \
+                "    SELECT data_source_id " + \
+                "    FROM products.acquisition pads JOIN products.product p " + \
+                "      ON pads.productcode = p.productcode " + \
+                "       AND pads.version = p.version " + \
+                "       AND p.activated = TRUE " + \
+                "    WHERE pads.type = 'INTERNET' AND pads.activated = TRUE)"
+
+        result = db_analysis.execute(query)
+        internet_sources = result.fetchall()
+
+        return internet_sources
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_active_datastore_sources: Database query error!\n -> {}".format(exceptionvalue))
+        return False
+    finally:
+        if db.session:
+            db.session.close()
+        # db = None
+
 
 ######################################################################################
 #   get_processingchains_input_products()
