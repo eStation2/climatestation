@@ -1,10 +1,12 @@
 #!/bin/bash
 
+source .env 
+
 export USER_ID=$(id -u)
 export GROUP_ID=$(id -g)
 
-export DATA_VOLUME=/data
-export TMP_VOLUME=/tmp/climatestation
+#export DATA_VOLUME=/data
+#export TMP_VOLUME=/tmp/climatestation
 
 # Create mandatory directories and set their permission
 mkdir -p log
@@ -26,19 +28,20 @@ mkdir -p ${DATA_VOLUME}/static_data/log
 mkdir -p ${DATA_VOLUME}/static_data/logos
 mkdir -p ${DATA_VOLUME}/static_data/requests
 mkdir -p ${DATA_VOLUME}/static_data/settings
-mkdir -p /tmp/climatestation
-mkdir -p /tmp/climatestation/services
+mkdir -p ${TMP_VOLUME}
+mkdir -p ${TMP_VOLUME}/services
+
 
 # TODO: get layers and logos (and docs?) from our JRC FTP and extract them into their respective dir under static_data.
 
 chmod 775 -R ${DATA_VOLUME}
-chmod 775 -R /tmp/climatestation
+chmod 775 -R ${TMP_VOLUME} 
 
 # create an external docker volume for the postgresql data:
-docker volume create --name cs-docker-postgresql12-volume -d local
+#docker volume create --name cs-docker-postgresql12-volume -d local
 
 # Build and run the climate station containers: mapserver, potsgres and web
-docker-compose -f ./docker-compose-JRC.yml up -d --build
+#docker-compose -f ./docker-compose-JRC.yml up -d --build
 
 # Run script that installs or update the CS DB
-docker exec -ti postgres sh -c "/install_update_db.sh"
+#docker exec -ti postgres sh -c "/install_update_db.sh"

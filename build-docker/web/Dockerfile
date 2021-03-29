@@ -33,8 +33,6 @@ RUN apt-get update && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi
 # Install all needed Python packages, listed in the file requirements.txt
 # Some packages depend on setuptools to be installed. The reqiurements.txt does not preserve
 # the order of install so install setuptools before the requirements.txt
-# By default pip keeps copies of the downloaded package, in case you reinstall later.
-# This wastes space, and you won't need it. Use the --no-cache-dir flag!
 ADD requirements.txt /etc/apache2/sites-available/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install setuptools
