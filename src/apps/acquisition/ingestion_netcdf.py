@@ -94,8 +94,8 @@ def ingestion_netcdf(input_file, in_date, product, subproducts, datasource_descr
 
     # 4. Pre-process (get the physical value data by converting native file--> along with subproduct assigned)
     if do_preprocess:
-        composed_file_list = ingestion_pre_process(preproc_type, native_mapset_code, subproducts, input_file, tmpdir, my_logger, in_date, product,
-                                                   test_mode)
+        composed_file_list = ingestion_pre_process(preproc_type, native_mapset_code, subproducts, input_file, tmpdir,
+                                                   my_logger, product, test_mode)
         # TODO alter this area
         # Error occurred and was detected in pre_process routine
         if str(composed_file_list) == '1':
@@ -131,15 +131,6 @@ def ingestion_netcdf(input_file, in_date, product, subproducts, datasource_descr
 
     return ingestion_status
 
-def read_netcdf_file(input_file):
-    # Check if the file has many variables
-    multi_var_netcdf = False
-
-    # Check if the file has many bands
-    multi_band_netcdf = False
-
-    # Check if the file has many variables and bands
-    multi_var_band_netcdf = False
 
 def ingestion_post_processing(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, input_files,
                               echo_query, test_mode, tmpdir):
@@ -165,7 +156,7 @@ def ingestion_post_processing(composed_file_list, in_date, product, subproducts,
             output_path_filename = get_output_path_filename(datasource_descr, product, subproduct, in_date)
 
             #5. Create the output based on the file extension format
-            # tmp_file = composed_file_list[0] #create_output_file(output_path_filename, tmpdir, file_extension)
+            tmp_output_file = tmpdir+'tmp_file.nc' # tmp_file = composed_file_list[0] #create_output_file(output_path_filename, tmpdir, file_extension)
 
             # 6. Metadata registration -- here just metadata class is initialized
             metadata = assign_metadata_generic(product, subproduct['subproduct'], subproduct['mapsetcode'], in_date,
@@ -175,16 +166,15 @@ def ingestion_post_processing(composed_file_list, in_date, product, subproducts,
             # New approach is to get these info from subproduct table
             product_out_info = querydb.get_subproduct(productcode=product['productcode'],version=product['version'],subproductcode=subproduct['subproduct'])
 
-            tmp_file = tmpdir+'tmp_file.nc'
-            write_status = NetCDF_Writer.write_nc(file_name=tmp_file, data=[data_numpy_array], dataset_tag=[product_out_info.subproductcode],
+            write_status = NetCDF_Writer.write_nc(file_name=tmp_output_file, data=[data_numpy_array], dataset_tag=[product_out_info.subproductcode],
                                                   zc=trg_mapset.bbox, fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
                                                   write_CS_metadata=metadata)
             # write_status = NetCDF_Writer.write_nc(file_name=tmp_file, data=[data_numpy_array], dataset_tag=[product_out_info.subproductcode],
             #                                       fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
             #                                       write_CS_metadata=metadata)
 
-            if os.path.isfile(tmp_file):
-                shutil.move(tmp_file, output_path_filename)
+            if os.path.isfile(tmp_output_file):
+                shutil.move(tmp_output_file, output_path_filename)
                 ingestion_status = True
     except:
         my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
@@ -192,12 +182,6 @@ def ingestion_post_processing(composed_file_list, in_date, product, subproducts,
         raise NameError('Error in ingestion routine')
 
     return ingestion_status
-
-#5. Create the output based on the file extension format
-def create_output_file(output_path_filename, tmpdir, file_format):
-    # This method should call CS raster read write class to create the ouput
-    output_success = True
-    return output_success
 
 # Get output product full filename with product
 def get_output_path_filename(datasource_descr, product, subproduct, in_date, file_extension='.nc'):
@@ -223,13 +207,14 @@ def get_output_path_filename(datasource_descr, product, subproduct, in_date, fil
     return output_path_filename
 
 
-def ingestion_pre_process(preproc_type, native_mapset_code, subproducts, input_file, tmpdir, my_logger, in_date, product, test_mode):
+def ingestion_pre_process(preproc_type, native_mapset_code, subproducts, input_file, tmpdir, my_logger, product,
+                          test_mode):
     my_logger.debug("Calling routine %s" % 'preprocess_files')
     try:
 
         composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts,
                                                                       input_file, tmpdir,
-                                                                      my_logger, in_date=in_date)
+                                                                      my_logger)
 
         # Pre-process returns None if there are not enough files for continuing
         if composed_file_list is None:
@@ -381,7 +366,7 @@ def delete_files(date_fileslist, logger_spec):
             logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
 
 
-def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file, tmpdir, my_logger, in_date=None):
+def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file, tmpdir, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process one or more input files by:
 #   2. Extract one or more datasets from a netcdf file, or a multi-layer netcdf file (e.g. HDF)
@@ -392,13 +377,10 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #
 #   Arguments:
 #       preproc_type:    type of preprocessing
-#       IRI : IRI data
-#       CDS : CDS data
+#       NETCDF : IRI & CDS NETCDF data
 #       input_files: list of input files
 #   Returned:
-#       output_file: temporary created output file[s]
-#       None: wait for additional files (e.g. MSG_MPE - in 4 segments)
-#       -1: nothing to do on the passed files (e.g. for S3A night-files or out-of-ROI).
+#       output dict: subproduct and data_array
 #
 
     my_logger.info("Input files pre-processing by using method: %s" % preproc_type)
@@ -406,8 +388,8 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
     georef_already_done = False
 
     try:
-        if preproc_type == 'IRI':
-            sprod_data_list = pre_process_iri(subproducts, input_file, native_mapset_code, tmpdir, my_logger)
+        if preproc_type == 'NETCDF_IRI_CDS':
+            sprod_data_list = pre_process_netcdf(subproducts, input_file, native_mapset_code, tmpdir, my_logger)
 
         else:
             my_logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
@@ -425,17 +407,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
         my_logger.info('Nothing to do on the passed files. Exit')
         return -1
 
-    # # Make sure it is a list (if only a string is returned, it loops over chars)
-    # if isinstance(interm_files, list):
-    #     list_interm_files = interm_files
-    # else:
-    #     list_interm_files = []
-    #     list_interm_files.append(interm_files)
-
-    # set_geoTransform_projection(native_mapset_code, georef_already_done, list_interm_files, my_logger)
     return sprod_data_list
 
-def pre_process_iri(subproducts, input_file, native_mapset_code, my_logger, in_date=None):
+def pre_process_netcdf(subproducts, input_file, native_mapset_code, my_logger, in_date=None):
     try:
         # This pre processed list contains list of object(subproduct,data(numpy array))key value pair
         pre_processed_list = []
