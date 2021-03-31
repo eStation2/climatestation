@@ -157,6 +157,13 @@ class RasterDataset(object):
 
         return physicalvalue_data_array
 
+    def get_data_irregular_grid(self, target_mapset_name, native_mapset_name):
+        # This method should return(or generate) target_bbox specific lat, lon and variable array
+        # By now native lat, lon are initialized. (get_coordinates in the init does this already)
+
+
+        return None
+
     def _get_netcdf(self):
         """
         read the band layer and return it as numpy array
@@ -187,7 +194,9 @@ class RasterDataset(object):
         :param data: numpy array of "raw" data
         :param gobj: gdal_object of type gdal.Open()
         :return: scientific dataset (i.e. data having physical meanings)
-        """
+                    """
+        # if self.raster_type == 'geotif':
+
         i_i = 0
         i_f = None
         j_i = 0
@@ -210,6 +219,27 @@ class RasterDataset(object):
             data *= self.scale_factor
         if self.add_offset is not None:
             data += self.add_offset
+
+        # else:
+        #     if self.ds_lats is None and self.ds_lats is None:
+        #         self._get_netcdf_dim()
+        #     i_i = 0
+        #     i_f = None
+        #     j_i = 0
+        #     j_f = None
+        #
+        #     # Get target_bbox specific lat and long
+        #
+        #     # Do the extraction
+        #
+        #     # physical conversion
+        #     if self.fill_value is not None:
+        #         data[data == self.fill_value] = np.nan
+        #     if self.scale_factor is not None:
+        #         data *= self.scale_factor
+        #     if self.add_offset is not None:
+        #         data += self.add_offset
+
 
         return data
 
@@ -396,7 +426,7 @@ class RasterDataset(object):
         return d
 
     def get_coordinates(self):
-        if self.raster_type == 'geofit':
+        if self.raster_type == 'geotif':
             gobj = gdal.Open(self.filename)
             old_cs = osr.SpatialReference()
             old_cs.ImportFromWkt(gobj.GetProjectionRef())
@@ -434,28 +464,23 @@ class RasterDataset(object):
 
         else:
             # else is a netcdf data, so we expect lat and lon array inside
-            ds_lats = None
-            ds_lons = None
+            self.ds_lats = None
+            self.ds_lons = None
             s = n = e = w = lat_0 = lon_0 = None
-            ds = Dataset(self.filename)
 
-            for dim in ds.dimensions.keys():
-                if 'lat' in dim.lower():
-                    ds_lats = ds.variables[dim][:]
-                elif 'lon' in dim.lower():
-                    ds_lons = ds.variables[dim][:]
+            self._get_netcdf_dim()
 
-            if ds_lats is not None and ds_lons is not None:
-                s_try = ds_lats[0]
-                n_try = ds_lats[-1]
+            if self.ds_lats is not None and self.ds_lons is not None:
+                s_try = self.ds_lats[0]
+                n_try = self.ds_lats[-1]
                 if n_try < s_try:
                     n = s_try
                     s = n_try
                 else:
                     n = n_try
                     s = s_try
-                w_try = ds_lons[0]
-                e_try = ds_lons[-1]
+                w_try = self.ds_lons[0]
+                e_try = self.ds_lons[-1]
 
                 if e_try < w_try:
                     e = w_try
@@ -466,6 +491,21 @@ class RasterDataset(object):
 
         self.native_zc = [s, n, w, e]
         return [s, n, w, e], [lat_0, lon_0]
+
+    def _get_netcdf_dim(self):
+        ds = Dataset(self.filename)
+        for dim in ds.dimensions.keys():
+            if 'lat' in dim.lower() or 'y' in dim.lower():
+                self.ds_lats = ds.variables[dim][:]
+            elif 'lon' in dim.lower() or 'x' in dim.lower():
+                self.ds_lons = ds.variables[dim][:]
+        # d1 = d2 = 0
+        # for dim in ds.dimensions.keys():
+        #     if 'lat' in dim.lower():
+        #         d1 = ds[dim].shape[0]
+        #     elif 'lon' in dim.lower():
+        #         d2 = ds[dim].shape[0]
+        # return [d1, d2]
 
     def set_CS_subproduct_parameter(self, subproduct):
         if subproduct is not None:
