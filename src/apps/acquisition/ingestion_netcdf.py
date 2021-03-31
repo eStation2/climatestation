@@ -434,6 +434,28 @@ def pre_process_netcdf(subproducts, input_file, native_mapset_code, my_logger, i
 
     return pre_processed_list
 
+
+def pre_process_irregular_grid(subproducts, input_file, native_mapset_code, my_logger, in_date=None):
+    try:
+        # This pre processed list contains list of object(subproduct,data(numpy array))key value pair
+        pre_processed_list = []
+        #Read the file looping over the subproducts?
+        for subproduct in subproducts:
+            # bandname = subproduct['re_extract']
+            # re_process = subproduct['re_process']
+            # no_data = subproduct['nodata']
+            subproductcode = subproduct['subproduct']
+            mapsetcode = subproduct['mapsetcode']
+            raster = RasterDataset(filename=input_file)
+            # SET CS subproduct parameters into the Raster class
+            raster.set_CS_subproduct_parameter(subproduct)
+            data_numpy_array = raster.get_data_CS_netcdf(target_mapset_name=mapsetcode, native_mapset_name=native_mapset_code) # conversion to physical value by applying nodatavalue
+            pre_processed_data = {'subproduct': subproduct,  'data_array': data_numpy_array}
+            pre_processed_list.append(pre_processed_data)
+    except:
+        my_logger.error("Error in pre process Irregular grid for date %s"% in_date)
+
+    return pre_processed_list
 # ----------------------------------------------
 # Assign metadata parameters to metadata class.
 # ----------------------------------------------
