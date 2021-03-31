@@ -10,7 +10,7 @@ import unittest
 import re
 import os
 from database import querydb
-from apps.acquisition import get_cds, ingestion_netcdf, ingestion
+from apps.acquisition import get_datastore, ingestion_netcdf, ingestion
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 class SourceEOS:
@@ -107,7 +107,7 @@ class TestGetEOS(unittest.TestCase):
                               version='1.0')
 
         #files_list = get_internet.build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        result = get_cds.loop_get_internet(test_one_source=internet_id, my_source=my_source)
+        result = get_datastore.loop_get_datastore(test_one_source=internet_id, my_source=my_source)
 
     def testRemote_CDS_SST_1Month(self):
         internet_id = "CDS:ERA5:REANALYSIS:SST:MONTH"#'CDS:ERA5:REANALYSIS:SST:MONTH'
@@ -144,7 +144,7 @@ class TestGetEOS(unittest.TestCase):
                               https_params='')
 
         # files_list = get_internet.build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        result = get_cds.loop_get_internet(test_one_source=internet_id, my_source=my_source)
+        result = get_datastore.loop_get_datastore(test_one_source=internet_id, my_source=my_source)
 
 
 
@@ -176,7 +176,7 @@ class TestGetEOS(unittest.TestCase):
                               version='1.0')
 
         # files_list = get_internet.build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        result = get_cds.loop_get_internet(test_one_source=internet_id, my_source=my_source)
+        result = get_datastore.loop_get_datastore(test_one_source=internet_id, my_source=my_source)
 
 
     def debug_IRI_surfacetemp_1Month_ingest_netcdf(self):

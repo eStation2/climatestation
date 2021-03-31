@@ -154,63 +154,6 @@ def build_list_matching_files_cds(base_url, template, from_date, to_date, freque
 
     return list_input_files
 
-######################################################################################
-#   get_file_from_url
-#   Purpose: download and save locally a file
-#   Author: Marco Clerici, JRC, European Commission
-#   Date: 2014/09/01
-#   Inputs: remote_url_file: full file path
-#           target_file: target file name (by default 'test_output_file')
-#           target_dir: target directory (by default a tmp dir is created)
-#   Output: full pathname is returned (or positive number for error)
-#
-def get_file_from_url(remote_url_file, target_dir, target_file=None, userpwd='', https_params=''):
-    # Create a tmp directory for download
-    tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
-
-    if target_file is None:
-        target_file = 'test_output_file'
-
-    target_fullpath = tmpdir + os.sep + target_file
-    target_final = target_dir + os.sep + target_file
-
-    c = pycurl.Curl()
-
-    try:
-        outputfile = open(target_fullpath, 'wb')
-        logger.debug('Output File: ' + target_fullpath)
-        remote_url_file = remote_url_file.replace('\\', '')  # Pierluigi
-        c.setopt(c.URL, remote_url_file)
-        c.setopt(c.WRITEFUNCTION, outputfile.write)
-        if remote_url_file.startswith('https'):
-            c.setopt(c.CAINFO, certifi.where())  # Pierluigi
-            if https_params is not '':
-                # headers = 'Authorization: Bearer ACB5F378-5483-11E9-849E-54E83FFDBADB'
-                c.setopt(pycurl.HTTPHEADER, [https_params])
-        if userpwd is not ':':
-            c.setopt(c.USERPWD, userpwd)
-        c.perform()
-        # Check the result (filter server/client errors http://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
-        if c.getinfo(pycurl.HTTP_CODE) >= 400:
-            outputfile.close()
-            os.remove(target_fullpath)
-            raise Exception('HTTP Error in downloading the file: %i' % c.getinfo(pycurl.HTTP_CODE))
-        # See ES2-67
-        elif c.getinfo(pycurl.HTTP_CODE) == 301:
-            outputfile.close()
-            os.remove(target_fullpath)
-            raise Exception('File moved permanently: %i' % c.getinfo(pycurl.HTTP_CODE))
-        else:
-            outputfile.close()
-            shutil.move(target_fullpath, target_final)
-            return 0
-    except:
-        logger.warning('Output NOT downloaded: %s - error : %i' % (remote_url_file, c.getinfo(pycurl.HTTP_CODE)))
-        return 1
-    finally:
-        c = None
-        shutil.rmtree(tmpdir)
-
 
 ######################################################################################
 #   loop_get_cds_iri
@@ -219,7 +162,7 @@ def get_file_from_url(remote_url_file, target_dir, target_file=None, userpwd='',
 #   Date: 2021/03/24
 #   Inputs: none
 #   Arguments: dry_run -> if set, read tables and report activity ONLY
-def loop_get_cds_iri(dry_run=False, test_one_source=False, my_source=None):
+def loop_get_datastore(dry_run=False, test_one_source=False, my_source=None):
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info
 
@@ -234,7 +177,7 @@ def loop_get_cds_iri(dry_run=False, test_one_source=False, my_source=None):
 
     while b_loop:
         output_dir = es_constants.get_internet_output_dir
-        logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
+        logger.debug("Check if the Datastore Server input directory : %s exists.", output_dir)
         if not os.path.exists(output_dir):
             # ToDo: create output_dir - ingest directory
             logger.fatal("The Ingest Server input directory : %s doesn't exists.", output_dir)
@@ -256,26 +199,27 @@ def loop_get_cds_iri(dry_run=False, test_one_source=False, my_source=None):
             #
             # else:
 
-            logger.info("Reading active INTERNET data sources from database")
-            internet_sources_list = querydb.get_active_internet_sources()
+            logger.info("Reading active Datastore data sources from database")
+            # internet_sources_list = querydb.get_active_internet_sources()
+            datastore_sources_list = querydb.get_active_datastore_sources()
 
             # Loop over active triggers
-            for internet_source in internet_sources_list:
+            for datastore_source in datastore_sources_list:
                 try:
                     # In case of test_one_source, skip all other sources
                     if test_one_source:
-                        if (internet_source.internet_id != test_one_source):
+                        if (datastore_source.internet_id != test_one_source):
                             logger.debug("Running in test mode, and source is not %s. Continue.", test_one_source)
                             continue
                         else:
                             # Overwrite DB definitions with the passed object (if defined - for testing purposes)
                             if my_source:
-                                internet_source = my_source
+                                datastore_source = my_source
 
                     execute_trigger = True
                     # Get this from the pads database table (move from internet_source 'pull_frequency' to the pads table,
                     # so that it can be exploited by eumetcast triggers as well). It is in minute
-                    pull_frequency = internet_source.pull_frequency
+                    pull_frequency = datastore_source.pull_frequency
 
                     # Manage the case of files to be continuously downloaded (delay < 0)
                     if pull_frequency < 0:
@@ -286,12 +230,12 @@ def loop_get_cds_iri(dry_run=False, test_one_source=False, my_source=None):
                         delay_time_source_minutes = pull_frequency
 
                     if sys.platform == 'win32':
-                        internet_id = str(internet_source.internet_id).replace(':', '_')
+                        internet_id = str(datastore_source.internet_id).replace(':', '_')
                     else:
-                        internet_id = str(internet_source.internet_id)
+                        internet_id = str(datastore_source.internet_id)
 
                     logger_spec = log.my_logger('apps.get_internet.' + internet_id)
-                    logger.info("Processing internet source  %s.", internet_source.descriptive_name)
+                    logger.info("Processing internet source  %s.", datastore_source.descriptive_name)
 
                     # Create objects for list and info
                     processed_info_filename = es_constants.get_internet_processed_list_prefix + str(
@@ -326,32 +270,32 @@ def loop_get_cds_iri(dry_run=False, test_one_source=False, my_source=None):
                         processed_info['time_latest_exec'] = datetime.datetime.now()
 
                         logger.debug("Create current list of file to process for source %s.",
-                                     internet_source.internet_id)
-                        if internet_source.user_name is None:
+                                     datastore_source.internet_id)
+                        if datastore_source.user_name is None:
                             user_name = "anonymous"
                         else:
-                            user_name = internet_source.user_name
+                            user_name = datastore_source.user_name
 
-                        if internet_source.password is None:
+                        if datastore_source.password is None:
                             password = "anonymous"
                         else:
-                            password = internet_source.password
+                            password = datastore_source.password
 
                         usr_pwd = str(user_name) + ':' + str(password)
 
-                        logger_spec.debug("              Url is %s.", internet_source.url)
+                        logger_spec.debug("              Url is %s.", datastore_source.url)
                         logger_spec.debug("              usr/pwd is %s.", usr_pwd)
-                        logger_spec.debug("              regex   is %s.", internet_source.include_files_expression)
+                        logger_spec.debug("              regex   is %s.", datastore_source.include_files_expression)
 
-                        internet_type = internet_source.type
+                        internet_type = datastore_source.type
 
                         if internet_type == 'cds_api':
-                            current_list = cds_api_loop_internet(internet_source)
+                            current_list = cds_api_loop_internet(datastore_source)
                         elif internet_type == 'iri_api':
-                            current_list = iri_api_loop_internet(internet_source)
+                            current_list = iri_api_loop_internet(datastore_source)
 
                         else:
-                            logger.debug("No correct type for this internet source type: %s" % internet_type)
+                            logger.debug("No correct type for this datastore source type: %s" % internet_type)
                             current_list = []
 
                         logger_spec.debug("Number of files currently available for source %s is %i", internet_id,
@@ -368,7 +312,7 @@ def loop_get_cds_iri(dry_run=False, test_one_source=False, my_source=None):
                     #     sleep(float(user_def_sleep))
                 # # Loop over sources
                 except Exception as inst:
-                    logger.error("Error while processing source %s. Continue" % internet_source.descriptive_name)
+                    logger.error("Error while processing source %s. Continue" % datastore_source.descriptive_name)
                     b_error = True
             sleep(float(user_def_sleep))
     if not test_one_source:
@@ -376,28 +320,28 @@ def loop_get_cds_iri(dry_run=False, test_one_source=False, my_source=None):
     else:
         return b_error
 
-def cds_api_loop_internet(internet_source):
-    logger_spec = log.my_logger('apps.get_internet.' + internet_source.internet_id)
+def cds_api_loop_internet(datastore_source):
+    logger_spec = log.my_logger('apps.get_datastore.' + datastore_source.internet_id)
 
-    if internet_source.user_name is None:
+    if datastore_source.user_name is None:
         user_name = "anonymous"
     else:
-        user_name = internet_source.user_name
+        user_name = datastore_source.user_name
 
-    if internet_source.password is None:
+    if datastore_source.password is None:
         password = "anonymous"
     else:
-        password = internet_source.password
+        password = datastore_source.password
 
     usr_pwd = str(user_name) + ':' + str(password)
 
     # Create the full filename from a 'template' which contains
-    cds_internet_url = str(internet_source.url)
+    cds_internet_url = str(datastore_source.url)
 
     #Read the CDS parameters from the file.
-    parameter = cds_api.read_cds_parameter_file(internet_source.internet_id)
+    parameter = cds_api.read_cds_parameter_file(datastore_source.internet_id)
 
-    if internet_source.productcode is None or internet_source.version is None:
+    if datastore_source.productcode is None or datastore_source.version is None:
         logger.error("Product is not passed")
         return
 
@@ -405,16 +349,16 @@ def cds_api_loop_internet(internet_source):
         resourcename_uuid = parameter.get('resourcename_uuid')
         template_paramater = parameter.get('template')
     else:
-        resourcename_uuid = internet_source.files_filter_expression
-        template_paramater = internet_source.include_files_expression
+        resourcename_uuid = datastore_source.files_filter_expression
+        template_paramater = datastore_source.include_files_expression
 
     ongoing_list = []
     ongoing_list_filename = es_constants.get_internet_processed_list_prefix + str(
-        internet_source.internet_id) + '_Ongoing' + '.list'
+        datastore_source.internet_id) + '_Ongoing' + '.list'
     ongoing_list = functions.restore_obj_from_pickle(ongoing_list, ongoing_list_filename)
 
     processed_list = []
-    processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_source.internet_id + '.list'
+    processed_list_filename = es_constants.get_internet_processed_list_prefix + datastore_source.internet_id + '.list'
     processed_list = functions.restore_obj_from_pickle(processed_list,
                                                        processed_list_filename)
 
@@ -431,8 +375,8 @@ def cds_api_loop_internet(internet_source):
         else:
             # Dates defined are dynamic not based on the configuration file
             current_list = build_list_matching_files_cds(cds_internet_url, template=template_paramater,
-                                                         from_date=internet_source.start_date, to_date=internet_source.end_date,
-                                                         frequency_id=str(internet_source.frequency_id), resourcename_uuid=resourcename_uuid)
+                                                         from_date=datastore_source.start_date, to_date=datastore_source.end_date,
+                                                         frequency_id=str(datastore_source.frequency_id), resourcename_uuid=resourcename_uuid)
 
         # Current list and ongoing list in format (Datetime:ResourceID:variable)
         ongoing_list_reduced = cds_api.get_cds_current_list_pattern(ongoing_list)
@@ -453,14 +397,14 @@ def cds_api_loop_internet(internet_source):
                         current_resource_id = filename.split(':')[1]
                         template_without_date=template_paramater
                         template = cds_api.build_cds_date_template(current_datetime_str, template_without_date)
-                        created_ongoing_request_id = cds_api.create_cds_job(internet_source, usr_pwd, template, resourcename_uuid)
+                        created_ongoing_request_id = cds_api.create_cds_job(datastore_source, usr_pwd, template, resourcename_uuid)
 
                         if created_ongoing_request_id is not None:
                             ongoing_list.append(filename+":"+created_ongoing_request_id)
                             functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
                     except:
                         logger_spec.warning(
-                            "Problem while creating Job request to JEODPP: %s.", filename)
+                            "Problem while creating Job request to CDS: %s.", filename)
                         b_error = True
         # functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
         if len(ongoing_list) > 0:
@@ -473,11 +417,11 @@ def cds_api_loop_internet(internet_source):
             listtodownload = []
             for ongoing in ongoing_list:
                 ongoing_request_id = ongoing.split(':')[-1]
-                job_status = cds_api.get_task_status(internet_source.url, ongoing_request_id, usr_pwd)
+                job_status = cds_api.get_task_status(datastore_source.url, ongoing_request_id, usr_pwd)
                 if job_status == 'completed':
                     logger_spec.info("Downloading Product: " + str(ongoing))
                     try:
-                        download_url = cds_api.get_job_download_url(internet_source.url, ongoing_request_id, usr_pwd)
+                        download_url = cds_api.get_job_download_url(datastore_source.url, ongoing_request_id, usr_pwd)
                         if download_url is False:
                             logger_spec.warning("Problem in getting download Url : %s.", str(ongoing))
                             continue
@@ -489,12 +433,12 @@ def cds_api_loop_internet(internet_source):
 
                             processed_item = cds_api.get_cds_current_Item_pattern(ongoing)
                             logger_spec.info("Ingesting : " + str(ongoing))
-                            status = cds_api.ingest_netcdf_cds(internet_source, target_path, processed_item)
+                            status = cds_api.ingest_netcdf_cds(datastore_source, target_path, processed_item)
                             processed_list.append(processed_item)  # Add the processed list only with datetime, resourceid_product_type and variable
                             functions.dump_obj_to_pickle(processed_list, processed_list_filename)
                             ongoing_list.remove(ongoing)
                             functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
-                            deleted = cds_api.delete_cds_task(internet_source.url, ongoing_request_id, usr_pwd, internet_source.https_params)
+                            deleted = cds_api.delete_cds_task(datastore_source.url, ongoing_request_id, usr_pwd, datastore_source.https_params)
                             if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
                                 logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
                         else:
@@ -507,7 +451,7 @@ def cds_api_loop_internet(internet_source):
                     # Check if the request failed and remove the job
                     # Check if the created request is failed then remove the job(task)
                     logger_spec.warning("Problem with created job so deleteing it: %s.", str(ongoing))
-                    deleted = cds_api.delete_cds_task(internet_source.url, ongoing_request_id, usr_pwd, internet_source.https_params)
+                    deleted = cds_api.delete_cds_task(datastore_source.url, ongoing_request_id, usr_pwd, datastore_source.https_params)
                     if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
                         logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
                     else:
@@ -517,17 +461,17 @@ def cds_api_loop_internet(internet_source):
         functions.dump_obj_to_pickle(processed_list, processed_list_filename)
 
     except:
-        logger.error("Error in CDS service. Continue")
+        logger.error("Error in CDS datastore service. Continue")
         b_error = True
 
     finally:
-        logger.info("CDS service completed")
+        logger.info("CDS datastore service completed")
         current_list = []
         return current_list
 
 def iri_api_loop_internet(internet_source):
 
-    logger_spec = log.my_logger('apps.get_internet.' + internet_source.internet_id)
+    logger_spec = log.my_logger('apps.get_datastore.' + internet_source.internet_id)
 
     if internet_source.user_name is None:
         user_name = "anonymous"
@@ -574,14 +518,13 @@ def iri_api_loop_internet(internet_source):
         # functions.dump_obj_to_pickle(processed_list, processed_list_filename)
 
     except:
-        logger.error("Error in IRI service. Continue")
+        logger.error("Error in IRI datastore service. Continue")
         b_error = True
 
     finally:
-        logger.info("IRI service Ending")
+        logger.info("IRI datastore service Ending")
         current_list = []
         return current_list
-
 
 
 def build_list_dates_generic(from_date, to_date, frequency_id):

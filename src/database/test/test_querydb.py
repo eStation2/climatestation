@@ -146,6 +146,14 @@ class TestQuerydb(TestCase):
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
+    def test_get_active_datastore_sources(self):
+        result = querydb.get_active_datastore_sources()
+        if result:
+            print_rows(result)
+            self.assertGreater(result.__len__(), 0)
+        else:
+            self.assertFalse(True)
+
     def test_get_active_processing_chains(self):
         result = querydb.get_active_processing_chains()
         if result:

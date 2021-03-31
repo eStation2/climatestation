@@ -574,7 +574,7 @@ def define_output_data_format(datasource_descr, in_date, out_date_format):
             elif functions.is_date_yyyymmdd(output_date_str):
                 out_date_str_final = output_date_str + '0000'
         elif out_date_format == 'YYYYMMDD':
-            if functions.is_date_yyyymmdd(output_date_str):
+            if functions.is_date_yyyymmdd(output_date_str, silent=True):
                 out_date_str_final = output_date_str
             elif functions.is_date_yyyymmddhhmm(output_date_str):
                 out_date_str_final = output_date_str[0:8]

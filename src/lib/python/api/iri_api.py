@@ -289,39 +289,41 @@ def process_list_matching_url(datasource_descr, product, subproducts, dates):
                               dir=es_constants.base_tmp_dir)
     parameter = read_parameter_file(datasource_descr.datasource_descr_id)
     internet_url = datasource_descr.url
-    try:
-        parameter_url = build_parameter_http(parameter)
-        processed_list = []
-        processed_list_filename = es_constants.get_internet_processed_list_prefix + datasource_descr.datasource_descr_id + '.list'
-        processed_list = functions.restore_obj_from_pickle(processed_list,
-                                                           processed_list_filename)
-        for date in dates:
-            # iri_month = date.strftime("%b")
-            # iri_year = date.strftime("%Y")
-            time_url = manage_IRI_time(date, datasource_descr.frequency_id)
-            #Check if the file is already processed
-            if not check_processed_list(parameter_url+time_url, processed_list):
-                continue
-            # import urllib   #python 3 urllib.parse.quote(query)
-            # Manage dates depending on the datasource type TODO
-            in_date = date.strftime("%Y%m%d")
-            downloaded_file =tmpdir+'/'+in_date+'_'+product['productcode']+'.nc'
-            file_downloaded = get_file(download_url=internet_url+parameter_url+urllib.parse.quote(time_url)+'/data.nc', target_path=downloaded_file)
-            if not file_downloaded:
-                logger.error('Error in downloading the file')
-                continue
-            # Move the file to cs folder
-            # ingestion_status = ingestion_iri(datasource_descr, product, subproducts[0], in_date, downloaded_file, logger)
+    # try:
+    parameter_url = build_parameter_http(parameter)
+    processed_list = []
+    processed_list_filename = es_constants.get_internet_processed_list_prefix + datasource_descr.datasource_descr_id + '.list'
+    processed_list = functions.restore_obj_from_pickle(processed_list,
+                                                       processed_list_filename)
+    for date in dates:
+        # iri_month = date.strftime("%b")
+        # iri_year = date.strftime("%Y")
+        time_url = manage_IRI_time(date, datasource_descr.frequency_id)
+        #Check if the file is already processed
+        if not check_processed_list(parameter_url+time_url, processed_list):
+            continue
+        # import urllib   #python 3 urllib.parse.quote(query)
+        # Manage dates depending on the datasource type TODO
+        in_date = date.strftime("%Y%m%d")
+        downloaded_file =tmpdir+'/'+in_date+'_'+product['productcode']+'.nc'
+        # downloaded_file =
+        file_downloaded = get_file(download_url=internet_url+parameter_url+urllib.parse.quote(time_url)+'/data.nc', target_path=downloaded_file)
+        if not file_downloaded:
+            logger.error('Error in downloading the file')
+            continue
+        # Move the file to cs folder
+        # ingestion_status = ingestion_iri(datasource_descr, product, subproducts[0], in_date, downloaded_file, logger)
 
-            ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, subproducts, datasource_descr, logger)
-            processed_list.append(parameter_url+time_url)
-            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-    except:
-        logger.error('Error in processing IRIDL URL')
-        # os.removedirs(tmpdir)
-        # return processed_list
-    finally:
-        os.removedirs(tmpdir)
+        ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, subproducts, datasource_descr, logger)
+        processed_list.append(parameter_url+time_url)
+        functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+    shutil.rmtree(tmpdir)
+    # except:
+    #     logger.error('Error in processing IRIDL URL')
+    #     # os.removedirs(tmpdir)
+    #     # return processed_list
+    # finally:
+    #     os.removedirs(tmpdir)
     # return processed_list
 
 # def manage_IRI_time(time_line):
