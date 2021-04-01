@@ -30,7 +30,9 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
         'climatestation.view.widgets.ServiceMenuButton'
     ],
 
-    name:'acquisitionmain',
+    id: 'acquisitionmain',
+    name: 'acquisitionmain',
+    reference: 'acquisitionmain',
 
     store: 'ProductsActiveStore',
 
@@ -208,7 +210,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             padding: 0,
-            items: [{
+            items: [' ', {
                 xtype: 'button',
                 id: 'lockunlock',
                 name: 'lockunlock',

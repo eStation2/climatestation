@@ -10,11 +10,11 @@ Ext.define('climatestation.view.system.systemsettingsModel', {
             reference: 'climatestation.model.SystemSetting',
             //type: 'SystemSetting',
             id: 0
-            ,listeners: {
-                update: function () {
-                    //Ext.Msg.alert('Message', 'Path settings updated!');
-                }
-            }
+            // ,listeners: {
+            //     update: function () {
+            //
+            //     }
+            // }
         }
     }
 });

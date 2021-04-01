@@ -30,18 +30,18 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
     //constrain: true,
     modal: true,
     closable: true,
-    closeAction: 'destroy', // 'hide',
+    closeAction: 'destroy', // 'destroy',
     resizable: true,
     scrollable: 'y',
     maximizable: false,
 
     width: 1260,
-    height: Ext.getBody().getViewSize().height < 825 ? Ext.getBody().getViewSize().height-35 : 950,  // 600,
+    height: Ext.getBody().getViewSize().height < 825 ? Ext.getBody().getViewSize().height-35 : 1000,  // 600,
     maxHeight: 1000,
 
     frame: true,
     border: false,
-    bodyStyle: 'padding:5px 0px 0',
+    bodyStyle: 'padding:3px 3px 3px 3px',
 
     viewConfig:{forceFit:true},
     layout:'fit',
@@ -69,6 +69,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
     initComponent: function () {
         var me = this;
         var user = climatestation.getUser();
+        me.changes_saved = false;
 
         if (me.params.edit){
             // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('editmapset') + '</span>');
@@ -83,17 +84,16 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
 
         // Ext.util.Observable.capture(me, function(e){console.log(e);});
 
-        me.bbar = [{
-            text: climatestation.Utils.getTranslation('save'),    // 'Save',
-            iconCls: 'far fa-save',
-            style: { color: 'lightblue' },
-            scale: 'medium',
-            disabled: false,
-            formBind: true,
-            hidden: me.params.view ? true : false,
-            handler: 'onSaveClick'
-        }];
-
+        // me.bbar = [{
+        //     text: climatestation.Utils.getTranslation('save'),    // 'Save',
+        //     iconCls: 'far fa-save',
+        //     style: { color: 'lightblue' },
+        //     scale: 'medium',
+        //     disabled: false,
+        //     formBind: true,
+        //     hidden: me.params.view ? true : false,
+        //     handler: 'onSaveClick'
+        // }];
 
         // var geometrytypes = Ext.create('Ext.data.ArrayStore', {
         //     fields: ['geometrytype','geometryname'],
@@ -131,7 +131,6 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
         //         }
         //     }
         // });
-
 
         me.listeners = {
             show: function(){
@@ -275,7 +274,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                 me.africacountryborders = new ol.layer.Vector({
                     source: new ol.source.Vector({      // ol.source.GeoJSON({
                         // projection: 'EPSG:4326', // 'EPSG:3857',
-                        url: 'analysis/getvectorlayer?file=AFR_0_g2015_2014.geojson'
+                        url: 'analysis/getvectorlayer?file=africa_countries.geojson'
                         ,format: new ol.format.GeoJSON()
                         ,wrapX: false   // no repeat of layer when
                         ,noWrap: true
@@ -507,10 +506,15 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
             },
 
             beforeclose: function(){
+                console.info(Ext.data.StoreManager.lookup('mapsets').getUpdatedRecords());
+                console.info(me.changes_saved);
+                me.hide();
                 if (Ext.data.StoreManager.lookup('mapsets').getUpdatedRecords() !== []){
                     Ext.data.StoreManager.lookup('mapsets').rejectChanges();
                 }
-                Ext.data.StoreManager.lookup('mapsets').load();
+                if (me.changes_saved) {
+                    Ext.data.StoreManager.lookup('mapsets').load();
+                }
             }
         };
 
@@ -537,11 +541,11 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                 title: '<b>'+climatestation.Utils.getTranslation('mapsetdefinition')+'</b>',    // '<b>Mapset definition</b>',
                 collapsible: false,
                 width: 610,
-                margin: '0 5 0 10',
-                padding: '10 10 0 10',
+                // margin: '0 5 0 10',
+                padding: '5 10 0 10',
                 defaults: {
-                    width: 580,
-                    labelAlign: 'top',
+                    width: 565,
+                    labelAlign: 'left',
                     // disabled: me.params.view ? true : false
                     editable: me.params.view ? false : true
                 },
@@ -551,7 +555,8 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                         type: 'hbox'
                         ,align: 'stretch'
                     },
-                    margin: '0 5 10 0',
+                    margin: '0 5 5 0',
+                    // padding: 0,
                     items: [{
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('mapsetcode'),    // 'Mapset code',
@@ -590,12 +595,12 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                 }, {
                     xtype: 'textareafield',
                     fieldLabel: climatestation.Utils.getTranslation('description'),    // 'Description',
-                    labelAlign: 'top',
+                    labelAlign: 'left',
                     reference: 'description',
                     bind: {
                         value: '{theMapset.description}'
                     },
-                    height: 80,
+                    height: 50,
                     // minHeight: 80,
                     scrollable: true,
                     allowBlank: true,
@@ -620,7 +625,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     xtype: 'combobox',
                     fieldLabel: climatestation.Utils.getTranslation('projection'),
                     reference: 'projection',
-                    width: 200,
+                    width: 350,
                     // margin: '0 0 5 80',
                     allowBlank: false,
                     disabled: me.params.view ? true : false,
@@ -653,13 +658,13 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     xtype: 'container',
                     layout: {
                         type: 'vbox'
-                        ,align: 'stretch'
+                        // ,align: 'stretch'
                     },
                     items: [{
                         xtype: 'container',
                         layout: {
                             type: 'hbox'
-                            , align: 'stretch'
+                            // , align: 'stretch'
                         },
                         items: [{
                             xtype: 'combobox',
@@ -703,7 +708,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             labelAlign: 'top',
                             reference: 'center_of_pixel',
                             inputValue: '0',
-                            padding: '20 10 0 0',
+                            padding: '5 10 0 0',
                             width: 150,
                             bind: '{theMapset.center_of_pixel}',
                             listeners: {
@@ -725,32 +730,41 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     },{
                         xtype: 'container',
                         layout: {
-                            type: 'hbox'
-                            ,align: 'stretch'
+                            type: 'vbox'
+                            // ,align: 'stretch'
                         },
-                        margin: '10 0 0 0',
+                        margin: 0,  // '5 0 0 0',
+                        padding: 0,
                         items: [{
                             xtype: 'displayfield',
                             fieldLabel: climatestation.Utils.getTranslation('pixel_size_x'),
-                            labelAlign: 'top',
+                            labelAlign: 'left',
+                            labelWidth: 150,
                             reference: 'pixel_size_x',
                             allowBlank: false,
-                            padding: '10 10 0 0',
-                            margin: '0 0 0 0',
+                            // padding: '5 10 0 0',
+                            padding: 0,
+                            margin: 0,
                             cls:'greenbold',
-                            width: 200,
+                            width: 500,
+                            minHeight: 24,
+                            maxHeight: 24,
                             bind: '{theMapset.pixel_size_x}'
 
                         }, {
                             xtype: 'displayfield',
                             fieldLabel: climatestation.Utils.getTranslation('pixel_size_y'),
-                            labelAlign: 'top',
+                            labelAlign: 'left',
+                            labelWidth: 150,
                             reference: 'pixel_size_y',
                             allowBlank: false,
-                            padding: '5 10 0 0',
-                            margin: '0 0 0 0',
+                            // padding: '5 10 0 0',
+                            padding: 0,
+                            margin: 0,
                             cls: 'greenbold',
-                            width: 200,
+                            width: 500,
+                            minHeight: 24,
+                            maxHeight: 24,
                             bind: '{theMapset.pixel_size_y}'
                         // }, {
                         //     xtype: 'numberfield',
@@ -788,7 +802,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                     collapsible: false,
                     // margin: '15 10 5 0',
                     padding: '0 5 0 0',
-                    width: 585,
+                    width: 580,
                     layout: {
                         type: 'hbox'
                         ,align: 'stretch'
@@ -801,7 +815,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             align: 'stretch'
                         },
                         width: 250,
-                        padding: '10 10 3 10',
+                        padding: '5 10 3 10',
                         defaults: {
                             // disabled: me.params.view ? true : false,
                             editable: me.params.view ? false : true,
@@ -956,12 +970,11 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             type: 'vbox'
                             ,align: 'stretch'
                         },
-                        // padding: '0 10 0 0',
+                        padding: '0 10 0 0',
                         defaults: {
                             disabled: me.params.view ? true : false,
                             labelAlign: 'top',
                             labelWidth: 120
-
                         },
                         items: [{
                             xtype: 'combobox',
@@ -979,7 +992,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             // editable: true,
                             valueField: 'bboxcode',
                             displayField: 'descriptive_name',
-                            allowBlank: false,
+                            allowBlank: true,
                             typeAhead: true,
                             forceSelection: false,
                             queryMode: 'local',
@@ -1035,129 +1048,144 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                         }]
                     }]
                 }]
-            },{
-                xtype: 'panel',
-                title: '<b>'+climatestation.Utils.getTranslation('draw_boundary_box')+'</b>',    // '<b>Draw boundary box</b>',
-                collapsible: false,
-                width: 600,
-                height: 600,
-                layout: 'fit',
-                frame: false,
-                border: true,
-                margin: '10 10 10 5',
-                // padding: '10 10 10 10',
-                tbar: Ext.create('Ext.toolbar.Toolbar', {
-                    // dock: 'top',
-                    autoShow: true,
-                    alwaysOnTop: true,
-                    floating: false,
-                    hidden: false,
-                    border: false,
-                    shadow: false,
-                    padding: 0,
+            }, {
+                xtype: 'container',
+                margin: 5,
+                items: [{
+                    xtype: 'panel',
+                    title: '<b>' + climatestation.Utils.getTranslation('draw_boundary_box') + '</b>',    // '<b>Draw boundary box</b>',
+                    collapsible: false,
+                    width: 600,
+                    height: 600,
+                    layout: 'fit',
+                    frame: false,
+                    border: true,
+                    margin: '10 5 10 10',
+                    // padding: '10 10 10 10',
+                    tbar: Ext.create('Ext.toolbar.Toolbar', {
+                        // dock: 'top',
+                        autoShow: true,
+                        alwaysOnTop: true,
+                        floating: false,
+                        hidden: false,
+                        border: false,
+                        shadow: false,
+                        padding: 0,
+                        items: [{
+                            xtype: 'container',
+                            autoWidth: true,
+                            height: 37,
+                            margin: '5 5 5 150',
+                            // top: 0,
+                            align: 'center',
+                            defaults: {
+                                style: {
+                                    "font-size": '14px',
+                                    "line-height": '18px'
+                                }
+                            },
+                            items: [{
+                                xtype: 'box',
+                                height: 20,
+                                top: 25,
+                                html: '<div id="mouse-position_' + me.id + '"></div>'
+                            }]
+                        }, '->',
+                            {
+                                xtype: 'button',
+                                text: climatestation.Utils.getTranslation('reset'),   // 'Reset',
+                                // glyph: 'xf0e2@Font Awesome Free',
+                                // cls: 'red',
+                                iconCls: 'far fa-undo',
+                                style: {color: 'red'},
+                                // margin: '5 10 5 5',
+                                //cls: 'x-menu-no-icon button-gray',
+                                // width: 80,
+                                handler: function () {
+                                    var bboxcodename = me.lookupReference('bboxcodename');
+
+                                    me.lookupReference('predefined_bbox').setValue(null);
+                                    bboxcodename.enable();
+                                    bboxcodename.setValue(me.lookupReference('mapsetcode').getValue());
+
+                                    me.drawvectorlayer.getSource().clear();
+                                    me.drawnFeature = null;
+                                    me.getController().addDrawInteraction();
+                                }
+
+                                // {
+                                // xtype: 'button',
+                                // reference: 'drawgeometry_' + me.id.replace(/-/g, '_'),
+                                // hidden: false,
+                                // iconCls: 'polygon-gray',
+                                // scale: 'medium',
+                                // floating: false,  // usually you want this set to True (default)
+                                // enableToggle: true,
+                                // arrowVisible: false,
+                                // arrowAlign: 'right',
+                                // collapseDirection: 'left',
+                                // menuAlign: 'tr-tl',
+                                // handler: 'toggleDrawGeometry',
+                                // listeners: {
+                                //     afterrender: function (me) {
+                                //         // Register the new tip with an element's ID
+                                //         Ext.tip.QuickTipManager.register({
+                                //             target: me.getId(), // Target button's ID
+                                //             title: '',
+                                //             text: climatestation.Utils.getTranslation('draw_bbox')
+                                //         });
+                                //     }
+                                //     , mouseover: function (btn, y, x) {
+                                //         btn.showMenu();
+                                //     }
+                                // },
+                                // menu: {
+                                //     hideOnClick: true,
+                                //     alwaysOnTop: true,
+                                //     //iconAlign: '',
+                                //     width: 125,
+                                //     defaults: {
+                                //         hideOnClick: true,
+                                //         //cls: "x-menu-no-icon",
+                                //         padding: 2
+                                //     },
+                                //     items: [
+                                //         geometrytypescombo,
+                                //         {
+                                //             //xtype: 'button',
+                                //             text: climatestation.Utils.getTranslation('reset'),   // 'Reset',
+                                //             glyph: 'xf0e2@FontAwesome',
+                                //             cls: 'red',
+                                //             // iconCls: 'far fa-undo',
+                                //             style: {color: 'red'},
+                                //             //cls: 'x-menu-no-icon button-gray',
+                                //             width: 60,
+                                //             handler: function () {
+                                //                 me.drawvectorlayer.getSource().clear();
+                                //             }
+                                //         }
+                                //     ]
+                                // }
+                            }]
+                    }),
                     items: [{
                         xtype: 'container',
-                        autoWidth: true,
-                        height: 37,
-                        margin: '5 5 5 150',
-                        // top: 0,
-                        align: 'center',
-                        defaults: {
-                            style: {
-                                "font-size": '14px',
-                                "line-height": '18px'
-                            }
-                        },
-                        items: [{
-                            xtype: 'box',
-                            height: 20,
-                            top: 25,
-                            html: '<div id="mouse-position_' + me.id + '"></div>'
-                        }]
-                    }, '->',
-                    {
-                        xtype: 'button',
-                        text: climatestation.Utils.getTranslation('reset'),   // 'Reset',
-                        // glyph: 'xf0e2@Font Awesome Free',
-                        // cls: 'red',
-                        iconCls: 'far fa-undo',
-                        style: {color: 'red'},
-                        // margin: '5 10 5 5',
-                        //cls: 'x-menu-no-icon button-gray',
-                        // width: 80,
-                        handler: function () {
-                            var bboxcodename = me.lookupReference('bboxcodename');
-
-                            me.lookupReference('predefined_bbox').setValue(null);
-                            bboxcodename.enable();
-                            bboxcodename.setValue(me.lookupReference('mapsetcode').getValue());
-
-                            me.drawvectorlayer.getSource().clear();
-                            me.drawnFeature = null;
-                            me.getController().addDrawInteraction();
-                        }
-
-                        // {
-                        // xtype: 'button',
-                        // reference: 'drawgeometry_' + me.id.replace(/-/g, '_'),
-                        // hidden: false,
-                        // iconCls: 'polygon-gray',
-                        // scale: 'medium',
-                        // floating: false,  // usually you want this set to True (default)
-                        // enableToggle: true,
-                        // arrowVisible: false,
-                        // arrowAlign: 'right',
-                        // collapseDirection: 'left',
-                        // menuAlign: 'tr-tl',
-                        // handler: 'toggleDrawGeometry',
-                        // listeners: {
-                        //     afterrender: function (me) {
-                        //         // Register the new tip with an element's ID
-                        //         Ext.tip.QuickTipManager.register({
-                        //             target: me.getId(), // Target button's ID
-                        //             title: '',
-                        //             text: climatestation.Utils.getTranslation('draw_bbox')
-                        //         });
-                        //     }
-                        //     , mouseover: function (btn, y, x) {
-                        //         btn.showMenu();
-                        //     }
-                        // },
-                        // menu: {
-                        //     hideOnClick: true,
-                        //     alwaysOnTop: true,
-                        //     //iconAlign: '',
-                        //     width: 125,
-                        //     defaults: {
-                        //         hideOnClick: true,
-                        //         //cls: "x-menu-no-icon",
-                        //         padding: 2
-                        //     },
-                        //     items: [
-                        //         geometrytypescombo,
-                        //         {
-                        //             //xtype: 'button',
-                        //             text: climatestation.Utils.getTranslation('reset'),   // 'Reset',
-                        //             glyph: 'xf0e2@FontAwesome',
-                        //             cls: 'red',
-                        //             // iconCls: 'far fa-undo',
-                        //             style: {color: 'red'},
-                        //             //cls: 'x-menu-no-icon button-gray',
-                        //             width: 60,
-                        //             handler: function () {
-                        //                 me.drawvectorlayer.getSource().clear();
-                        //             }
-                        //         }
-                        //     ]
-                        // }
+                        id: 'mapbboxcontainer_' + me.id,
+                        reference: 'mapbboxcontainer_' + me.id,
+                        layout: 'fit',
+                        margin: 0
                     }]
-                }),
-                items: [{
-                    xtype: 'container',
-                    id: 'mapbboxcontainer_' + me.id,
-                    reference: 'mapbboxcontainer_' + me.id,
-                    layout: 'fit',
-                    margin: 0
+                },{
+                    xtype: 'button',
+                    text: climatestation.Utils.getTranslation('save'),    // 'Save',
+                    iconCls: 'far fa-save',
+                    style: { color: 'lightblue' },
+                    scale: 'medium',
+                    margin: '10 5 10 10',
+                    disabled: false,
+                    formBind: true,
+                    hidden: me.params.view ? true : false,
+                    handler: 'onSaveClick'
                 }]
             }]
         }];

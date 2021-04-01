@@ -30,7 +30,7 @@ Ext.define("climatestation.view.system.ThemaAdmin",{
     frame:true,
     bodyStyle: 'padding:5px 5px 0',
     scrollable: true,
-    defaultAlign: 'b-c',
+    // defaultAlign: 'b-c',
 
     store: 'themas',
 

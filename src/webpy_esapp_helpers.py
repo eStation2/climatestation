@@ -333,7 +333,7 @@ def ResetUserSettings():
         config_usersettings.set('USER_SETTINGS', option, '')
 
     # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
-    with open(usersettingsinifile, 'wb') as configfile:
+    with open(usersettingsinifile, 'w+') as configfile:
         config_usersettings.write(configfile)
         configfile.close()
 
@@ -403,7 +403,7 @@ def UpdateUserSettings(params):
                 config_usersettings.set('USER_SETTINGS', setting, params['systemsettings'][setting])
 
     # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
-    with open(usersettingsfilepath, 'wb') as configfile:
+    with open(usersettingsfilepath, 'w+') as configfile:
         config_usersettings.write(configfile)
         configfile.close()
 

@@ -8,20 +8,26 @@ Ext.define('climatestation.view.dashboard.DatasetInformation', {
     xtype: 'dashboard-datasetinfo',
 
     requires: [
-        'Ext.chart.theme.DefaultGradients',
+        // 'Ext.chart.theme.DefaultGradients',
         'Ext.chart.PolarChart',
         'climatestation.Utils'
     ],
 
     // cls: 'service-type shadow',
-    height: 500,
-    bodyPadding: 15,
+    height: 350,
+    bodyPadding: 5,
     title: 'Dataset information',
     layout: {
         type: 'hbox',
         align: 'stretch'
     },
+    tools: [{
+        type:'refresh',
+        tooltip: 'Refresh Dataset information',
+        handler: function(event, toolEl, panelHeader) {
 
+        }
+    }],
     config: {
 
     },
@@ -55,6 +61,7 @@ Ext.define('climatestation.view.dashboard.DatasetInformation', {
         me.items = [{
             xtype: 'polar',
             reference: 'datasetscompleteness',
+            downloadServerUrl: 'localhost',
             captions: {
                 title: 'Dataset completeness'
                 // credits: {
@@ -63,11 +70,11 @@ Ext.define('climatestation.view.dashboard.DatasetInformation', {
                 //     align: 'left'
                 // }
             },
-            theme: 'default-gradients',
+            // theme: 'default-gradients',
             width: '50%',
-            height: 500,
-            insetPadding: 20,
-            innerPadding: 20,
+            height: 350,
+            // insetPadding: 20,
+            innerPadding: 5,
             // store: {
             //     type: 'datasetinfo'
             // },
@@ -80,6 +87,7 @@ Ext.define('climatestation.view.dashboard.DatasetInformation', {
             series: [{
                 type: 'pie',
                 angleField: 'value',
+                rotation:45,
                 label: {
                     field: 'completeness',
                     calloutLine: {
@@ -97,12 +105,13 @@ Ext.define('climatestation.view.dashboard.DatasetInformation', {
         },{
             xtype: 'polar',
             reference: 'chart',
+            downloadServerUrl: 'localhost',
             captions: {
                 title: 'Available products per category'
             },
             width: '50%',
-            height: 500,
-            innerPadding: 20,
+            height: 350,
+            innerPadding: 5,
             store: me.storeDatasetsCategory,
             legend: {
                 docked: 'right'
@@ -112,6 +121,7 @@ Ext.define('climatestation.view.dashboard.DatasetInformation', {
                 type: 'pie',
                 angleField: 'value',
                 donut: 50,
+                rotation:90,
                 label: {
                     field: 'category',
                     display: 'outside'

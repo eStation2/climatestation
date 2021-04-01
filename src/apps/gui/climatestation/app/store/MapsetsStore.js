@@ -18,7 +18,7 @@ Ext.define('climatestation.store.MapsetsStore', {
     ,loadMask: true
     ,session: false
 
-    ,sorters: {property: 'mapsetcode', direction: 'ASC'}
+    ,sorters: [{property: 'defined_by', direction: 'DESC'}, {property: 'mapsetcode', direction: 'ASC'}]
 
     ,proxy: {
         type: 'rest',

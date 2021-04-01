@@ -6,8 +6,6 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
     },
     xtype  : 'datamanagement-main',
 
-    name:'datamanagementmain',
-
     requires: [
         'Ext.XTemplate',
         'Ext.data.StoreManager',
@@ -23,6 +21,10 @@ Ext.define("climatestation.view.datamanagement.DataManagement",{
         'climatestation.view.datamanagement.requestsAdmin',
         'climatestation.view.datamanagement.sendRequest'
     ],
+
+    id: 'datamanagementmain',
+    name: 'datamanagementmain',
+    reference: 'datamanagementmain',
 
     store: 'DataSetsStore',
     // session: false,
