@@ -1847,7 +1847,11 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
 
 
                             elif internet_type == 'cds_api':
-                                current_list = cds_api_loop_internet(internet_source)
+                                current_list = []
+                                logger_spec.debug('CDS Datasource is managed in datastore service')
+                            elif internet_type == 'iri_api':
+                                current_list = []
+                                logger_spec.debug('IRI Datasource is managed in datastore service')
 
                             # elif internet_type == 'sentinel_sat':
                             #     # Create the full filename from a 'template' which contains

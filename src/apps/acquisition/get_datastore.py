@@ -363,6 +363,7 @@ def cds_api_loop_internet(datastore_source):
                                                        processed_list_filename)
 
     try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.base_tmp_dir)
         current_list = []
         # Check if template is dict or string them create resources_parameters
         if type(template_paramater) is dict:
@@ -425,7 +426,7 @@ def cds_api_loop_internet(datastore_source):
                         if download_url is False:
                             logger_spec.warning("Problem in getting download Url : %s.", str(ongoing))
                             continue
-                        target_path = cds_api.get_cds_target_path(es_constants.ingest_dir, ongoing,
+                        target_path = cds_api.get_cds_target_path(tmpdir, ongoing,
                                                                   template_paramater)
                         download_result = cds_api.get_file(download_url, usr_pwd, None, target_path)
                         if download_result:
@@ -466,6 +467,7 @@ def cds_api_loop_internet(datastore_source):
 
     finally:
         logger.info("CDS datastore service completed")
+        shutil.rmtree(tmpdir)
         current_list = []
         return current_list
 
