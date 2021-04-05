@@ -262,7 +262,7 @@ def system_db_dump_docker(list_dump):
     from docker import Client
     c = Client(base_url='unix://var/run/docker.sock')
     # commandid = c.exec_create('postgres', '/usr/bin/pg_dump -h localhost -U estation -F p -a --column-inserts -f
-    # /eStation2/db_dump/estationdb_products_2020-04-21-15:21:33.sql -n products estationdb')
+    # /data/static_data/db_dump/estationdb_products_2020-04-21-15:21:33.sql -n products estationdb')
 
     logger.debug("Entering routine %s" % 'system_db_dump')
     now = datetime.datetime.now()
@@ -272,9 +272,7 @@ def system_db_dump_docker(list_dump):
     status = False
     if len(list_dump) > 0:
         for dump_schema in list_dump:
-
             # Check if there is one dump for the current day
-            # See Tuleap Ticket #10905 (VGF-MOI-wk1)
             existing_dumps = glob.glob(dump_dir + os.path.sep + 'estationdb_' + dump_schema + '_*')
             match_name = '.*estationdb_' + dump_schema + '_' + now.strftime("%Y-%m-%d-") + '.*.sql'
             matches = [s for s in existing_dumps if re.match(match_name, s)]

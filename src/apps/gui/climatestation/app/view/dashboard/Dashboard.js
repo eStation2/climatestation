@@ -41,7 +41,7 @@ Ext.define("climatestation.view.dashboard.Dashboard",{
     // },
     frame: false,
     border: false,
-    bodyPadding: '15 0 15 15',
+    bodyPadding: '5 0 5 15',
 
     initComponent: function () {
         // var pcs_container;
@@ -49,31 +49,32 @@ Ext.define("climatestation.view.dashboard.Dashboard",{
 
         // me.title = '<span class="dashboard-header-title-style">' + climatestation.Utils.getTranslation('mesa_full_estation') + '</span>';
 
-        me.tbar = Ext.create('Ext.toolbar.Toolbar', {
-            items: [
-            // '->', ' ', ' ', ' ', ' ', {
-            //     xtype: 'tbtext',
-            //     reference: 'dashboardtitle',
-            //     text: '<span class="dashboard-header-title-style">' + climatestation.Utils.getTranslation('mesa_full_estation') + '</span>',
-            //     cls: 'dashboard-header-style'
-            // },
-            '->',
-            {
-                xtype: 'button',
-                iconCls: 'far fa-redo-alt',
-                style: { color: 'gray' },
-                enableToggle: false,
-                scale: 'medium',
-                handler: function(){
-                    me.getController().setupDashboard(true);
-                }
-            }]
-        });
+        // me.tbar = Ext.create('Ext.toolbar.Toolbar', {
+        //     items: [
+        //     // '->', ' ', ' ', ' ', ' ', {
+        //     //     xtype: 'tbtext',
+        //     //     reference: 'dashboardtitle',
+        //     //     text: '<span class="dashboard-header-title-style">' + climatestation.Utils.getTranslation('mesa_full_estation') + '</span>',
+        //     //     cls: 'dashboard-header-style'
+        //     // },
+        //     '->',
+        //     {
+        //         xtype: 'button',
+        //         iconCls: 'far fa-redo-alt',
+        //         style: { color: 'gray' },
+        //         enableToggle: false,
+        //         scale: 'medium',
+        //         handler: function(){
+        //             me.getController().setupDashboard(true);
+        //         }
+        //     }]
+        // });
 
         me.items = [
             {
                 xtype: 'dashboard-datasetinfo',
                 userCls: 'big-100 small-100',
+                margin: '0 10px 10px 0'
             },
             {
                 xtype: 'dashboard-server-status-info',

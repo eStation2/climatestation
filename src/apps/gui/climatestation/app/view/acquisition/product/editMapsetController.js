@@ -25,6 +25,7 @@ Ext.define('climatestation.view.acquisition.product.editMapsetController', {
                         else {
                             Ext.toast({html: climatestation.Utils.getTranslation('mapsetupdated'), title: climatestation.Utils.getTranslation('saved'), width: 200, align: 't'});
                         }
+                        me.changes_saved = true;
                     },
                     failure: function () {
                         // console.log('failure');

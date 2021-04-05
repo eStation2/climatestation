@@ -8,7 +8,7 @@ Ext.define('climatestation.view.dashboard.ServerStatusInfo', {
     ],
 
     // cls: 'service-type shadow',
-    height: 380,
+    height: 325,
     bodyPadding: 15,
     title: 'Server status information',
     layout: {
@@ -16,6 +16,13 @@ Ext.define('climatestation.view.dashboard.ServerStatusInfo', {
         align: 'stretch'
     },
 
+    tools: [{
+        type:'refresh',
+        tooltip: 'Refresh Server status information',
+        handler: function(event, toolEl, panelHeader) {
+
+        }
+    }],
     config: {
         dbstatus: false,
         internetconnection: true,

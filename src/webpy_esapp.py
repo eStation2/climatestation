@@ -4008,7 +4008,11 @@ class GetVectorLayer(object):
     def GET(self):
         getparams = web.input()
         filename = getparams['file']
-        layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename  #.encode('utf-8').decode()
+
+        if filename in ('africa_countries.geojson', 'countries.geojson'):
+            layerfilepath = './apps/gui/climatestation/resources/layers' + os.path.sep + filename
+        else:
+            layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename  #.encode('utf-8').decode()
         # if isFile(layerfilepath):
         layerfile = open(layerfilepath, 'rb')
         layerfilecontent = layerfile.read()
@@ -4067,8 +4071,8 @@ class ResetUserSettings(object):
         updatestatus = webpy_esapp_helpers.ResetUserSettings()
 
         # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-        import imp
-        imp.reload(webpy_esapp_helpers)
+        # import imp
+        # imp.reload(webpy_esapp_helpers)
 
         return updatestatus
 
@@ -4079,11 +4083,12 @@ class UpdateUserSettings(object):
 
     def PUT(self):
         params = json.loads(web.data())
+        print(params)
         updatestatus = webpy_esapp_helpers.UpdateUserSettings(params)
 
         # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-        import imp
-        imp.reload(webpy_esapp_helpers)
+        # import imp
+        # imp.reload(webpy_esapp_helpers)
 
         return updatestatus
 

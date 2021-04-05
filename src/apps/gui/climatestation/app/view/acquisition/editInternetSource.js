@@ -179,6 +179,7 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
         me.listeners = {
             afterrender: function(){
                 Ext.data.StoreManager.lookup('frequencies').load();
+                Ext.data.StoreManager.lookup('dateformats').load();
                 if (me.params.create){
                     me.lookupReference('internet_id').setValue('');
                 }

@@ -9,20 +9,22 @@ Ext.define('climatestation.view.dashboard.Services', {
     ],
 
     // cls: 'service-type shadow',
-    height: 380,
+    height: 325,
     bodyPadding: 15,
     title: 'Services',
     layout: {
         type: 'vbox',
         align: 'stretch'
     },
-
     config: {
         service_eumetcast: false,
         service_internet: false,
         service_ingest: false,
         service_processing: false,
         service_system: false
+    },
+    listeners: {
+      afterrender: 'checkStatusServices'
     },
 
     initComponent: function () {
