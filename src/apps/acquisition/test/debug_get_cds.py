@@ -182,8 +182,8 @@ class TestGetEOS(unittest.TestCase):
     def debug_IRI_surfacetemp_1Month_ingest_netcdf(self):
         internet_id = "IRI:NOAA:SURFACETEMP:MONTH"#'CDS:ERA5:REANALYSIS:SST:MONTH'
         product = {"productcode": "iri-surface-temp", "version": "1.0"}
-        downloaded_file = '/data/ingest/20200701_iri-surface-temp_iri-surface-temp_default_1.0.nc'
-        in_date = '20200701'
+        downloaded_file = '/tmp/climatestation/surface_temp_Jan_2020.nc'
+        in_date = '20200101'
         # Datasource description
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
         datasource_descr = datasource_descr[0]
@@ -197,9 +197,24 @@ class TestGetEOS(unittest.TestCase):
 
     def debug_CDS_RFE_DAY_netcdf(self):
         internet_id = "CDS:ERA5:REANALYSIS:RFE:DAY"
-        product = {"productcode": "cds-total-precip", "version": "1.0"}
-        downloaded_file = '/data/ingest/20200701000000_reanalysis-era5-single-levels-monthly-means_monthly_averaged_reanalysis_sea_surface_temperature.nc'
-        in_date = '20200701'
+        product = {"productcode": "era5-rfe", "version": "1.0"}
+        downloaded_file = '/data/ingest/202103200000_reanalysis-era5-single-levels_reanalysis_total_precipitation.nc'
+        in_date = '202103200000'
+        # Datasource description
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
+        datasource_descr = datasource_descr[0]
+        # Get list of subproducts
+
+        sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
+
+        ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
+                                                             datasource_descr, logger)
+
+    def debug_IRI_PRCP_1Month_ingest_netcdf(self):
+        internet_id = "IRI:NOAA:PRCP:MONTH"#'CDS:ERA5:REANALYSIS:SST:MONTH'
+        product = {"productcode": "iri_prcp", "version": "1.0"}
+        downloaded_file = '/data/ingest/20210101-iri_prcp.nc'
+        in_date = '20210101'
         # Datasource description
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
         datasource_descr = datasource_descr[0]
