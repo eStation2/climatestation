@@ -162,7 +162,8 @@ class RasterDataset(object):
         # Read original dataset
         native_dataset = self._get_GDAL_dataset()
         # Clip the native dataset to target bbox ? or change resolution
-        pre_proccessed_dataset = self.do_clip_resample_reproject(native_dataset, target_mapset_name=target_mapset_name, native_mapset_name=native_mapset_name)
+        pre_proccessed_dataset = do_clip_resample_reproject(native_dataset, target_mapset_name=target_mapset_name, native_mapset_name=native_mapset_name)
+        # pre_proccessed_dataset = self.raster_clip_bbox(self.zc, setSpatialRef=True)
         # Apply input scaling factor offset nodata and get physical value data
         pre_processed_data_array = np.array(pre_proccessed_dataset.ReadAsArray())
         physicalvalue_data_array = self._process_data(pre_processed_data_array, pre_proccessed_dataset, already_extracted=True)
@@ -561,73 +562,33 @@ class RasterDataset(object):
             trg_mapset.assigndb(target_mapset_code)
             self.zc = trg_mapset.bbox
 
-    #This do_clip_resample_reproject is basically used for 3 purpose
-    # 1. Assign Projection information to the netcdf dataset since this information is avaialble as lat lon
-    # 2. Clip the target bounding box (target bbox is taken from target mapset)
-    # 3. Resampling or resolution change (conversion of resolution eg.10km to 1km)
-    def do_clip_resample_reproject(self, orig_ds, target_mapset_name, native_mapset_name=None):
+     # 2. Clip the target bounding box (target bbox is taken from target mapset)
+    def raster_clip_bbox(self, bbox, orig_ds=None, setSpatialRef=False):
         """
-        :param target mapset code  -    eStation variable to get bbox etc of target data
-        :param native mapset code  -    eStation variable to get bbox etc of native data
-        :param orig_ds  -    native file which is read as dataset
+        :param bbox  -    eStation variable to get bbox of target data to be clipped
+        :param orig_ds  -    native file which is read as GDAL dataset
         :return: Memory dataset with target projection, bbox, resolution information
         ***********************************************************************************************************
         ***********************************************************************************************************
         """
+        if orig_ds is None:
+            orig_ds = self._get_GDAL_dataset()
 
-        if native_mapset_name is not None:
-            native_mapset = mapset.MapSet()
-            native_mapset.assigndb(native_mapset_name)
-            orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
-            # orig_size_x = native_mapset.size_x
-            # orig_size_y = native_mapset.size_y
-            orig_band = orig_ds.GetRasterBand(1)
-            # orig_ds.SetGeoTransform(native_mapset.geo_transform)
-            orig_ds.SetProjection(orig_cs.ExportToWkt())
-        else:
-            orig_cs = osr.SpatialReference()
-            orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
-            orig_band = orig_ds.GetRasterBand(1)
-            # orig_ds.SetGeoTransform(native_mapset.geo_transform)
-            # orig_ds.SetProjection(native_mapset.spatial_ref.ExportToWkt())
+        if setSpatialRef:
+            set_coordinate_system(orig_ds)
+            # orig_ds.SetSpatialRef()
 
-        in_data_type = orig_band.DataType
-
-        # Get the Target mapset
-        trg_mapset = mapset.MapSet()
-        trg_mapset.assigndb(target_mapset_name)
-        out_cs = trg_mapset.spatial_ref
-        out_size_x = trg_mapset.size_x
-        out_size_y = trg_mapset.size_y
-
-        # Create target in memory
-        mem_driver = gdal.GetDriverByName('MEM')
-
+        # orig_band = orig_ds.GetRasterBand(1)
+        # # orig_ds.SetProjection(orig_cs.ExportToWkt())
+        # in_data_type = orig_band.DataType
         # Assign mapset to dataset in memory
-        out_data_type_gdal = in_data_type
-        mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
-        # aligned_geotransform = helpers_read_write_raster.align2_native_geotransform(trg_mapset.geo_transform)
-        mem_ds.SetGeoTransform(trg_mapset.geo_transform)
-        mem_ds.SetProjection(out_cs.ExportToWkt())
+        # out_data_type_gdal = in_data_type
 
-        # Do the Re-projection
-        orig_wkt = orig_cs.ExportToWkt()
-        res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
-                                  gdalconst.GRA_NearestNeighbour)
 
-        # out_data = mem_ds.ReadAsArray()
-        #
-        # output_driver = gdal.GetDriverByName('GTiff')
-        # output_ds = output_driver.Create('/data/ingest/reproject_cliped_iri_default.tif', out_size_x, out_size_y, 1, in_data_type)
-        # output_ds.SetGeoTransform(trg_mapset.geo_transform)
-        # output_ds.SetProjection(out_cs.ExportToWkt())
-        # output_ds.GetRasterBand(1).WriteArray(out_data, 0, 0)
-        #
-        # trg_ds = None
-        # mem_ds = None
-        # orig_ds = None
-        # output_driver = None
-        # output_ds = None
+        #  Translate(destName, srcDS, **kwargs)
+        # projWin --- subwindow in projected coordinates to extract: [ulx, uly, lrx, lry]
+        mem_ds = gdal.Translate('', orig_ds, format = 'MEM', projWin = bbox)
+
         return mem_ds
 
     # Get the metadata information from the file itself
@@ -709,7 +670,7 @@ class RasterDataset(object):
             min_lon = self.zc[2]
             max_lon = self.zc[3]
 
-        if helpers_read_write_raster._check_longitude_0_360(self.ds_lons, input_lons):
+        if helpers_read_write_raster.check_longitude_0_360(input_lons):
             min_lon = 180 + min_lon
             max_lon = 180 + max_lon
         # Checks on BBox within lat/lon arrays
@@ -931,12 +892,86 @@ class RasterDataset(object):
                 var.setncattr('valid_range', valid_range)
             var.setncattr('data_type', str_type)
             if write_CS_metadata is not None:
-                self.set_CS_ncattr(write_CS_metadata, var)
+                set_CS_ncattr(write_CS_metadata, var)
         dataset.close()
 
-    # Set Climate station defined METADATA for netcdf attribute
-    def set_CS_ncattr(self, CS_metadata, var):
-        try:
-            CS_metadata.write_to_nc_var(nc_variable=var)
-        except:
-            print('Error in assigning metadata .. Continue')
+#This do_clip_resample_reproject is basically used for 3 purpose
+# 1. Assign Projection information to the netcdf dataset since this information is avaialble as lat lon
+# 2. Clip the target bounding box (target bbox is taken from target mapset)
+# 3. Resampling or resolution change (conversion of resolution eg.10km to 1km)
+def do_clip_resample_reproject(orig_ds, target_mapset_name, native_mapset_name=None):
+    """
+    :param target mapset code  -    eStation variable to get bbox etc of target data
+    :param native mapset code  -    eStation variable to get bbox etc of native data
+    :param orig_ds  -    native file which is read as dataset
+    :return: Memory dataset with target projection, bbox, resolution information
+    ***********************************************************************************************************
+    ***********************************************************************************************************
+    """
+
+    if native_mapset_name is not None:
+        native_mapset = mapset.MapSet()
+        native_mapset.assigndb(native_mapset_name)
+        orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
+        # orig_size_x = native_mapset.size_x
+        # orig_size_y = native_mapset.size_y
+        orig_band = orig_ds.GetRasterBand(1)
+        # orig_ds.SetGeoTransform(native_mapset.geo_transform)
+        orig_ds.SetProjection(orig_cs.ExportToWkt())
+    else:
+        orig_cs = osr.SpatialReference()
+        orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+        orig_band = orig_ds.GetRasterBand(1)
+        # orig_ds.SetGeoTransform(native_mapset.geo_transform)
+        # orig_ds.SetProjection(native_mapset.spatial_ref.ExportToWkt())
+
+    in_data_type = orig_band.DataType
+
+    # Get the Target mapset
+    trg_mapset = mapset.MapSet()
+    trg_mapset.assigndb(target_mapset_name)
+    out_cs = trg_mapset.spatial_ref
+    out_size_x = trg_mapset.size_x
+    out_size_y = trg_mapset.size_y
+
+    # Create target in memory
+    mem_driver = gdal.GetDriverByName('MEM')
+
+    # Assign mapset to dataset in memory
+    out_data_type_gdal = in_data_type
+    mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+    # aligned_geotransform = helpers_read_write_raster.align2_native_geotransform(trg_mapset.geo_transform)
+    mem_ds.SetGeoTransform(trg_mapset.geo_transform)
+    mem_ds.SetProjection(out_cs.ExportToWkt())
+
+    # Do the Re-projection
+    orig_wkt = orig_cs.ExportToWkt()
+    res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
+                              gdalconst.GRA_NearestNeighbour)
+
+    return mem_ds
+
+# Set Climate station defined METADATA for netcdf attribute
+def set_CS_ncattr(self, CS_metadata, var):
+    try:
+        CS_metadata.write_to_nc_var(nc_variable=var)
+    except:
+        print('Error in assigning metadata .. Continue')
+
+# Set the corrdinate system for NETCDF (also for GTIFF if needed)
+def set_coordinate_system(ds):
+    wgs84_wkt = """
+        GEOGCS["WGS 84",
+        DATUM["WGS_1984",
+        SPHEROID["WGS 84",6378137,298.257223563,
+        AUTHORITY["EPSG","7030"]],
+        AUTHORITY["EPSG","6326"]],
+        PRIMEM["Greenwich",0,
+        AUTHORITY["EPSG","8901"]],
+        UNIT["degree",0.01745329251994328,
+        AUTHORITY["EPSG","9122"]],
+        AUTHORITY["EPSG","4326"]]"""
+    new_cs = osr.SpatialReference()
+    new_cs.ImportFromWkt(wgs84_wkt)
+    ds.SetProjection(new_cs.ExportToWkt())
+    # ds.SetSpatialRef(new_cs)

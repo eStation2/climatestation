@@ -1,7 +1,7 @@
 import numpy as np
 
 # Check if longitude is 0 to 360 convention or -180 to 180
-def _check_longitude_0_360(input_lons):
+def check_longitude_0_360(input_lons):
     long_0_360 = False
     if np.max(input_lons) > 180:
         long_0_360 = True
