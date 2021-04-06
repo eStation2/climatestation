@@ -33,9 +33,10 @@ from lib.python import mapset
 from lib.python.image_proc import helpers_read_write_raster
 
 class RasterDataset(object):
+
     def __init__(self, filename, product=None):
         """
-        :param filename: filename of the raster file to read (can be either a geotif or a netCDF file)
+        :param filename: filename of the raster file to read (can be either a geotiff or a netCDF file)
                         The routine uses the right method to read the file in relation to its file extension
 
 
@@ -99,7 +100,7 @@ class RasterDataset(object):
         except Exception:  # general error handling, to be better refined in future (TODO!)
             pass
 
-    # Extract Data from a [C-Station] geotif [or netcdf] file for the usage in C3SF4P
+    # Extract Data from a [C-Station] geotiff [or netcdf] file for the usage in C3SF4P
     def get_data(self, band=None, subsample_coordinates=None, make_extraction=False, local_site_lat=None,
                  local_site_lon=None, neighbors=0, mask_name=None, threshold=None):
         """
@@ -160,8 +161,7 @@ class RasterDataset(object):
         """
         :param target mapset code  -    eStation variable to get bbox etc of target data
         :param native mapset code  -    eStation variable to get bbox etc of native file
-        :return: Data array of the kind numpy.array which shape is defined by subsample coordinates and/or
-        local site coordinates
+        :return: Data array of the kind numpy.array which shape is defined by target_mapset
         ***********************************************************************************************************
         ***********************************************************************************************************
         """
@@ -288,6 +288,7 @@ class RasterDataset(object):
 
         return data
 
+    # Compute Haversine distance from [0,0] to [END] coordinates
     def _haversine(self, lat_end, lon_end):
 
         lat_start = self.local_zc[0] + self.lat_offset
@@ -659,7 +660,6 @@ class RasterDataset(object):
                     except ValueError:
                         self.add_offset = None
 
-
     #   Goal: process the lat/lon (non-equally-spaced) arrays from native file to clip to the target mapset
     #
     #   Inputs: input_lats -> array of (non-equally-spaced) latitudes   -> expected decreasing (North to South)
@@ -673,7 +673,6 @@ class RasterDataset(object):
     #   Output: output_lats: array of lats for the 'clipped' zone -> min/max_lat replaces the original vals
     #           output_lons: array of lats for the 'clipped' zone -> min/max_lo replaces the original vals
     #
-
     # Play with lats/lons grids (arrays) for clipping
     def get_indices_lats_lons(self, input_lats=None, input_lons=None, min_lat=None, min_lon=None, max_lat=None, max_lon=None):
         if input_lats is None:
@@ -913,15 +912,12 @@ class RasterDataset(object):
                 set_CS_ncattr(write_CS_metadata, var)
         dataset.close()
 
-# This do_clip_resample_reproject is basically used for 3 purpose
-# 1. Assign Projection information to the netcdf dataset since this information is available as lat lon
-# 2. Clip the target bounding box (target bbox is taken from target mapset)
-# 3. Resampling or resolution change (conversion of resolution eg.10km to 1km)
+# Convert the orig_ds from native to target mapset
 def do_clip_resample_reproject(orig_ds, target_mapset_name, native_mapset_name=None):
     """
     :param target mapset code  -    eStation variable to get bbox etc of target data
     :param native mapset code  -    eStation variable to get bbox etc of native data
-    :param orig_ds  -    native file which is read as dataset
+    :param orig_ds             -    native file which is read as dataset
     :return: Memory dataset with target projection, bbox, resolution information
     ***********************************************************************************************************
     ***********************************************************************************************************
