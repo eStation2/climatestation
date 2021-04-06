@@ -51,6 +51,7 @@ class RasterDataset(object):
         _, ext = os.path.splitext(self.filename)
 
         if str(ext).lower() in ['.tif', '.tiff']:
+            # M.C.: Corrected from 'geofit'
             self.raster_type = 'geofit'
         elif str(ext).lower() == '.nc':
             self.raster_type = 'netcdf'
@@ -87,6 +88,8 @@ class RasterDataset(object):
         self.lon_offset = 0.
         self.filename = filename
         self.product = product
+
+        # Added by Vijay for Irregular grid
         self.ds_lons_out = None
         self.ds_lats_out = None
         self.data = None
@@ -96,6 +99,7 @@ class RasterDataset(object):
         except Exception:  # general error handling, to be better refined in future (TODO!)
             pass
 
+    # Extract Data from a [C-Station] geotif [or netcdf] file for the usage in C3SF4P
     def get_data(self, band=None, subsample_coordinates=None, make_extraction=False, local_site_lat=None,
                  local_site_lon=None, neighbors=0, mask_name=None, threshold=None):
         """
@@ -150,6 +154,8 @@ class RasterDataset(object):
         else:
             return self._get_netcdf()
 
+    # Extract Data from a generic netcdf file [CDS/IRI] with regular grid
+    # TODO: data are now returned as numpy.array: should be better stored in the object itself
     def get_data_regular_grid(self, target_mapset_name, native_mapset_name):
         """
         :param target mapset code  -    eStation variable to get bbox etc of target data
@@ -162,14 +168,18 @@ class RasterDataset(object):
         # Read original dataset
         native_dataset = self._get_GDAL_dataset()
         # Clip the native dataset to target bbox ? or change resolution
-        pre_proccessed_dataset = do_clip_resample_reproject(native_dataset, target_mapset_name=target_mapset_name, native_mapset_name=native_mapset_name)
+        pre_processed_dataset = do_clip_resample_reproject(native_dataset, target_mapset_name=target_mapset_name, native_mapset_name=native_mapset_name)
         # pre_proccessed_dataset = self.raster_clip_bbox(self.zc, setSpatialRef=True)
         # Apply input scaling factor offset nodata and get physical value data
-        pre_processed_data_array = np.array(pre_proccessed_dataset.ReadAsArray())
-        physicalvalue_data_array = self._process_data(pre_processed_data_array, pre_proccessed_dataset, already_extracted=True)
+        pre_processed_data_array = np.array(pre_processed_dataset.ReadAsArray())
+
+        # TODO: replace this part with assigning to self.data
+        physicalvalue_data_array = self._process_data(pre_processed_data_array, pre_processed_dataset, already_extracted=True)
 
         return physicalvalue_data_array
 
+    # Extract Data from a generic netcdf file [CDS/IRI] with irregular grid
+    # TODO: data are now returned as numpy.array: should be better stored in the object itself
     def get_data_irregular_grid(self, subproduct, mapsetcode):
         """
         :param mapset code  -    eStation variable to get bbox etc of target data
@@ -184,6 +194,7 @@ class RasterDataset(object):
         self.set_CS_subproduct_parameter(subproduct, mapsetcode)
         return self._get_netcdf()
 
+    # Used by get_data to read values
     def _get_netcdf(self):
         """
         read the band layer and return it as numpy array
@@ -201,6 +212,7 @@ class RasterDataset(object):
 
         return self._process_data(_data, gobj)
 
+    # Open GDAL ds
     def _get_GDAL_dataset(self):
         if self.band is None:
             fid = self.filename
@@ -209,6 +221,7 @@ class RasterDataset(object):
         gobj = gdal.Open(fid)
         return gobj
 
+    # Rescale data using factor/offset [clip if needed]
     def _process_data(self, data, gobj, already_extracted=False):
         """
         :param data: numpy array of "raw" data
@@ -447,6 +460,7 @@ class RasterDataset(object):
         _data = np.array(gobj.GetRasterBand(1).ReadAsArray())
         return self._process_data(_data, gobj)
 
+    # TODO: Check if it is used
     def apply_mask(self, d):
         thr = self.threshold
         if thr is None:
@@ -539,6 +553,7 @@ class RasterDataset(object):
         #         d2 = ds[dim].shape[0]
         # return [d1, d2]
 
+    # Copy from subproduct object to self [and from target mapset as well]
     def set_CS_subproduct_parameter(self, subproduct, target_mapset_code=None):
         """
         :param target mapset code  -    eStation variable to get bbox etc of target data
@@ -562,7 +577,7 @@ class RasterDataset(object):
             trg_mapset.assigndb(target_mapset_code)
             self.zc = trg_mapset.bbox
 
-     # 2. Clip the target bounding box (target bbox is taken from target mapset)
+     # Clip to the target bounding box (target bbox is taken from target mapset)
     def raster_clip_bbox(self, bbox, orig_ds=None, setSpatialRef=False):
         """
         :param bbox  -    eStation variable to get bbox of target data to be clipped
@@ -659,6 +674,7 @@ class RasterDataset(object):
     #           output_lons: array of lats for the 'clipped' zone -> min/max_lo replaces the original vals
     #
 
+    # Play with lats/lons grids (arrays) for clipping
     def get_indices_lats_lons(self, input_lats=None, input_lons=None, min_lat=None, min_lon=None, max_lat=None, max_lon=None):
         if input_lats is None:
             input_lats = self.ds_lats
@@ -744,6 +760,7 @@ class RasterDataset(object):
         # return output_lats, output_lons
         return i_min_lat, i_max_lat, i_min_lon, i_max_lon
 
+    # Clip an numpy array according to passed indices
     def netcdf_var_extraction(self, v, i_i, i_f, j_i, j_f):
         if self.neigh not in [None, 0]:
             if len(v.shape) > 2:
@@ -759,7 +776,7 @@ class RasterDataset(object):
 
         return data
 
-    # It is a wrapper for write netcdf to manage ingestion of netcdf. Here we should add some check and return boolean value
+    # It is a wrapper for write netcdf to manage ingestion of netcdf. Here we should add some checks and return boolean value
     def write_nc_ingest(self, output_file, product_out_info, metadata):
 
         write_status = self.write_nc(file_name=output_file, data=[self.data],
@@ -770,6 +787,7 @@ class RasterDataset(object):
                                                           write_CS_metadata=metadata, lats=self.ds_lats_out,
                                                           lons=self.ds_lons_out)
 
+    # TODO: either move out of the class (since does no use self.members) or replace args with self.members
     def write_nc(self, file_name, data, dataset_tag, dataset_long_name=None, fill_value=None, scale_factor=None, offset=None,
                  valid_range=None, dtype=None, zc=None, mode=None, history=None, lats=None, lons=None,
                  global_attrs=None,
@@ -895,8 +913,8 @@ class RasterDataset(object):
                 set_CS_ncattr(write_CS_metadata, var)
         dataset.close()
 
-#This do_clip_resample_reproject is basically used for 3 purpose
-# 1. Assign Projection information to the netcdf dataset since this information is avaialble as lat lon
+# This do_clip_resample_reproject is basically used for 3 purpose
+# 1. Assign Projection information to the netcdf dataset since this information is available as lat lon
 # 2. Clip the target bounding box (target bbox is taken from target mapset)
 # 3. Resampling or resolution change (conversion of resolution eg.10km to 1km)
 def do_clip_resample_reproject(orig_ds, target_mapset_name, native_mapset_name=None):
@@ -958,7 +976,7 @@ def set_CS_ncattr(self, CS_metadata, var):
     except:
         print('Error in assigning metadata .. Continue')
 
-# Set the corrdinate system for NETCDF (also for GTIFF if needed)
+# Set the coordinate system for NETCDF (also for GTIFF if needed)
 def set_coordinate_system(ds):
     wgs84_wkt = """
         GEOGCS["WGS 84",
