@@ -34,9 +34,10 @@ from lib.python import mapset, functions
 from lib.python.image_proc import helpers_read_write_raster
 
 class RasterDataset(object):
+
     def __init__(self, filename, product=None):
         """
-        :param filename: filename of the raster file to read (can be either a geotif or a netCDF file)
+        :param filename: filename of the raster file to read (can be either a geotiff or a netCDF file)
                         The routine uses the right method to read the file in relation to its file extension
 
 
@@ -102,7 +103,7 @@ class RasterDataset(object):
         except Exception:  # general error handling, to be better refined in future (TODO!)
             pass
 
-    # Extract Data from a [C-Station] geotif [or netcdf] file for the usage in C3SF4P
+    # Extract Data from a [C-Station] geotiff [or netcdf] file for the usage in C3SF4P
     def get_data(self, band=None, subsample_coordinates=None, make_extraction=False, local_site_lat=None,
                  local_site_lon=None, neighbors=0, mask_name=None, threshold=None):
         """
@@ -256,6 +257,7 @@ class RasterDataset(object):
 
         return data
 
+    # Compute Haversine distance from [0,0] to [END] coordinates
     def _haversine(self, lat_end, lon_end):
 
         lat_start = self.local_zc[0] + self.lat_offset
