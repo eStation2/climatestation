@@ -61,7 +61,7 @@ services:
       MIN_WAL_SIZE: "2048MB"
       WAL_SEGSIZE: "1024"
       MAINTAINANCE_WORK_MEM: "128MB"
-      DB_VERSION: "100"
+      DB_VERSION: "101"
     image: "climatestation/postgis:12"
     ports:
     - 5432:5432
