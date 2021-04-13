@@ -19,6 +19,7 @@
 """
 
 from osgeo import gdal, osr, gdalconst
+import datetime
 import numpy as np
 import os
 import re
@@ -29,12 +30,13 @@ except ModuleNotFoundError:
     SdsMetadata = None
 from netCDF4 import Dataset
 from lib.python import mapset
-
+from lib.python.image_proc import helpers_read_write_raster
 
 class RasterDataset(object):
+
     def __init__(self, filename, product=None):
         """
-        :param filename: filename of the raster file to read (can be either a geotif or a netCDF file)
+        :param filename: filename of the raster file to read (can be either a geotiff or a netCDF file)
                         The routine uses the right method to read the file in relation to its file extension
 
 
@@ -50,6 +52,7 @@ class RasterDataset(object):
         _, ext = os.path.splitext(self.filename)
 
         if str(ext).lower() in ['.tif', '.tiff']:
+            # M.C.: Corrected from 'geofit'
             self.raster_type = 'geofit'
         elif str(ext).lower() == '.nc':
             self.raster_type = 'netcdf'
@@ -86,12 +89,18 @@ class RasterDataset(object):
         self.lon_offset = 0.
         self.filename = filename
         self.product = product
+
+        # Added by Vijay for Irregular grid
+        self.ds_lons_out = None
+        self.ds_lats_out = None
+        self.data = None
         # Read relevant metadata fields
         try:
             self.get_sds_metadata()  # This work only with Climatestation where metadata is already written
         except Exception:  # general error handling, to be better refined in future (TODO!)
             pass
 
+    # Extract Data from a [C-Station] geotiff [or netcdf] file for the usage in C3SF4P
     def get_data(self, band=None, subsample_coordinates=None, make_extraction=False, local_site_lat=None,
                  local_site_lon=None, neighbors=0, mask_name=None, threshold=None):
         """
@@ -146,17 +155,46 @@ class RasterDataset(object):
         else:
             return self._get_netcdf()
 
-    def get_data_CS_netcdf(self, target_mapset_name, native_mapset_name):
+    # Extract Data from a generic netcdf file [CDS/IRI] with regular grid
+    # TODO: data are now returned as numpy.array: should be better stored in the object itself
+    def get_data_regular_grid(self, target_mapset_name, native_mapset_name):
+        """
+        :param target mapset code  -    eStation variable to get bbox etc of target data
+        :param native mapset code  -    eStation variable to get bbox etc of native file
+        :return: Data array of the kind numpy.array which shape is defined by target_mapset
+        ***********************************************************************************************************
+        ***********************************************************************************************************
+        """
         # Read original dataset
         native_dataset = self._get_GDAL_dataset()
         # Clip the native dataset to target bbox ? or change resolution
-        pre_proccessed_dataset = self.do_reproject(native_dataset, target_mapset_name=target_mapset_name, native_mapset_name=native_mapset_name)
+        pre_processed_dataset = do_clip_resample_reproject(native_dataset, target_mapset_name=target_mapset_name, native_mapset_name=native_mapset_name)
+        # pre_proccessed_dataset = self.raster_clip_bbox(self.zc, setSpatialRef=True)
         # Apply input scaling factor offset nodata and get physical value data
-        pre_processed_data_array = np.array(pre_proccessed_dataset.ReadAsArray())
-        physicalvalue_data_array = self._process_data(pre_processed_data_array, pre_proccessed_dataset)
+        pre_processed_data_array = np.array(pre_processed_dataset.ReadAsArray())
+
+        # TODO: replace this part with assigning to self.data
+        physicalvalue_data_array = self._process_data(pre_processed_data_array, pre_processed_dataset, already_extracted=True)
 
         return physicalvalue_data_array
 
+    # Extract Data from a generic netcdf file [CDS/IRI] with irregular grid
+    # TODO: data are now returned as numpy.array: should be better stored in the object itself
+    def get_data_irregular_grid(self, subproduct, mapsetcode):
+        """
+        :param mapset code  -    eStation variable to get bbox etc of target data
+        :param subproduct  -    eStation variable to get subproduct properties to generate the ingested file
+        :return: Data array of the kind numpy.array which shape is defined by subsample coordinates and/or
+        local site coordinates
+        ***********************************************************************************************************
+        ***********************************************************************************************************
+        """
+        # This method should return(or generate) target_bbox specific lat, lon and variable array
+        # By now native lat, lon are initialized. (get_coordinates in the init does this already)
+        self.set_CS_subproduct_parameter(subproduct, mapsetcode)
+        return self._get_netcdf()
+
+    # Used by get_data to read values
     def _get_netcdf(self):
         """
         read the band layer and return it as numpy array
@@ -174,6 +212,7 @@ class RasterDataset(object):
 
         return self._process_data(_data, gobj)
 
+    # Open GDAL ds
     def _get_GDAL_dataset(self):
         if self.band is None:
             fid = self.filename
@@ -182,22 +221,28 @@ class RasterDataset(object):
         gobj = gdal.Open(fid)
         return gobj
 
-    def _process_data(self, data, gobj):
+    # Rescale data using factor/offset [clip if needed]
+    def _process_data(self, data, gobj, already_extracted=False):
         """
         :param data: numpy array of "raw" data
         :param gobj: gdal_object of type gdal.Open()
         :return: scientific dataset (i.e. data having physical meanings)
-        """
+                    """
+        self.data_type = gobj.ReadAsArray().dtype
+        # if self.raster_type == 'geotif':
+
         i_i = 0
         i_f = None
         j_i = 0
         j_f = None
         data_type = gobj.ReadAsArray().dtype
-        if self.do_extract:  # if true, extract a point (or a neighbor of points)
-            i_i, i_f, j_i, j_f = self._local_extraction([gobj.RasterYSize, gobj.RasterXSize])
-        else:
-            if self.zc not in [None, self.native_zc]:  # if verified, extract a sub-region of data
-                i_i, i_f, j_i, j_f = self._subregion_extraction([gobj.RasterYSize, gobj.RasterXSize])
+
+        if not already_extracted:
+            if self.do_extract:  # if true, extract a point (or a neighbor of points)
+                i_i, i_f, j_i, j_f = self._local_extraction([gobj.RasterYSize, gobj.RasterXSize])
+            else:
+                if self.zc not in [None, self.native_zc]:  # if verified, extract a sub-region of data
+                    i_i, i_f, j_i, j_f = self._subregion_extraction([gobj.RasterYSize, gobj.RasterXSize])
 
         data = data[i_i:i_f, j_i:j_f]
         if data_type != 'float':
@@ -210,9 +255,40 @@ class RasterDataset(object):
             data *= self.scale_factor
         if self.add_offset is not None:
             data += self.add_offset
+        self.data = data
+        # else:
+        #     if self.ds_lats is None and self.ds_lats is None:
+        #         self._get_netcdf_dim()
+        #     i_i = 0
+        #     i_f = None
+        #     j_i = 0
+        #     j_f = None
+        #     # self.data_type = gobj.ReadAsArray().dtype
+        #     # Get target_bbox indices and assign output lat and long array
+        #     if self.do_extract:  # if true, extract a point (or a neighbor of points)
+        #         i_i, i_f, j_i, j_f = self._local_extraction([gobj.RasterYSize, gobj.RasterXSize])
+        #         # data = data[i_i:i_f, j_i:j_f]
+        #     else:
+        #         if self.zc not in [None, self.native_zc]:  # if verified, extract a sub-region of data
+        #             i_i, i_f, j_i, j_f = self.get_indices_lats_lons()
+        #             # Do the extraction
+        #             # data = self.netcdf_var_extraction(data, i_i, i_f, j_i, j_f)
+        #     data = data[i_i:i_f, j_i:j_f]
+        #     if self.data_type != 'float':
+        #         data = np.array(data, dtype='float')
+        #     # physical conversion
+        #     if self.fill_value is not None:
+        #         data[data == self.fill_value] = np.nan
+        #     if self.scale_factor is not None:
+        #         data *= self.scale_factor
+        #     if self.add_offset is not None:
+        #         data += self.add_offset
+        #
+        #     self.data = data
 
         return data
 
+    # Compute Haversine distance from [0,0] to [END] coordinates
     def _haversine(self, lat_end, lon_end):
 
         lat_start = self.local_zc[0] + self.lat_offset
@@ -385,6 +461,7 @@ class RasterDataset(object):
         _data = np.array(gobj.GetRasterBand(1).ReadAsArray())
         return self._process_data(_data, gobj)
 
+    # TODO: Check if it is used
     def apply_mask(self, d):
         thr = self.threshold
         if thr is None:
@@ -396,7 +473,7 @@ class RasterDataset(object):
         return d
 
     def get_coordinates(self):
-        if self.raster_type == 'geofit':
+        if self.raster_type == 'geotif':
             gobj = gdal.Open(self.filename)
             old_cs = osr.SpatialReference()
             old_cs.ImportFromWkt(gobj.GetProjectionRef())
@@ -434,28 +511,23 @@ class RasterDataset(object):
 
         else:
             # else is a netcdf data, so we expect lat and lon array inside
-            ds_lats = None
-            ds_lons = None
+            self.ds_lats = None
+            self.ds_lons = None
             s = n = e = w = lat_0 = lon_0 = None
-            ds = Dataset(self.filename)
 
-            for dim in ds.dimensions.keys():
-                if 'lat' in dim.lower():
-                    ds_lats = ds.variables[dim][:]
-                elif 'lon' in dim.lower():
-                    ds_lons = ds.variables[dim][:]
+            self._get_netcdf_dim()
 
-            if ds_lats is not None and ds_lons is not None:
-                s_try = ds_lats[0]
-                n_try = ds_lats[-1]
+            if self.ds_lats is not None and self.ds_lons is not None:
+                s_try = self.ds_lats[0]
+                n_try = self.ds_lats[-1]
                 if n_try < s_try:
                     n = s_try
                     s = n_try
                 else:
                     n = n_try
                     s = s_try
-                w_try = ds_lons[0]
-                e_try = ds_lons[-1]
+                w_try = self.ds_lons[0]
+                e_try = self.ds_lons[-1]
 
                 if e_try < w_try:
                     e = w_try
@@ -467,77 +539,75 @@ class RasterDataset(object):
         self.native_zc = [s, n, w, e]
         return [s, n, w, e], [lat_0, lon_0]
 
-    def set_CS_subproduct_parameter(self, subproduct):
+    def _get_netcdf_dim(self):
+        ds = Dataset(self.filename)
+        for dim in ds.dimensions.keys():
+            if 'lat' in dim.lower() or 'y' in dim.lower():
+                self.ds_lats = ds.variables[dim][:]
+            elif 'lon' in dim.lower() or 'x' in dim.lower():
+                self.ds_lons = ds.variables[dim][:]
+        # d1 = d2 = 0
+        # for dim in ds.dimensions.keys():
+        #     if 'lat' in dim.lower():
+        #         d1 = ds[dim].shape[0]
+        #     elif 'lon' in dim.lower():
+        #         d2 = ds[dim].shape[0]
+        # return [d1, d2]
+
+    # Copy from subproduct object to self [and from target mapset as well]
+    def set_CS_subproduct_parameter(self, subproduct, target_mapset_code=None):
+        """
+        :param target mapset code  -    eStation variable to get bbox etc of target data
+        :param subproduct  -    eStation variable to get subproduct properties to generate the ingested file
+        :return: None. Doesn't return anything but assign the properties of the dataset to ingest it
+        ***********************************************************************************************************
+        ***********************************************************************************************************
+        """
         if subproduct is not None:
             # self.native_zc = subproduct[]
-            self.scale_factor = subproduct['in_scale_factor']
-            self.fill_value = subproduct['nodata']
-            self.add_offset = subproduct['in_offset']
+            if self.scale_factor is None:
+                self.scale_factor = subproduct['in_scale_factor']
+            if self.fill_value is None:
+                self.fill_value = subproduct['nodata']
+            if self.add_offset is None:
+                self.add_offset = subproduct['in_offset']
             self.band = subproduct['re_extract']
+        if target_mapset_code is not None:
+            # Get the Target mapset
+            trg_mapset = mapset.MapSet()
+            trg_mapset.assigndb(target_mapset_code)
+            self.zc = trg_mapset.bbox
 
-    #This reproject is basically used to 3 purpose
-    # 1. Assign Projection information to the netcdf dataset since this information is avaialble as lat lon
-    # 2. Clip the target bounding box (target bbox is taken from target mapset)
-    # 3. Resampling or resolution change (conversion of resolution eg.10km to 1km)
-    def do_reproject(self, orig_ds, target_mapset_name, native_mapset_name=None):
+     # Clip to the target bounding box (target bbox is taken from target mapset)
+    def raster_clip_bbox(self, bbox, orig_ds=None, setSpatialRef=False):
+        """
+        :param bbox  -    eStation variable to get bbox of target data to be clipped
+        :param orig_ds  -    native file which is read as GDAL dataset
+        :return: Memory dataset with target projection, bbox, resolution information
+        ***********************************************************************************************************
+        ***********************************************************************************************************
+        """
+        if orig_ds is None:
+            orig_ds = self._get_GDAL_dataset()
 
-        # Open the input file
-        # orig_ds = gdal.Open(self.filename)
+        if setSpatialRef:
+            set_coordinate_system(orig_ds)
+            # orig_ds.SetSpatialRef()
 
-        if native_mapset_name is not None:
-            native_mapset = mapset.MapSet()
-            native_mapset.assigndb(native_mapset_name)
-            orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
-            # orig_size_x = native_mapset.size_x
-            # orig_size_y = native_mapset.size_y
-            orig_band = orig_ds.GetRasterBand(1)
-            # orig_ds.SetGeoTransform(native_mapset.geo_transform)
-            orig_ds.SetProjection(orig_cs.ExportToWkt())
-        else:
-            orig_cs = osr.SpatialReference()
-            orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
-            orig_band = orig_ds.GetRasterBand(1)
-            # orig_ds.SetGeoTransform(native_mapset.geo_transform)
-            # orig_ds.SetProjection(native_mapset.spatial_ref.ExportToWkt())
-
-        in_data_type = orig_band.DataType
-
-        # Get the Target mapset
-        trg_mapset = mapset.MapSet()
-        trg_mapset.assigndb(target_mapset_name)
-        out_cs = trg_mapset.spatial_ref
-        out_size_x = trg_mapset.size_x
-        out_size_y = trg_mapset.size_y
-
-        # Create target in memory
-        mem_driver = gdal.GetDriverByName('MEM')
-
+        # orig_band = orig_ds.GetRasterBand(1)
+        # # orig_ds.SetProjection(orig_cs.ExportToWkt())
+        # in_data_type = orig_band.DataType
         # Assign mapset to dataset in memory
-        out_data_type_gdal = in_data_type
-        mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
-        mem_ds.SetGeoTransform(trg_mapset.geo_transform)
-        mem_ds.SetProjection(out_cs.ExportToWkt())
+        # out_data_type_gdal = in_data_type
 
-        # Do the Re-projection
-        orig_wkt = orig_cs.ExportToWkt()
-        res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
-                                  gdalconst.GRA_NearestNeighbour)
 
-        # out_data = mem_ds.ReadAsArray()
-        #
-        # output_driver = gdal.GetDriverByName('GTiff')
-        # output_ds = output_driver.Create('/data/ingest/reproject_cliped_iri_default.tif', out_size_x, out_size_y, 1, in_data_type)
-        # output_ds.SetGeoTransform(trg_mapset.geo_transform)
-        # output_ds.SetProjection(out_cs.ExportToWkt())
-        # output_ds.GetRasterBand(1).WriteArray(out_data, 0, 0)
-        #
-        # trg_ds = None
-        # mem_ds = None
-        # orig_ds = None
-        # output_driver = None
-        # output_ds = None
+        #  Translate(destName, srcDS, **kwargs)
+        # projWin --- subwindow in projected coordinates to extract: [ulx, uly, lrx, lry]
+        mem_ds = gdal.Translate('', orig_ds, format = 'MEM', projWin = bbox)
+
         return mem_ds
 
+    # Get the metadata information from the file itself
     def get_sds_metadata(self):
         # get the boundary coordinates
         self.get_coordinates()
@@ -567,16 +637,19 @@ class RasterDataset(object):
             self.month = seed[0][4:6]
             self.day = seed[0][6:]
             self.prod_code = seed[1]
-            self.date_long = date(int(self.year), int(self.month), int(self.day)).strftime('%Y-%b-%d')
+            try:
+                self.date_long = date(int(self.year), int(self.month), int(self.day)).strftime('%Y-%b-%d')
+            except:
+                self.date_long = date(int(self.year), int(self.month), int(self.day[:1])).strftime('%Y-%b-%d')
             metadata = gdal.Open(self.filename).GetMetadata()
 
             for el in metadata.keys():
-                if 'scaling_factor' in str(el).lower():
+                if 'scaling_factor' in str(el).lower() or 'scale_factor' in str(el).lower():
                     try:
                         self.scale_factor = float(metadata[el])
                     except ValueError:
                         self.scale_factor = None
-                if 'nodata' in str(el).lower():
+                if 'nodata' in str(el).lower() or 'missing_value' in str(el).lower() or 'FillValue' in str(el).lower():
                     try:
                         self.fill_value = float(metadata[el])
                     except ValueError:
@@ -586,3 +659,333 @@ class RasterDataset(object):
                         self.add_offset = float(metadata[el])
                     except ValueError:
                         self.add_offset = None
+
+    #   Goal: process the lat/lon (non-equally-spaced) arrays from native file to clip to the target mapset
+    #
+    #   Inputs: input_lats -> array of (non-equally-spaced) latitudes   -> expected decreasing (North to South)
+    #           input_lons -> array of (non-equally-spaced) longitudes  -> expected increasing (West to East)
+
+    #           min_lat: target BBox minimum latitude
+    #           min_lon: target BBox minimum longitude
+    #           max_lat: target BBox maximum latitude
+    #           max_lon: target BBox maximum longitude
+
+    #   Output: output_lats: array of lats for the 'clipped' zone -> min/max_lat replaces the original vals
+    #           output_lons: array of lats for the 'clipped' zone -> min/max_lo replaces the original vals
+    #
+    # Play with lats/lons grids (arrays) for clipping
+    def get_indices_lats_lons(self, input_lats=None, input_lons=None, min_lat=None, min_lon=None, max_lat=None, max_lon=None):
+        if input_lats is None:
+            input_lats = self.ds_lats
+        if input_lons is None:
+            input_lons = self.ds_lons
+        if min_lat is None or min_lon is None or max_lat is None or max_lon is None:
+            min_lat = self.zc[0]
+            max_lat = self.zc[1]
+            min_lon = self.zc[2]
+            max_lon = self.zc[3]
+
+        if helpers_read_write_raster.check_longitude_0_360(input_lons):
+            min_lon = 180 + min_lon
+            max_lon = 180 + max_lon
+        # Checks on BBox within lat/lon arrays
+        if min_lat < np.min(input_lats):
+            print('Error')
+            return -1
+        if max_lat > np.max(input_lats):
+            print('Error')
+            return -1
+        if min_lon < np.min(input_lons):
+            # check if the lon is 0 to 360
+            print('Error')
+            return -1
+        if max_lon > np.max(input_lons):
+            print('Error')
+            return -1
+
+        # Checks on passed values (min<max)
+
+        # Checks on lats/lons arrays direction (and invert if needed)
+        b_lat_flip = False
+        if input_lats[0] > input_lats[-1]:
+            input_lats=np.flip(input_lats)
+            b_lat_flip = True
+
+        # Get i_min_lat
+        i_min_lat = np.argmin(abs(input_lats-min_lat))
+        if input_lats[i_min_lat] > min_lat:
+            i_min_lat = i_min_lat-1
+
+        # Get i_max_lat
+        i_max_lat = np.argmin(abs(input_lats-max_lat))
+        if input_lats[i_max_lat] < max_lat:
+            i_max_lat = i_max_lat+1
+
+        # Get i_min_lon
+        i_min_lon = np.argmin(abs(input_lons-min_lon))
+        if input_lons[i_min_lon] > min_lon:
+            i_min_lon = i_min_lon-1
+
+        # Get i_max_lon
+        i_max_lon = np.argmin(abs(input_lons-max_lon))
+        if input_lons[i_max_lon] < max_lon:
+            i_max_lon = i_max_lon+1
+
+        # Subset arrays [+1 to be added for numpy convention of indexing]
+        # output_lats = input_lats[i_min_lat:i_max_lat+1]
+        # output_lons = input_lons[i_min_lon:i_max_lon+1]
+        i_max_lat = i_max_lat + 1
+        i_max_lon = i_max_lon + 1
+        output_lats = input_lats[i_min_lat:i_max_lat]
+        output_lons = input_lons[i_min_lon:i_max_lon]
+
+        print('i_min_lat= ',i_min_lat)
+        print('i_max_lat=',i_max_lat)
+        print('i_min_lon',i_min_lon)
+        print('i_max_lon',i_max_lon)
+
+        # Replace the extreme values
+        output_lats[0]=min_lat
+        output_lats[-1]=max_lat
+        output_lons[0]=min_lon
+        output_lons[-1]=max_lon
+
+        if b_lat_flip:
+            output_lats=np.flip(output_lats)
+
+        self.ds_lons_out = output_lons
+        self.ds_lats_out = output_lats
+
+        # return output_lats, output_lons
+        return i_min_lat, i_max_lat, i_min_lon, i_max_lon
+
+    # Clip an numpy array according to passed indices
+    def netcdf_var_extraction(self, v, i_i, i_f, j_i, j_f):
+        if self.neigh not in [None, 0]:
+            if len(v.shape) > 2:
+                data = np.squeeze(v[:, i_i:i_f, j_i:j_f].astype(self.data_type))
+            else:
+                data = v[i_i:i_f, j_i:j_f].astype(self.data_type)
+                data = np.squeeze(data)
+        else:
+            if len(v.shape) > 2:
+                data = np.squeeze(v[:, i_i, j_i].astype(self.data_type))
+            else:
+                data = np.squeeze(v[i_i, j_i].astype(self.data_type))
+
+        return data
+
+    # It is a wrapper for write netcdf to manage ingestion of netcdf. Here we should add some checks and return boolean value
+    def write_nc_ingest(self, output_file, product_out_info, metadata):
+
+        write_status = self.write_nc(file_name=output_file, data=[self.data],
+                                                          dataset_tag=[product_out_info.subproductcode],
+                                                          zc=self.zc, fill_value=product_out_info.nodata,
+                                                          scale_factor=product_out_info.scale_factor,
+                                                          offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
+                                                          write_CS_metadata=metadata, lats=self.ds_lats_out,
+                                                          lons=self.ds_lons_out)
+
+    # TODO: either move out of the class (since does no use self.members) or replace args with self.members
+    def write_nc(self, file_name, data, dataset_tag, dataset_long_name=None, fill_value=None, scale_factor=None, offset=None,
+                 valid_range=None, dtype=None, zc=None, mode=None, history=None, lats=None, lons=None,
+                 global_attrs=None,
+                 compression=9, write_CS_metadata=None):
+        """
+        :param file_name:           output full name
+        :param data:                datasets to be write to, list
+        :param dataset_tag:         tag name associated to each dataset in the dataset list
+        :param dataset_long_name:   long name associated to each dataset in the dataset list
+        :param fill_value:          fill_value, default = np.nan
+        :param scale_factor:        scale_factor, default = 1.
+        :param offset:              offset, default = 0
+        :param valid_range:         valid_range, default [data_min, data_max]
+        :param dtype:               data type, default = float
+        :param zc:                  geographic extensions, default = [-90S, 90N, -180W, 180E]
+        :param mode:                netCDF4 open mode, default = w (write), can be either:
+                                        w (write mode) to create a new file, over-write existing one
+                                        r (read mode) to open an existing file read-only
+                                        r+ (append mode) to open an existing file and change its contents
+
+        :param history:             resumes the principal characteristics of the netCDF dataset, these will be
+                                    written on the global attributes only if the 'w' mode is selected
+
+        :return:
+        """
+        # convert python data-type into NetCDF formalism
+        datatype_dict = {'int8': 'NC_BYTE',
+                         'uint8': 'NC_UBYTE',
+                         'char': 'NC_CHAR',
+                         'int16': 'NC_SHORT',
+                         'uint16': 'NC_USHORT',
+                         'int32': 'NC_INT',
+                         'uint32': 'NC_UINT',
+                         'int64': 'NC_INT64',
+                         'uint64': 'NC_UINT64',
+                         'float32': 'NC_FLOAT',
+                         'Float32': 'NC_FLOAT',
+                         'float': 'NC_FLOAT',
+                         'str': 'NC_STRING'}
+        if dataset_long_name is None:
+            dataset_long_name = dataset_tag
+        if fill_value is None:
+            fill_value = np.nan
+        if scale_factor is None:
+            scale_factor = 1.
+        if offset is None:
+            offset = 0.
+        # if valid_range is None:
+        #     valid_range = [np.nanmin(np.asarray(data)), np.nanmax(np.asarray(data))]
+        if dtype is None:
+            data_type = 'float'
+        else:
+            data_type = dtype.lower()
+        try:
+            str_type = datatype_dict[data_type]
+        except KeyError:
+            print("data-type " + "'" + str(dtype) + "'" + " not understood! Please check! EXIT!")
+            str_type = None
+            exit()
+
+        if zc is None:
+            zc = [-90, 90, -180, 180]
+        if mode is None or mode not in ['w', 'a', 'r+']:
+            if mode == 'r':
+                print("mode cannot be 'r', this is dedicated to read only procedure. mode 'r+' is then assumed.")
+                mode = 'r+'
+            else:
+                # print "mode should be one of the following: 'w', 'r', 'a', 'r+', got " + "'" + str(mode) + "'" + \
+                #       " instead, default 'w' assumed."
+                mode = 'w'
+
+        # print mode
+
+        if history is None:
+            history = ' Created at JRC on ' + datetime.datetime.now().strftime("%d, %b %Y %H:%M")
+
+        dataset = Dataset(file_name, mode, format='NETCDF4')
+
+        if mode == 'w':
+            size = data[0].shape
+
+            dataset.Conventions = 'CF-1.6'
+            dataset.institution = 'Joint Research Centre'
+            if global_attrs is not None:
+                for a in global_attrs:
+                    dataset.setncattr(a, global_attrs[a])
+
+            dataset.createDimension('latitude', data[0].shape[0])
+            dataset.createDimension('longitude', data[0].shape[1])
+            dataset.createDimension('time', None)
+
+            dataset.history = history
+
+            # Variables
+            latitudes = dataset.createVariable('latitude', np.float32, ('latitude',))
+            longitudes = dataset.createVariable('longitude', np.float32, ('longitude',))
+            latitudes.units = 'degree_north'
+            longitudes.units = 'degree_east'
+            if lats is None:
+                step_lat = abs(float(zc[0] - zc[1]) / (size[0]))
+                hb_lat = step_lat / 2
+                lats = np.linspace(zc[1] - hb_lat, zc[0] + hb_lat, size[0])
+            if lons is None:
+                step_lon = abs(float(zc[3] - zc[2]) / (size[1]))
+                hb_lon = step_lon / 2
+                lons = np.linspace(zc[2] + hb_lon, zc[3] - hb_lon, size[1])
+
+            latitudes[:] = lats
+            longitudes[:] = lons
+
+        for i, var_name in enumerate(dataset_tag):
+            # data_type = 'float'
+            var = dataset.createVariable(var_name, data_type, ('latitude', 'longitude'),
+                                         zlib=True, complevel=compression, fill_value=fill_value)
+            var[:] = data[i]
+            var.setncattr('long_name', dataset_long_name[i])
+            var.setncattr('scale_factor', scale_factor)
+            var.setncattr('add_offset', offset)
+            if valid_range is not None:
+                var.setncattr('valid_range', valid_range)
+            var.setncattr('data_type', str_type)
+            if write_CS_metadata is not None:
+                set_CS_ncattr(write_CS_metadata, var)
+        dataset.close()
+
+# Convert the orig_ds from native to target mapset
+def do_clip_resample_reproject(orig_ds, target_mapset_name, native_mapset_name=None):
+    """
+    :param target mapset code  -    eStation variable to get bbox etc of target data
+    :param native mapset code  -    eStation variable to get bbox etc of native data
+    :param orig_ds             -    native file which is read as dataset
+    :return: Memory dataset with target projection, bbox, resolution information
+    ***********************************************************************************************************
+    ***********************************************************************************************************
+    """
+
+    if native_mapset_name is not None:
+        native_mapset = mapset.MapSet()
+        native_mapset.assigndb(native_mapset_name)
+        orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
+        # orig_size_x = native_mapset.size_x
+        # orig_size_y = native_mapset.size_y
+        orig_band = orig_ds.GetRasterBand(1)
+        # orig_ds.SetGeoTransform(native_mapset.geo_transform)
+        orig_ds.SetProjection(orig_cs.ExportToWkt())
+    else:
+        orig_cs = osr.SpatialReference()
+        orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+        orig_band = orig_ds.GetRasterBand(1)
+        # orig_ds.SetGeoTransform(native_mapset.geo_transform)
+        # orig_ds.SetProjection(native_mapset.spatial_ref.ExportToWkt())
+
+    in_data_type = orig_band.DataType
+
+    # Get the Target mapset
+    trg_mapset = mapset.MapSet()
+    trg_mapset.assigndb(target_mapset_name)
+    out_cs = trg_mapset.spatial_ref
+    out_size_x = trg_mapset.size_x
+    out_size_y = trg_mapset.size_y
+
+    # Create target in memory
+    mem_driver = gdal.GetDriverByName('MEM')
+
+    # Assign mapset to dataset in memory
+    out_data_type_gdal = in_data_type
+    mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+    # aligned_geotransform = helpers_read_write_raster.align2_native_geotransform(trg_mapset.geo_transform)
+    mem_ds.SetGeoTransform(trg_mapset.geo_transform)
+    mem_ds.SetProjection(out_cs.ExportToWkt())
+
+    # Do the Re-projection
+    orig_wkt = orig_cs.ExportToWkt()
+    res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
+                              gdalconst.GRA_NearestNeighbour)
+
+    return mem_ds
+
+# Set Climate station defined METADATA for netcdf attribute
+def set_CS_ncattr(self, CS_metadata, var):
+    try:
+        CS_metadata.write_to_nc_var(nc_variable=var)
+    except:
+        print('Error in assigning metadata .. Continue')
+
+# Set the coordinate system for NETCDF (also for GTIFF if needed)
+def set_coordinate_system(ds):
+    wgs84_wkt = """
+        GEOGCS["WGS 84",
+        DATUM["WGS_1984",
+        SPHEROID["WGS 84",6378137,298.257223563,
+        AUTHORITY["EPSG","7030"]],
+        AUTHORITY["EPSG","6326"]],
+        PRIMEM["Greenwich",0,
+        AUTHORITY["EPSG","8901"]],
+        UNIT["degree",0.01745329251994328,
+        AUTHORITY["EPSG","9122"]],
+        AUTHORITY["EPSG","4326"]]"""
+    new_cs = osr.SpatialReference()
+    new_cs.ImportFromWkt(wgs84_wkt)
+    ds.SetProjection(new_cs.ExportToWkt())
+    # ds.SetSpatialRef(new_cs)

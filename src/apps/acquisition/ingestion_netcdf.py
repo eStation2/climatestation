@@ -29,7 +29,7 @@ from apps.processing import proc_functions
 from apps.productmanagement import products
 from apps.acquisition import ingestion_ingest_file
 from lib.python.image_proc.read_write_raster import RasterDataset
-from lib.python.image_proc import NetCDF_Writer
+from lib.python.image_proc import helpers_read_write_raster
 from lib.python import metadata, mapset
 logger = log.my_logger(__name__)
 
@@ -138,7 +138,7 @@ def ingestion_post_processing(composed_file_list, in_date, product, subproducts,
     try:
         for pre_processed_input in composed_file_list:
             subproduct =pre_processed_input['subproduct']
-            data_numpy_array = pre_processed_input['data_array']
+            raster_dataset = pre_processed_input['raster_dataset']
             file_extension = subproduct['re_extract']
 
             # Target mapset Initialization
@@ -156,23 +156,18 @@ def ingestion_post_processing(composed_file_list, in_date, product, subproducts,
             output_path_filename = get_output_path_filename(datasource_descr, product, subproduct, in_date)
 
             #5. Create the output based on the file extension format
-            tmp_output_file = tmpdir+'tmp_file.nc' # tmp_file = composed_file_list[0] #create_output_file(output_path_filename, tmpdir, file_extension)
+            tmp_output_file = tmpdir+'/tmp_file.nc' # tmp_file = composed_file_list[0] #create_output_file(output_path_filename, tmpdir, file_extension)
 
             # 6. Metadata registration -- here just metadata class is initialized
             metadata = assign_metadata_generic(product, subproduct['subproduct'], subproduct['mapsetcode'], in_date,
                                     os.path.dirname(output_path_filename), [input_files], my_logger)
 
             # Get the output product info (scaling, ofset, nodata, datatype etc) Cu
-            # New approach is to get these info from subproduct table
             product_out_info = querydb.get_subproduct(productcode=product['productcode'],version=product['version'],subproductcode=subproduct['subproduct'])
-
-            write_status = NetCDF_Writer.write_nc(file_name=tmp_output_file, data=[data_numpy_array], dataset_tag=[product_out_info.subproductcode],
-                                                  zc=trg_mapset.bbox, fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
-                                                  write_CS_metadata=metadata)
-            # write_status = NetCDF_Writer.write_nc(file_name=tmp_file, data=[data_numpy_array], dataset_tag=[product_out_info.subproductcode],
-            #                                       fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
-            #                                       write_CS_metadata=metadata)
-
+            # write_status = NetCDF_Writer.write_nc(file_name=tmp_output_file, data=[raster_dataset.data], dataset_tag=[product_out_info.subproductcode],
+            #                                       zc=raster_dataset.zc, fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
+            #                                       write_CS_metadata=metadata, lats=raster_dataset.ds_lats_out, lons=raster_dataset.ds_lons_out)
+            write_status = raster_dataset.write_nc_ingest(tmp_output_file, product_out_info, metadata)
             if os.path.isfile(tmp_output_file):
                 shutil.move(tmp_output_file, output_path_filename)
                 ingestion_status = True
@@ -389,7 +384,10 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
     try:
         if preproc_type == 'NETCDF_IRI_CDS':
-            sprod_data_list = pre_process_netcdf(subproducts, input_file, native_mapset_code, tmpdir, my_logger)
+            sprod_data_list = pre_process_netcdf(subproducts, input_file, native_mapset_code, my_logger)
+
+        elif preproc_type == 'NETCDF_IRREGULAR_GRID':
+            sprod_data_list = pre_process_irregular_grid(subproducts, input_file, my_logger)
 
         else:
             my_logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
@@ -409,31 +407,44 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
     return sprod_data_list
 
+# Pre Process netcdf file which is regular grid.. CDS and IRI regular grid files are managed if mapset is passed correctly
 def pre_process_netcdf(subproducts, input_file, native_mapset_code, my_logger, in_date=None):
     try:
         # This pre processed list contains list of object(subproduct,data(numpy array))key value pair
         pre_processed_list = []
         #Read the file looping over the subproducts?
         for subproduct in subproducts:
-            # bandname = subproduct['re_extract']
-            # re_process = subproduct['re_process']
-            # no_data = subproduct['nodata']
-            subproductcode = subproduct['subproduct']
             mapsetcode = subproduct['mapsetcode']
             raster = RasterDataset(filename=input_file)
             # SET CS subproduct parameters into the Raster class
-            raster.set_CS_subproduct_parameter(subproduct)
-            # NATIVE bbox [s, n, w, e], [lat_0, lon_0]
-            # native_bbox, nativelat0long0 = raster.get_coordinates()
+            raster.set_CS_subproduct_parameter(subproduct, target_mapset_code=mapsetcode)
             # data_numpy_array = raster.get_data() # conversion to physical value by applying nodatavalue
-            data_numpy_array = raster.get_data_CS_netcdf(target_mapset_name=mapsetcode, native_mapset_name=native_mapset_code) # conversion to physical value by applying nodatavalue
-            pre_processed_data = {'subproduct': subproduct,  'data_array': data_numpy_array}
+            data_numpy_array = raster.get_data_regular_grid(target_mapset_name=mapsetcode, native_mapset_name=native_mapset_code) # conversion to physical value by applying nodatavalue
+            pre_processed_data = {'subproduct': subproduct,  'raster_dataset': raster}
             pre_processed_list.append(pre_processed_data)
     except:
         my_logger.error("Error in pre process IRI for date %s"% in_date)
 
     return pre_processed_list
 
+# Pre process Irregular grid netcdf file of IRI and CDS
+def pre_process_irregular_grid(subproducts, input_file, my_logger, in_date=None):
+    try:
+        # This pre processed list contains list of object(subproduct,data(numpy array))key value pair
+        pre_processed_list = []
+        #Read the file looping over the subproducts?
+        for subproduct in subproducts:
+            mapsetcode = subproduct['mapsetcode']
+            raster = RasterDataset(filename=input_file)
+            # SET CS subproduct parameters into the Raster class
+            # raster.set_CS_subproduct_parameter(subproduct, mapsetcode)
+            raster.get_data_irregular_grid(subproduct, mapsetcode) # conversion to physical value by applying nodatavalue
+            pre_processed_data = {'subproduct': subproduct,  'raster_dataset': raster}
+            pre_processed_list.append(pre_processed_data)
+    except:
+        my_logger.error("Error in pre process Irregular grid for date %s"% in_date)
+
+    return pre_processed_list
 # ----------------------------------------------
 # Assign metadata parameters to metadata class.
 # ----------------------------------------------

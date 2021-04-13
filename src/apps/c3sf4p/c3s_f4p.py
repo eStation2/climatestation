@@ -18,11 +18,12 @@
 import os
 from src.lib.python.image_proc.read_write_raster import RasterDataset
 import numpy as np
-from src.apps.c3sf4p.pytrend import TrendStarter as Ts
+from src.apps.c3sf4p.f4p_utilities.pytrend import TrendStarter as Ts
 from inspect import currentframe, getframeinfo
 import src.apps.c3sf4p.f4p_utilities.stats_funcions as sf
 import psutil
 from joblib import Parallel, delayed
+from datetime import datetime
 
 
 class Fitness4Purpose(object):
@@ -81,12 +82,14 @@ class Fitness4Purpose(object):
         self.dbg = dbg
         self.n_cores = psutil.cpu_count(logical=False)
         self._check_input()
+        self.logfile = None
 
     def _check_input(self):
         if self.dbg:
+            self.logfile = './test/check_input_test_' + str(datetime.today()) + '.log'
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            print(info)
-            print('start check input function')
+            tag = 'start check-input function'
+            self._log_report(info, tag)
         try:
             assert len(self.lof) == len(self.bands)
         except AssertionError:
@@ -95,16 +98,16 @@ class Fitness4Purpose(object):
 
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            print(info)
-            print('Numbero of datasets=', len(self.lof))
+            tag = 'Number of datasets=' + str(len(self.lof))
+            self._log_report(info, tag)
 
         if self.zn is None:
             # set default value
             self.zn = 'Africa'
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            print(info)
-            print('Region name=', self.zn)
+            tag = 'Region name=' + self.zn
+            self._log_report(info, tag)
 
         if self.zc is not None:
             try:
@@ -112,19 +115,115 @@ class Fitness4Purpose(object):
             except AssertionError:
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
                     getframeinfo(currentframe()).lineno))
-                print(info)
-                print('region_coordinate parameter error! South coordinate '
-                      '(region_coordinate[0]) cannot be greater than North coordinate (region_coordinate[1]): EXIT')
+                tag = 'ERROR: region_coordinate parameter error! South coordinate (region_coordinate[0]) cannot be ' \
+                      'greater than North coordinate (region_coordinate[1]): EXIT'
+                self._log_report(info, tag)
                 exit()
             try:
                 assert self.zc[2] < self.zc[3]
             except AssertionError:
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
                     getframeinfo(currentframe()).lineno))
-                print(info)
-                print('region_coordinate parameter error! West coordinate '
-                      '(region_coordinate[2]) cannot be greater than East coordinate (region_coordinate[3]): EXIT!')
+                tag = 'region_coordinate parameter error! West coordinate (region_coordinate[2]) cannot be greater ' \
+                      'than East coordinate (region_coordinate[3]): EXIT!'
+                self._log_report(info, tag)
                 exit()
+
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                getframeinfo(currentframe()).lineno))
+            tag = 'end of the method. No problem found'
+            self._log_report(info, tag)
+
+    def _optimise_trend_parameters(self, chunks, jobs, index):
+        """
+        :param chunks   type(int) number of chunks in which the timeseries will be divided for optimising
+                        parallel computation
+        :param jobs     type(int) number of jobs parameter to pass to the parallel processor i.e. number of
+                        simultaneous jobs (a.k.a. number of CPU)
+        : param index   type(int) number of index in the general type(list) timeseries formalism
+
+        ***************************************************************************************************************
+        This check optimises the wo parameters: 'chunks' and 'jobs' accordingly to the local machine architecture.
+        In particular the number of jobs is optimised in a way it never exceed the available CPU number (not logical)
+        and the chunk number is optimised in a way to grantee that for each parallel cycle not more than the 70% of the
+        available RAM is occupied by the trend processor.
+
+        """
+
+        start_chunks = chunks
+
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Trend Optimiser start'
+            self._log_report(info, tag)
+
+        size = RasterDataset(self.lof[index][0]).get_data(self.bands[0], subsample_coordinates=self.zc).size
+        ncpus = psutil.cpu_count(logical=False)
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Available number of CPU (not logical) is = ' + str(ncpus)
+            self._log_report(info, tag)
+        if ncpus < jobs:
+            jobs = ncpus
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+                tag = 'Rescaling number of jobs to = ' + str(jobs)
+                self._log_report(info, tag)
+        else:
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+                tag = 'Number of jobs is already optimised. Setting njobs = ' + str(jobs)
+                self._log_report(info, tag)
+
+        timeseries_length = len(self.lof[index])
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'total lenght of the timeseries is = ' + str(size)
+            self._log_report(info, tag)
+
+        chunk_length = size // chunks ** 2
+        chunk_size = chunk_length * 8 * timeseries_length  # weight in bytes for any chunk casted as float
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Every chunks is weighting = ' + str(chunk_size/1024**3) + 'GB'
+            self._log_report(info, tag)
+
+        memory_allocated_per_loop = chunk_size * jobs
+        available_memory = psutil.virtual_memory().available
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Available memory is = ' + str(available_memory/1024**3) + 'GB'
+            self._log_report(info, tag)
+
+        pct_needed_memory = np.ceil(100 * memory_allocated_per_loop / available_memory)
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Every parallel cycle is composed by ' + str(jobs) + ' number of jobs and is requiring ' + \
+                  str(pct_needed_memory/1024**3) + 'GB of memory'
+            self._log_report(info, tag)
+
+        if pct_needed_memory > 70:  # 70% of available RAM can be used at most
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = "Memory for loop is too high (it's over 70% of available RAM), need to optimise the number of " \
+                      "chunks in order to decrease the amount of RAM required for each parallel cycle"
+                self._log_report(info, tag)
+
+            while pct_needed_memory <= 70:
+                chunks += 1
+                pct_needed_memory = np.ceil(100 * size // np.square(chunks) * 8 * timeseries_length * jobs /
+                                            available_memory)
+
+            if start_chunks != chunks:
+                if self.dbg:
+                    info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                        getframeinfo(currentframe()).lineno))
+                    tag = "Optimised number of chunks = " + str(chunks)
+                    self._log_report(info, tag)
+
+        return chunks, jobs
 
     def scatter_plot(self):
         """
@@ -140,25 +239,26 @@ class Fitness4Purpose(object):
         n_dataset = len(self.lof)
 
         if self.dbg:
+            self.logfile = './test/scatter-plot_test_' + str(datetime.today()) + '.log'
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            print(info)
-            print('Starting Scatter Plot function', len(self.lof))
+            tag = 'Starting Scatter Plot function' + str(len(self.lof))
+            self._log_report(info, tag)
 
         # checking parameters:
         try:
             assert n_dataset == 2
         except AssertionError:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            print(info)
-            print('Two datasets are foreseen by the scatter plot function, got ', len(self.lof), 'EXIT!')
+            tag = 'Two datasets are foreseen by the scatter plot function, got ' + str(len(self.lof)) + ' EXIT!'
+            self._log_report(info, tag)
             exit()
         try:
             assert len(self.lof[0]) == len(self.lof[1])
         except AssertionError:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            print(info)
-            print('The same number of files is expected for each dataset, got instead', len(self.lof[0]),
-                  'files for dataset-0 and ', len(self.lof[1]), 'files for dataset-1, please check. EXIT!')
+            tag = 'The same number of files is expected for each dataset, got instead' + str(len(self.lof[0])) + \
+                  'files for dataset-0 and ' + str(len(self.lof[1])), 'files for dataset-1, please check. EXIT!'
+            self._log_report(info, tag)
             exit()
         dates = []
         for nd in range(n_dataset):
@@ -173,6 +273,10 @@ class Fitness4Purpose(object):
                 data[nd].append(_d)
 
         """spatial consistency: i.e. consider only the cells which have a valid retrieval (not nan) for both datasets"""
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Applying spatial consistency methodology'
+            self._log_report(info, tag)
         data = sf.get_spatial_consistency(data)
 
         """from here one must call a routine to render the plot, to be seen with Jurriaan"""
@@ -180,11 +284,15 @@ class Fitness4Purpose(object):
         # for testing the function call a matplotlib function to plot data
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            print(info)
-            print('Generating the scatter plot for testing purposes')
+            tag = 'Generating the scatter graphic (using matplotlib.show) for testing purposes'
+            self._log_report(info, tag)
             from src.apps.c3sf4p.f4p_plot_functions.plot_scatter import graphical_render
 
             graphical_render(data[0], data[1], x_label=data_labels[0], y_label=data_labels[1], figure_title=fig_title)
+
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'End of scatter plot function, no problem found'
+            self._log_report(info, tag)
 
     def latitudinal_average_plot(self):
         """
@@ -194,21 +302,41 @@ class Fitness4Purpose(object):
         :return:
         """
 
+        if self.dbg:
+            self.logfile = './test/latitudinal-average-plot_test_' + str(datetime.today()) + '.log'
+
         filelist = list(self.lof[0])
         band_name = self.bands[0]
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Latitudinal average plot for ' + band_name + ' start function'
+            self._log_report(info, tag)
 
         x_tick_labels = []
         rd0 = RasterDataset(filelist[0])
-        sn_0 = rd0.sensor_code
+
         # shape = rd0.get_data(self.bands[0], subsample_coordinates=self.zc).shape
         sz = rd0.get_data(self.bands[0]).shape[1]
         x_set = range(len(filelist))
 
         # initialise data matrix to host hovmoller calculation
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Initialise data matrix to host hovmoller calculation'
+            self._log_report(info, tag)
         data = np.zeros([sz, len(filelist)])
 
         # notice that if self.n_cores = 1 the parallel statement behave like a normal for loop
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'fill data matrix using parallel calculation, number of jobs=' + str(self.n_cores)
+            self._log_report(info, tag)
         out = Parallel(n_jobs=self.n_cores)(delayed(sf.par_hov)(filelist, band_name, k) for k in x_set)
+
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Parallel calculation ends. Now display the result'
+            self._log_report(info, tag)
 
         # unrol the output of parallel computation
         for j in x_set:
@@ -239,32 +367,97 @@ class Fitness4Purpose(object):
         # for testing the function call a matplotlib function to plot data
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            print(info)
-            print('Generating latitudinal average plot for testing purposes')
+            tag = 'Generating latitudinal average plot using matplotlib.show() for testing purposes'
+            self._log_report(info, tag)
             from src.apps.c3sf4p.f4p_plot_functions.plot_hovmoller import graphical_render
 
             graphical_render(hov_matrix, band_name, sensor_name=sens_name, x_tick_labels=x_tick_labels,
                              y_tick_labels=y_tick_labels)
 
-    def trend_analysis(self, num_jobs=10, num_partitions=10):
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Latitudinal average methods ended without errors.'
+            self._log_report(info, tag)
+
+    def trend_analysis(self, num_jobs=10, num_partitions=10, only_significant=True, threshold=0.05):
         """
-        this function implements the analysis of trend given a timeseries of data. The Analysis is performed in
-        compliance with the Mann Kendall method [TODO...to be completed...]
-        :param num_jobs:
-        :param num_partitions:
-        :return:
-        """
+                this function implements the analysis of trend given a timeseries of data. The Analysis is performed in
+                compliance with the Seasonal MK Test (seasonal_test): For seasonal time series data
+                [Hirsch, R.M., Slack, J.R. and Smith, R.A. (1982)]
+                This method belongs to the pymankendall library.
+                The null hypotesis H0 is that there is NO-trend in the data.
+
+                :param num_jobs:        Int: represents the number of jobs for the parallel computation. Usually this number
+                                        equals the number of cpu threads available on machine architecture.
+
+                :param num_partitions:  Int: Together with num_jobs parameter determine the number of chunks in which the input
+                                        timeseries will be splitted. As an example if the default values holds, the total number
+                                        of chunks will be 100, i.e. in general holds the rule:
+                                                number-of-chunks = num_jobs * num_partitions
+                :param only_significant Bool: if true, only the significant (statistically speaking) trend will be filtered,
+                                        i.e. all the p-values below a certain threshold (0.05 is used here)
+
+                :param threshold        float: threshold for defining when the p-value determines a value which is
+                                        statistically significant.
+                                        Default value = 0.05
+                                        The p-value indicates the evidence against the null hypothesis, for instance for
+                                        a p-value of 0.05 (i.e. 5%) there is a 5% of probability to commit a mistake in
+                                        rejectiong the null hypothesis, or in other words, there is a 95% of probability
+                                        that the null hypothesis is False (i.e. the data have a trend)
+                                        Any p-value > threshold (common factor is 0.05) is considered NOT statistically
+                                        significant, i.e. the evidence against the null hypothesis is weak.
+
+
+                ****************************************************************************************************************
+
+                :Description:           The chunk-subdivision allows to reduce the amount of RAM required by the trend analysis,
+                                        the back side is that more computational time is need to complete the process, as some
+                                        time is also need to load the timeseries, split them in chunks and write them on a
+                                        temporary folder of local disk to be accessible in I/O during the full process.
+
+                                        The entry point is represented by the TrendClass, member of
+                                        src.apps.c3sf4p.f4p_utilities.pytrend.TrendStarter.py.
+                                        The method that trigger the beginning of the calculation is 'start_loop' which is in
+                                        charge of performing data acquisition, subdivision in chunks and start the parallel
+                                        computation. This latter rely on the joblib python library.
+                                        The parallel computation will run the function 'par_trend' (parallel-trend) located in
+
+                                        src.apps.c3sf4p.f4p_utilities.pytrend.utilities
+
+                                        num-jobs times, assigning a different chunk to any job.
+                                        This process is repeated until the total chunks are processed.
+
+                                        The par_trend function is ultimately also the entry point of the real core of the
+                                        processor, represented by the TrendAnalyser class belonging to
+                                        src.apps.c3sf4p.f4p_utilities.pytrend.MK_trend.py
+
+                                        This last piece of code is responsible to the the signal de-seasonal and
+                                        the implementation of the Mann-Kendall method for trend calculation.
+
+                                        ## more information can be found on the description of each specific method
+
+
+                """
+        if self.dbg:
+            self.logfile = './test/trend_test_' + str(datetime.today()) + '.log'
+
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Checking if the system is able to handle default chunks and size '
+            self._log_report(info, tag)
+
         '''
         freq2number correlates the frequency string with a integer number which express the number of 
         observation in one year. The numbers answer the question: How many files in one year?  
         '''
+        # TODO decide which frequency is meaningful for trend calc. my suggestion: > 8days
         freq2number = {'2pday': 730,
                        'e15minute': 4*24*365,
                        'e1cgldekad': 3*12,
                        'e1day': 365,
                        'e1decad': 3*12,
-                       'e1modis16day': 23,
-                       'e1modis8day': 46,
+                       'e1modis16day': 23,  # TODO double-check with Marco
+                       'e1modis8day': 46,   # TODO double-check with Marco
                        'e1month': 12,
                        'e1motu7day': 4*12,
                        'e1pentad': 6*12,
@@ -275,29 +468,44 @@ class Fitness4Purpose(object):
                        'e6month': 2}
 
         for nd in range(len(self.lof)):
+            num_partitions, num_jobs = self._optimise_trend_parameters(chunks=num_partitions, jobs=num_jobs, index=nd)
             rd0 = RasterDataset(self.lof[nd][0])
             sn = rd0.sensor_code
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Trend analysis starts for ' + sn + ' ' + self.bands[nd]
+                self._log_report(info, tag)
             try:
                 frequency = freq2number[rd0.frequency]
             except KeyError:
                 frequency = None
                 msg = 'frequency not allowed'
+                if self.dbg:
+                    info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                        getframeinfo(currentframe()).lineno))
+                    tag = msg + ': ' + str(frequency) + ' function forced to exit'
+                    self._log_report(info, tag)
+
                 print(msg)
                 exit()
 
-            mk_tag = 'MK'
             trend_flag = 'Mann-Kendall-Trend'
-            date = rd0.year + '-' + RasterDataset(self.lof[nd][-1]).year
+            dates = rd0.year + '-' + RasterDataset(self.lof[nd][-1]).year
 
-            # TODO define a trend name to be saved in a predefined folder-structure to not repeat the calc
-            #  when done once
+            # **********************************************************************************************************
+            # TODO: define a trend name to be saved in a predefined folder-structure to not repeat the full calculation
+            #       when it is already done once
+            #
+            save_path = './'
+            trend_name = save_path + sn + '_' + self.bands[nd] + '_' + trend_flag + '_' + dates + '.nc'
+            #
+            # **********************************************************************************************************
 
-            trend_path = './'
-            tmp_path = trend_path + 'TMP' + os.sep
-            trend_name = trend_path + ''
+            tmp_path = save_path + 'TMP' + os.sep
 
-            # todo this parameter triggers the calc of trend in a sub-region of the nominal geographical coverage of
-            #  the product
+            # TODO: this parameter triggers the calc of trend in a sub-region of the nominal geographical coverage of
+            #       the product
             try_reshape = False
 
             #  this parameter triggers the actual calculation, if it is already run once i.e. trend_name exists, then
@@ -314,16 +522,36 @@ class Fitness4Purpose(object):
                 if not os.path.exists(tmp_path):
                     try:
                         os.makedirs(tmp_path)
+                        if self.dbg:
+                            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                                getframeinfo(currentframe()).lineno))
+                            tag = 'Creating tmp folder for housing parallel output in ' + str(tmp_path)
+                            self._log_report(info, tag)
                     except IOError:
-                        msg = 'Cannot write on ' + tmp_path + 'please check. programm exit!'
-                        raise Exception(msg)
+                        msg = 'Cannot have permission to write in ' + str(save_path)
+                        if self.dbg:
+                            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                                getframeinfo(currentframe()).lineno))
+                            tag = msg + ' function forced to exit'
+                            self._log_report(info, tag)
+                        print(msg)
+                        exit()
+
+                if self.dbg:
+                    info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                        getframeinfo(currentframe()).lineno))
+                    tag = 'Starting the parallel calculation'
+                    self._log_report(info, tag)
 
                 tc = Ts.TrendClass(self.lof[nd], self.bands[nd], tmp_path, coordinates=self.zc, njobs=num_jobs,
-                                   partitions=num_partitions, freq=frequency)
+                                   partitions=num_partitions, freq=frequency, dbg=self.dbg, logfile=self.logfile,
+                                   threshold=threshold)
+
                 slopes, intercepts, pvalues = tc.start_loop()
 
                 if os.path.exists(tmp_path):
-                    rm_dir = os.removedirs(tmp_path)
+                    # clean the temporal folder
+                    os.removedirs(tmp_path)
 
                 rdw = RasterDataset(trend_name)
 
@@ -331,13 +559,31 @@ class Fitness4Purpose(object):
                              fill_value=np.nan, scale_factor=1, offset=0, dtype='float', zc=self.zc, mode='w')
 
             else:
+                # calculaion already performed once. Trend file already exists.
                 rd = RasterDataset(trend_name)
 
                 slopes = rd.get_data('slopes', subsample_coordinates=self.zc)
                 pvalues = rd.get_data('pvalues', subsample_coordinates=self.zc)
 
-            slopes[pvalues > 0.05] = np.nan
+            if only_significant:
+                # remove all the statistical slopes with pval > threshold (0.05)
+                slopes[pvalues > threshold] = np.nan
 
-            pf.plot_map(slopes, sensor_name=sn, product=self.product[nd], ecv_type=self.ecv, plot_type='Trend',
-                        zone_name=self.zn, zone_coord=self.zc, is_save=is_save, is_show=is_show,
-                        is_mk=do_mk, water_mask=self.water_mask, str_output_fname=save_name)
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Generating trend plot using matplotlib.show() for testing purposes'
+                self._log_report(info, tag)
+                from src.apps.c3sf4p.f4p_plot_functions.plot_trend import graphical_render
+
+                graphical_render(slopes, )
+
+    def _log_report(self, info, tag):
+        if not os.path.exists(self.logfile):
+            fid = open(self.logfile, 'w')
+        else:
+            fid = open(self.logfile, 'r+')
+
+        msg = info + ': ' + tag + '\n'
+        fid.writelines(msg)
+        fid.close()
