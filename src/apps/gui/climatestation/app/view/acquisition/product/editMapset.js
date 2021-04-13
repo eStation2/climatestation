@@ -30,7 +30,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
     //constrain: true,
     modal: true,
     closable: true,
-    closeAction: 'destroy', // 'destroy',
+    closeAction: 'hide', // 'destroy',
     resizable: true,
     scrollable: 'y',
     maximizable: false,
@@ -81,56 +81,6 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
         else {
             me.setTitle('<span class="">' + climatestation.Utils.getTranslation('newmapset') + '</span>');
         }
-
-        // Ext.util.Observable.capture(me, function(e){console.log(e);});
-
-        // me.bbar = [{
-        //     text: climatestation.Utils.getTranslation('save'),    // 'Save',
-        //     iconCls: 'far fa-save',
-        //     style: { color: 'lightblue' },
-        //     scale: 'medium',
-        //     disabled: false,
-        //     formBind: true,
-        //     hidden: me.params.view ? true : false,
-        //     handler: 'onSaveClick'
-        // }];
-
-        // var geometrytypes = Ext.create('Ext.data.ArrayStore', {
-        //     fields: ['geometrytype','geometryname'],
-        //     data: [
-        //         // ['Polygon', 'Polygon'],
-        //         // ['LineString', 'LineString'],
-        //         // ['Point', 'Point'],
-        //         //['Circle', 'Circle'],
-        //         // ['Square', 'Square'],
-        //         ['Box', 'Box']
-        //         // ['None', 'None']
-        //     ]
-        // });
-        //
-        // var geometrytypescombo = Ext.create('Ext.form.field.ComboBox', {
-        //     id: 'geometrytypes' + me.id,
-        //     hideLabel: true,
-        //     store: geometrytypes,
-        //     displayField: 'geometryname',
-        //     valueField: 'geometrytype',
-        //     value: 'Box',
-        //     typeAhead: true,
-        //     queryMode: 'local',
-        //     triggerAction: 'all',
-        //     emptyText: climatestation.Utils.getTranslation('select_geometry'),     // 'Select a geometry...',
-        //     selectOnFocus: false,
-        //     width: 100,
-        //     indent: true,
-        //     cls: "x-menu-no-icon",
-        //     hidden: true,
-        //     listeners: {
-        //         change: function(newValue , oldValue , eOpts ){
-        //             me.map.removeInteraction(me.draw);
-        //             me.getController().addDrawInteraction(newValue);
-        //         }
-        //     }
-        // });
 
         me.listeners = {
             show: function(){
@@ -333,7 +283,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                 // me.overviewmapView.calculateExtent([120,120]);
 
                 me.overviewMap = new ol.Map({
-                    target: 'footprint_image',
+                    target: 'footprint_image_'+me.id,
                     projection: me.projection,
                     displayProjection: me.displayprojection,
                     interactions : [],
@@ -505,16 +455,14 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
 
             },
 
-            beforeclose: function(){
-                console.info(Ext.data.StoreManager.lookup('mapsets').getUpdatedRecords());
-                console.info(me.changes_saved);
-                me.hide();
+            close: function(){
                 if (Ext.data.StoreManager.lookup('mapsets').getUpdatedRecords() !== []){
                     Ext.data.StoreManager.lookup('mapsets').rejectChanges();
                 }
                 if (me.changes_saved) {
                     Ext.data.StoreManager.lookup('mapsets').load();
                 }
+                me = null;
             }
         };
 
@@ -1031,7 +979,7 @@ Ext.define("climatestation.view.acquisition.product.editMapset",{
                             items: [{
                                 // xtype: 'imagecomponent',
                                 xtype: 'container',
-                                id: 'footprint_image',
+                                id: 'footprint_image_'+me.id,
                                 reference: 'footprint_image',
                                 // bind: {
                                 //     src: '{theMapset.footprint_image}'

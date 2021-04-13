@@ -24,7 +24,7 @@ Ext.define("climatestation.view.acquisition.product.MapsetAdmin",{
 
     modal: true,
     closable: true,
-    closeAction: 'destroy', // 'hide',
+    // closeAction: 'hide', // 'destroy',
     maximizable: false,
     resizable: true,
     resizeHandles: 'n,s',
@@ -84,7 +84,14 @@ Ext.define("climatestation.view.acquisition.product.MapsetAdmin",{
             handler: 'loadMapsetStore'
         };
 
-        me.tbar = [addButton, '->', refreshButton];
+        me.tbar = {
+            padding: 0,
+            margin: 0,
+            defaults: {
+                margin: 5,
+                padding: 5,
+            },
+            items: [addButton, '->', refreshButton]};
 
 
         if (me.config.assigntoproduct){

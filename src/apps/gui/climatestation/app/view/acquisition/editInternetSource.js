@@ -37,7 +37,7 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
     //constrain: true,
     modal: true,
     closable: true,
-    closeAction: 'destroy', // 'hide',
+    closeAction: 'hide', // 'destroy',
     resizable: true,
     scrollable: 'y',
     maximizable: false,
@@ -65,9 +65,8 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
     },
 
     initComponent: function () {
-        var me = this;
-
-        // me.title = climatestation.Utils.getTranslation('editinternetdatasource');
+        let me = this;
+        me.changes_saved = false;
 
         if (me.params.edit){
             me.setTitle('<span class="">' + climatestation.Utils.getTranslation('editinternetdatasource') + '</span>');
@@ -79,51 +78,45 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
             me.setTitle('<span class="">' + climatestation.Utils.getTranslation('newinternetdatasource') + '</span>');
         }
 
-        me.buttons = [
-        //     {
-        //     text: 'TEST',
-        //     // iconCls: 'far fa-save',
-        //     style: {color: 'lightblue'},
-        //     scale: 'medium',
-        //     disabled: false,
-        //     formBind: true,
-        //     hidden: me.params.view ? true : false,
-        //     handler: 'onTestClick'
-        // },
-            '->',{
-            text: 'Save',
-            iconCls: 'far fa-save',
-            style: { color: 'lightblue' },
-            scale: 'medium',
-            disabled: false,
-            formBind: true,
-            hidden: me.params.view ? true : false,
-            handler: 'onSaveClick'
-        // }, {
-        //     text: 'Cancel',
-        //     scale: 'medium',
-        //     handler: 'onCancelClick'
-        }];
+        me.bbar = {
+            padding: 0,
+            margin: 0,
+            defaults: {
+                margin: 5,
+                padding: 5,
+            },
+            items: [
+                '->', {
+                    text: 'Save',
+                    iconCls: 'far fa-save lightblue',
+                    // style: {color: 'lightblue'},
+                    scale: 'medium',
+                    disabled: false,
+                    formBind: true,
+                    hidden: me.params.view ? true : false,
+                    handler: 'onSaveClick'
+                }]
+        };
 
-        var internettype = new Ext.data.Store({
-            model   : 'climatestation.model.InternetType',
-            data: [
-                { internet_type_id:'ftp', internet_type_name:'FTP', internet_type_descr:'' },
-                { internet_type_id:'ftp_tmpl', internet_type_name:'FTP TEMPLATE', internet_type_descr:'' },
-                { internet_type_id:'http_tmpl', internet_type_name:'HTTP TEMPLATE', internet_type_descr:'' },
-                { internet_type_id:'http_multi_tmpl', internet_type_name:'HTTP MULTIPLE TEMPLATE', internet_type_descr:'' },
-                { internet_type_id:'http_tmpl_vito', internet_type_name:'HTTP TEMPLATE VITO', internet_type_descr:'' },
-                { internet_type_id:'http_tmpl_theia', internet_type_name:'HTTP TEMPLATE THEIA', internet_type_descr:'' },
-                { internet_type_id:'http_coda_eum', internet_type_name:'COPERNICUS ONLINE DATA ACCESS', internet_type_descr:'' },
-                { internet_type_id:'motu_client', internet_type_name:'MOTU CLIENT API', internet_type_descr:'' },
-                { internet_type_id:'sentinel_sat', internet_type_name:'SENTINEL SAT API', internet_type_descr:'' },
-                { internet_type_id:'jeodpp', internet_type_name:'JEODPP API', internet_type_descr:'' },
-                { internet_type_id:'local', internet_type_name:'LOCAL', internet_type_descr:'' },
-                { internet_type_id:'offline', internet_type_name:'OFFLINE ACCESS', internet_type_descr:'' }
-            ]
-        });
+        // let internettype = new Ext.data.Store({
+        //     model   : 'climatestation.model.InternetType',
+        //     data: [
+        //         { internet_type_id:'ftp', internet_type_name:'FTP', internet_type_descr:'' },
+        //         { internet_type_id:'ftp_tmpl', internet_type_name:'FTP TEMPLATE', internet_type_descr:'' },
+        //         { internet_type_id:'http_tmpl', internet_type_name:'HTTP TEMPLATE', internet_type_descr:'' },
+        //         { internet_type_id:'http_multi_tmpl', internet_type_name:'HTTP MULTIPLE TEMPLATE', internet_type_descr:'' },
+        //         { internet_type_id:'http_tmpl_vito', internet_type_name:'HTTP TEMPLATE VITO', internet_type_descr:'' },
+        //         { internet_type_id:'http_tmpl_theia', internet_type_name:'HTTP TEMPLATE THEIA', internet_type_descr:'' },
+        //         { internet_type_id:'http_coda_eum', internet_type_name:'COPERNICUS ONLINE DATA ACCESS', internet_type_descr:'' },
+        //         { internet_type_id:'motu_client', internet_type_name:'MOTU CLIENT API', internet_type_descr:'' },
+        //         { internet_type_id:'sentinel_sat', internet_type_name:'SENTINEL SAT API', internet_type_descr:'' },
+        //         { internet_type_id:'jeodpp', internet_type_name:'JEODPP API', internet_type_descr:'' },
+        //         { internet_type_id:'local', internet_type_name:'LOCAL', internet_type_descr:'' },
+        //         { internet_type_id:'offline', internet_type_name:'OFFLINE ACCESS', internet_type_descr:'' }
+        //     ]
+        // });
 
-        var formattypes = new Ext.data.Store({
+        let formattypes = new Ext.data.Store({
             model   : 'climatestation.model.FormatType',
             data: [
                 { format_type:'delimited', format_type_descr:'Delimited'},
@@ -131,7 +124,7 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
             ]
         });
 
-        var areatypes = new Ext.data.Store({
+        let areatypes = new Ext.data.Store({
             model   : 'climatestation.model.AreaType',
             data: [
                 { area_type:'global', area_type_descr:'Global'},
@@ -141,56 +134,63 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
             ]
         });
 
-        var preproctypes = new Ext.data.Store({
-            model   : 'climatestation.model.PreprocType',
-            data: [
-                { preproc_type:'MSG_MPE', preproc_type_descr:'MSG MPE'},
-                { preproc_type:'MPE_UMARF', preproc_type_descr:'MPE UMARF'},
-                { preproc_type:'MODIS_HDF4_TILE', preproc_type_descr:'MODIS HDF4 TILE'},
-                { preproc_type:'MERGE_TILE', preproc_type_descr:'MERGE TILE'},
-                { preproc_type:'LSASAF_HDF5', preproc_type_descr:'LSASAF HDF5'},
-                { preproc_type:'PML_NETCDF', preproc_type_descr:'PML NETCDF'},
-                { preproc_type:'UNZIP', preproc_type_descr:'UNZIP'},
-                { preproc_type:'BZIP2', preproc_type_descr:'BZIP2'},
-                { preproc_type:'GEOREF_NETCDF', preproc_type_descr:'GEOREF NETCDF'},
-                { preproc_type:'BZ2_HDF4', preproc_type_descr:'BZ2 HDF4'},
-                { preproc_type:'HDF5_ZIP', preproc_type_descr:'HDF5 ZIP'},
-                { preproc_type:'HDF5_GLS', preproc_type_descr:'HDF5 GLS'},
-                { preproc_type:'HDF5_GLS_NC', preproc_type_descr:'HDF5 GLS NC'},
-                { preproc_type:'NASA_FIRMS', preproc_type_descr:'NASA FIRMS'},
-                { preproc_type:'GZIP', preproc_type_descr:'GZIP'},
-                { preproc_type:'NETCDF', preproc_type_descr:'NETCDF'},
-                { preproc_type:'JRC_WBD_GEE', preproc_type_descr:'JRC WBD GEE'},
-                { preproc_type:'ECMWF_MARS', preproc_type_descr:'ECMWF MARS'},
-                { preproc_type:'ENVI_2_GTIFF', preproc_type_descr:'ENVI TO GTIFF'},
-                { preproc_type:'CPC_BINARY', preproc_type_descr:'CPC BINARY'},
-                { preproc_type:'GSOD', preproc_type_descr:'GSOD'},
-                { preproc_type:'NETCDF_S3_WRR_ZIP', preproc_type_descr:'NETCDF S3 WRR ZIPPED'},
-                { preproc_type:'NETCDF_S3_WRR', preproc_type_descr:'NETCDF S3 WRR'},
-                { preproc_type:'NETCDF_GPT_SUBSET', preproc_type_descr:'NETCDF GPT SUBSET'},
-                { preproc_type:'NETCDF_S3_WST', preproc_type_descr:'NETCDF S3 WST'},
-                { preproc_type:'NETCDF_S3_WST_ZIP', preproc_type_descr:'NETCDF S3 WST ZIPPED'},
-                { preproc_type:'TARZIP', preproc_type_descr:'TARZIP'},
-                { preproc_type:'NETCDF_AVISO', preproc_type_descr:'NETCDF AVISO'},
-                { preproc_type:'SNAP_SUBSET_NC', preproc_type_descr:'SNAP SUBSET NC'}
-            ]
-        });
+        // let preproctypes = new Ext.data.Store({
+        //     model   : 'climatestation.model.PreprocType',
+        //     data: [
+        //         { preproc_type:'MSG_MPE', preproc_type_descr:'MSG MPE'},
+        //         { preproc_type:'MPE_UMARF', preproc_type_descr:'MPE UMARF'},
+        //         { preproc_type:'MODIS_HDF4_TILE', preproc_type_descr:'MODIS HDF4 TILE'},
+        //         { preproc_type:'MERGE_TILE', preproc_type_descr:'MERGE TILE'},
+        //         { preproc_type:'LSASAF_HDF5', preproc_type_descr:'LSASAF HDF5'},
+        //         { preproc_type:'PML_NETCDF', preproc_type_descr:'PML NETCDF'},
+        //         { preproc_type:'UNZIP', preproc_type_descr:'UNZIP'},
+        //         { preproc_type:'BZIP2', preproc_type_descr:'BZIP2'},
+        //         { preproc_type:'GEOREF_NETCDF', preproc_type_descr:'GEOREF NETCDF'},
+        //         { preproc_type:'BZ2_HDF4', preproc_type_descr:'BZ2 HDF4'},
+        //         { preproc_type:'HDF5_ZIP', preproc_type_descr:'HDF5 ZIP'},
+        //         { preproc_type:'HDF5_GLS', preproc_type_descr:'HDF5 GLS'},
+        //         { preproc_type:'HDF5_GLS_NC', preproc_type_descr:'HDF5 GLS NC'},
+        //         { preproc_type:'NASA_FIRMS', preproc_type_descr:'NASA FIRMS'},
+        //         { preproc_type:'GZIP', preproc_type_descr:'GZIP'},
+        //         { preproc_type:'NETCDF', preproc_type_descr:'NETCDF'},
+        //         { preproc_type:'JRC_WBD_GEE', preproc_type_descr:'JRC WBD GEE'},
+        //         { preproc_type:'ECMWF_MARS', preproc_type_descr:'ECMWF MARS'},
+        //         { preproc_type:'ENVI_2_GTIFF', preproc_type_descr:'ENVI TO GTIFF'},
+        //         { preproc_type:'CPC_BINARY', preproc_type_descr:'CPC BINARY'},
+        //         { preproc_type:'GSOD', preproc_type_descr:'GSOD'},
+        //         { preproc_type:'NETCDF_S3_WRR_ZIP', preproc_type_descr:'NETCDF S3 WRR ZIPPED'},
+        //         { preproc_type:'NETCDF_S3_WRR', preproc_type_descr:'NETCDF S3 WRR'},
+        //         { preproc_type:'NETCDF_GPT_SUBSET', preproc_type_descr:'NETCDF GPT SUBSET'},
+        //         { preproc_type:'NETCDF_S3_WST', preproc_type_descr:'NETCDF S3 WST'},
+        //         { preproc_type:'NETCDF_S3_WST_ZIP', preproc_type_descr:'NETCDF S3 WST ZIPPED'},
+        //         { preproc_type:'TARZIP', preproc_type_descr:'TARZIP'},
+        //         { preproc_type:'NETCDF_AVISO', preproc_type_descr:'NETCDF AVISO'},
+        //         { preproc_type:'SNAP_SUBSET_NC', preproc_type_descr:'SNAP SUBSET NC'}
+        //     ]
+        // });
 
         me.listeners = {
             afterrender: function(){
-                Ext.data.StoreManager.lookup('frequencies').load();
-                Ext.data.StoreManager.lookup('dateformats').load();
+                let frequenciesStore = Ext.data.StoreManager.lookup('frequencies');
+                let dateformatsStore = Ext.data.StoreManager.lookup('dateformats');
+                let preproctypesStore = Ext.data.StoreManager.lookup('preproctypes');
+                let internettypesStore = Ext.data.StoreManager.lookup('internettypes');
+                if (!frequenciesStore.isLoaded()) frequenciesStore.load();
+                if (!dateformatsStore.isLoaded()) dateformatsStore.load();
+                if (!preproctypesStore.isLoaded()) preproctypesStore.load();
+                if (!internettypesStore.isLoaded()) internettypesStore.load();
                 if (me.params.create){
                     me.lookupReference('internet_id').setValue('');
                 }
             },
             beforeclose: function(){
-                // console.info('beforeclose');
-                // console.info(Ext.data.StoreManager.lookup('InternetSourceStore').getUpdatedRecords());
                 if (Ext.data.StoreManager.lookup('InternetSourceStore').getUpdatedRecords() !== []){
                     Ext.data.StoreManager.lookup('InternetSourceStore').rejectChanges();
                 }
-                Ext.data.StoreManager.lookup('InternetSourceStore').load();
+                if (me.changes_saved) {
+                    Ext.data.StoreManager.lookup('InternetSourceStore').load();
+                }
+                me = null;
             }
         };
 
@@ -257,7 +257,10 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         // labelWidth: 60,
                         width: 300,
                         reference: 'type',
-                        store: internettype,
+                        // store: internettype,
+                        store: {
+                            type: 'internettypes'
+                        },
                         valueField: 'internet_type_id',
                         displayField: 'internet_type_name',
                         bind: '{theInternetSource.type}',
@@ -313,6 +316,11 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         anchor: '100%',
                         height: 80,
                         grow: false
+                    // }, {
+                    //     xtype: 'hiddenfield',
+                    //     name: 'modified_by',
+                    //     bind: '{theInternetSource.modified_by}',
+                    //     value: modified_by
                     //}, {
                     //    xtype: 'textfield',
                     //    fieldLabel: climatestation.Utils.getTranslation('status'),    // 'Status',
@@ -334,7 +342,7 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         minValue: 0,
                         allowDecimals: true,
                         hideTrigger: false,
-                        width: 80,
+                        width: 200,
                         bind: '{theInternetSource.pull_frequency}'
                     }, {
                         xtype: 'combobox',
@@ -363,7 +371,7 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         // minValue: -99999999,
                         allowDecimals: true,
                         hideTrigger: false,
-                        width: 100,
+                        width: 200,
                         bind: '{theInternetSource.start_date}'
                     }, {
                         xtype: 'numberfield',
@@ -376,7 +384,7 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         // minValue: -99999999,
                         allowDecimals: true,
                         hideTrigger: false,
-                        width: 100,
+                        width: 200,
                         bind: '{theInternetSource.end_date}'
                     }]
                 },{
@@ -512,10 +520,10 @@ Ext.define("climatestation.view.acquisition.editInternetSource",{
                         fieldLabel: climatestation.Utils.getTranslation('preproc_type'),    // 'Preproc type',
                         reference: 'preproc_type',
                         bind: '{theInternetSource.preproc_type}',
-                        store: preproctypes,
-                        // store: {
-                        //     type: 'preproctypes'
-                        // },
+                        // store: preproctypes,
+                        store: {
+                            type: 'preproctypes'
+                        },
                         valueField: 'preproc_type',
                         displayField: 'preproc_type_descr',
                         // itemTpl: '<div class=""><span>{preproc_type}</span>{preproc_type_descr}</div>',

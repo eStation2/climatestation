@@ -25,7 +25,7 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
     //constrain: true,
     modal: true,
     closable: true,
-    closeAction: 'destroy', // 'hide',
+    // closeAction: 'destroy', // 'hide',
     resizable: true,
     scrollable:true,
     maximizable: false,
@@ -44,11 +44,15 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
     // Create a session for this view
     session: true,
 
-    initComponent: function () {
-        var me = this;
-        var user = climatestation.getUser();
+    listeners:  {
+        close: 'onClose'
+    },
 
-        var assignButton = {
+    initComponent: function () {
+        let me = this;
+        let user = climatestation.getUser();
+
+        let assignButton = {
             text: climatestation.Utils.getTranslation('assign'),  // 'Assign',
             iconCls: 'far fa-link',
             // style: {color: 'green'},
@@ -56,7 +60,7 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
             disabled: false,
             handler: 'onAssignEumetcastSourceClick'
         };
-        var addButton = {
+        let addButton = {
             text: climatestation.Utils.getTranslation('add'),  // 'Add',
             iconCls: 'far fa-plus-circle',
             // style: {color: 'green'},
@@ -65,7 +69,7 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
             handler: 'onAddEumetcastSourceClick'
         };
 
-        var refreshButton = {
+        let refreshButton = {
             xtype: 'button',
             iconCls: 'far fa-redo-alt',
             // style: { color: 'gray' },
@@ -74,7 +78,14 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
             handler: 'reloadStore'
         };
 
-        me.tbar = [addButton, '->', refreshButton];
+        me.tbar = {
+            padding: 0,
+            margin: 0,
+            defaults: {
+                margin: 5,
+                padding: 5,
+            },
+            items: [addButton, '->', refreshButton]};
 
         if (me.params.assigntoproduct){
             me.setTitle('<span class="">' + climatestation.Utils.getTranslation('assigneumetcastsource')
@@ -214,7 +225,6 @@ Ext.define("climatestation.view.acquisition.product.EumetcastSourceAdmin",{
                }]
             }]
         }];
-
 
         me.callParent();
     }

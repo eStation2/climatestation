@@ -16,6 +16,8 @@ Ext.define('climatestation.store.EumetcastSourceStore', {
     ,autoSync: false
     // ,session: false
 
+    ,sorters: [{property: 'defined_by', direction: 'DESC'}, {property: 'eumetcast_id', direction: 'ASC'}]
+
     ,proxy: {
         type: 'rest',
 

@@ -33,12 +33,11 @@ Ext.define("climatestation.view.acquisition.product.editSubDatasourceDescription
     //constrain: true,
     modal: true,
     closable: true,
-    closeAction: 'destroy', // 'hide',
+    closeAction: 'hide', // 'destroy',
     resizable: true,
     scrollable:true,
     maximizable: false,
 
-    // width: 870,
     height: Ext.getBody().getViewSize().height < 550 ? Ext.getBody().getViewSize().height-35 : 550,
     maxHeight: 550,
 
@@ -56,9 +55,10 @@ Ext.define("climatestation.view.acquisition.product.editSubDatasourceDescription
     },
 
     initComponent: function () {
-        var me = this;
-        var labelwidth = 120;
-        // var user = climatestation.getUser();
+        let me = this;
+        let labelwidth = 120;
+        // let user = climatestation.getUser();
+        me.changes_saved = false;
 
         if (me.params.edit){
             me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('editsubdatasourcedescr') + '</span>');
@@ -68,14 +68,6 @@ Ext.define("climatestation.view.acquisition.product.editSubDatasourceDescription
         }
 
         me.buttons = [
-        //{     text: 'TEST',
-        //     // iconCls: 'far fa-save',
-        //     style: {color: 'lightblue'},
-        //     scale: 'medium',
-        //     disabled: false,
-        //     formBind: false,
-        //     handler: 'onTestClick'
-        // },
             '->',{
             text: climatestation.Utils.getTranslation('save'),    // 'Save',
             iconCls: 'far fa-save',
@@ -91,53 +83,60 @@ Ext.define("climatestation.view.acquisition.product.editSubDatasourceDescription
             // beforerender: function(){
             //     Ext.data.StoreManager.lookup('SubDatasourceDescriptionStore').load();
             // },
-            // afterrender: function(){
-            //
-            // },
-            beforeclose: function(){
+            afterrender: function(){
+                let datatypesStore = Ext.data.StoreManager.lookup('datatypes');
+                let preproctypesStore = Ext.data.StoreManager.lookup('preproctypes');
+                if (!datatypesStore.isLoaded()) datatypesStore.load();
+                if (!preproctypesStore.isLoaded()) preproctypesStore.load();
+            },
+            close: function(){
                 if (Ext.data.StoreManager.lookup('SubDatasourceDescriptionStore').getUpdatedRecords() !== []){
                     Ext.data.StoreManager.lookup('SubDatasourceDescriptionStore').rejectChanges();
                 }
-                Ext.data.StoreManager.lookup('SubDatasourceDescriptionStore').load();
+
+                if (me.changes_saved) {
+                    Ext.data.StoreManager.lookup('SubDatasourceDescriptionStore').load();
+                }
+                me = null;
             }
         };
 
-        var preproctypes = new Ext.data.Store({
-            model   : 'climatestation.model.PreprocType',
-            data: [
-                { preproc_type:'MSG_MPE', preproc_type_descr:'MSG MPE'},
-                { preproc_type:'MPE_UMARF', preproc_type_descr:'MPE UMARF'},
-                { preproc_type:'MODIS_HDF4_TILE', preproc_type_descr:'MODIS HDF4 TILE'},
-                { preproc_type:'MERGE_TILE', preproc_type_descr:'MERGE TILE'},
-                { preproc_type:'LSASAF_HDF5', preproc_type_descr:'LSASAF HDF5'},
-                { preproc_type:'PML_NETCDF', preproc_type_descr:'PML NETCDF'},
-                { preproc_type:'UNZIP', preproc_type_descr:'UNZIP'},
-                { preproc_type:'BZIP2', preproc_type_descr:'BZIP2'},
-                { preproc_type:'GEOREF_NETCDF', preproc_type_descr:'GEOREF NETCDF'},
-                { preproc_type:'BZ2_HDF4', preproc_type_descr:'BZ2 HDF4'},
-                { preproc_type:'HDF5_ZIP', preproc_type_descr:'HDF5 ZIP'},
-                { preproc_type:'HDF5_GLS', preproc_type_descr:'HDF5 GLS'},
-                { preproc_type:'HDF5_GLS_NC', preproc_type_descr:'HDF5 GLS NC'},
-                { preproc_type:'NASA_FIRMS', preproc_type_descr:'NASA FIRMS'},
-                { preproc_type:'GZIP', preproc_type_descr:'GZIP'},
-                { preproc_type:'NETCDF', preproc_type_descr:'NETCDF'},
-                { preproc_type:'JRC_WBD_GEE', preproc_type_descr:'JRC WBD GEE'},
-                { preproc_type:'ECMWF_MARS', preproc_type_descr:'ECMWF MARS'},
-                { preproc_type:'ENVI_2_GTIFF', preproc_type_descr:'ENVI TO GTIFF'},
-                { preproc_type:'CPC_BINARY', preproc_type_descr:'CPC BINARY'},
-                { preproc_type:'GSOD', preproc_type_descr:'GSOD'},
-                { preproc_type:'NETCDF_S3_WRR_ZIP', preproc_type_descr:'NETCDF S3 WRR ZIPPED'},
-                { preproc_type:'NETCDF_S3_WRR', preproc_type_descr:'NETCDF S3 WRR'},
-                { preproc_type:'NETCDF_GPT_SUBSET', preproc_type_descr:'NETCDF GPT SUBSET'},
-                { preproc_type:'NETCDF_S3_WST', preproc_type_descr:'NETCDF S3 WST'},
-                { preproc_type:'NETCDF_S3_WST_ZIP', preproc_type_descr:'NETCDF S3 WST ZIPPED'},
-                { preproc_type:'TARZIP', preproc_type_descr:'TARZIP'},
-                { preproc_type:'NETCDF_AVISO', preproc_type_descr:'NETCDF AVISO'},
-                { preproc_type:'SNAP_SUBSET_NC', preproc_type_descr:'SNAP SUBSET NC'}
-            ]
-        });
+        // let preproctypes = new Ext.data.Store({
+        //     model   : 'climatestation.model.PreprocType',
+        //     data: [
+        //         { preproc_type:'MSG_MPE', preproc_type_descr:'MSG MPE'},
+        //         { preproc_type:'MPE_UMARF', preproc_type_descr:'MPE UMARF'},
+        //         { preproc_type:'MODIS_HDF4_TILE', preproc_type_descr:'MODIS HDF4 TILE'},
+        //         { preproc_type:'MERGE_TILE', preproc_type_descr:'MERGE TILE'},
+        //         { preproc_type:'LSASAF_HDF5', preproc_type_descr:'LSASAF HDF5'},
+        //         { preproc_type:'PML_NETCDF', preproc_type_descr:'PML NETCDF'},
+        //         { preproc_type:'UNZIP', preproc_type_descr:'UNZIP'},
+        //         { preproc_type:'BZIP2', preproc_type_descr:'BZIP2'},
+        //         { preproc_type:'GEOREF_NETCDF', preproc_type_descr:'GEOREF NETCDF'},
+        //         { preproc_type:'BZ2_HDF4', preproc_type_descr:'BZ2 HDF4'},
+        //         { preproc_type:'HDF5_ZIP', preproc_type_descr:'HDF5 ZIP'},
+        //         { preproc_type:'HDF5_GLS', preproc_type_descr:'HDF5 GLS'},
+        //         { preproc_type:'HDF5_GLS_NC', preproc_type_descr:'HDF5 GLS NC'},
+        //         { preproc_type:'NASA_FIRMS', preproc_type_descr:'NASA FIRMS'},
+        //         { preproc_type:'GZIP', preproc_type_descr:'GZIP'},
+        //         { preproc_type:'NETCDF', preproc_type_descr:'NETCDF'},
+        //         { preproc_type:'JRC_WBD_GEE', preproc_type_descr:'JRC WBD GEE'},
+        //         { preproc_type:'ECMWF_MARS', preproc_type_descr:'ECMWF MARS'},
+        //         { preproc_type:'ENVI_2_GTIFF', preproc_type_descr:'ENVI TO GTIFF'},
+        //         { preproc_type:'CPC_BINARY', preproc_type_descr:'CPC BINARY'},
+        //         { preproc_type:'GSOD', preproc_type_descr:'GSOD'},
+        //         { preproc_type:'NETCDF_S3_WRR_ZIP', preproc_type_descr:'NETCDF S3 WRR ZIPPED'},
+        //         { preproc_type:'NETCDF_S3_WRR', preproc_type_descr:'NETCDF S3 WRR'},
+        //         { preproc_type:'NETCDF_GPT_SUBSET', preproc_type_descr:'NETCDF GPT SUBSET'},
+        //         { preproc_type:'NETCDF_S3_WST', preproc_type_descr:'NETCDF S3 WST'},
+        //         { preproc_type:'NETCDF_S3_WST_ZIP', preproc_type_descr:'NETCDF S3 WST ZIPPED'},
+        //         { preproc_type:'TARZIP', preproc_type_descr:'TARZIP'},
+        //         { preproc_type:'NETCDF_AVISO', preproc_type_descr:'NETCDF AVISO'},
+        //         { preproc_type:'SNAP_SUBSET_NC', preproc_type_descr:'SNAP SUBSET NC'}
+        //     ]
+        // });
 
-        var scale_types = new Ext.data.Store({
+        let scale_types = new Ext.data.Store({
             model   : 'climatestation.model.ScaleType',
             data: [
                 { scale_type: 'linear', scale_type_descr: 'Linear'},
@@ -358,7 +357,10 @@ Ext.define("climatestation.view.acquisition.product.editSubDatasourceDescription
                             fieldLabel: climatestation.Utils.getTranslation('preproc_type'),    // 'Preproc type',
                             reference: 'preproc_type',
                             bind: '{theSubDatasourceDescription.preproc_type}',
-                            store: preproctypes,
+                            // store: preproctypes,
+                            store: {
+                                type: 'preproctypes'
+                            },
                             valueField: 'preproc_type',
                             displayField: 'preproc_type_descr',
                             // itemTpl: '<div class=""><span>{preproc_type}</span>{preproc_type_descr}</div>',

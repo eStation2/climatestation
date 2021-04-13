@@ -16,6 +16,8 @@ Ext.define('climatestation.store.InternetSourceStore', {
     ,autoSync: false
     //,session: true
 
+    ,sorters: [{property: 'defined_by', direction: 'DESC'}, {property: 'internet_id', direction: 'ASC'}]
+
     ,proxy: {
         type: 'rest',
 

@@ -9,10 +9,11 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductControll
     ],
 
     setup: function() {
-        var me = this.getView();
-        var user = climatestation.getUser();
-
-        var subDatasourceDescriptionStore = me.getViewModel().get('subdatasourcedescriptions');
+        let me = this.getView();
+        let user = climatestation.getUser();
+        let subDatasourceDescriptionStore = Ext.data.StoreManager.lookup('SubDatasourceDescriptionStore')
+        // let subDatasourceDescriptionStore = me.getViewModel().get('subdatasourcedescriptions');
+        subDatasourceDescriptionStore.load();
 
         subDatasourceDescriptionStore.setFilters([{
             property: 'pads_productcode'
@@ -30,29 +31,29 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductControll
 
         if (me.params.edit){
             me.height = 825;
-            Ext.getCmp('ingestsubproductdatasourcesfieldset').show();
-            me.center();
+            me.lookupReference('ingestsubproductdatasourcesfieldset').show();
+            // me.center();
         }
         else {
             if (climatestation.Utils.objectExists(user) && user.userlevel == 1){
-                Ext.getCmp('defined_by_field').setValue('JRC');
+                me.lookupReference('defined_by_field').setValue('JRC');
             }
             else {
-                Ext.getCmp('defined_by_field').setValue('USER');
+                me.lookupReference('defined_by_field').setValue('USER');
             }
         }
     }
 
     ,saveIngestSubProductInfo: function(widget, event){
-        var me = this.getView();
+        let me = this.getView();
         // var user = climatestation.getUser();
         // var subDatasourcesDescrStore = me.getViewModel().get('subdatasourcedescriptions');
 
-        var url = 'ingestsubproduct/create';
+        let url = 'ingestsubproduct/create';
         if (me.params.edit){
             url = 'ingestsubproduct/update';
         }
-        var params = {
+        let params = {
             category_id: me.params.ingestsubproductrecord.get('category_id'),
             productcode: me.params.ingestsubproductrecord.get('productcode'),
             version: me.params.ingestsubproductrecord.get('version'),
@@ -62,7 +63,7 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductControll
             provider: me.params.ingestsubproductrecord.get('provider'),
             descriptive_name: me.params.ingestsubproductrecord.get('descriptive_name'),
             description: me.lookupReference('description').getValue().trim(),
-            defined_by:  me.lookupReference('defined_by_field').getValue(),      //  me.params.ingestsubproductrecord.get('defined_by'),
+            defined_by: me.lookupReference('defined_by_field').getValue(),      //  me.params.ingestsubproductrecord.get('defined_by'),
 
             frequency_id: me.params.ingestsubproductrecord.get('frequency_id'),
             date_format: me.params.ingestsubproductrecord.get('date_format'),
@@ -74,7 +75,7 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductControll
             unit: me.params.ingestsubproductrecord.get('unit'),
             data_type_id: me.params.ingestsubproductrecord.get('data_type_id'),
             masked: !me.lookupReference('masked').getValue(),
-            timeseries_role: me.lookupReference('enable_in_timeseries').getValue() ? 'Initial': null,
+            timeseries_role: me.lookupReference('enable_in_timeseries').getValue() ? 'Initial' : null,
             enable_in_timeseries: me.params.ingestsubproductrecord.get('enable_in_timeseries'),
             display_index: me.params.ingestsubproductrecord.get('display_index')
         };
@@ -86,7 +87,7 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductControll
             url: url,
             params: params,
             success: function(response, opts){
-                var result = Ext.JSON.decode(response.responseText);
+                let result = Ext.JSON.decode(response.responseText);
                 // console.info(result);
                 if (result.success){
                     Ext.toast({ html: climatestation.Utils.getTranslation('productinfoupdated'), title: climatestation.Utils.getTranslation('productinfoupdated'), width: 200, align: 't' });
@@ -95,7 +96,7 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductControll
                         me.params.edit = true;
                         me.height = 825;
 
-                        Ext.getCmp('ingestsubproductdatasourcesfieldset').show();
+                        me.lookupReference('ingestsubproductdatasourcesfieldset').show();
                         me.center();
 
                         me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('editingestsubproduct') + '</span>');
@@ -109,6 +110,7 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductControll
                     }
 
                     Ext.data.StoreManager.lookup('IngestSubProductsStore').load();
+                    me.changes_saved = true;
                 }
             },
             failure: function(response, opts) {
@@ -118,11 +120,11 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductControll
     }
 
     ,addEditIngestParameters: function(grid, rowIndex, colIndex, colCmp){
-        var me = this.getView();
-        var subDatasourceDescriptionRecord = grid.getStore().getAt(rowIndex);
+        let me = this.getView();
+        let subDatasourceDescriptionRecord = grid.getStore().getAt(rowIndex);
         // console.info(subDatasourceDescriptionRecord);
-        var edit = false;
-        var create = true;  // By default open Sub Datasource Description editor in create mode.
+        let edit = false;
+        let create = true;  // By default open Sub Datasource Description editor in create mode.
         if (subDatasourceDescriptionRecord.get('productcode') != '' ){  // open Sub Datasource Description editor in edit mode.
             edit = true;
             create = false;
@@ -132,7 +134,7 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductControll
             subDatasourceDescriptionRecord.set('datasource_descr_id', subDatasourceDescriptionRecord.get('pads_data_source_id'));
         }
 
-        var editSubDatasourceDescriptionWin = new climatestation.view.acquisition.product.editSubDatasourceDescription({
+        let editSubDatasourceDescriptionWin = new climatestation.view.acquisition.product.editSubDatasourceDescription({
             params: {
                 create: create,
                 edit: edit,
@@ -141,24 +143,4 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductControll
         });
         editSubDatasourceDescriptionWin.show();
     }
-
-    // ,deleteIngestParameters: function(){
-    //
-    // }
-    //
-    //
-    // ,onSaveClick: function () {
-    //     var me = this.getView(),
-    //         form = me.lookupReference('ingestsubproductform');
-    //
-    //     if (form.isValid()) {
-    //         // console.info(Ext.data.StoreManager.lookup('InternetSourceStore').getUpdatedRecords());
-    //
-    //         if (Ext.data.StoreManager.lookup('IngestSubProductsStore').getUpdatedRecords() !== []){
-    //             Ext.data.StoreManager.lookup('IngestSubProductsStore').sync();
-    //             //Ext.toast({html: climatestation.Utils.getTranslation('saved'), title: climatestation.Utils.getTranslation('saved'), width: 200, align: 't'});
-    //         }
-    //     }
-    // }
-
 });

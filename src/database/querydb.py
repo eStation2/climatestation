@@ -1195,16 +1195,16 @@ def update_eumetcast_source_info(eumetcastsourceinfo, datasourcedescrinfo):
                  "  file_extension = '" + datasourcedescrinfo['file_extension'] + "', " + \
                  "  delimiter = '" + datasourcedescrinfo['delimiter'] + "', " + \
                  "  date_format = '" + datasourcedescrinfo['date_format'] + "', " + \
-                 "  date_position = '" + datasourcedescrinfo['date_position'] + "', " + \
+                 "  date_position = '" + str(datasourcedescrinfo['date_position']) + "', " + \
                  "  product_identifier = '" + datasourcedescrinfo['product_identifier'] + "', " + \
                  "  prod_id_position = " + str(datasourcedescrinfo['prod_id_position']) + ", " + \
                  "  prod_id_length = " + str(datasourcedescrinfo['prod_id_length']) + ", " + \
                  "  area_type = '" + datasourcedescrinfo['area_type'] + "', " + \
-                 "  area_position = '" + datasourcedescrinfo['area_position'] + "', " + \
+                 "  area_position = '" + str(datasourcedescrinfo['area_position']) + "', " + \
                  "  area_length = " + str(datasourcedescrinfo['area_length']) + ", " + \
                  "  preproc_type = '" + datasourcedescrinfo['preproc_type'] + "', " + \
                  "  product_release = '" + datasourcedescrinfo['product_release'] + "', " + \
-                 "  release_position = '" + datasourcedescrinfo['release_position'] + "', " + \
+                 "  release_position = '" + str(datasourcedescrinfo['release_position']) + "', " + \
                  "  release_length = " + str(datasourcedescrinfo['release_length']) + ", " + \
                  "  native_mapset = '" + datasourcedescrinfo['native_mapset'] + "' " + \
                  " WHERE datasource_descr_id = '" + eumetcastsourceinfo['orig_eumetcast_id'] + "' "
@@ -1244,16 +1244,16 @@ def update_internet_source_info(internetsourceinfo, datasourcedescrinfo):
                  "  file_extension = '" + datasourcedescrinfo['file_extension'] + "', " + \
                  "  delimiter = '" + datasourcedescrinfo['delimiter'] + "', " + \
                  "  date_format = '" + datasourcedescrinfo['date_format'] + "', " + \
-                 "  date_position = '" + datasourcedescrinfo['date_position'] + "', " + \
+                 "  date_position = '" + str(datasourcedescrinfo['date_position']) + "', " + \
                  "  product_identifier = '" + datasourcedescrinfo['product_identifier'] + "', " + \
                  "  prod_id_position = " + str(datasourcedescrinfo['prod_id_position']) + ", " + \
                  "  prod_id_length = " + str(datasourcedescrinfo['prod_id_length']) + ", " + \
                  "  area_type = '" + datasourcedescrinfo['area_type'] + "', " + \
-                 "  area_position = '" + datasourcedescrinfo['area_position'] + "', " + \
+                 "  area_position = '" + str(datasourcedescrinfo['area_position']) + "', " + \
                  "  area_length = " + str(datasourcedescrinfo['area_length']) + ", " + \
                  "  preproc_type = '" + datasourcedescrinfo['preproc_type'] + "', " + \
                  "  product_release = '" + datasourcedescrinfo['product_release'] + "', " + \
-                 "  release_position = '" + datasourcedescrinfo['release_position'] + "', " + \
+                 "  release_position = '" + str(datasourcedescrinfo['release_position']) + "', " + \
                  "  release_length = " + str(datasourcedescrinfo['release_length']) + ", " + \
                  "  native_mapset = '" + datasourcedescrinfo['native_mapset'] + "' " + \
                  " WHERE datasource_descr_id = '" + internetsourceinfo['orig_internet_id'] + "' "
@@ -1691,6 +1691,42 @@ def get_datatypes():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_datatypes: Database query error!\n -> {}".format(exceptionvalue))
+        return False
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_preproctypes():
+    global db
+    try:
+        query = "SELECT * FROM products.preproc_type ORDER BY preproc_type"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_preproctypes: Database query error!\n -> {}".format(exceptionvalue))
+        return False
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_internettypes():
+    global db
+    try:
+        query = "SELECT * FROM products.internet_type ORDER BY internet_type_id"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_internettypes: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
         if db.session:
@@ -4284,14 +4320,18 @@ def get_product_subproducts(productcode='', version='undefined'):
 def get_ingestsubproducts():
     global db
     try:
-        # || '_' || subproductcode
-        query = " SELECT p.productcode || '_' || p.version as productid, " + \
-                "        p.subproductcode as orig_subproductcode, " + \
-                "	     CASE WHEN TRIM(p.timeseries_role) = 'Initial' " + \
-                "             THEN TRUE ELSE FALSE END AS enable_in_timeseries, * " + \
-                " FROM products.sub_product p" + \
-                " WHERE p.product_type = 'Ingest' " + \
-                " ORDER BY p.productcode, p.version DESC, p.subproductcode"
+        query = " SELECT sp.productcode || '_' || sp.version as productid, " + \
+                "        sp.subproductcode as orig_subproductcode, " + \
+                "        CASE WHEN TRIM(sp.timeseries_role) = 'Initial' THEN TRUE ELSE FALSE END AS enable_in_timeseries, " + \
+                "        p.category_id, " + \
+                "        p.provider, " + \
+                "        p.activated, " + \
+                "        sp.* " + \
+                " FROM products.sub_product sp INNER JOIN products.product p ON " + \
+                "      sp.productcode = p.productcode AND sp.version = p.version " + \
+                " WHERE sp.product_type = 'Ingest' " + \
+                " ORDER BY sp.productcode, sp.version DESC, sp.subproductcode"
+
         subproducts = db.execute(query)
         subproducts = subproducts.fetchall()
 

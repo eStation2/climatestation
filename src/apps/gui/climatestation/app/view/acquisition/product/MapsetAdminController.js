@@ -98,26 +98,24 @@ Ext.define('climatestation.view.acquisition.product.MapsetAdminController', {
                 'ingestions_assigned': null
             });
 
-            mapsetstore.add(newMapSetRecord);
+        mapsetstore.add(newMapSetRecord);
 
-            var editMapsetWin = new climatestation.view.acquisition.product.editMapset({
-                params: {
-                    create: true,
-                    edit: false,
-                    view: false,
-                    mapsetrecord: newMapSetRecord,
-                    mapsetcode: 'new-mapset'
-                }
-            });
-            editMapsetWin.show();
+        var editMapsetWin = new climatestation.view.acquisition.product.editMapset({
+            params: {
+                create: true,
+                edit: false,
+                view: false,
+                mapsetrecord: newMapSetRecord,
+                mapsetcode: 'new-mapset'
+            }
+        });
+        editMapsetWin.show();
     },
 
     onEditMapsetClick: function(grid, rowIndex){
         var record = grid.getStore().getAt(rowIndex);
         var mapsetcode = record.get('mapsetcode');
         var user = climatestation.getUser();
-        // console.info(record);
-        // console.info(data_source_id);
 
         var edit = false;
         var view = true;
@@ -137,7 +135,6 @@ Ext.define('climatestation.view.acquisition.product.MapsetAdminController', {
         });
         editMapsetWin.show();
     },
-
 
     onRemoveMapsetClick: function(grid, rowIndex){
         var record = grid.getStore().getAt(rowIndex);
@@ -185,6 +182,14 @@ Ext.define('climatestation.view.acquisition.product.MapsetAdminController', {
         if (refHolder) {
             delete refHolder.getView().refs[ref];
         }
-        Ext.destroy(me);
+
+        var editmapsetWindows = Ext.ComponentQuery.query('editmapset');
+        if (editmapsetWindows !== []) {
+            Ext.Object.each(editmapsetWindows, function (id, editmapsetwin, thisObj) {
+                editmapsetwin = null;
+                // console.info(editmapsetwin);
+                // editmapsetwin.destroy();
+            });
+        }
     }
 });

@@ -75,6 +75,9 @@ urls = (
     "/frequencies", "GetFrequencies",
     "/dateformats", "GetDateFormats",
     "/datatypes", "GetDataTypes",
+    "/preproctypes", "GetPreProcTypes",
+    "/internettypes", "GetInternetTypes",
+
     "/projections", "GetProjections",
     "/resolutions", "GetResolutions",
     "/bboxes", "GetPredefinedBboxes",
@@ -1586,6 +1589,68 @@ class GetDataTypes(object):
         return datatypes_json
 
 
+class GetPreProcTypes(object):
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        preproctypes_dict_all = []
+        preproctypes = querydb.get_preproctypes()
+
+        if hasattr(preproctypes, "__len__") and preproctypes.__len__() > 0:
+            for row in preproctypes:
+                row_dict = functions.row2dict(row)
+
+                preproctypes_dict_all.append(row_dict)
+
+            preproctypes_json = json.dumps(preproctypes_dict_all,
+                                        ensure_ascii=False,
+                                        # encoding='utf-8',
+                                        sort_keys=True,
+                                        indent=4,
+                                        separators=(', ', ': '))
+
+            preproctypes_json = '{"success":"true", "total":' \
+                             + str(preproctypes.__len__()) \
+                             + ',"preproctypes":' + preproctypes_json + '}'
+
+        else:
+            preproctypes_json = '{"success":false, "error":"No PreProc Types defined!"}'
+
+        return preproctypes_json
+
+
+class GetInternetTypes(object):
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        internettypes_dict_all = []
+        internettypes = querydb.get_internettypes()
+
+        if hasattr(internettypes, "__len__") and internettypes.__len__() > 0:
+            for row in internettypes:
+                row_dict = functions.row2dict(row)
+
+                internettypes_dict_all.append(row_dict)
+
+            internettypes_json = json.dumps(internettypes_dict_all,
+                                        ensure_ascii=False,
+                                        # encoding='utf-8',
+                                        sort_keys=True,
+                                        indent=4,
+                                        separators=(', ', ': '))
+
+            internettypes_json = '{"success":"true", "total":' \
+                                 + str(internettypes.__len__()) \
+                                 + ',"internettypes":' + internettypes_json + '}'
+
+        else:
+            internettypes_json = '{"success":false, "error":"No Internet Types defined!"}'
+
+        return internettypes_json
+
+
 class AssignInternetSource(object):
     def __init__(self):
         self.lang = "eng"
@@ -1692,6 +1757,7 @@ class GetEumetcastSources(object):
                                    'keywords_theme': row_dict['keywords_theme'],
                                    'keywords_societal_benefit_area': row_dict['keywords_societal_benefit_area'],
                                    'defined_by': row_dict['defined_by'],
+                                   'modified_by': row_dict['modified_by'],
                                    'datasource_descr_id': row_dict['datasource_descr_id'],
                                    'format_type': row_dict['format_type'],
                                    'file_extension': row_dict['file_extension'],
@@ -1769,10 +1835,12 @@ class UpdateEumetcastSource(object):
             eumetcastsourceinfo = {'eumetcast_id': getparams['eumetcastsources']['eumetcast_id'],
                                    'filter_expression_jrc': getparams['eumetcastsources']['filter_expression_jrc'],
                                    'description': getparams['eumetcastsources']['description'],
+                                   'collection_name': getparams['eumetcastsources']['collection_name'],
                                    'typical_file_name': getparams['eumetcastsources']['typical_file_name'],
                                    'frequency': getparams['eumetcastsources']['frequency'],
                                    'datasource_descr_id': getparams['eumetcastsources']['eumetcast_id'],
-                                   'defined_by': getparams['eumetcastsources']['defined_by']
+                                   'defined_by': getparams['eumetcastsources']['defined_by'],
+                                   'modified_by': getparams['eumetcastsources']['modified_by']
                                    }
 
             datasourcedescrinfo = {'datasource_descr_id': getparams['eumetcastsources']['eumetcast_id'],
@@ -1859,14 +1927,15 @@ class CreateEumetcastSource(object):
             eumetcastsourceinfo = {'eumetcast_id': getparams['eumetcastsources']['eumetcast_id'],
                                    'filter_expression_jrc': getparams['eumetcastsources']['filter_expression_jrc'],
                                    'description': getparams['eumetcastsources']['description'],
+                                   'collection_name': getparams['eumetcastsources']['collection_name'],
                                    'typical_file_name': getparams['eumetcastsources']['typical_file_name'],
                                    'frequency': getparams['eumetcastsources']['frequency'],
                                    'datasource_descr_id': getparams['eumetcastsources']['eumetcast_id'],
                                    'defined_by': getparams['eumetcastsources']['defined_by'],
-                                   # 'update_datetime': getparams['internetsources']['update_datetime']
+                                   'modified_by': getparams['eumetcastsources']['modified_by']
                                    }
 
-            datasourcedescrinfo = {'datasource_descr_id': getparams['eumetcastsources']['internet_id'],
+            datasourcedescrinfo = {'datasource_descr_id': getparams['eumetcastsources']['eumetcast_id'],
                                    'format_type': getparams['eumetcastsources']['format_type'],
                                    'file_extension': getparams['eumetcastsources']['file_extension'],
                                    'delimiter': getparams['eumetcastsources']['delimiter'],
@@ -2093,7 +2162,6 @@ class UpdateInternetSource(object):
                                   'descriptive_name': getparams['internetsources']['descriptive_name'],
                                   'description': getparams['internetsources']['description'],
                                   'modified_by': getparams['internetsources']['modified_by'],
-                                  # 'update_datetime': datetime.date.today(),     # Created a trigger which updates this field
                                   'url': getparams['internetsources']['url'],
                                   'user_name': getparams['internetsources']['user_name'],
                                   'password': getparams['internetsources']['password'],
@@ -2208,7 +2276,6 @@ class CreateInternetSource(object):
                                   'descriptive_name': getparams['internetsources']['descriptive_name'],
                                   'description': getparams['internetsources']['description'],
                                   'modified_by': getparams['internetsources']['modified_by'],
-                                  # 'update_datetime': getparams['internetsources']['update_datetime'],
                                   'url': getparams['internetsources']['url'],
                                   'user_name': getparams['internetsources']['user_name'],
                                   'password': getparams['internetsources']['password'],

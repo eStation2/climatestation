@@ -6,8 +6,7 @@ Ext.define('climatestation.view.acquisition.AcquisitionController', {
     requires: [
         'climatestation.Utils',
         'climatestation.view.acquisition.product.ProductAdmin',
-        'climatestation.view.acquisition.product.editProduct',
-        'climatestation.view.acquisition.product.selectProduct'
+        'climatestation.view.acquisition.product.editProduct'
     ],
 
 
