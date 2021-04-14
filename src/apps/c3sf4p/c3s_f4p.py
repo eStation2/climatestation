@@ -30,9 +30,9 @@ class Fitness4Purpose(object):
     """
     Entry point to trigger the c3sf4p capabilities
     """
-    def __init__(self, file_list, ecv, band_names, region_name='', region_coordinates=None, dbg=False):
+    def __init__(self, file_list, band_names, ecv=None, region_name='', region_coordinates=None, dbg=False):
         """
-        :param file_list:           LIST of Strings: file or list of files to analyse,
+        @param file_list:           LIST of Strings: file or list of files to analyse,
                                     this parameter should be specified as a list-of-lists, where len(file_list)
                                     represents the number of different datasets (i.e. different product providers) to be
                                     considered in the analysis.
@@ -43,10 +43,10 @@ class Fitness4Purpose(object):
                                                 [full_name-2.1, full_name-2.2, ..., fill-name-2.n],
                                                 [full_name-3.1, full_name-3.2, ..., fill-name-3.n]]
 
-        :param ecv:                 STRING: ecv type as defined in GCOS it is assumed that every element of the
+        @param ecv:                 STRING: ecv type as defined in GCOS it is assumed that every element of the
                                             file_list parameter are all of the same ecv-kind
 
-        :param band_names:          LIST of STRING: band name for each dataset in file_list,
+        @param band_names:          LIST of STRING: band name for each dataset in file_list,
                                     where len(band_names) equals the number of different datasets
                                     (i.e. different product providers)
 
@@ -55,10 +55,10 @@ class Fitness4Purpose(object):
                                     band_names = [band_name-1, band_name-2, band_name-3]
 
 
-        :param region_name:         STRING: Ancillary parameter name of the region to which the raster input corresponds
+        @param region_name:         STRING: Ancillary parameter name of the region to which the raster input corresponds
                                     This parameter is the name associated to region_coordinates parameter
 
-        :param region_coordinates:  LIST: Ancillary parameter, represents the boundary coordinates in case the analysis
+        @param region_coordinates:  LIST: Ancillary parameter, represents the boundary coordinates in case the analysis
                                     is foreseen in a sub-region of the original extension. This parameter should be
                                     specified as a list of 4 cardinal points (floating numbers) in the folloing order:
                                     [S, N, W, E] where:
@@ -71,7 +71,7 @@ class Fitness4Purpose(object):
                                     In this convention the following condition should always be verified: S<N and W<E
                                     the tools also implements this test, and if wrong it throws an exception
 
-        :param dbg:                 enables debug mode
+        @param dbg:                 enables debug mode
 
         """
         self.lof = file_list
@@ -387,17 +387,17 @@ class Fitness4Purpose(object):
                 This method belongs to the pymankendall library.
                 The null hypotesis H0 is that there is NO-trend in the data.
 
-                :param num_jobs:        Int: represents the number of jobs for the parallel computation. Usually this number
+                @param num_jobs:        Int: represents the number of jobs for the parallel computation. Usually this number
                                         equals the number of cpu threads available on machine architecture.
 
-                :param num_partitions:  Int: Together with num_jobs parameter determine the number of chunks in which the input
+                @param num_partitions:  Int: Together with num_jobs parameter determine the number of chunks in which the input
                                         timeseries will be splitted. As an example if the default values holds, the total number
                                         of chunks will be 100, i.e. in general holds the rule:
                                                 number-of-chunks = num_jobs * num_partitions
-                :param only_significant Bool: if true, only the significant (statistically speaking) trend will be filtered,
+                @param only_significant:Bool: if true, only the significant (statistically speaking) trend will be filtered,
                                         i.e. all the p-values below a certain threshold (0.05 is used here)
 
-                :param threshold        float: threshold for defining when the p-value determines a value which is
+                @param threshold:       float: threshold for defining when the p-value determines a value which is
                                         statistically significant.
                                         Default value = 0.05
                                         The p-value indicates the evidence against the null hypothesis, for instance for
@@ -435,7 +435,6 @@ class Fitness4Purpose(object):
                                         the implementation of the Mann-Kendall method for trend calculation.
 
                                         ## more information can be found on the description of each specific method
-
 
                 """
         if self.dbg:
