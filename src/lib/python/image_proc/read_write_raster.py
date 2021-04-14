@@ -550,10 +550,10 @@ class RasterDataset(object):
 
 # Write netcdf outside the class
 def write_nc(file_name, data, dataset_tag, dataset_long_name=None, fill_value=None, scale_factor=None, offset=None,
-             valid_range=None, dtype=None, zc=None, mode=None, history=None, lats=None, lons=None,
-             global_attrs=None,
-             compression=9, write_CS_metadata=None):
+             valid_range=None, dtype=None, zc=None, mode=None, history=None, lats=None, lons=None, global_attrs=None,
+             compression=9, write_CS_metadata=None, do_out_rescaling=False):
     """
+    :param do_out_rescaling:
     :param file_name:           output full name
     :param data:                datasets to be write to, list
     :param dataset_tag:         tag name associated to each dataset in the dataset list
@@ -596,6 +596,7 @@ def write_nc(file_name, data, dataset_tag, dataset_long_name=None, fill_value=No
         scale_factor = 1.
     if offset is None:
         offset = 0.
+
     # if valid_range is None:
     #     valid_range = [np.nanmin(np.asarray(data)), np.nanmax(np.asarray(data))]
     if dtype is None:
@@ -661,9 +662,18 @@ def write_nc(file_name, data, dataset_tag, dataset_long_name=None, fill_value=No
 
     for i, var_name in enumerate(dataset_tag):
         # data_type = 'float'
+        rescaled_data = data[i]
         var = dataset.createVariable(var_name, data_type, ('latitude', 'longitude'),
                                      zlib=True, complevel=compression, fill_value=fill_value)
-        var[:] = data[i]
+        if do_out_rescaling:
+            # Convert physical values to DN for output scaling factor and offset
+            # DN = (Phys - add_offset)/scale_factor
+            rescaled_data -= offset
+            rescaled_data /= scale_factor
+            rescaled_data = np.nan_to_num(rescaled_data, nan=fill_value)
+            # rescaled_data[rescaled_data == np.nan] =  fill_value
+            # data += offset
+        var[:] = rescaled_data
         var.setncattr('long_name', dataset_long_name[i])
         var.setncattr('scale_factor', scale_factor)
         var.setncattr('add_offset', offset)
@@ -836,13 +846,10 @@ class RasterDatasetIngest(RasterDataset):
     # It is a wrapper for write netcdf to manage ingestion of netcdf. Here we should add some checks and return boolean value
     def write_nc_ingest(self, output_file, product_out_info, metadata):
 
-        write_status = write_nc(file_name=output_file, data=[self.data],
-                                                          dataset_tag=[product_out_info.subproductcode],
-                                                          zc=self.zc, fill_value=product_out_info.nodata,
-                                                          scale_factor=product_out_info.scale_factor,
-                                                          offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
-                                                          write_CS_metadata=metadata, lats=self.ds_lats_out,
-                                                          lons=self.ds_lons_out)
+        write_status = write_nc(file_name=output_file, data=[self.data], dataset_tag=[product_out_info.subproductcode],
+                                fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor,
+                                offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id, zc=self.zc,
+                                lats=self.ds_lats_out, lons=self.ds_lons_out, write_CS_metadata=metadata, do_out_rescaling=True)
 
     # # Extract Data from a generic netcdf file [CDS/IRI] with regular grid
     # # TODO: data are now returned as numpy.array: should be better stored in the object itself
@@ -1068,8 +1075,8 @@ def _create_mapset(mapsetcode):
 # 3. Resampling or resolution change (conversion of resolution eg.10km to 1km)
 def do_clip_resample_reproject(orig_ds, target_mapset, native_mapset=None):
     """
-    :param target mapset code  -    eStation variable to get bbox etc of target data
-    :param native mapset code  -    eStation variable to get bbox etc of native data
+    :param target mapset   -    eStation variable to get bbox etc of target data
+    :param native mapset   -    eStation variable to get bbox etc of native data
     :param orig_ds  -    native file which is read as dataset
     :return: Memory dataset with target projection, bbox, resolution information
     ***********************************************************************************************************
@@ -1094,9 +1101,6 @@ def do_clip_resample_reproject(orig_ds, target_mapset, native_mapset=None):
 
     in_data_type = orig_band.DataType
 
-    # Get the Target mapset
-    # trg_mapset = mapset.MapSet()
-    # trg_mapset.assigndb(target_mapset)
     out_cs = target_mapset.spatial_ref
     out_size_x = target_mapset.size_x
     out_size_y = target_mapset.size_y
@@ -1111,11 +1115,17 @@ def do_clip_resample_reproject(orig_ds, target_mapset, native_mapset=None):
     mem_ds.SetGeoTransform(target_mapset.geo_transform)
     mem_ds.SetProjection(out_cs.ExportToWkt())
 
+    # CS-90 In order to avoid the problem of improper nodata assignment
+    orig_ds.GetRasterBand(1).SetNoDataValue(np.nan)
+
     # Do the Re-projection
     orig_wkt = orig_cs.ExportToWkt()
     res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
                               gdalconst.GRA_NearestNeighbour)
-
+    if res != 0:
+        msg = "ReprojectImage() failed , error value %d" % res
+        raise Exception(msg)
+    # res = gdal.Warp(mem_ds, orig_ds, dstSRS=orig_cs,outputBounds=target_mapset.bbox, resampleAlg=gdalconst.GRA_NearestNeighbour)
     return mem_ds
 
 # Set Climate station defined METADATA for netcdf attribute
@@ -1123,7 +1133,8 @@ def set_CS_ncattr(CS_metadata, var):
     try:
         CS_metadata.write_to_nc_var(nc_variable=var)
     except:
-        print('Error in assigning metadata .. Continue')
+        msg ='Error in assigning metadata .. Continue'
+        raise Exception(msg)
 
 # Set the coordinate system for NETCDF (also for GTIFF if needed)
 def _set_coordinate_system(ds):
