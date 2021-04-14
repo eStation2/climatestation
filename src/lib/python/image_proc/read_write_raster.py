@@ -713,7 +713,7 @@ class RasterDataset(_ImportRasterDataset):
         @param threshold:               TYPE: int/float [...TBD], Threshold to be applied to the product
         """
 
-        return(self._get_data(band=band, subsample_coordinates=subsample_coordinates,
+        return(self._get_data(product=band, subsample_coordinates=subsample_coordinates,
                               make_extraction=make_extraction, local_site_lat=local_site_lat,
                               local_site_lon=local_site_lon, neighbors=neighbors, mask_name=mask_name,
                               threshold=threshold))
