@@ -763,13 +763,9 @@ class RasterDatasetIngest(_ImportRasterDataset):
         preprocess_status = False
         preproc_type = self.preproc_type
         if preproc_type is None and preproc_type == 'None' and preproc_type == '""' and preproc_type == "''" and preproc_type == '':
-            self._get_data(band=self.product)
+            self._get_data(product=self.product)
 
         elif preproc_type == 'NETCDF_IRI_CDS':
-            # raster = RasterDataset(filename=input_file)
-            # SET CS subproduct parameters into the Raster class
-            # raster.set_CS_subproduct_parameter(subproduct, target_mapset_code=mapsetcode)
-            # data_numpy_array = raster.get_data() # conversion to physical value by applying nodatavalue
              # conversion to physical value by applying nodatavalue
             native_dataset = self._get_GDAL_dataset()
             # Clip the native dataset to target bbox ? or change resolution
