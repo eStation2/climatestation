@@ -34,7 +34,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
     //constrain: true,
     modal: true,
     closable: true,
-    closeAction: 'destroy', // 'hide',
+    closeAction: 'hide', // 'destroy',
     resizable: true,
     scrollable: true,
     maximizable: false,
@@ -61,11 +61,16 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
         orig_version: ''
     },
 
+    listeners:  {
+        close: 'onClose'
+    },
 
     initComponent: function () {
-        var me = this;
-        var user = climatestation.getUser();
-        var width_fieldsets = 685;
+        let me = this;
+        let user = climatestation.getUser();
+        let width_fieldsets = 685;
+
+        me.changes_saved = false;
 
         if (me.params.edit){
             me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('editproduct') + '</span>');
@@ -79,9 +84,10 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
         }
 
         me.listeners = {
-            close: me.onClose
+            afterrender: function(){
+                me.controller.setup();
+            }
         };
-
 
         me.items = [{
             items: [{
@@ -104,12 +110,12 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                         labelWidth: 120
                     },
                     items: [{
-                        id: 'category',
+                        reference: 'category',
                         name: 'category',
                         //bind: '{product.category_id}',
                         xtype: 'combobox',
                         fieldLabel: climatestation.Utils.getTranslation('category'),    // 'Category',
-                        width: 280,
+                        width: 160+120,
                         allowBlank: false,
                         // store: 'categories',
                         store: {
@@ -121,7 +127,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                         queryMode: 'local',
                         emptyText: climatestation.Utils.getTranslation('selectacategory')    // 'Select a category...'
                     },{
-                        id: 'activate_product_field',
+                        reference: 'activate_product_field',
                         name: 'activate_product_field',
                         xtype: 'checkboxfield',
                         boxLabel : climatestation.Utils.getTranslation('activate'),
@@ -133,22 +139,23 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                 },{
                     xtype: 'container',
                     disabled: false,
-                    width: 600,
+                    width: width_fieldsets,
                     layout: 'hbox',
+                    padding: '10 5 10 0',
                     defaults: {
                         disabled: me.params.view ? true : false,
                         labelWidth: 120
                     },
                     items: [{
-                        id: 'productcode',
+                        reference: 'productcode',
                         name: 'productcode',
                         //bind: '{product.productcode}',
                         xtype: 'textfield',
                         fieldLabel: climatestation.Utils.getTranslation('productcode'),    // 'Product code',
-                        width: 250,
+                        width: 160+120,
                         allowBlank: false
                     },{
-                        id: 'defined_by_field',
+                        reference: 'defined_by_field',
                         name: 'defined_by_field',
                         xtype: 'combobox',
                         fieldLabel: climatestation.Utils.getTranslation('definedby'),
@@ -168,15 +175,15 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                         hidden: (climatestation.Utils.objectExists(user) && user.userlevel == 1) ? false : true
                     }]
                 },{
-                    id: 'version',
+                    reference: 'version',
                     name: 'version',
                     //bind: '{product.version}',
                     xtype: 'textfield',
                     fieldLabel: climatestation.Utils.getTranslation('version'),    // 'Version',
-                    width:150+120,
+                    width:160+120,
                     allowBlank: false
                 },{
-                    id: 'provider',
+                    reference: 'provider',
                     name: 'provider',
                     //bind: '{product.provider}',
                     xtype: 'textfield',
@@ -184,7 +191,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                     width:530,
                     allowBlank: true
                 },{
-                    id: 'product_name',
+                    reference: 'product_name',
                     name: 'product_name',
                     //bind: '{product.prod_descriptive_name}',
                     xtype: 'textfield',
@@ -192,7 +199,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                     width:530,
                     allowBlank: true
                 }, {
-                    id: 'productdescription',
+                    reference: 'productdescription',
                     name: 'productdescription',
                     //bind: '{product.description}',
                     xtype: 'textareafield',
@@ -234,7 +241,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
             items: [{
                 xtype: 'fieldset',
                 title: '<div class="grid-header-style">'+climatestation.Utils.getTranslation('datasources')+'</div>',   // '<b>Data sources</b>',
-                id: 'datasourcesfieldset',
+                reference: 'datasourcesfieldset',
                 hidden: true,
                 collapsible: false,
                 padding: '10 10 10 10',
@@ -247,9 +254,6 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                     bind:{
                         store:'{productdatasources}'
                     },
-                    // session: true,
-                    // stateful: false,
-
                     dockedItems: [{
                         xtype: 'toolbar',
                         dock: 'bottom',
@@ -330,6 +334,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                         items: [{
                             getClass: function (cell, meta, rec) {
                                 // console.info(rec.get('defined_by'));
+                                // data sources are always editable by the user. so will not enter the else!
                                if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel <= 1)) {
                                    return 'far fa-edit';
                                }
@@ -390,7 +395,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                                 }
                             },
                             handler: function(grid, rowIndex, colIndex) {
-                                var rec = grid.getStore().getAt(rowIndex),
+                                let rec = grid.getStore().getAt(rowIndex),
                                     action = (rec.get('store_original_data') ? 'deactivated' : 'activated');
                                 // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
                                 rec.get('store_original_data') ? rec.set('store_original_data', false) : rec.set('store_original_data', true);
@@ -426,7 +431,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                                 return false;    // !record.get('editable');
                             },
                             handler: function (grid, rowIndex, colIndex) {
-                                var rec = grid.getStore().getAt(rowIndex),
+                                let rec = grid.getStore().getAt(rowIndex),
                                     action = (rec.get('activated') ? 'deactivated' : 'activated');
                                 // Ext.toast({ html: action + ' ' + rec.get('productcode'), title: 'Action', width: 300, align: 't' });
                                 rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
@@ -443,18 +448,12 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                        shrinkWrap: 0,
                        items: [{
                            width:'35',
-                           // disabled: false,
                            isActionDisabled: function(view, rowIndex, colIndex, item, record){
-                                if (!record.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                                    return false;
-                                }
-                                else {
-                                    return true;
-                                }
+                                return !(!record.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel <= 1));
                            },
                            getClass: function(cell, meta, rec) {
                                // return 'far fa-trash-alt red';
-                               if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
+                               if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel <= 1)){
                                    return 'far fa-trash-alt red';
                                }
                                else {
@@ -463,17 +462,17 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                                }
                            },
                            getTip: function(cell, meta, rec) {
-                               if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                                   var tipText = climatestation.Utils.getTranslation('unassignproductdatasource') + ': <BR>' +
-                                       '<b>' + Ext.getCmp('product_name').getValue() + '</b>';
+                               if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel <= 1)){
+                                   let tipText = climatestation.Utils.getTranslation('unassignproductdatasource') + ': <BR>' +
+                                       '<b>' + me.lookupReference('product_name').getValue() + '</b>';
 
-                                   if (Ext.getCmp('version').getValue() != ''){
-                                       tipText += '<b> - ' + Ext.getCmp('version').getValue() + '</b>' ;
-                                       // tipText += '<span class="smalltext">' + '<b> - ' + Ext.getCmp('version').getValue() + '</b></span>' ;
+                                   if (me.lookupReference('version').getValue() != ''){
+                                       tipText += '<b> - ' + me.lookupReference('version').getValue() + '</b>' ;
+                                       // tipText += '<span class="smalltext">' + '<b> - ' + me.lookupReference('version').getValue() + '</b></span>' ;
                                    }
 
-                                   tipText += '<b style="color:darkgrey;"> - ' + Ext.getCmp('productcode').getValue() + '</b>';
-                                   // tipText += '<span class="smalltext">' + '<b style="color:darkgrey"> - ' + Ext.getCmp('productcode').getValue() + '</b></span>';
+                                   tipText += '<b style="color:darkgrey;"> - ' + me.lookupReference('productcode').getValue() + '</b>';
+                                   // tipText += '<span class="smalltext">' + '<b style="color:darkgrey"> - ' + me.lookupReference('productcode').getValue() + '</b></span>';
                                    return tipText;
                                }
                            },
@@ -481,13 +480,12 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                        }]
                     }]
                 }]
-
             }]
         },{
             items: [{
                 xtype: 'fieldset',
                 title: '<div class="grid-header-style">'+climatestation.Utils.getTranslation('ingestedproducts')+'</div>',   // 'Ingested SubProducts',
-                id: 'ingestionsfieldset',
+                reference: 'ingestionsfieldset',
                 hidden: true,
                 collapsible:false,
                 padding:'10 10 10 10',
@@ -615,7 +613,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                                 ' - {subproductcode}' +
                                 '</span></b>'
                             ),
-                        width: 220,
+                        width: 200,
                         cellWrap:true,
                         sortable: false,
                         hideable: false,
@@ -625,7 +623,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                         text: climatestation.Utils.getTranslation('scale_factor'),
                         headerWrap: true,
                         dataIndex: 'scale_factor',
-                        width: 80,
+                        width: 95,
                         sortable: false,
                         hideable: false,
                         variableRowHeight: true,
@@ -634,7 +632,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                         text: climatestation.Utils.getTranslation('scale_offset'),
                         headerWrap: true,
                         dataIndex: 'scale_offset',
-                        width: 140,
+                        width: 95,
                         sortable: false,
                         hideable: false,
                         variableRowHeight: true,
@@ -643,7 +641,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                         text: climatestation.Utils.getTranslation('nodata'),
                         headerWrap: true,
                         dataIndex: 'nodata',
-                        width: 80,
+                        width: 105,
                         sortable: false,
                         hideable: false,
                         variableRowHeight: true,
@@ -651,7 +649,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                     },{
                         text: climatestation.Utils.getTranslation('definedby'),  // 'Defined by',
                         dataIndex: 'defined_by',
-                        width: 60,
+                        width: 90,
                         align: 'center',
                         menuDisabled: true,
                         sortable: false,
@@ -670,6 +668,7 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                            disabled: false,
                            getClass: function(cell, meta, rec) {
                                // return 'far fa-trash-alt red';
+                               // console.info(rec);
                                if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
                                    return 'far fa-trash-alt red';
                                }
@@ -680,17 +679,17 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
                            },
                            getTip: function(cell, meta, rec) {
                                if (!rec.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel == 1)){
-                                   var tipText = climatestation.Utils.getTranslation('delete_ingest_product') + ': <BR>' +
+                                   let tipText = climatestation.Utils.getTranslation('delete_ingest_product') + ': <BR>' +
                                        '<b>' + rec.get('descriptive_name') + '</b>';
 
                                    if (rec.get('version') != ''){
                                        tipText += '<b> - ' + rec.get('version') + '</b>' ;
-                                       // tipText += '<span class="smalltext">' + '<b> - ' + Ext.getCmp('version').getValue() + '</b></span>' ;
+                                       // tipText += '<span class="smalltext">' + '<b> - ' + me.lookupReference('version').getValue() + '</b></span>' ;
                                    }
 
                                    tipText += '<b> - ' + rec.get('productcode') + '</b>';
                                    tipText += '<b> - ' + rec.get('subproductcode') + '</b>';
-                                   // tipText += '<span class="smalltext">' + '<b style="color:darkgrey"> - ' + Ext.getCmp('productcode').getValue() + '</b></span>';
+                                   // tipText += '<span class="smalltext">' + '<b style="color:darkgrey"> - ' + me.lookupReference('productcode').getValue() + '</b></span>';
                                    return tipText;
                                }
                            },
@@ -703,11 +702,5 @@ Ext.define("climatestation.view.acquisition.product.editProduct",{
         }];
 
         me.callParent();
-
-        me.controller.setup();
-
-    }
-    ,onClose: function(win, ev) {
-        // Ext.data.StoreManager.lookup('ProductsStore').load();
     }
 });

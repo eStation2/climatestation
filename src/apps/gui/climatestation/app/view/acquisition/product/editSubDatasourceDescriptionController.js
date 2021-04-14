@@ -57,7 +57,7 @@ Ext.define('climatestation.view.acquisition.product.editSubDatasourceDescription
                     else {
                         Ext.toast({ html: climatestation.Utils.getTranslation('subdatasourcedescrupdated'), title: climatestation.Utils.getTranslation('subdatasourcedescrupdated'), width: 200, align: 't' });
                     }
-
+                    me.changes_saved = true;
                     // Ext.data.StoreManager.lookup('IngestSubProductsStore').load();
                 }
             },

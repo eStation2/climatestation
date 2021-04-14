@@ -100,17 +100,6 @@ Ext.define('climatestation.view.acquisition.product.InternetSourceAdminControlle
             editInternetDataSourceWin.show();
     },
 
-    // onEditInternetSourceClick: function (grid, record, colIndex) {
-    //     var rec;
-    //     if (!isNaN(record)) // record is rowIndex (from actioncolumn icon click)
-    //         rec = grid.getStore().getAt(record);
-    //     else rec = record;  // record is the row from itemdblclick event
-    //
-    //     //console.info(rec);
-    //     this.createDialog(rec);
-    //     //this.createDialog(button.getWidgetRecord());
-    // },
-
     onEditInternetSourceClick: function(grid, rowIndex, colIndex){
         var record = grid.getStore().getAt(rowIndex);
         var data_source_id = record.get('internet_id');
@@ -169,80 +158,15 @@ Ext.define('climatestation.view.acquisition.product.InternetSourceAdminControlle
     },
 
     reloadStore: function(btn){
-        // var me = this.getView();
-        // console.info(btn.up().up().down('grid').getStore());
-        // btn.up().up().down('grid').getStore().load();
-        // me.down('grid').getStore().load();
         Ext.data.StoreManager.lookup('InternetSourceStore').load();
+    },
+
+    onClose: function(win, ev) {
+        let editWindows = Ext.ComponentQuery.query('editinternetsource');
+        if (editWindows !== []) {
+            Ext.Object.each(editWindows, function (id, editwin, thisObj) {
+                editwin = null;
+            });
+        }
     }
-
-
-    // createDialog: function(record) {
-    //     var view = this.getView();
-    //
-    //     this.isEdit = !!record;
-    //     this.dialog = view.add({
-    //         xtype: 'editinternetsource',
-    //         viewModel: {
-    //             data: {
-    //                 title: record ? climatestation.Utils.getTranslation('edit') + ': ' + record.get('descriptive_name') : climatestation.Utils.getTranslation('addinternetsource')  // 'Add Internet Source'
-    //
-    //             },
-    //             // If we are passed a record, a copy of it will be created in the newly spawned session.
-    //             // Otherwise, create a new phantom customer in the child.
-    //             links: {
-    //                 theInternetSource: record || {
-    //                     //type: 'InternetSource',
-    //                     reference: 'climatestation.model.InternetSource',
-    //                     create: true
-    //                 }
-    //             }
-    //         }
-    //         // Creates a child session that will spawn from the current session of this view.
-    //         ,session: true
-    //     });
-    //
-    //     this.dialog.show();
-    // },
-
-    // onSaveClick: function () {
-    //     // Save the changes pending in the dialog's child session back to the parent session.
-    //     var dialog = this.dialog,
-    //         form = this.lookupReference('internetsourceform'),
-    //         isEdit = this.isEdit;
-    //
-    //     if (form.isValid()) {
-    //
-    //         if (dialog.getSession().getChanges() != null) {
-    //             dialog.getSession().getSaveBatch().start();
-    //             Ext.toast({html: climatestation.Utils.getTranslation('saved'), title: climatestation.Utils.getTranslation('saved'), width: 200, align: 't'});
-    //             this.onCancelClick();
-    //         }
-    //
-    //         //if (!isEdit) {
-    //         //    // Since we're not editing, we have a newly inserted record. Grab the id of
-    //         //    // that record that exists in the child session
-    //         //    id = dialog.getViewModel().get('theInternetSource').internet_id;
-    //         //}
-    //         ////dialog.getSession().save();
-    //         ////this.getSession().save();
-    //         //if (!isEdit) {
-    //         //    //console.info(dialog.getViewModel().get('theInternetSource'));
-    //         //    // Use the id of that child record to find the phantom in the parent session,
-    //         //    // we can then use it to insert the record into our store
-    //         //    //this.getStore('internetsources').add(this.getSession().getRecord('InternetSource', id));
-    //         //    //this.getStore('internetsources').add(dialog.getViewModel().get('theInternetSource'));
-    //         //    //this.getStore('internetsources').insert(0, dialog.getViewModel().get('theInternetSource'));
-    //         //    //this.getStore('internetsources').insert(0, form.getValues());
-    //         //    //this.getStore('internetsources').sync();
-    //         //    //dialog.fireEvent('create', dialog, form.getValues());
-    //         //}
-    //         //console.info(this.getStore('internetsources'));
-    //         //this.onCancelClick();
-    //     }
-    // },
-    //
-    // onCancelClick: function () {
-    //     this.dialog = Ext.destroy(this.dialog);
-    // }
 });

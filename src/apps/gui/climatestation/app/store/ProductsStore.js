@@ -57,7 +57,7 @@ Ext.define('climatestation.store.ProductsStore', {
         }
     }
 
-    ,sorters: [{property: 'order_index', direction: 'DESC'},{property: 'prod_descriptive_name', direction: 'ASC'},{property: 'version', direction: 'ASC'}]
+    ,sorters: [{property: 'defined_by', direction: 'DESC'}, {property: 'order_index', direction: 'DESC'},{property: 'prod_descriptive_name', direction: 'ASC'},{property: 'version', direction: 'ASC'}]
 
     ,grouper:{
         groupFn : function (item) {

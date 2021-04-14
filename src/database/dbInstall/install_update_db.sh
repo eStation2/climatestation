@@ -23,10 +23,10 @@ fi
 if [[ `su - postgres -c "psql postgres -d estationdb -c \"select db_version from products.db_version;\""  2>/dev/null|grep -m1 -o '[0-9]\+'` < ${DB_VERSION} ]]; then
     # Update database structure to current release
     echo "`date +'%Y-%m-%d %H:%M '` Update database structure"
-    psql -h postgres -U estation -d estationdb -w -f /var/www/climatestation/database/dbInstall/update_structure.sql >/var/log/climatestation/update_structure.log 2>/var/log/climatestation/update_structure.err
+    psql -h postgres -U estation -d estationdb -w -f /var/www/climatestation/database/dbInstall/update_db_structure.sql >/var/log/climatestation/update_db_structure.log 2>/var/log/climatestation/update_db_structure.err
 
     echo "`date +'%Y-%m-%d %H:%M '` Populate/update tables"
-    psql -h postgres -U estation -d estationdb -w -f /var/www/climatestation/database/dbInstall/import_jrc_data.sql >/var/log/climatestation/import_jrc_data.log 2>/var/log/climatestation/import_jrc_data.err
+    psql -h postgres -U estation -d estationdb -w -f /var/www/climatestation/database/dbInstall/update_insert_jrc_data.sql >/var/log/climatestation/update_insert_jrc_data.log 2>/var/log/climatestation/update_insert_jrc_data.err
 
     # Update table products.db_version to value DB_VERSION
     psql -h postgres -U estation -d estationdb -w -c "update products.db_version SET db_version='${DB_VERSION}'"

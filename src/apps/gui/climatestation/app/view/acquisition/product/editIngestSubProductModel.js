@@ -5,9 +5,6 @@ Ext.define('climatestation.view.acquisition.product.editIngestSubProductModel', 
         subdatasourcedescriptions: {
             source:'SubDatasourceDescriptionStore'
         }
-        // ingestsubproducts: {
-        //     source:'IngestSubProductsStore'
-        // }
     }
 
     ,formulas: {

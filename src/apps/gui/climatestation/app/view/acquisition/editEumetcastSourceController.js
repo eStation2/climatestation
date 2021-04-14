@@ -8,69 +8,19 @@ Ext.define('climatestation.view.acquisition.editEumetcastSourceController', {
     onSaveClick: function () {
         // Save the changes pending in the dialog's child session back to the parent session.
         var me = this.getView(),
-            form = this.lookupReference('eumetcastsourceform');
+            form = this.lookupReference('eumetcastsourceform'),
+            user = climatestation.getUser(),
+            updatedRecords = Ext.data.StoreManager.lookup('EumetcastSourceStore').getUpdatedRecords();
 
         if (form.isValid()) {
-
-            if (Ext.data.StoreManager.lookup('EumetcastSourceStore').getUpdatedRecords() !== []){
+            if (updatedRecords !== []){
+                if ((climatestation.Utils.objectExists(user) && user.userlevel !== 1)) {
+                    // console.info(updatedRecords);
+                    updatedRecords[0].set('modified_by', 'USER');
+                }
                 Ext.data.StoreManager.lookup('EumetcastSourceStore').sync();
-                //Ext.toast({html: climatestation.Utils.getTranslation('saved'), title: climatestation.Utils.getTranslation('saved'), width: 200, align: 't'});
-
+                me.changes_saved = true;
             }
-            //if (dialog.getSession().getChanges() != null) {
-            //    dialog.getSession().getSaveBatch().start();
-            //    Ext.toast({html: climatestation.Utils.getTranslation('saved'), title: climatestation.Utils.getTranslation('saved'), width: 200, align: 't'});
-            //    this.onCancelClick();
-            //}
         }
     }
-
-
-    // ,onCancelClick: function () {
-    //     Ext.data.StoreManager.lookup('EumetcastSourceStore').rejectChanges();
-    //     Ext.destroy(this.getView());
-    // }
-
-    //,getEumetcastSource: function(win) {
-    //    var me = this.getView();
-    //    if (me.data_source_id != null){
-    //        //console.info(me.data_source_id);
-    //    }
-        //console.info(this.getStore('eumetcastsources'));
-        //console.info(this.getStore('theEumetcastSource'));
-        //this.getStore('theEumetcastSource').setFilters({
-        //    property: 'eumetcast_id'
-        //    ,value: me.data_source_id
-        //    ,anyMatch: false
-        //});
-        //var eumetcaststore  = Ext.data.StoreManager.lookup('EumetcastSourceStore');
-        //var eumetcastrecordid = eumetcaststore.find('eumetcast_id', me.data_source_id, 0, true, false, true);
-        //var eumetcastrecord = eumetcaststore.getModel().load(eumetcastrecordid, {
-        //    scope: me,
-        //    failure: function(record, operation) {
-        //        //console.info('failure');
-        //    },
-        //    success: function(record, operation) {
-        //
-        //    }
-        //});
-        //
-        //this.getStore('eumetcastsources').load();
-        //
-        //console.info(this.getStore('eumetcastsources').findRecord('eumetcast_id', me.data_source_id, 0, true, false, false));
-        //
-        //console.info(this.getViewModel());
-        //
-        //var record = this.getStore('eumetcastsources').findRecord('eumetcast_id', me.data_source_id, 0, true, false, true);
-        //var newstore = Ext.create('Ext.data.JsonStore', {
-        //    name: 'theEumetcastSource',
-        //    model: 'climatestation.model.EumetcastSource',
-        //    data: record.getData()
-        //});
-        //this.getViewModel().addStore(newstore);
-        //
-        //
-        ////this.getViewModel().linkData = {theEumetcastSource: record };
-        //this.getViewModel().setLinks( {theEumetcastSource: record.getData() } );
-    //}
 });

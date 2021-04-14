@@ -32,7 +32,7 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
     //constrain: true,
     modal: true,
     closable: true,
-    closeAction: 'destroy', // 'hide',
+    closeAction: 'hide', // 'destroy',
     resizable: true,
     scrollable: 'y',
     maximizable: false,
@@ -43,7 +43,7 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
 
     frame: true,
     border: true,
-    bodyStyle: 'padding:5px 0px 0',
+    // bodyStyle: 'padding:5px 0px 0',
 
     viewConfig:{forceFit:true},
     layout:'vbox',
@@ -63,9 +63,15 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
     },
 
     initComponent: function () {
-        var me = this;
-        var labelwidth = 120;
-        var user = climatestation.getUser();
+        let me = this;
+        me.changes_saved = false;
+        let labelwidth = 120;
+        let user = climatestation.getUser();
+        let categoriesall = Ext.data.StoreManager.lookup('categoriesall');
+        categoriesall.load();
+        let categoryrec = categoriesall.findRecord('category_id', me.params.ingestsubproductrecord.get('category_id'), 0, true, false, false);
+
+        me.params.categoryname = categoryrec.get('descriptive_name');
 
         if (me.params.edit){
             me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('editingestsubproduct') + '</span>');
@@ -76,27 +82,38 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
             me.height = 700;
         }
 
-
         me.listeners = {
-            beforerender: function(){
-                Ext.data.StoreManager.lookup('SubDatasourceDescriptionStore').load();
-                Ext.data.StoreManager.lookup('categoriesall').load();
-
-                var categoryrec = Ext.data.StoreManager.lookup('categoriesall').findRecord('category_id', me.params.ingestsubproductrecord.get('category_id'), 0, true, false, false);
-                me.params.categoryname = categoryrec.get('descriptive_name');
-            },
+            // beforerender: function(){
+            //     let categoriesall = Ext.data.StoreManager.lookup('categoriesall');
+            //     Ext.data.StoreManager.lookup('SubDatasourceDescriptionStore').load();
+            //     categoriesall.load();
+            //
+            //     let categoryrec = categoriesall.findRecord('category_id', me.params.ingestsubproductrecord.get('category_id'), 0, true, false, false);
+            //
+            //     me.params.categoryname = categoryrec.get('descriptive_name');
+            //     console.info(me);
+            // },
             afterrender: function(){
-                // console.info(me);
-                // console.info(me.params.create);
+                let frequenciesStore = Ext.data.StoreManager.lookup('frequencies');
+                let dateformatsStore = Ext.data.StoreManager.lookup('dateformats');
+                let datatypesStore = Ext.data.StoreManager.lookup('datatypes');
+                if (!frequenciesStore.isLoaded()) frequenciesStore.load();
+                if (!dateformatsStore.isLoaded()) dateformatsStore.load();
+                if (!datatypesStore.isLoaded()) datatypesStore.load();
+                me.controller.setup();
                 // if (me.params.create){
                 //     me.lookupReference('productid').setValue('');
                 // }
             },
-            beforeclose: function(){
+            close: function(){
                 if (Ext.data.StoreManager.lookup('IngestSubProductsStore').getUpdatedRecords() !== []){
                     Ext.data.StoreManager.lookup('IngestSubProductsStore').rejectChanges();
                 }
-                Ext.data.StoreManager.lookup('IngestSubProductsStore').load();
+
+                if (me.changes_saved) {
+                    Ext.data.StoreManager.lookup('IngestSubProductsStore').load();
+                }
+                me = null;
             }
         };
 
@@ -116,11 +133,11 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
             items: [{
                 xtype: 'fieldset',
                 title: '<div class="grid-header-style">' + climatestation.Utils.getTranslation('ingestsubproductdefinition') + '</div>',  // '<b>Ingested Sub Product definition</b>',
-                id: 'ingestsubproductinfofieldset',
+                reference: 'ingestsubproductinfofieldset',
                 hidden: false,
                 collapsible: false,
-                padding: '10 10 10 20',
-                margin: '10 10 10 10',
+                padding: '0 10 10 10',
+                margin: '10 10 10 15',
                 width: 660,
                 defaults: {
                     width: 630,
@@ -132,7 +149,7 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                     defaults: {
                         disabled: me.params.view ? true : false,
                         labelWidth: labelwidth,
-                        padding: '0 10 5 10'
+                        padding: '0 10 0 10'
                     },
                     layout: {
                         type: 'hbox'
@@ -146,7 +163,7 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                         value: me.params.categoryname,
                         // bind: '{theIngestSubProduct.category_id}',
                         allowBlank: false,
-                        padding: '0 10 10 0',
+                        padding: '0 10 5 0',
                         cls:'greenbold',
                         width: 120
                     }, {
@@ -201,8 +218,8 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                     allowBlank: true,
                     // grow: true,
                     // growMax: 130,
-                    height: 80,
-                    minHeight: 80,
+                    height: 60,
+                    minHeight: 60,
                     scrollable: true,
 
                     layout: 'fit',
@@ -223,7 +240,7 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                     defaults: {
                         disabled: me.params.view ? true : false,
                         labelWidth: labelwidth,
-                        padding: '20 10 10 0'
+                        padding: '10 10 5 0'
                     },
                     layout: {
                         type: 'hbox'
@@ -241,12 +258,11 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                             type: 'vbox'
                         },
                         items: [{
-                            id: 'ingest_subproduct_frequency',
                             name: 'ingest_subproduct_frequency',
                             reference: 'ingest_subproduct_frequency',
                             xtype: 'combobox',
                             fieldLabel: climatestation.Utils.getTranslation('frequency'),    // 'Frequency',
-                            width: 145 + 100,
+                            width: 175 + labelwidth,
                             allowBlank: false,
                             bind: '{theIngestSubProduct.frequency_id}',
                             store: {
@@ -258,7 +274,6 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                             queryMode: 'local',
                             emptyText: climatestation.Utils.getTranslation('selectafrequency')    // 'Select a frequency...'
                         }, {
-                            id: 'ingest_subproduct_date_format',
                             name: 'ingest_subproduct_date_format',
                             reference: 'ingest_subproduct_date_format',
                             xtype: 'combobox',
@@ -275,12 +290,11 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                             queryMode: 'local',
                             emptyText: climatestation.Utils.getTranslation('selectadateformat')    // 'Select a date format...'
                         }, {
-                            id: 'ingest_subproduct_data_type',
                             name: 'ingest_subproduct_data_type',
                             reference: 'ingest_subproduct_data_type',
                             xtype: 'combobox',
                             fieldLabel: climatestation.Utils.getTranslation('data_type'),    // 'Data type',
-                            width: 145 + 100,
+                            width: 175 + labelwidth,
                             allowBlank: false,
                             bind: '{theIngestSubProduct.data_type_id}',
                             store: {
@@ -295,7 +309,7 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                             xtype: 'numberfield',
                             fieldLabel: climatestation.Utils.getTranslation('scale_offset'),    // 'Scale offset',
                             reference: 'ingest_subproduct_scale_offset',
-                            width: 100 + 100,
+                            width: 100 + labelwidth,
                             allowBlank: true,
                             maxValue: 99999999.99999,
                             minValue: -99999999.99999,
@@ -308,7 +322,7 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                             xtype: 'numberfield',
                             fieldLabel: climatestation.Utils.getTranslation('scale_factor'),    // 'Scale factor',
                             reference: 'ingest_subproduct_scale_factor',
-                            width: 100 + 100,
+                            width: 100 + labelwidth,
                             allowBlank: true,
                             maxValue: 99999999.99999,
                             minValue: -99999999.99999,
@@ -321,7 +335,7 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                             xtype: 'numberfield',
                             fieldLabel: climatestation.Utils.getTranslation('nodata'),    // 'No data value',
                             reference: 'ingest_subproduct_nodata',
-                            width: 100 + 100,
+                            width: 100 + labelwidth,
                             allowBlank: true,
                             maxValue: 99999999.99999,
                             minValue: -99999999.99999,
@@ -420,11 +434,11 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
             items: [{
                 xtype: 'fieldset',
                 title: '<div class="grid-header-style">'+climatestation.Utils.getTranslation('datasourceingestparameters')+'</div>',   // '<b>Datasource Ingest parameters</b>',
-                id: 'ingestsubproductdatasourcesfieldset',
+                reference: 'ingestsubproductdatasourcesfieldset',
                 hidden: true,
                 collapsible: false,
-                padding: '10 10 10 10',
-                margin: '10 10 10 10',
+                padding: '0 10 10 10',
+                margin: '10 10 10 15',
                 width: 660,
 
                 items:[{
@@ -585,7 +599,7 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                 //
                 //     items:[ Ext.create('Ext.view.View', {
                 //         bind: '{ingestionmapset}',
-                //         //id: 'mapsets',
+                //         //reference: 'mapsets',
                 //         //boxLabel: '{descriptive_name}',
                 //         tpl: Ext.create('Ext.XTemplate',
                 //             '<tpl for=".">',
@@ -620,9 +634,5 @@ Ext.define("climatestation.view.acquisition.product.editIngestSubProduct",{
                 //     }]
 
         me.callParent();
-
-        me.controller.setup();
-
     }
-
 });

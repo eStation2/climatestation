@@ -24,7 +24,7 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
     //constrain: true,
     modal: true,
     closable: true,
-    closeAction: 'destroy', // 'hide',
+    // closeAction: 'destroy', // 'hide',
     resizable: true,
     scrollable:true,
     maximizable: false,
@@ -42,6 +42,10 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
 
     // Create a session for this view
     session: true,
+
+    listeners:  {
+        close: 'onClose'
+    },
 
     initComponent: function () {
         var me = this;
@@ -85,7 +89,14 @@ Ext.define("climatestation.view.acquisition.product.InternetSourceAdmin",{
         // };
 
 
-        me.tbar = [addButton, '->', refreshButton];
+        me.tbar = {
+            padding: 0,
+            margin: 0,
+            defaults: {
+                margin: 5,
+                padding: 5,
+            },
+            items: [addButton, '->', refreshButton]};
 
         if (me.params.assigntoproduct){
             me.setTitle('<span class="">' + climatestation.Utils.getTranslation('assigninternetsource')

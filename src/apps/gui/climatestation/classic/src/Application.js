@@ -33,6 +33,8 @@ Ext.define('climatestation.Application', {
         ,'FrequenciesStore'
         ,'DateFormatsStore'
         ,'DataTypesStore'
+        ,'PreProcTypesStore'
+        ,'InternetTypesStore'
         ,'DefinedByStore'
         ,'ProjectionsStore'
         ,'ResolutionsStore'

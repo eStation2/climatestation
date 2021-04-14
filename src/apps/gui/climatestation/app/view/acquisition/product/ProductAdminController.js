@@ -9,12 +9,12 @@ Ext.define('climatestation.view.acquisition.product.ProductAdminController', {
     ],
 
     loadProductsStore: function(){
-        var me = this.getView();
-        var productsStore = Ext.data.StoreManager.lookup('ProductsStore');
-        var ingestsubproductsStore = Ext.data.StoreManager.lookup('IngestSubProductsStore');
+        let me = this.getView();
+        let productsStore = Ext.data.StoreManager.lookup('ProductsStore');
+        let ingestsubproductsStore = Ext.data.StoreManager.lookup('IngestSubProductsStore');
 
         if (me.forceStoreLoad || !productsStore.isLoaded() || !ingestsubproductsStore.isLoaded()) {
-            var myLoadMask = new Ext.LoadMask({
+            let myLoadMask = new Ext.LoadMask({
                 msg: climatestation.Utils.getTranslation('loading'), // 'Loading...',
                 target: me
             });
@@ -41,11 +41,11 @@ Ext.define('climatestation.view.acquisition.product.ProductAdminController', {
 
     editProduct: function(grid, rowIndex, colIndex, refElement, event){
         // var record = grid.getStore().getAt(rowIndex);    // for an to me unknown reason rowIndex is the index within the group category
-        var record = event.record;
-        var user = climatestation.getUser();
+        let record = event.record;
+        let user = climatestation.getUser();
 
-        var edit = false;
-        var view = true;
+        let edit = false;
+        let view = true;
         if (!record.get('defined_by').includes('JRC') || (climatestation.Utils.objectExists(user) && user.userlevel <= 1)){
             edit = true;
             view = false;
@@ -59,7 +59,7 @@ Ext.define('climatestation.view.acquisition.product.ProductAdminController', {
         // console.info(refElement);
         // console.info(event);
 
-        var editProductWin = new climatestation.view.acquisition.product.editProduct({
+        let editProductWin = new climatestation.view.acquisition.product.editProduct({
             params: {
                 new: false,
                 edit: edit,
@@ -73,9 +73,9 @@ Ext.define('climatestation.view.acquisition.product.ProductAdminController', {
     },
 
     deleteProduct: function(grid, rowIndex, row){
-        var record = grid.getStore().getAt(rowIndex);
-        var messageText = climatestation.Utils.getTranslation('delete_product-and-its-subproducts-question') + ': <BR>' +
-                 '<b>'+ record.get('prod_descriptive_name')+'</b>';
+        let record = grid.getStore().getAt(rowIndex);
+        let messageText = climatestation.Utils.getTranslation('delete_product-and-its-subproducts-question') + ': <BR>' +
+            '<b>' + record.get('prod_descriptive_name') + '</b>';
 
         if (record.get('version') != ''){
            messageText += '<span class="smalltext"><b> - ' + record.get('version') + '</b></span>' ;
@@ -96,5 +96,20 @@ Ext.define('climatestation.view.acquisition.product.ProductAdminController', {
                 }
             });
         // }
+    },
+
+    onClose: function(win, ev) {
+        if (win.changesmade){
+            let acquisitionmain = Ext.getCmp('acquisitionmain');
+            acquisitionmain.setDirtyStore(true);
+            acquisitionmain.fireEvent('loadstore');
+        }
+
+        let editWindows = Ext.ComponentQuery.query('editproduct');
+        if (editWindows !== []) {
+            Ext.Object.each(editWindows, function (id, editwin, thisObj) {
+                editwin = null;
+            });
+        }
     }
 });
