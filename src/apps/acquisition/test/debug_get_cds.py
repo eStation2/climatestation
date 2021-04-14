@@ -213,8 +213,23 @@ class TestGetEOS(unittest.TestCase):
     def debug_IRI_PRCP_1Month_ingest_netcdf(self):
         internet_id = "IRI:NOAA:PRCP:MONTH"#'CDS:ERA5:REANALYSIS:SST:MONTH'
         product = {"productcode": "iri_prcp", "version": "1.0"}
-        downloaded_file = '/data/ingest/20210101-iri_prcp.nc'
+        downloaded_file = '/data/processing/iri_prcp/1.0/archive/20210101-iri_prcp.nc'
         in_date = '20210101'
+        # Datasource description
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
+        datasource_descr = datasource_descr[0]
+        # Get list of subproducts
+
+        sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
+
+        ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
+                                                             datasource_descr, logger)
+
+    def debug_CDS_SST_MONTH_netcdf(self):
+        internet_id = "CDS:ERA5:REANALYSIS:SST:MONTH"
+        product = {"productcode": "era5-monthly-sst", "version": "1.0"}
+        downloaded_file = '/data/ingest/20210101_sst_monthly_average.nc'
+        in_date = '202101010000'
         # Datasource description
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
         datasource_descr = datasource_descr[0]

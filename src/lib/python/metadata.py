@@ -158,7 +158,7 @@ class SdsMetadata(object):
             sds = gdal.Open(filepath, gdalconst.GA_Update)
             self.write_to_ds(sds)
 
-    def read_from_ds(self, dataset):
+    def read_from_ds(self, dataset, netcdf=False):
         #   Read metadata structure from an opened file
         #   Args:
         #       dataset: osgeo.gdal dataset (open and georeferenced)
@@ -167,11 +167,18 @@ class SdsMetadata(object):
         if not isinstance(dataset, gdal.Dataset):
             logger.error('The argument should be an open GDAL Dataset. Exit')
         else:
-
+            metadata = dataset.GetMetadata()
             # Go through the metadata list and write to sds
             for key, value in list(self.sds_metadata.items()):
                 try:
-                    value = dataset.GetMetadataItem(key)
+                    if netcdf:
+                        for el in metadata.keys():
+                            if key.lower() in str(el).lower():
+                                value = metadata[el]
+                                break
+                    else:
+                        value = dataset.GetMetadataItem(key)
+
                     self.sds_metadata[key] = value
                 except:
                     self.sds_metadata[key] = 'Not found in file'
@@ -181,14 +188,17 @@ class SdsMetadata(object):
         #   Read metadata structure from a source file
         #   Args:
         #       filepath: full file path (dir+name)
-
+        netcdf = False
         # Check the file exists
         if not os.path.isfile(filepath):
             logger.error('Input file does not exist %s' % filepath)
         else:
+            _, ext = os.path.splitext(filepath)
+            if str(ext).lower() == '.nc':
+                netcdf = True
             # Open it and read metadata
             infile = gdal.Open(filepath)
-            self.read_from_ds(infile)
+            self.read_from_ds(infile, netcdf=netcdf)
 
             # Close the file
             infile = None

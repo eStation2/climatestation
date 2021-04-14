@@ -28,7 +28,7 @@ from config import es_constants
 from apps.processing import proc_functions
 from apps.productmanagement import products
 from apps.acquisition import ingestion_ingest_file
-from lib.python.image_proc.read_write_raster import RasterDataset
+from lib.python.image_proc.read_write_raster import RasterDatasetIngest
 from lib.python.image_proc import helpers_read_write_raster
 from lib.python import metadata, mapset
 logger = log.my_logger(__name__)
@@ -36,7 +36,7 @@ logger = log.my_logger(__name__)
 ingest_dir_in = es_constants.ingest_dir
 ingest_error_dir = es_constants.ingest_error_dir
 data_dir_out = es_constants.processing_dir
-
+systemsettings = functions.getSystemSettings()
 python_version = sys.version_info[0]
 
 def ingestion_netcdf(input_file, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False, test_mode=False):
@@ -89,37 +89,36 @@ def ingestion_netcdf(input_file, in_date, product, subproducts, datasource_descr
     # ----------------------------------------------------------------------------------
     # 4. Get the physical value data by converting native file--> along with subproduct assigned
     # ----------------------------------------------------------------------------------
-    if preproc_type != None and preproc_type != 'None' and preproc_type != '""' and preproc_type != "''" and preproc_type != '':
-        do_preprocess = True
+    # if preproc_type != None and preproc_type != 'None' and preproc_type != '""' and preproc_type != "''" and preproc_type != '':
+    #     do_preprocess = True
 
     # 4. Pre-process (get the physical value data by converting native file--> along with subproduct assigned)
-    if do_preprocess:
-        composed_file_list = ingestion_pre_process(preproc_type, native_mapset_code, subproducts, input_file, tmpdir,
-                                                   my_logger, product, test_mode)
-        # TODO alter this area
-        # Error occurred and was detected in pre_process routine
-        if str(composed_file_list) == '1':
-            my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
-            # Move files to 'error/storage' directory
-            if not test_mode:
-                error_file = input_file
-                if os.path.isfile(ingest_error_dir + os.path.basename(error_file)):
-                    shutil.os.remove(ingest_error_dir + os.path.basename(error_file))
-                try:
-                    shutil.move(error_file, ingest_error_dir)
-                except:
-                    my_logger.warning("Error in moving file: %s " % error_file)
+    # if do_preprocess:
+    composed_file_list = ingestion_pre_process(datasource_descr, subproducts, input_file, tmpdir,
+                                               my_logger, product, test_mode)
+    # TODO alter this area
+    # Error occurred and was detected in pre_process routine
+    if str(composed_file_list) == '1':
+        my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
+        # Move files to 'error/storage' directory
+        if not test_mode:
+            error_file = input_file
+            if os.path.isfile(ingest_error_dir + os.path.basename(error_file)):
+                shutil.os.remove(ingest_error_dir + os.path.basename(error_file))
+            try:
+                shutil.move(error_file, ingest_error_dir)
+            except:
+                my_logger.warning("Error in moving file: %s " % error_file)
 
-            shutil.rmtree(tmpdir)
-            raise NameError('Detected Error in preprocessing routine')
-    else:
-        composed_file_list = [input_file]
+        shutil.rmtree(tmpdir)
+        raise NameError('Detected Error in preprocessing routine')
+    # else:
+    #     composed_file_list = [input_file]
 
     # -------------------------------------------------------------------------
     #  5 & 6 Post processing - Output Rescale, create output, Metadata
     # -------------------------------------------------------------------------
-    ingestion_status = ingestion_post_processing(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, input_file,
-                              echo_query, test_mode, tmpdir)
+    ingestion_status = ingestion_post_processing(composed_file_list, in_date, product, datasource_descr, my_logger, input_file, tmpdir)
     # -------------------------------------------------------------------------
     # Remove the Temp working directory
     # -------------------------------------------------------------------------
@@ -129,21 +128,30 @@ def ingestion_netcdf(input_file, in_date, product, subproducts, datasource_descr
         logger.error('Error in removing temporary directory. Continue')
         raise NameError('Error in removing tmpdir')
 
+    # Result is None means we are still waiting for some files to be received. Keep files in /data/ingest
+    # dates_not_in_filename means the input files contains many dates (e.g. GSOD precip)
+    if ingestion_status:
+        if systemsettings['type_installation'] == 'Server':
+            store_native_files(product, [input_file], my_logger)
+        else:
+            delete_files(input_file, my_logger)
+
     return ingestion_status
 
 
-def ingestion_post_processing(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, input_files,
-                              echo_query, test_mode, tmpdir):
+def ingestion_post_processing(composed_file_list, in_date, product, datasource_descr, my_logger, input_file, tmpdir):
     ingestion_status = False
     try:
-        for pre_processed_input in composed_file_list:
-            subproduct =pre_processed_input['subproduct']
-            raster_dataset = pre_processed_input['raster_dataset']
-            file_extension = subproduct['re_extract']
+        for ingest_dataset in composed_file_list:
+            # raster_dataset = ingest_dataset.rasterDataset
+            subproduct = ingest_dataset.subproduct
+            # subproduct =ingest_dataset['subproduct']
+            # raster_dataset = ingest_dataset['raster_dataset']
+            # file_extension = subproduct['re_extract']
 
             # Target mapset Initialization
-            trg_mapset = mapset.MapSet()
-            trg_mapset.assigndb(subproduct['mapsetcode'])
+            # trg_mapset = ingest_dataset.target_mapset
+            # trg_mapset.assigndb(subproduct['mapsetcode'])
 
             # #Rescaling
             # if False:
@@ -160,14 +168,14 @@ def ingestion_post_processing(composed_file_list, in_date, product, subproducts,
 
             # 6. Metadata registration -- here just metadata class is initialized
             metadata = assign_metadata_generic(product, subproduct['subproduct'], subproduct['mapsetcode'], in_date,
-                                    os.path.dirname(output_path_filename), [input_files], my_logger)
+                                               os.path.dirname(output_path_filename), [input_file], my_logger)
 
             # Get the output product info (scaling, ofset, nodata, datatype etc) Cu
             product_out_info = querydb.get_subproduct(productcode=product['productcode'],version=product['version'],subproductcode=subproduct['subproduct'])
             # write_status = NetCDF_Writer.write_nc(file_name=tmp_output_file, data=[raster_dataset.data], dataset_tag=[product_out_info.subproductcode],
             #                                       zc=raster_dataset.zc, fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
             #                                       write_CS_metadata=metadata, lats=raster_dataset.ds_lats_out, lons=raster_dataset.ds_lons_out)
-            write_status = raster_dataset.write_nc_ingest(tmp_output_file, product_out_info, metadata)
+            write_status = ingest_dataset.write_nc_ingest(tmp_output_file, product_out_info, metadata)
             if os.path.isfile(tmp_output_file):
                 shutil.move(tmp_output_file, output_path_filename)
                 ingestion_status = True
@@ -202,33 +210,49 @@ def get_output_path_filename(datasource_descr, product, subproduct, in_date, fil
     return output_path_filename
 
 
-def ingestion_pre_process(preproc_type, native_mapset_code, subproducts, input_file, tmpdir, my_logger, product,
+def ingestion_pre_process(datasource_descr, subproducts, input_file, tmpdir, my_logger, product,
                           test_mode):
     my_logger.debug("Calling routine %s" % 'preprocess_files')
     try:
+        composed_file_list = []
+        # composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts,
+        #                                                               input_file, tmpdir,
+        #                                                               my_logger)
+        preproc_type = datasource_descr.preproc_type
+        # georef_already_done = False
+        my_logger.info("Input files pre-processing by using method: %s" % preproc_type)
+        for subproduct in subproducts:
+            ingest_subproduct = None
+            try:
+                # ingest_subproduct = IngestionCS(product=product,subproduct=subproduct,datasource=datasource_descr,input_file=input_file)
+                ingest_subproduct = RasterDatasetIngest(subproduct=subproduct, datasource=datasource_descr,filename=input_file)
+                # extract raster data with different option based on preprocess type
+                preprocess_status = ingest_subproduct.preprocess()
+            except:
+                # Error occurred and was NOT detected in pre_process routine
+                my_logger.error('Error in pre-processing routine for particular subproduct. Exit')
+                preprocess_status = False
 
-        composed_file_list = pre_process_inputs(preproc_type, native_mapset_code, subproducts,
-                                                                      input_file, tmpdir,
-                                                                      my_logger)
+        # except:
+        #     my_logger.error('Error in pre-processing routine. Exit')
+        #     raise NameError('Error in pre-processing routine')
 
-        # Pre-process returns None if there are not enough files for continuing
-        if composed_file_list is None:
-            logger.debug('Waiting for additional files to be received. Return')
-            shutil.rmtree(tmpdir)
-            return None
+            # Check if None is returned (i.e. waiting for remaining files)
+            if ingest_subproduct is None:
+                my_logger.info('Ingestion preprocess returned with empty object.. something went wrong')
+                continue
+            if preprocess_status is False:
+                my_logger.info('something went wrong in preprocess .. ')
+                continue
+    
+            composed_file_list.append(ingest_subproduct)
 
-        # Check if -1 is returned, i.e. nothing to do on the passed files (e.g. S3A night-files)
-        elif composed_file_list is -1:
-            logger.debug('Nothing to do on the passed files. Return')
-            shutil.rmtree(tmpdir)
-            return -1
-        # TODO check if this place is fine
-        else:
-            return composed_file_list
+        return composed_file_list
     except:
         # Error occurred and was NOT detected in pre_process routine
-        my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
-        # Move files to 'error/storage' directory (ingest.wrong)
+        my_logger.error('Error in pre-processing routine. Exit')
+        # raise NameError('Error in pre-processing routine')
+        
         if not test_mode:
             # for error_file in input_files:
             if os.path.isfile(ingest_error_dir + os.path.basename(input_file)):
@@ -242,91 +266,41 @@ def ingestion_pre_process(preproc_type, native_mapset_code, subproducts, input_f
         raise NameError('Caught Error in preprocessing routine')
 
 
-def is_test_one_product(test_one_product=None, productcode=None):
-
-    # Verify the test-one-product case
-    do_ingest_source = True
-    if test_one_product:
-        if productcode != test_one_product:
-            do_ingest_source = False
-
-    return do_ingest_source
+# def is_test_one_product(test_one_product=None, productcode=None):
+#
+#     # Verify the test-one-product case
+#     do_ingest_source = True
+#     if test_one_product:
+#         if productcode != test_one_product:
+#             do_ingest_source = False
+#
+#     return do_ingest_source
 
 
 #########################################################################################################
 ###################### Get Subproducts associated with ingestion and datasource #########################
 ## Goes in error if specific datasource is not associated with subproducts eg. WSI crop & Pasture #######
 #########################################################################################################
-def get_subproduct(ingest, product_in_info, datasource_descr_id):
-    sprod=None
-    try:
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-        nodata_value = product_in_info.no_data
-        sprod = {'subproduct': ingest.subproductcode,
-                 'mapsetcode': ingest.mapsetcode,
-                 're_extract': re_extract,
-                 're_process': re_process,
-                 'nodata': nodata_value}
-        # subproducts.append(sprod)
-        return sprod
-    except:
-        # What to return here?
-        logger.warning("Subproduct %s not defined for source %s" % (
-            ingest.subproductcode, datasource_descr_id))
-    finally:
-        return sprod
+# def get_subproduct(ingest, product_in_info, datasource_descr_id):
+#     sprod=None
+#     try:
+#         re_process = product_in_info.re_process
+#         re_extract = product_in_info.re_extract
+#         nodata_value = product_in_info.no_data
+#         sprod = {'subproduct': ingest.subproductcode,
+#                  'mapsetcode': ingest.mapsetcode,
+#                  're_extract': re_extract,
+#                  're_process': re_process,
+#                  'nodata': nodata_value}
+#         # subproducts.append(sprod)
+#         return sprod
+#     except:
+#         # What to return here?
+#         logger.warning("Subproduct %s not defined for source %s" % (
+#             ingest.subproductcode, datasource_descr_id))
+#     finally:
+#         return sprod
 
-#################################################
-#######   Get list unique dates   ###############
-#################################################
-def get_list_unique_dates(datasource_descr, files, dates_not_in_filename, product_in_info, ingest_mapsetcode ):
-    #   Check the case 'dates_not_in_filename' (e.g. GSOD -> yearly files continuously updated)
-    dates_list = []
-    if dates_not_in_filename:
-        # Build the list of dates from datasource description
-        dates_list = build_date_list_from_datasource(datasource_descr, product_in_info, ingest_mapsetcode)
-
-    return dates_list
-
-#########################################################################################
-#######Build the list of dates from datasource description & Product info ###############
-#########################################################################################
-def build_date_list_from_datasource(datasource_descr, product_in_info, ingest_mapset):
-    dates_list = []
-
-    start_datetime = datetime.datetime.strptime(str(datasource_descr.start_date), "%Y%m%d")
-    if datasource_descr.end_date is None:
-        end_datetime = datetime.date.today()
-    else:
-        end_datetime = datetime.datetime.strptime(str(datasource_descr.end_date), "%Y%m%d")
-
-    all_starting_dates = proc_functions.get_list_dates_for_dataset(product_in_info.productcode, \
-                                                                   product_in_info.subproductcode, \
-                                                                   product_in_info.version, \
-                                                                   start_date=datasource_descr.start_date,
-                                                                   end_date=datasource_descr.end_date)
-
-    my_dataset = products.Dataset(product_in_info.productcode,
-                                  product_in_info.subproductcode,
-                                  ingest_mapset,
-                                  version=product_in_info.version,
-                                  from_date=start_datetime,
-                                  to_date=end_datetime)
-    my_dates = my_dataset.get_dates()
-
-    my_formatted_dates = []
-    for my_date in my_dates:
-        my_formatted_dates.append(my_dataset._frequency.format_date(my_date))
-
-    my_missing_dates = []
-    for curr_date in all_starting_dates:
-        if curr_date not in my_formatted_dates:
-            my_missing_dates.append(curr_date)
-
-    dates_list = sorted(my_missing_dates, reverse=False)
-
-    return dates_list
 
 # Store native files
 def store_native_files(product, date_fileslist, logger_spec):
@@ -361,90 +335,7 @@ def delete_files(date_fileslist, logger_spec):
             logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
 
 
-def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file, tmpdir, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process one or more input files by:
-#   2. Extract one or more datasets from a netcdf file, or a multi-layer netcdf file (e.g. HDF)
-#   5. Apply geo-reference (native_mapset)
-#
-#   Input: one or more input files in the 'native' format, for a single data and a single mapset
-#   Output: one or more files (1 foreach subproduct), geo-referenced in GTIFF
-#
-#   Arguments:
-#       preproc_type:    type of preprocessing
-#       NETCDF : IRI & CDS NETCDF data
-#       input_files: list of input files
-#   Returned:
-#       output dict: subproduct and data_array
-#
 
-    my_logger.info("Input files pre-processing by using method: %s" % preproc_type)
-
-    georef_already_done = False
-
-    try:
-        if preproc_type == 'NETCDF_IRI_CDS':
-            sprod_data_list = pre_process_netcdf(subproducts, input_file, native_mapset_code, my_logger)
-
-        elif preproc_type == 'NETCDF_IRREGULAR_GRID':
-            sprod_data_list = pre_process_irregular_grid(subproducts, input_file, my_logger)
-
-        else:
-            my_logger.error('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
-    except:
-        my_logger.error('Error in pre-processing routine. Exit')
-        raise NameError('Error in pre-processing routine')
-
-    # Check if None is returned (i.e. waiting for remaining files)
-    if sprod_data_list is None:
-        my_logger.info('Waiting for additional files to be received. Exit')
-        return None
-
-    # Check if -1 is returned (i.e. nothing to do on the passed files)
-    if sprod_data_list is -1:
-        my_logger.info('Nothing to do on the passed files. Exit')
-        return -1
-
-    return sprod_data_list
-
-# Pre Process netcdf file which is regular grid.. CDS and IRI regular grid files are managed if mapset is passed correctly
-def pre_process_netcdf(subproducts, input_file, native_mapset_code, my_logger, in_date=None):
-    try:
-        # This pre processed list contains list of object(subproduct,data(numpy array))key value pair
-        pre_processed_list = []
-        #Read the file looping over the subproducts?
-        for subproduct in subproducts:
-            mapsetcode = subproduct['mapsetcode']
-            raster = RasterDataset(filename=input_file)
-            # SET CS subproduct parameters into the Raster class
-            raster.set_CS_subproduct_parameter(subproduct, target_mapset_code=mapsetcode)
-            # data_numpy_array = raster.get_data() # conversion to physical value by applying nodatavalue
-            data_numpy_array = raster.get_data_regular_grid(target_mapset_name=mapsetcode, native_mapset_name=native_mapset_code) # conversion to physical value by applying nodatavalue
-            pre_processed_data = {'subproduct': subproduct,  'raster_dataset': raster}
-            pre_processed_list.append(pre_processed_data)
-    except:
-        my_logger.error("Error in pre process IRI for date %s"% in_date)
-
-    return pre_processed_list
-
-# Pre process Irregular grid netcdf file of IRI and CDS
-def pre_process_irregular_grid(subproducts, input_file, my_logger, in_date=None):
-    try:
-        # This pre processed list contains list of object(subproduct,data(numpy array))key value pair
-        pre_processed_list = []
-        #Read the file looping over the subproducts?
-        for subproduct in subproducts:
-            mapsetcode = subproduct['mapsetcode']
-            raster = RasterDataset(filename=input_file)
-            # SET CS subproduct parameters into the Raster class
-            # raster.set_CS_subproduct_parameter(subproduct, mapsetcode)
-            raster.get_data_irregular_grid(subproduct, mapsetcode) # conversion to physical value by applying nodatavalue
-            pre_processed_data = {'subproduct': subproduct,  'raster_dataset': raster}
-            pre_processed_list.append(pre_processed_data)
-    except:
-        my_logger.error("Error in pre process Irregular grid for date %s"% in_date)
-
-    return pre_processed_list
 # ----------------------------------------------
 # Assign metadata parameters to metadata class.
 # ----------------------------------------------
@@ -464,3 +355,123 @@ def assign_metadata_generic(product, subproduct, mapset_id, out_date_str_final, 
         my_logger.warning('Error in assigning metadata class .. Continue')
 
     return sds_meta
+
+class IngestionCS():
+    def __init__(self, product, subproduct, datasource, input_file, in_date=None):
+        """
+        :param product: CS product with code and version as object
+        :param subproduct: CS subproduct (subproduct+ingestion+subdatasource)
+        :param filename: filename of the raster file to read (can be either a geotif or a netCDF file)
+                        The routine uses the right method to read the file in relation to its file extension
+        To initialize the read_raster class only the filename is needed.
+
+        Some public methods are available through the class, the main one (.get_data) allows to retrieve the
+        numpy array of the data layer of interest
+
+        """
+        self.in_filename = input_file
+        self.product = product
+        self.datasource= datasource
+        # self.ingestion = None
+        # self.subdatasource = None
+        self.product_in_info_ingestion= subproduct
+        self.in_date= in_date
+        self.rasterDataset = None
+
+        # self.productcode=None
+        # self.version=None
+
+        self.date_format=None
+        self.native_mapset=None
+        self.preproc_type=None
+
+        self.in_scale_factor=None
+        self.in_fill_value=None
+        self.in_add_offset=None
+        self.in_var=None
+        self.target_mapset=None
+        self.subproductcode=None
+
+        self.out_scale_factor=None
+        self.out_fill_value=None
+        self.out_add_offset=None
+        self.out_band=None
+
+    #     Initialize the needed variable to read raster dataset
+    #     self._init_variables()
+    #
+    #     if self.in_filename is not None:
+    #         self.read_Rasterdata_from_file(self.in_filename,variable=self.in_var)
+
+
+    # def _init_variables(self):
+    #     if self.product_in_info_ingestion is not None:
+    #         self.in_scale_factor = self.product_in_info_ingestion['in_scale_factor']
+    #         self.in_fill_value = self.product_in_info_ingestion['nodata']
+    #         self.in_add_offset = self.product_in_info_ingestion['in_offset']
+    #         self.in_var = self.product_in_info_ingestion['re_extract']
+    #         target_mapset_code = self.product_in_info_ingestion['mapsetcode']
+    #         self.target_mapset = create_mapset(target_mapset_code)
+    #
+    #     if self.datasource is not None:
+    #         self.preproc_type = self.datasource.preproc_type
+    #         native_mapset_code = self.datasource.native_mapset
+    #         self.native_mapset = create_mapset(native_mapset_code)
+
+    # Read the raster dataset of the native input file
+    def read_Rasterdata_from_file(self, filename, variable=None):
+        rasterDataset = RasterDatasetIngest(filename=filename, product=variable)
+        if rasterDataset is not None:
+            # rasterDataset.ds_lons_out = None
+            # rasterDataset.ds_lats_out = None
+            # rasterDataset.data = None
+            self.rasterDataset = rasterDataset
+            self.assign_rasterDataset_parameters(self.rasterDataset)
+
+    # Read raster dataset missing parameters from the file
+    def assign_rasterDataset_parameters(self, rasterDataset):
+        if self.target_mapset is not None:
+            rasterDataset.zc = self.target_mapset.bbox
+        # self.native_zc = subproduct[]
+        if rasterDataset.scale_factor is None:
+            rasterDataset.scale_factor = self.in_scale_factor
+        if rasterDataset.fill_value is None:
+            rasterDataset.fill_value = self.in_fill_value
+        if rasterDataset.add_offset is None:
+            rasterDataset.add_offset = self.in_add_offset
+        # rasterDataset.band = self.in_var
+
+    # def preprocess(self):
+    #     if self.rasterDataset is None:
+    #         self.read_Rasterdata_from_file(self.in_filename, variable=self.in_var)
+    #
+    #     rasterDataset = self.rasterDataset
+    #
+    #     preproc_type = self.preproc_type
+    #     if preproc_type is None and preproc_type == 'None' and preproc_type == '""' and preproc_type == "''" and preproc_type == '':
+    #         rasterDataset.get_data(band=self.in_var)
+    #
+    #     elif preproc_type == 'NETCDF_IRI_CDS':
+    #         # raster = RasterDataset(filename=input_file)
+    #         # SET CS subproduct parameters into the Raster class
+    #         # raster.set_CS_subproduct_parameter(subproduct, target_mapset_code=mapsetcode)
+    #         # data_numpy_array = raster.get_data() # conversion to physical value by applying nodatavalue
+    #          # conversion to physical value by applying nodatavalue
+    #         native_dataset =  rasterDataset._get_GDAL_dataset()
+    #         # Clip the native dataset to target bbox ? or change resolution
+    #         pre_processed_dataset = do_clip_resample_reproject(native_dataset, target_mapset=self.target_mapset,
+    #                                                            native_mapset=self.native_mapset)
+    #         # pre_proccessed_dataset = self.raster_clip_bbox(self.zc, setSpatialRef=True)
+    #         # Apply input scaling factor offset nodata and get physical value data
+    #         pre_processed_data_array = np.array(pre_processed_dataset.ReadAsArray())
+    #
+    #         # rescale and assign processed array to rasterDataset object
+    #         rasterDataset._process_data(pre_processed_data_array, pre_processed_dataset, already_extracted=True)
+    #
+    #     elif preproc_type == 'NETCDF_IRREGULAR_GRID':
+    #         # self.set_CS_subproduct_parameter(subproduct, mapsetcode)
+    #         rasterDataset._get_netcdf()
+    #
+    #     else:
+    #         print('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
+    #         rasterDataset = None
