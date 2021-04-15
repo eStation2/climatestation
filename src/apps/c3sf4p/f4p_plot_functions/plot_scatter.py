@@ -3,21 +3,24 @@ import matplotlib.cm as cm
 import numpy as np
 from scipy.stats import stats
 from inspect import currentframe, getframeinfo
+from src.apps.c3sf4p.f4p_utilities.stats_funcions import log_report
 
 
-def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=None, dbg=True):
+def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=None, dbg=True, logfile=None):
     """
-    :param data_1:              -> np.array dataset 1
-    :param data_2:              -> np.array dataset 2
-    :param x_label:             -> STRING; label for x-axis (typically: Name of dataset-1)
-    :param y_label:             -> STRING; label for y-axis (typically: Name of dataset-2)
-    :param figure_title:        -> STRING; title to be printed on the canvas
+    @param data_1:              -> np.array dataset 1
+    @param data_2:              -> np.array dataset 2
+    @param x_label:             -> STRING; label for x-axis (typically: Name of dataset-1)
+    @param y_label:             -> STRING; label for y-axis (typically: Name of dataset-2)
+    @param figure_title:        -> STRING; title to be printed on the canvas
+    @param dbg:                 -> BOOL; enables debug mode
+    @param logfile:             -> STRING; file for write the debug results
     :return:
     """
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-        print(info)
-        print('Start graphical render for Scatter Plot TEST')
+        tag = 'Start graphical render for Scatter Plot TEST'
+        log_report(info, tag, logfile)
 
     if x_label is None:
         x_label = 'dataset(1)'
@@ -33,8 +36,9 @@ def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=No
     # remove nan values from the two data series
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-        print(info)
-        print('remove nan values from the two data series')
+        tag = 'remove nan values from the two data series'
+        log_report(info, tag, logfile)
+
     mask = data_1 + data_2
     d1 = data_1[~np.isnan(mask)]
     d2 = data_2[~np.isnan(mask)]
@@ -47,8 +51,9 @@ def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=No
     # build trend line:
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-        print(info)
-        print('build trend line')
+        tag = 'build trend line'
+        log_report(info, tag, logfile)
+
     xx = np.linspace(min_v, max_v, 10)
     slp = np.full_like(xx, fill_value=slope)
     itc = np.full_like(xx, fill_value=intercept)
@@ -73,8 +78,8 @@ def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=No
     # building plot legend
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-        print(info)
-        print('building plot legend')
+        tag = 'building plot legend'
+        log_report(info, tag, logfile)
 
     txt_1 = 'Slope=' + str("{:.3f}".format(slope)) + '\n'
     txt_2 = 'Intercept=' + str("{:.3f}".format(intercept)) + '\n'
@@ -95,8 +100,9 @@ def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=No
     # render the figure
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-        print(info)
-        print('render the figure')
+        tag = 'render the figure'
+        log_report(info, tag, logfile)
+
     plt.figure(figsize=(7, 6), facecolor='w', edgecolor='k')
     plt.grid()
 
@@ -124,7 +130,7 @@ def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=No
 
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-        print(info)
-        print('show the figure')
+        tag = 'show the figure'
+        log_report(info, tag, logfile)
 
     plt.show()

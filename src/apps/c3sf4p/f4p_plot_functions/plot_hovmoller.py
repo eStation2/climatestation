@@ -2,28 +2,29 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 from inspect import currentframe, getframeinfo
+from src.apps.c3sf4p.f4p_utilities.stats_funcions import log_report
 
 
 def graphical_render(data, product, sensor_name=None, zone_name=None, x_tick_labels=None, y_tick_labels=None,
-                     figure_title=None, min_v=None, max_v=None, dbg=True):
+                     figure_title=None, min_v=None, max_v=None, dbg=True, logfile=None):
     """
-    :param data:            ->  np.array;   data
-    :param product:         ->  STRING;     product name
-    :param sensor_name:     ->  STRING;     Sensor Name
-    :param zone_name:       ->  STRING;     Region name
-    :param zone_coord:      ->  list;       Region coordinates
-    :param latitude:        ->  BOOL;       True: hovmoller for latitude, False: hovmoller for longitude
-    :param x_tick_labels:   ->  [STRINGS];  fill ticks in x-axis typically each label is a date for the time series
-    :param y_tick_labels:   ->  [STRINGS];  fill ticks in x-axis typically each label is a coordinate
-    :param figure_title:    ->  STRING;     figure title
-    :param min_v:           ->  FLOAT;      upper limit
-    :param max_v:           ->  FLOAT;      lower limit
+    @param data:            ->  np.array;   data
+    @param product:         ->  STRING;     product name
+    @param sensor_name:     ->  STRING;     Sensor Name
+    @param zone_name:       ->  STRING;     Region name
+    @param x_tick_labels:   ->  [STRINGS];  fill ticks in x-axis typically each label is a date for the time series
+    @param y_tick_labels:   ->  [STRINGS];  fill ticks in x-axis typically each label is a coordinate
+    @param figure_title:    ->  STRING;     figure title
+    @param min_v:           ->  FLOAT;      upper limit
+    @param max_v:           ->  FLOAT;      lower limit
+    @param dbg              ->  BOOL; enables debug mode
+    @param logfile          ->  STRING; file for write the debug results
     :return:
     """
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-        print(info)
-        print('Start graphical render for Longitudinal average Plot TEST')
+        tag = 'Start graphical render for Longitudinal average Plot TEST'
+        log_report(info, tag, logfile)
 
     sz = data.shape
     y_ax_lab = 'Latitude'
@@ -76,8 +77,8 @@ def graphical_render(data, product, sensor_name=None, zone_name=None, x_tick_lab
 
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-        print(info)
-        print('render the figure')
+        tag = 'render the figure'
+        log_report(info, tag, logfile)
 
     plt.figure(figsize=(15, 8), facecolor='w', edgecolor='k')
     plt.rcParams['axes.facecolor'] = [0.7, 0.7, 0.7]
