@@ -11,7 +11,7 @@
 # ###############################################################################
 """
 import numpy as np
-from src.apps.c3sf4p.read_raster import RasterDataset
+from src.lib.python.image_proc.read_write_raster import RasterDatasetCS as RasterDataset
 
 
 def get_spatial_consistency(data_in):
