@@ -622,8 +622,8 @@ def write_nc(file_name, data, dataset_tag, dataset_long_name=None, fill_value=No
     dataset.close()
 
 
-class RasterDataset(_ImportRasterDataset):
-    def __init__(self, filename):
+class RasterDatasetCS(_ImportRasterDataset):
+    def __init__(self, filename=None, product=None):
         """
         :param filename: filename of the raster file to read (can be either a geotif or a netCDF file)
                         The routine uses the right method to read the file in relation to its file extension
@@ -636,7 +636,7 @@ class RasterDataset(_ImportRasterDataset):
 
         """
         # if filename is not None:
-        super(RasterDataset, self).__init__(filename=filename, product=None)
+        super(RasterDatasetCS, self).__init__(filename=filename, product=product)
         # self.filename = filename
 
         self.date = None
