@@ -202,6 +202,7 @@ class _ImportRasterDataset(object):
                     i_i, i_f, j_i, j_f = self._subregion_extraction([gobj.RasterYSize, gobj.RasterXSize])
 
         data = data[i_i:i_f, j_i:j_f]
+        # TODO Manage data_type for float32, 64 etc
         if data_type != 'float':
             data = np.array(data, dtype='float')
 
