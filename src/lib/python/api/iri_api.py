@@ -292,8 +292,8 @@ def process_list_matching_url(datasource_descr, product, subproducts, dates):
     # try:
     parameter_url = build_parameter_http(parameter)
     processed_list = []
-    processed_list_filename = es_constants.get_internet_processed_list_prefix + datasource_descr.datasource_descr_id + '.list'
-    processed_list = functions.restore_obj_from_pickle(processed_list,
+    processed_list_filename = es_constants.get_internet_processed_list_prefix + datasource_descr.datasource_descr_id.replace(":", "_") + '.list'
+    processed_list = functions.restore_obj_from_json(processed_list,
                                                        processed_list_filename)
     for date in dates:
         # iri_month = date.strftime("%b")
@@ -316,7 +316,7 @@ def process_list_matching_url(datasource_descr, product, subproducts, dates):
 
         ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, subproducts, datasource_descr, logger)
         processed_list.append(parameter_url+time_url)
-        functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+        functions.dump_obj_to_json(processed_list, processed_list_filename)
     shutil.rmtree(tmpdir)
     # except:
     #     logger.error('Error in processing IRIDL URL')
