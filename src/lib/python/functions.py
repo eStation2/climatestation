@@ -1850,7 +1850,7 @@ def dump_obj_to_pickle(obj, filename):
 #
 def dump_obj_to_json(obj, filename):
     dump_file = open(filename, 'w')
-    json.dump(obj, dump_file)
+    json.dump(obj, dump_file, indent=2)
     dump_file.close()
 
 
