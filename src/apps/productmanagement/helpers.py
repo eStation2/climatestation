@@ -228,6 +228,7 @@ class INTERVAL_TYPE(object):
 class FILE_EXTENSIONS(object):
     MISSING_FILE_EXTENSION = ".missing"
     TIF_FILE_EXTENSION = ".tif"
+    NETCDF_FILE_EXTENSION = ".nc"
 
 
 def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=None, to_date=None):

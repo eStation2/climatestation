@@ -1020,20 +1020,20 @@ class TestWebpy(unittest.TestCase):
 
     def test_GetProductLayer(self):
 
-        date = '20181112'
-        params = {
-            'productcode': 'pml-modis-sst',
-            'productversion': '3.0',
-            'subproductcode': 'sst-fronts',
-            'mapsetcode': 'SPOTV-IOC-1km',
-            'date': date,
-            'WIDTH': '256',
-            'HEIGHT': '256',
-            'BBOX': "-11.25, 53.4375, -8.4375, 56.25",
-            'CRS': "EPSG:4326",
-            'legendid': "136"
-        }
-
+        # date = '20181112'
+        # params = {
+        #     'productcode': 'pml-modis-sst',
+        #     'productversion': '3.0',
+        #     'subproductcode': 'sst-fronts',
+        #     'mapsetcode': 'SPOTV-IOC-1km',
+        #     'date': date,
+        #     'WIDTH': '256',
+        #     'HEIGHT': '256',
+        #     'BBOX': "-11.25, 53.4375, -8.4375, 56.25",
+        #     'CRS': "EPSG:4326",
+        #     'legendid': "136"
+        # }
+        #
         # date = '20180625'  # uncompressed with piramid (adds .ovr file)
         # date = '20180701'
         # params = {
@@ -1102,11 +1102,23 @@ class TestWebpy(unittest.TestCase):
         # vals = params['BBOX'].split(',')
         # ratio = (float(vals[3]) - float(vals[1])) / (float(vals[2]) - float(vals[0]))  # ratio width/height (X/Y)
         # params['WIDTH'] = str(int(float(params['HEIGHT']) * ratio))
+        params = {
+            'productcode': 'era5-monthly-sst',
+            'productversion': '1.0',
+            'subproductcode': 'sst',
+            'mapsetcode': 'CDS-Africa-25km',
+            'date': '20210301',
+            'WIDTH': '256',
+            'HEIGHT': '256',
+            'BBOX': "-22.5,36.5625,-19.6875,39.375",
+            'CRS': "EPSG:4326",
+            'legendid': "401"
+        }
 
         result = webpy_esapp_helpers.getProductLayer(params)
         # print (result)
         # Copy the file for analysis in Windows
-        command = 'cp ' + result + ' /srv/www/eStation2/Tests/mapscript/'
+        command = 'cp ' + result + ' /data'
         os.system(command)
         self.assertEqual(1, 1)
 
