@@ -16,7 +16,7 @@
 # ###############################################################################
 """
 import os
-from src.lib.python.image_proc.read_write_raster import RasterDataset
+from src.lib.python.image_proc.read_write_raster import RasterDatasetCS, write_nc
 import numpy as np
 from src.apps.c3sf4p.f4p_utilities.pytrend import TrendStarter as Ts
 from inspect import currentframe, getframeinfo
@@ -30,9 +30,9 @@ class Fitness4Purpose(object):
     """
     Entry point to trigger the c3sf4p capabilities
     """
-    def __init__(self, file_list, ecv, band_names, region_name='', region_coordinates=None, dbg=False):
+    def __init__(self, file_list, band_names, ecv=None, region_name='', region_coordinates=None, dbg=False):
         """
-        :param file_list:           LIST of Strings: file or list of files to analyse,
+        @param file_list:           LIST of Strings: file or list of files to analyse,
                                     this parameter should be specified as a list-of-lists, where len(file_list)
                                     represents the number of different datasets (i.e. different product providers) to be
                                     considered in the analysis.
@@ -43,10 +43,10 @@ class Fitness4Purpose(object):
                                                 [full_name-2.1, full_name-2.2, ..., fill-name-2.n],
                                                 [full_name-3.1, full_name-3.2, ..., fill-name-3.n]]
 
-        :param ecv:                 STRING: ecv type as defined in GCOS it is assumed that every element of the
+        @param ecv:                 STRING: ecv type as defined in GCOS it is assumed that every element of the
                                             file_list parameter are all of the same ecv-kind
 
-        :param band_names:          LIST of STRING: band name for each dataset in file_list,
+        @param band_names:          LIST of STRING: band name for each dataset in file_list,
                                     where len(band_names) equals the number of different datasets
                                     (i.e. different product providers)
 
@@ -55,10 +55,10 @@ class Fitness4Purpose(object):
                                     band_names = [band_name-1, band_name-2, band_name-3]
 
 
-        :param region_name:         STRING: Ancillary parameter name of the region to which the raster input corresponds
+        @param region_name:         STRING: Ancillary parameter name of the region to which the raster input corresponds
                                     This parameter is the name associated to region_coordinates parameter
 
-        :param region_coordinates:  LIST: Ancillary parameter, represents the boundary coordinates in case the analysis
+        @param region_coordinates:  LIST: Ancillary parameter, represents the boundary coordinates in case the analysis
                                     is foreseen in a sub-region of the original extension. This parameter should be
                                     specified as a list of 4 cardinal points (floating numbers) in the folloing order:
                                     [S, N, W, E] where:
@@ -71,7 +71,7 @@ class Fitness4Purpose(object):
                                     In this convention the following condition should always be verified: S<N and W<E
                                     the tools also implements this test, and if wrong it throws an exception
 
-        :param dbg:                 enables debug mode
+        @param dbg:                 enables debug mode
 
         """
         self.lof = file_list
@@ -158,7 +158,7 @@ class Fitness4Purpose(object):
             tag = 'Trend Optimiser start'
             self._log_report(info, tag)
 
-        size = RasterDataset(self.lof[index][0]).get_data(self.bands[0], subsample_coordinates=self.zc).size
+        size = RasterDatasetCS(self.lof[index][0]).get_data(self.bands[0], subsample_coordinates=self.zc).size
         ncpus = psutil.cpu_count(logical=False)
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
@@ -167,25 +167,29 @@ class Fitness4Purpose(object):
         if ncpus < jobs:
             jobs = ncpus
             if self.dbg:
-                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                        str(getframeinfo(currentframe()).lineno))
                 tag = 'Rescaling number of jobs to = ' + str(jobs)
                 self._log_report(info, tag)
         else:
             if self.dbg:
-                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                        str(getframeinfo(currentframe()).lineno))
                 tag = 'Number of jobs is already optimised. Setting njobs = ' + str(jobs)
                 self._log_report(info, tag)
 
         timeseries_length = len(self.lof[index])
         if self.dbg:
-            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                    str(getframeinfo(currentframe()).lineno))
             tag = 'total lenght of the timeseries is = ' + str(size)
             self._log_report(info, tag)
 
         chunk_length = size // chunks ** 2
         chunk_size = chunk_length * 8 * timeseries_length  # weight in bytes for any chunk casted as float
         if self.dbg:
-            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                    str(getframeinfo(currentframe()).lineno))
             tag = 'Every chunks is weighting = ' + str(chunk_size/1024**3) + 'GB'
             self._log_report(info, tag)
 
@@ -264,7 +268,7 @@ class Fitness4Purpose(object):
         for nd in range(n_dataset):
             data.append([])
             for fname in self.lof[nd]:
-                rd = RasterDataset(fname)
+                rd = RasterDatasetCS(fname)
                 sensor_name = rd.sensor_code
                 data_labels.append(sensor_name + '  ' + self.bands[nd])
                 dates.append(rd.date)
@@ -313,7 +317,7 @@ class Fitness4Purpose(object):
             self._log_report(info, tag)
 
         x_tick_labels = []
-        rd0 = RasterDataset(filelist[0])
+        rd0 = RasterDatasetCS(filelist[0])
 
         # shape = rd0.get_data(self.bands[0], subsample_coordinates=self.zc).shape
         sz = rd0.get_data(self.bands[0]).shape[1]
@@ -344,7 +348,7 @@ class Fitness4Purpose(object):
             ii = int(out[j][0][1])
             d = out[j][0][0]
             data[:, ii] = d
-            rd = RasterDataset(filelist[j])
+            rd = RasterDatasetCS(filelist[j])
             x_tick_labels.append(rd.date)
 
         hov_matrix = np.array(data)
@@ -360,7 +364,7 @@ class Fitness4Purpose(object):
 
             y_tick_labels.append(str("{:.1f}".format(tick)) + '$^\circ$' + card)
 
-        sens_name = RasterDataset(filelist[0]).sensor_code
+        sens_name = RasterDatasetCS(filelist[0]).sensor_code
 
         """from here one must call a routine to render the plot, to be seen with Jurriaan"""
 
@@ -385,57 +389,59 @@ class Fitness4Purpose(object):
                 compliance with the Seasonal MK Test (seasonal_test): For seasonal time series data
                 [Hirsch, R.M., Slack, J.R. and Smith, R.A. (1982)]
                 This method belongs to the pymankendall library.
-                The null hypotesis H0 is that there is NO-trend in the data.
+                The null hypothesis H0 is that there is NO-trend in the data.
 
-                :param num_jobs:        Int: represents the number of jobs for the parallel computation. Usually this number
-                                        equals the number of cpu threads available on machine architecture.
+                @param num_jobs:        Int: represents the number of jobs for the parallel computation. Usually this
+                                        number equals the number of cpu threads available on machine architecture.
 
-                :param num_partitions:  Int: Together with num_jobs parameter determine the number of chunks in which the input
-                                        timeseries will be splitted. As an example if the default values holds, the total number
-                                        of chunks will be 100, i.e. in general holds the rule:
+                @param num_partitions:  Int: Together with num_jobs parameter determine the number of chunks in which
+                                        the input timeseries will be splitted. As an example if the default values
+                                        holds, the total number of chunks will be 100, i.e. in general holds the rule:
                                                 number-of-chunks = num_jobs * num_partitions
-                :param only_significant Bool: if true, only the significant (statistically speaking) trend will be filtered,
-                                        i.e. all the p-values below a certain threshold (0.05 is used here)
+                @param only_significant:Bool: if true, only the significant (statistically speaking) trend will be
+                                        filtered, i.e. all the p-values below a certain threshold (0.05 is used here)
 
-                :param threshold        float: threshold for defining when the p-value determines a value which is
+                @param threshold:       float: threshold for defining when the p-value determines a value which is
                                         statistically significant.
                                         Default value = 0.05
                                         The p-value indicates the evidence against the null hypothesis, for instance for
                                         a p-value of 0.05 (i.e. 5%) there is a 5% of probability to commit a mistake in
-                                        rejectiong the null hypothesis, or in other words, there is a 95% of probability
+                                        rejecting the null hypothesis, or in other words, there is a 95% of probability
                                         that the null hypothesis is False (i.e. the data have a trend)
                                         Any p-value > threshold (common factor is 0.05) is considered NOT statistically
                                         significant, i.e. the evidence against the null hypothesis is weak.
 
 
-                ****************************************************************************************************************
+                ********************************************************************************************************
 
-                :Description:           The chunk-subdivision allows to reduce the amount of RAM required by the trend analysis,
-                                        the back side is that more computational time is need to complete the process, as some
-                                        time is also need to load the timeseries, split them in chunks and write them on a
-                                        temporary folder of local disk to be accessible in I/O during the full process.
+                :Description:           The chunk-subdivision allows to reduce the amount of RAM required by the trend
+                                        analysis, the back side is that more computational time is need to complete the
+                                        process, as some time is also need to load the timeseries, split them in chunks
+                                        and write them on a temporary folder of local disk to be accessible in I/O
+                                        during the full process.
 
                                         The entry point is represented by the TrendClass, member of
                                         src.apps.c3sf4p.f4p_utilities.pytrend.TrendStarter.py.
-                                        The method that trigger the beginning of the calculation is 'start_loop' which is in
-                                        charge of performing data acquisition, subdivision in chunks and start the parallel
-                                        computation. This latter rely on the joblib python library.
-                                        The parallel computation will run the function 'par_trend' (parallel-trend) located in
+                                        The method that trigger the beginning of the calculation is 'start_loop'
+                                        which is in charge of performing data acquisition, subdivision in chunks and
+                                        start the parallel computation.
+                                        This latter rely on the joblib python library.
+                                        The parallel computation will run the function
+                                        'par_trend' (parallel-trend) located in
 
                                         src.apps.c3sf4p.f4p_utilities.pytrend.utilities
 
                                         num-jobs times, assigning a different chunk to any job.
                                         This process is repeated until the total chunks are processed.
 
-                                        The par_trend function is ultimately also the entry point of the real core of the
-                                        processor, represented by the TrendAnalyser class belonging to
+                                        The par_trend function is ultimately also the entry point of the real core of
+                                        the processor, represented by the TrendAnalyser class belonging to
                                         src.apps.c3sf4p.f4p_utilities.pytrend.MK_trend.py
 
                                         This last piece of code is responsible to the the signal de-seasonal and
                                         the implementation of the Mann-Kendall method for trend calculation.
 
                                         ## more information can be found on the description of each specific method
-
 
                 """
         if self.dbg:
@@ -469,7 +475,7 @@ class Fitness4Purpose(object):
 
         for nd in range(len(self.lof)):
             num_partitions, num_jobs = self._optimise_trend_parameters(chunks=num_partitions, jobs=num_jobs, index=nd)
-            rd0 = RasterDataset(self.lof[nd][0])
+            rd0 = RasterDatasetCS(self.lof[nd][0])
             sn = rd0.sensor_code
             if self.dbg:
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
@@ -491,7 +497,7 @@ class Fitness4Purpose(object):
                 exit()
 
             trend_flag = 'Mann-Kendall-Trend'
-            dates = rd0.year + '-' + RasterDataset(self.lof[nd][-1]).year
+            dates = rd0.year + '-' + RasterDatasetCS(self.lof[nd][-1]).year
 
             # **********************************************************************************************************
             # TODO: define a trend name to be saved in a predefined folder-structure to not repeat the full calculation
@@ -553,14 +559,12 @@ class Fitness4Purpose(object):
                     # clean the temporal folder
                     os.removedirs(tmp_path)
 
-                rdw = RasterDataset(trend_name)
-
-                rdw.write_nc([slopes, intercepts, pvalues], ['slopes', 'intercepts', 'pvalues'],
-                             fill_value=np.nan, scale_factor=1, offset=0, dtype='float', zc=self.zc, mode='w')
+                write_nc(trend_name, [slopes, intercepts, pvalues], ['slopes', 'intercepts', 'pvalues'],
+                         fill_value=np.nan, scale_factor=1, offset=0, dtype='float', zc=self.zc, mode='w')
 
             else:
                 # calculaion already performed once. Trend file already exists.
-                rd = RasterDataset(trend_name)
+                rd = RasterDatasetCS(trend_name)
 
                 slopes = rd.get_data('slopes', subsample_coordinates=self.zc)
                 pvalues = rd.get_data('pvalues', subsample_coordinates=self.zc)
@@ -576,7 +580,8 @@ class Fitness4Purpose(object):
                 self._log_report(info, tag)
                 from src.apps.c3sf4p.f4p_plot_functions.plot_trend import graphical_render
 
-                graphical_render(slopes, )
+                graphical_render(slopes, title='Significant Slope ', threshold=np.percentile(slopes, 90), dbg=True,
+                                 logfile=self.logfile)
 
     def _log_report(self, info, tag):
         if not os.path.exists(self.logfile):

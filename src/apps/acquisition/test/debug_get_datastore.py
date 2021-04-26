@@ -4,6 +4,8 @@ from __future__ import absolute_import
 from __future__ import division
 
 from future import standard_library
+from pywt.tests import test_modes
+
 standard_library.install_aliases()
 from builtins import str
 import unittest
@@ -141,7 +143,10 @@ class TestGetEOS(unittest.TestCase):
                               frequency_id=frequency,
                               type='cds_api',
                               files_filter_expression=files_filter_expression,
-                              https_params='')
+                              https_params='',
+                              productcode='era5-monthly-sst',
+                              version='1.0'
+                              )
 
         # files_list = get_internet.build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         result = get_datastore.loop_get_datastore(test_one_source=internet_id, my_source=my_source)
@@ -192,7 +197,7 @@ class TestGetEOS(unittest.TestCase):
         sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
 
         ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
-                                                             datasource_descr, logger)
+                                                             datasource_descr, logger, test_mode=True)
 
 
     def debug_CDS_RFE_DAY_netcdf(self):
@@ -208,7 +213,7 @@ class TestGetEOS(unittest.TestCase):
         sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
 
         ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
-                                                             datasource_descr, logger)
+                                                             datasource_descr, logger, test_mode=True)
 
     def debug_IRI_PRCP_1Month_ingest_netcdf(self):
         internet_id = "IRI:NOAA:PRCP:MONTH"#'CDS:ERA5:REANALYSIS:SST:MONTH'
@@ -223,7 +228,7 @@ class TestGetEOS(unittest.TestCase):
         sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
 
         ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
-                                                             datasource_descr, logger)
+                                                             datasource_descr, logger, test_mode=True)
 
     def debug_CDS_SST_MONTH_netcdf(self):
         internet_id = "CDS:ERA5:REANALYSIS:SST:MONTH"
@@ -238,4 +243,4 @@ class TestGetEOS(unittest.TestCase):
         sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
 
         ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
-                                                             datasource_descr, logger)
+                                                             datasource_descr, logger, test_mode=True)

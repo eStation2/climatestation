@@ -10,7 +10,7 @@
 #  *************************************************************************    #
 # ###############################################################################
 """
-from src.apps.c3sf4p.read_raster import RasterDataset
+from src.lib.python.image_proc.read_write_raster import RasterDatasetCS
 import os
 import numpy as np
 from joblib import Parallel, delayed
@@ -83,7 +83,7 @@ class TrendClass(object):
         self.mask = None
 
         # Add a line to get the size of the matrix
-        rd = RasterDataset(file_list[0])
+        rd = RasterDatasetCS(file_list[0])
         self.size = rd.get_data(product, subsample_coordinates=self.zc).size
         self.shape = rd.get_data(product, subsample_coordinates=self.zc).shape
         self.step = self.size // np.square(self.p)
@@ -214,7 +214,7 @@ class TrendClass(object):
 
         self.mask = np.zeros_like(self.shape, dtype='uint8')
         for ind_f, f in enumerate(self.fl):
-            rd = RasterDataset(f)
+            rd = RasterDatasetCS(f)
             self.dt.append(rd.date)
             mask_element = rd.get_data(self.prod, subsample_coordinates=self.zc)
             mask_element[~np.isnan(mask_element)] = 1
@@ -232,7 +232,7 @@ class TrendClass(object):
             '''
             main_data = np.zeros([self.size, self.count], dtype='float')
             for ind_f, f in enumerate(self.fl):
-                rd = RasterDataset(f)
+                rd = RasterDatasetCS(f)
                 self.dt.append(rd.date)
                 main_data[:, ind_f] = rd.get_data(self.prod, subsample_coordinates=self.zc).flatten()
 
@@ -262,7 +262,7 @@ class TrendClass(object):
                     if n + 1 == self.num_loops:
                         i1 = None
                     for f in self.fl:
-                        rd = RasterDataset(f)
+                        rd = RasterDatasetCS(f)
                         dtmp = rd.get_data(self.prod, subsample_coordinates=self.zc).flatten()[i0:i1]
                         d = np.hstack([dchunk, dtmp])
                     np.save(dec_name, d)

@@ -1,7 +1,8 @@
 """
 # ###############################################################################
-# version:          R1.0.1                                                      #
-# created by:       F.Cappucci  --- fabrizio.cappucci@ext.ec.europa.eu          #
+# version:          R1.1.0                                                      #
+# created by:       F.CAPPUCCI  --- fabrizio.cappucci@ext.ec.europa.eu          #
+#                   V.VENKATACHALAM  --- vijay.venkatachalam@ext.ec.europa.eu   #
 # creation date:    25 Oct 2020                                                 #
 # property of:      JRC                                                         #
 # purpose:          main Class containing the functions for read and import     #
@@ -22,22 +23,17 @@ from osgeo import gdal, osr, gdalconst
 import datetime
 import numpy as np
 import os
-import re
 from datetime import date
-# try:
-#     from lib.python.metadata import SdsMetadata
-# except ModuleNotFoundError:
-#     SdsMetadata = None
 from lib.python.metadata import SdsMetadata
 from netCDF4 import Dataset
 from lib.python import mapset, functions
-from lib.python.image_proc import helpers_read_write_raster
 
-class RasterDataset(object):
 
-    def __init__(self, filename, product=None):
+class _ImportRasterDataset(object):
+
+    def __init__(self, filename=None, product=None):
         """
-        :param filename: filename of the raster file to read (can be either a geotiff or a netCDF file)
+        @param filename: filename of the raster file to read (can be either a geotiff or a netCDF file)
                         The routine uses the right method to read the file in relation to its file extension
 
 
@@ -72,19 +68,11 @@ class RasterDataset(object):
         self.do_extract = None
         self.neigh = None
         self.local_zc = None
-        # self.date = None
-        # self.year = None
-        # self.month = None
-        # self.day = None
-        # self.prod_code = None
-        # self.sensor_code = None
-        # self.date_long = None
         self.native_zc = None
         self.scale_factor = None
         self.fill_value = None
         self.add_offset = None
-        self.band = None
-        # self.frequency = None
+
         # Initialize the parameters for local site (punctual) extraction
         self.neigh = 0
         self.lat_offset = 0.  # used in _haversine formulae
@@ -92,42 +80,38 @@ class RasterDataset(object):
         self.filename = filename
         self.product = product
 
-        # # Added by Vijay for Irregular grid
-        # self.ds_lons_out = None
-        # self.ds_lats_out = None
-        # self.data = None
-        # Read relevant metadata fields only if file exists
-        try:
-            if self.filename is not None:
-                self.get_metadata_basic()
-        except Exception:  # general error handling, to be better refined in future (TODO!)
-            pass
+        if self.filename is not None:
+            try:
+                self._get_metadata_basic()
+            except Exception:  # general error handling, to be better refined in future (TODO!)
+                pass
+        self.gobj = None
 
     # Extract Data from a [C-Station] geotiff [or netcdf] file for the usage in C3SF4P
-    def get_data(self, band=None, subsample_coordinates=None, make_extraction=False, local_site_lat=None,
-                 local_site_lon=None, neighbors=0, mask_name=None, threshold=None):
+    def _get_data(self, product=None, subsample_coordinates=None, make_extraction=False, local_site_lat=None,
+                  local_site_lon=None, neighbors=0, mask_name=None, threshold=None):
         """
-        :param band:                    TYPE: string, this parameter is meaningful (i.e. should be specified) in case
+        @param product:                 TYPE: string, this parameter is meaningful (i.e. should be specified) in case
                                         of net-CDF multiband rester file.
-        :param subsample_coordinates:   TYPE:list, to be provided as [S, N, W, E] floating numbers. Defines a subsample
+        @param subsample_coordinates:   TYPE:list, to be provided as [S, N, W, E] floating numbers. Defines a subsample
                                         of the product in case a particular sub-region is required instead of the
                                         full-extension product
                                         Example: subsample_coordinates=[-30, -20, 15, 25]
 
-        :param make_extraction:         TYPE: Bool, True or False, enables local site extraction
+        @param make_extraction:         TYPE: Bool, True or False, enables local site extraction
 
-        :param local_site_lat:          TYPE: float, Latitude of the local site to extract
+        @param local_site_lat:          TYPE: float, Latitude of the local site to extract
 
-        :param local_site_lon:          TYPE: float, Longitude of the local site to extract
+        @param local_site_lon:          TYPE: float, Longitude of the local site to extract
 
-        :param neighbors:               TYPE: int, integer number: number of neighbor around local site position.
+        @param neighbors:               TYPE: int, integer number: number of neighbor around local site position.
                                         EXAMPLE: if neighbors=1 ==> a matrix of 3x3 will be returned
                                                  if neighbors=2 ==> a matrix of 5x5 will be returned
                                                  in general: neighbors=n ==> a matrix of (2n+1)x(2n+1) will be returned
 
-        :param mask_name:               TYPE: str, Name of the layer containing the filter mask (if any)
+        @param mask_name:               TYPE: str, Name of the layer containing the filter mask (if any)
 
-        :param threshold:               TYPE: int/float [...TBD], Threshold to be applied to the product
+        @param threshold:               TYPE: int/float [...TBD], Threshold to be applied to the product
 
         TODO: verify that the mask parameter is actually needed in ClimateStation, otherwise get rid of it!
 
@@ -146,43 +130,30 @@ class RasterDataset(object):
         ***********************************************************************************************************
 
         """
-        self.band = band
+        self.product = product
         self.mask_name = mask_name
         self.threshold = threshold
-        if self.zc is None:  #TODO check with fabrizio if he with this case
+        if self.zc is None:  # TODO check with fabrizio if he with this case
             self.zc = subsample_coordinates
         self.do_extract = make_extraction
         self.neigh = neighbors
         self.local_zc = [local_site_lat, local_site_lon]
-        if self.raster_type == 'geotif':
-            return self._get_geotiff()
-        else:
-            return self._get_netcdf()
 
+        data = None
 
+        if self.filename is not None:
+            self.gobj = self._get_GDAL_dataset()
 
-    # Used by get_data to read values
-    def _get_netcdf(self):
-        """
-        read the band layer and return it as numpy array
-        the function is based on gdal
-        :return:
-        """
-        # if self.band is None:
-        #     fid = self.filename
-        # else:
-        #     fid = 'NETCDF:' + '"' + self.filename + '":' + self.band
-        gobj = self._get_GDAL_dataset()
-        self.meta = gobj.GetMetadata()
-        # data_type, fv, sf, add_of, vmin, vmax = self._get_netcdf_attr()
-        _data = np.array(gobj.ReadAsArray())
+            if self.raster_type == 'geotif':
+                data = self._get_geotiff()
+            else:
+                data = self._get_netcdf()
 
-        return self._process_data(_data, gobj)
+        return data
 
     # Open GDAL ds
     def _get_GDAL_dataset(self):
-        # if self.band is not None:
-        #     fid = 'NETCDF:' + '"' + self.filename + '":' + self.band
+
         if self.product is not None:
             fid = 'NETCDF:' + '"' + self.filename + '":' + self.product
         else:
@@ -190,15 +161,32 @@ class RasterDataset(object):
         gobj = gdal.Open(fid)
         return gobj
 
-    # Rescale data using factor/offset [clip if needed]
-    def _process_data(self, data, gobj, already_extracted=False):
+    def _get_netcdf(self):
         """
-        :param data: numpy array of "raw" data
-        :param gobj: gdal_object of type gdal.Open()
-        :return: scientific dataset (i.e. data having physical meanings)
-                    """
-        self.data_type = gobj.ReadAsArray().dtype
-        # if self.raster_type == 'geotif':
+        read the band layer and return it as numpy array
+        the function is based on gdal
+        :return:
+        """
+        self.meta = self.gobj.GetMetadata()
+        _data = np.squeeze(np.array(self.gobj.ReadAsArray()))
+
+        return self._process_data(_data)
+
+    def _get_geotiff(self):
+
+        _data = np.squeeze(np.array(self.gobj.GetRasterBand(1).ReadAsArray()))
+        return self._process_data(_data)
+
+    # Rescale data using factor/offset [clip if needed]
+    def _process_data(self, data, gobj=None, already_extracted=False):
+        """
+        @param data: numpy array of "raw" data
+        @param gobj: gdal_object of type gdal.Open()
+        @return: scientific dataset (i.e. data having physical meanings)
+        """
+
+        if gobj is None:
+            gobj = self.gobj
 
         i_i = 0
         i_f = None
@@ -214,6 +202,7 @@ class RasterDataset(object):
                     i_i, i_f, j_i, j_f = self._subregion_extraction([gobj.RasterYSize, gobj.RasterXSize])
 
         data = data[i_i:i_f, j_i:j_f]
+        # TODO Manage data_type for float32, 64 etc
         if data_type != 'float':
             data = np.array(data, dtype='float')
 
@@ -225,35 +214,6 @@ class RasterDataset(object):
         if self.add_offset is not None:
             data += self.add_offset
         self.data = data
-        # else:
-        #     if self.ds_lats is None and self.ds_lats is None:
-        #         self._get_netcdf_dim()
-        #     i_i = 0
-        #     i_f = None
-        #     j_i = 0
-        #     j_f = None
-        #     # self.data_type = gobj.ReadAsArray().dtype
-        #     # Get target_bbox indices and assign output lat and long array
-        #     if self.do_extract:  # if true, extract a point (or a neighbor of points)
-        #         i_i, i_f, j_i, j_f = self._local_extraction([gobj.RasterYSize, gobj.RasterXSize])
-        #         # data = data[i_i:i_f, j_i:j_f]
-        #     else:
-        #         if self.zc not in [None, self.native_zc]:  # if verified, extract a sub-region of data
-        #             i_i, i_f, j_i, j_f = self.get_indices_lats_lons()
-        #             # Do the extraction
-        #             # data = self.netcdf_var_extraction(data, i_i, i_f, j_i, j_f)
-        #     data = data[i_i:i_f, j_i:j_f]
-        #     if self.data_type != 'float':
-        #         data = np.array(data, dtype='float')
-        #     # physical conversion
-        #     if self.fill_value is not None:
-        #         data[data == self.fill_value] = np.nan
-        #     if self.scale_factor is not None:
-        #         data *= self.scale_factor
-        #     if self.add_offset is not None:
-        #         data += self.add_offset
-        #
-        #     self.data = data
 
         return data
 
@@ -368,25 +328,6 @@ class RasterDataset(object):
 
         lats_boundaries = np.arange(self.native_zc[0], self.native_zc[1], step_lat)
 
-        """
-        if lat to extract coincides with a boundary then the situation is undetermined. 
-        Example: 
-        one would like to extract the point of the lat, lon coordinates = (0., 0.) in a global raster 
-        (-180W, 180E,-90S, 90N) at 0.5 deg spatial_resolution. The point 0., 0. is clearly lying on the border 
-        between the four points (lat, lon)**: 
-
-                (0.25, -0.25) | (0.25, 0.25)
-                --------------+--------------   the + sign correspond to the point (0., 0.)
-                (-0.25, -0.25)| (-0.25, 0.25)
-
-        Notice that the distance fom these points to (0, 0) is the same!
-        Different codes give different results! for instance python would extract the point (0.25, -0.25)
-        IDL the point (-0.25, -0.25) etc...
-        Since this is an undetermined situation, in order to be consistent with IDL, a small offset is subtracted to the 
-        extraction latitude forcing the code to extract (-0.25, -0.25).     
-                -------
-                ** python is top-bottom oriented
-        """
         if self.local_zc[0] in lats_boundaries:
             self.lat_offset -= hb_lat / size[0]
         i = np.argmin(abs(lats - np.array(self.local_zc[0] + self.lat_offset)))
@@ -399,14 +340,12 @@ class RasterDataset(object):
         :return i, j index of region
         """
         zone = self.zc
-        data_cut = None
 
         step = (self.native_zc[1] - self.native_zc[0]) / size[0]
 
         latitude = np.arange(self.native_zc[0] + step/2, self.native_zc[1] + step/2, step)
         longitude = np.arange(self.native_zc[2] + step/2, self.native_zc[3] + step/2, step)
         add_lat = 1
-        # print 'invert lat', invert_lat
 
         ind_lat_min = np.argmin(abs(np.array(latitude) - zone[0]))
         ind_lat_max = np.argmin(abs(np.array(latitude) - zone[1])) + add_lat
@@ -424,24 +363,18 @@ class RasterDataset(object):
 
         return ind_lat_min, ind_lat_max, ind_lon_min, ind_lon_max
 
-    def _get_geotiff(self):
-
-        gobj = gdal.Open(self.filename)
-        _data = np.array(gobj.GetRasterBand(1).ReadAsArray())
-        return self._process_data(_data, gobj)
-
     # TODO: Check if it is used
-    def apply_mask(self, d):
+    def _apply_mask(self, d):
         thr = self.threshold
         if thr is None:
             thr = 5
-        gobj = gdal.Open(self.mask_name)
-        mask = gobj.GetRasterBand(1).ReadAsArray()
+        mkobj = gdal.Open(self.mask_name)
+        mask = mkobj.GetRasterBand(1).ReadAsArray()
 
         d[mask != thr] = np.nan
         return d
 
-    def get_coordinates(self):
+    def _get_coordinates(self):
         if self.raster_type == 'geotif':
             gobj = gdal.Open(self.filename)
             old_cs = osr.SpatialReference()
@@ -524,9 +457,8 @@ class RasterDataset(object):
         #         d2 = ds[dim].shape[0]
         # return [d1, d2]
 
-
     # Get the Basic metadata information( nodata, scaling_factor, offset) from the file using GDAL
-    def get_metadata_basic(self):
+    def _get_metadata_basic(self):
         dataset = self._get_GDAL_dataset()
         metadata = dataset.GetMetadata()
 
@@ -553,24 +485,30 @@ def write_nc(file_name, data, dataset_tag, dataset_long_name=None, fill_value=No
              valid_range=None, dtype=None, zc=None, mode=None, history=None, lats=None, lons=None, global_attrs=None,
              compression=9, write_CS_metadata=None, do_out_rescaling=False):
     """
-    :param do_out_rescaling:
-    :param file_name:           output full name
-    :param data:                datasets to be write to, list
-    :param dataset_tag:         tag name associated to each dataset in the dataset list
-    :param dataset_long_name:   long name associated to each dataset in the dataset list
-    :param fill_value:          fill_value, default = np.nan
-    :param scale_factor:        scale_factor, default = 1.
-    :param offset:              offset, default = 0
-    :param valid_range:         valid_range, default [data_min, data_max]
-    :param dtype:               data type, default = float
-    :param zc:                  geographic extensions, default = [-90S, 90N, -180W, 180E]
-    :param mode:                netCDF4 open mode, default = w (write), can be either:
+    @param do_out_rescaling:
+    @param file_name:           output full name
+    @param data:                datasets to be write to, list
+    @param dataset_tag:         tag name associated to each dataset in the dataset list
+    @param dataset_long_name:   long name associated to each dataset in the dataset list
+    @param fill_value:          fill_value, default = np.nan
+    @param scale_factor:        scale_factor, default = 1.
+    @param offset:              offset, default = 0
+    @param valid_range:         valid_range, default [data_min, data_max]
+    @param dtype:               data type, default = float
+    @param zc:                  geographic extensions, default = [-90S, 90N, -180W, 180E]
+    @param mode:                netCDF4 open mode, default = w (write), can be either:
                                     w (write mode) to create a new file, over-write existing one
                                     r (read mode) to open an existing file read-only
                                     r+ (append mode) to open an existing file and change its contents
 
-    :param history:             resumes the principal characteristics of the netCDF dataset, these will be
+    @param history:             resumes the principal characteristics of the netCDF dataset, these will be
                                 written on the global attributes only if the 'w' mode is selected
+    @param lats:                latitude array
+    @param lons:                longitude array
+    @param global_attrs:        Attributes to be written at global level
+    @param compression:         netCDF compression level
+    @param write_CS_metadata
+
 
     :return:
     """
@@ -685,7 +623,7 @@ def write_nc(file_name, data, dataset_tag, dataset_long_name=None, fill_value=No
     dataset.close()
 
 
-class RasterDatasetCS(RasterDataset):
+class RasterDatasetCS(_ImportRasterDataset):
     def __init__(self, filename=None, product=None):
         """
         :param filename: filename of the raster file to read (can be either a geotif or a netCDF file)
@@ -706,32 +644,20 @@ class RasterDatasetCS(RasterDataset):
         self.year = None
         self.month = None
         self.day = None
+        self.hour = None
         self.prod_code = None
         self.sensor_code = None
         self.date_long = None
         self.frequency = None
-        # Initialize the parameters for local site (punctual) extraction
-        # self.neigh = 0
-        # self.lat_offset = 0.  # used in _haversine formulae
-        # self.lon_offset = 0.
-        # self.filename = filename
-        # self.product = product
+        self.description = None
+        self.version = None
 
-        # Added by Vijay for Irregular grid
-        # self.ds_lons_out = None
-        # self.ds_lats_out = None
-        # self.data = None
-        # Read relevant metadata fields
-        try:
-            if self.filename is not None:
-                self.get_cs_metadata()  # This work only with Climatestation where metadata is already written
-        except Exception:  # general error handling, to be better refined in future (TODO!)
-            pass
+        self.get_cs_metadata()  # This work only with ClimateStation where metadata is already written
 
-    # Get the climatestation metadata information from the file using cs metadata
+    # Get the ClimateStation metadata information from the file using cs metadata
     def get_cs_metadata(self):
         # get the boundary coordinates
-        self.get_coordinates()
+        self._get_coordinates()
 
         # TODO when required, modify eStation_* with ClimateStation_*
         metadata_climatstation = SdsMetadata()
@@ -762,8 +688,39 @@ class RasterDatasetCS(RasterDataset):
 
         self.date_long = date(int(self.year), int(self.month), int(self.day)).strftime('%Y-%b-%d')
 
+    def get_data(self, band=None, subsample_coordinates=None, make_extraction=False, local_site_lat=None,
+                 local_site_lon=None, neighbors=0, mask_name=None, threshold=None):
+        """
+        @param band:                    TYPE: string, this parameter is meaningful (i.e. should be specified) in case
+                                        of net-CDF multiband rester file.
+        @param subsample_coordinates:   TYPE:list, to be provided as [S, N, W, E] floating numbers. Defines a subsample
+                                        of the product in case a particular sub-region is required instead of the
+                                        full-extension product
+                                        Example: subsample_coordinates=[-30, -20, 15, 25]
 
-class RasterDatasetIngest(RasterDataset):
+        @param make_extraction:         TYPE: Bool, True or False, enables local site extraction
+
+        @param local_site_lat:          TYPE: float, Latitude of the local site to extract
+
+        @param local_site_lon:          TYPE: float, Longitude of the local site to extract
+
+        @param neighbors:               TYPE: int, integer number: number of neighbor around local site position.
+                                        EXAMPLE: if neighbors=1 ==> a matrix of 3x3 will be returned
+                                                 if neighbors=2 ==> a matrix of 5x5 will be returned
+                                                 in general: neighbors=n ==> a matrix of (2n+1)x(2n+1) will be returned
+
+        @param mask_name:               TYPE: str, Name of the layer containing the filter mask (if any)
+
+        @param threshold:               TYPE: int/float [...TBD], Threshold to be applied to the product
+        """
+
+        return(self._get_data(product=band, subsample_coordinates=subsample_coordinates,
+                              make_extraction=make_extraction, local_site_lat=local_site_lat,
+                              local_site_lon=local_site_lon, neighbors=neighbors, mask_name=mask_name,
+                              threshold=threshold))
+
+
+class RasterDatasetIngest(_ImportRasterDataset):
     def __init__(self, filename, subproduct, datasource):
         """
         :param filename: filename of the raster file to read (can be either a geotif or a netCDF file)
@@ -807,15 +764,11 @@ class RasterDatasetIngest(RasterDataset):
         preprocess_status = False
         preproc_type = self.preproc_type
         if preproc_type is None and preproc_type == 'None' and preproc_type == '""' and preproc_type == "''" and preproc_type == '':
-            self.get_data(band=self.product)
+            self._get_data(product=self.product)
 
         elif preproc_type == 'NETCDF_IRI_CDS':
-            # raster = RasterDataset(filename=input_file)
-            # SET CS subproduct parameters into the Raster class
-            # raster.set_CS_subproduct_parameter(subproduct, target_mapset_code=mapsetcode)
-            # data_numpy_array = raster.get_data() # conversion to physical value by applying nodatavalue
              # conversion to physical value by applying nodatavalue
-            native_dataset =  self._get_GDAL_dataset()
+            native_dataset = self._get_GDAL_dataset()
             # Clip the native dataset to target bbox ? or change resolution
             pre_processed_dataset = do_clip_resample_reproject(native_dataset, target_mapset=self.target_mapset,
                                                                native_mapset=self.native_mapset)
@@ -824,7 +777,7 @@ class RasterDatasetIngest(RasterDataset):
             pre_processed_data_array = np.array(pre_processed_dataset.ReadAsArray())
 
             # rescale and assign processed array to rasterDataset object
-            self._process_data(pre_processed_data_array, pre_processed_dataset, already_extracted=True)
+            self._process_data(pre_processed_data_array, gobj=pre_processed_dataset, already_extracted=True)
             pre_processed_dataset = None
             native_dataset = None
             pre_processed_data_array= None
@@ -1069,14 +1022,15 @@ def _create_mapset(mapsetcode):
     mapsetObj.assigndb(mapsetcode)
     return mapsetObj
 
+
 # This do_clip_resample_reproject is basically used for 3 purpose
 # 1. Assign Projection information to the netcdf dataset since this information is available as lat lon
 # 2. Clip the target bounding box (target bbox is taken from target mapset)
 # 3. Resampling or resolution change (conversion of resolution eg.10km to 1km)
 def do_clip_resample_reproject(orig_ds, target_mapset, native_mapset=None):
     """
-    :param target mapset   -    eStation variable to get bbox etc of target data
-    :param native mapset   -    eStation variable to get bbox etc of native data
+    @param target_mapset   -    eStation variable to get bbox etc of target data
+    @param native_mapset   -    eStation variable to get bbox etc of native data
     :param orig_ds  -    native file which is read as dataset
     :return: Memory dataset with target projection, bbox, resolution information
     ***********************************************************************************************************
@@ -1125,8 +1079,10 @@ def do_clip_resample_reproject(orig_ds, target_mapset, native_mapset=None):
     if res != 0:
         msg = "ReprojectImage() failed , error value %d" % res
         raise Exception(msg)
-    # res = gdal.Warp(mem_ds, orig_ds, dstSRS=orig_cs,outputBounds=target_mapset.bbox, resampleAlg=gdalconst.GRA_NearestNeighbour)
+    # res = gdal.Warp(mem_ds, orig_ds, dstSRS=orig_cs,outputBounds=target_mapset.bbox,
+    # resampleAlg=gdalconst.GRA_NearestNeighbour)
     return mem_ds
+
 
 # Set Climate station defined METADATA for netcdf attribute
 def set_CS_ncattr(CS_metadata, var):
@@ -1135,6 +1091,7 @@ def set_CS_ncattr(CS_metadata, var):
     except:
         msg ='Error in assigning metadata .. Continue'
         raise Exception(msg)
+
 
 # Set the coordinate system for NETCDF (also for GTIFF if needed)
 def _set_coordinate_system(ds):

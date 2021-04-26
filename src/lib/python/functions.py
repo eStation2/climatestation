@@ -1845,7 +1845,37 @@ def dump_obj_to_pickle(obj, filename):
     pickle.dump(obj, dump_file)
     dump_file.close()
 
+######################################################################################
+#  Dump an object info a file as Json
+#
+def dump_obj_to_json(obj, filename):
+    dump_file = open(filename, 'w')
+    json.dump(obj, dump_file, indent=2)
+    dump_file.close()
 
+
+######################################################################################
+#  Restore an object from a file  if the file exist using JSON
+#  If file does not exist, do not alter the passed object
+#  If file cannot be loaded (corrupted), delete it (and return the passed object)
+#
+def restore_obj_from_json(obj, filename):
+    # Restore/Create Info
+    if os.path.exists(filename):
+        try:
+            dump_file_info = open(filename, 'r')
+            tmp_object = json.load(dump_file_info)
+            logger.debug("Dump file info loaded from %s.", filename)
+            obj = tmp_object
+        except:
+            logger.debug("Dump file %s can't be loaded, the file will be removed.", filename)
+            os.remove(filename)
+    # else:
+    # Create an empty file in the tmp dir
+    # logger.debug("Dump file %s does not exist", filename)
+    # open(filename, 'a').close()
+
+    return obj
 ######################################################################################
 #  Restore an object from a file (pickle serialization), if the file exist
 #  If file does not exist, do not alter the passed object

@@ -11,16 +11,17 @@
 # ###############################################################################
 """
 import numpy as np
-from src.apps.c3sf4p.read_raster import RasterDataset
+from src.lib.python.image_proc.read_write_raster import RasterDatasetCS
+import os
 
 
 def get_spatial_consistency(data_in):
     """
-    :param data_in:     multidimensional np.array: if size = np.shape(data_in) then:
+    @param data_in:     multidimensional np.array: if size = np.shape(data_in) then:
                             size[0] = n. of different dataset for which space consistency is required
                             size[1] = n. of time intervals for each dataset
                             size[2], size[3] = dimension of each 2D data matrix
-    :return: data_out:  with the same shape of dat_in; but! each pixel of each matrix will have a value different
+    @return: data_out:  with the same shape of dat_in; but! each pixel of each matrix will have a value different
                         from nan if and only if the value of the same pixel in each of the original matrices used for
                         the calculation is different from nan.
     """
@@ -40,16 +41,33 @@ def get_spatial_consistency(data_in):
 def par_hov(lof, product, k):
     """
     single element of parallel calculation of hovmoller matrix with index k
-    :param lof:         list of files
-    :param product:     band name
-    :param k:           index representing the element of filelist (lof) to handle within the parallel loop
+    @param lof:         list of files
+    @param product:     band name
+    @param k:           index representing the element of filelist (lof) to handle within the parallel loop
     """
     nax = 1  # latitude!
     out = list()
 
-    rd = RasterDataset(lof[k])
+    rd = RasterDatasetCS(lof[k])
     data_tmp = rd.get_data(product)
     # average value along longitude, d is an array with lengh==n.pixels along latitude
     d = np.squeeze(np.nanmean(data_tmp, axis=nax))
     out.append([d, k])
     return out
+
+
+def log_report(info, tag, logfile):
+    """
+    @param info:    STRING: carrying on the information about name of .py file and relative line of debug
+    @param tag:     STRING: describes what is happening at the level of "info"
+    @param logfile: STRING: full path of log file
+    @return:
+    """
+    if not os.path.exists(logfile):
+        fid = open(logfile, 'w')
+    else:
+        fid = open(logfile, 'r+')
+
+    msg = info + ': ' + tag + '\n'
+    fid.writelines(msg)
+    fid.close()

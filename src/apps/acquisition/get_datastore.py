@@ -58,7 +58,9 @@ if not os.path.isdir(es_constants.ingest_error_dir):
 # tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.base_tmp_dir)
 echo_query = False
 user_def_sleep = es_constants.es2globals['poll_frequency']
-
+es_constants.processed_list_datastore_dir = '/data/static_data/get_lists/get_datastore'
+es_constants.get_datastore_processed_list_prefix = es_constants.processed_list_datastore_dir+'/get_datastore_processed_list_'
+es_constants.get_datastore_ongoing_list_prefix = es_constants.processed_list_datastore_dir+'/get_datastore_ongoing_list_'
 
 #   ---------------------------------------------------------------------------
 #   Functions
@@ -77,7 +79,7 @@ def signal_handler(signal, frame):
 
     logger.info("Length of processed list is %i" % len(processed_list))
 
-    # functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+    # functions.dump_obj_to_json(processed_list, processed_list_filename)
     functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
     print('Exit ' + sys.argv[0])
@@ -186,8 +188,8 @@ def loop_get_datastore(dry_run=False, test_one_source=False, my_source=None):
             else:
                 exit(1)
 
-        if not os.path.exists(es_constants.processed_list_int_dir):
-            os.mkdir(es_constants.processed_list_int_dir)
+        if not os.path.exists(es_constants.processed_list_datastore_dir):
+            os.mkdir(es_constants.processed_list_datastore_dir)
 
         while b_loop:
 
@@ -232,13 +234,13 @@ def loop_get_datastore(dry_run=False, test_one_source=False, my_source=None):
                     if sys.platform == 'win32':
                         internet_id = str(datastore_source.internet_id).replace(':', '_')
                     else:
-                        internet_id = str(datastore_source.internet_id)
+                        internet_id = str(datastore_source.internet_id).replace(":", "_")
 
                     logger_spec = log.my_logger('apps.get_internet.' + internet_id)
                     logger.info("Processing internet source  %s.", datastore_source.descriptive_name)
 
                     # Create objects for list and info
-                    processed_info_filename = es_constants.get_internet_processed_list_prefix + str(
+                    processed_info_filename = es_constants.get_datastore_processed_list_prefix + str(
                         internet_id) + '.info'
 
                     # Restore/Create Info
@@ -263,8 +265,8 @@ def loop_get_datastore(dry_run=False, test_one_source=False, my_source=None):
                         # Restore/Create List
                         processed_list = []
                         if not do_not_consider_processed_list:
-                            processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_id + '.list'
-                            # processed_list = functions.restore_obj_from_pickle(processed_list,
+                            processed_list_filename = es_constants.get_datastore_processed_list_prefix + internet_id + '.list'
+                            # processed_list = functions.restore_obj_from_json(processed_list,
                             #                                                    processed_list_filename)
 
                         processed_info['time_latest_exec'] = datetime.datetime.now()
@@ -303,7 +305,7 @@ def loop_get_datastore(dry_run=False, test_one_source=False, my_source=None):
 
 
                         if not dry_run:
-                            # functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                            # functions.dump_obj_to_json(processed_list, processed_list_filename)
                             functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
                     # if test_one_source:
@@ -353,13 +355,13 @@ def cds_api_loop_internet(datastore_source):
         template_paramater = datastore_source.include_files_expression
 
     ongoing_list = []
-    ongoing_list_filename = es_constants.get_internet_processed_list_prefix + str(
-        datastore_source.internet_id) + '_Ongoing' + '.list'
-    ongoing_list = functions.restore_obj_from_pickle(ongoing_list, ongoing_list_filename)
+    ongoing_list_filename = es_constants.get_datastore_ongoing_list_prefix + str(
+        datastore_source.internet_id.replace(":", "_")) + '.list'
+    ongoing_list = functions.restore_obj_from_json(ongoing_list, ongoing_list_filename)
 
     processed_list = []
-    processed_list_filename = es_constants.get_internet_processed_list_prefix + datastore_source.internet_id + '.list'
-    processed_list = functions.restore_obj_from_pickle(processed_list,
+    processed_list_filename = es_constants.get_datastore_processed_list_prefix + datastore_source.internet_id.replace(":", "_") + '.list'
+    processed_list = functions.restore_obj_from_json(processed_list,
                                                        processed_list_filename)
 
     try:
@@ -402,12 +404,12 @@ def cds_api_loop_internet(datastore_source):
 
                         if created_ongoing_request_id is not None:
                             ongoing_list.append(filename+":"+created_ongoing_request_id)
-                            functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                            functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
                     except:
                         logger_spec.warning(
                             "Problem while creating Job request to CDS: %s.", filename)
                         b_error = True
-        # functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+        # functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
         if len(ongoing_list) > 0:
             logger_spec.info("Loop over the downloadable list files.")
             # Current list and ongoing list in format (Datetime:ResourceID:variable)
@@ -436,9 +438,9 @@ def cds_api_loop_internet(datastore_source):
                             logger_spec.info("Ingesting : " + str(ongoing))
                             status = cds_api.ingest_netcdf_cds(datastore_source, target_path, processed_item)
                             processed_list.append(processed_item)  # Add the processed list only with datetime, resourceid_product_type and variable
-                            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                            functions.dump_obj_to_json(processed_list, processed_list_filename)
                             ongoing_list.remove(ongoing)
-                            functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                            functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
                             deleted = cds_api.delete_cds_task(datastore_source.url, ongoing_request_id, usr_pwd, datastore_source.https_params)
                             if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
                                 logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
@@ -457,9 +459,9 @@ def cds_api_loop_internet(datastore_source):
                         logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
                     else:
                         ongoing_list.remove(ongoing)
-                        functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
-        functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
-        functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                        functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
+        functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
+        functions.dump_obj_to_json(processed_list, processed_list_filename)
 
     except:
         logger.error("Error in CDS datastore service. Continue")
@@ -491,8 +493,8 @@ def iri_api_loop_internet(internet_source):
     internet_url = str(internet_source.url)
 
     # processed_list = []
-    # processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_source.internet_id + '.list'
-    # processed_list = functions.restore_obj_from_pickle(processed_list,
+    # processed_list_filename = es_constants.get_datastore_processed_list_prefix + internet_source.internet_id.replace(":", "_") + '.list'
+    # processed_list = functions.restore_obj_from_json(processed_list,
     # processed_list_filename)
     try:
         # Check if template is dict or string them create resources_parameters
@@ -517,7 +519,7 @@ def iri_api_loop_internet(internet_source):
         # Dates defined are dynamic not based on the configuration file
         iri_api.process_list_matching_url(datasource_descr, product, subproducts, dates)
 
-        # functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+        # functions.dump_obj_to_json(processed_list, processed_list_filename)
 
     except:
         logger.error("Error in IRI datastore service. Continue")

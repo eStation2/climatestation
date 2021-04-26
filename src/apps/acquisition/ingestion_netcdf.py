@@ -153,13 +153,6 @@ def ingestion_post_processing(composed_file_list, in_date, product, datasource_d
             # trg_mapset = ingest_dataset.target_mapset
             # trg_mapset.assigndb(subproduct['mapsetcode'])
 
-            # #Rescaling
-            # if False:
-            #     # Do physical rescaling
-            #     # Apply rescale to data
-            #     # scaled_data = ingestion_ingest_file.rescale_data(out_data, in_scale_factor, in_offset, product_in_info, product_out_info, out_data_type_numpy, my_logger)
-            #     logger.info('Doing physical rescaling for netcdf')
-
             # Get output product full filename with product
             output_path_filename = get_output_path_filename(datasource_descr, product, subproduct, in_date)
 
@@ -276,32 +269,6 @@ def ingestion_pre_process(datasource_descr, subproducts, input_file, tmpdir, my_
 #
 #     return do_ingest_source
 
-
-#########################################################################################################
-###################### Get Subproducts associated with ingestion and datasource #########################
-## Goes in error if specific datasource is not associated with subproducts eg. WSI crop & Pasture #######
-#########################################################################################################
-# def get_subproduct(ingest, product_in_info, datasource_descr_id):
-#     sprod=None
-#     try:
-#         re_process = product_in_info.re_process
-#         re_extract = product_in_info.re_extract
-#         nodata_value = product_in_info.no_data
-#         sprod = {'subproduct': ingest.subproductcode,
-#                  'mapsetcode': ingest.mapsetcode,
-#                  're_extract': re_extract,
-#                  're_process': re_process,
-#                  'nodata': nodata_value}
-#         # subproducts.append(sprod)
-#         return sprod
-#     except:
-#         # What to return here?
-#         logger.warning("Subproduct %s not defined for source %s" % (
-#             ingest.subproductcode, datasource_descr_id))
-#     finally:
-#         return sprod
-
-
 # Store native files
 def store_native_files(product, date_fileslist, logger_spec):
     # Special case for mesa-proc @ JRC
@@ -356,7 +323,8 @@ def assign_metadata_generic(product, subproduct, mapset_id, out_date_str_final, 
 
     return sds_meta
 
-class IngestionCS():
+# Not used currently
+class Ingestion():
     def __init__(self, product, subproduct, datasource, input_file, in_date=None):
         """
         :param product: CS product with code and version as object
@@ -381,42 +349,12 @@ class IngestionCS():
         # self.productcode=None
         # self.version=None
 
-        self.date_format=None
-        self.native_mapset=None
-        self.preproc_type=None
-
-        self.in_scale_factor=None
-        self.in_fill_value=None
-        self.in_add_offset=None
-        self.in_var=None
-        self.target_mapset=None
-        self.subproductcode=None
-
-        self.out_scale_factor=None
-        self.out_fill_value=None
-        self.out_add_offset=None
-        self.out_band=None
-
     #     Initialize the needed variable to read raster dataset
     #     self._init_variables()
     #
     #     if self.in_filename is not None:
     #         self.read_Rasterdata_from_file(self.in_filename,variable=self.in_var)
 
-
-    # def _init_variables(self):
-    #     if self.product_in_info_ingestion is not None:
-    #         self.in_scale_factor = self.product_in_info_ingestion['in_scale_factor']
-    #         self.in_fill_value = self.product_in_info_ingestion['nodata']
-    #         self.in_add_offset = self.product_in_info_ingestion['in_offset']
-    #         self.in_var = self.product_in_info_ingestion['re_extract']
-    #         target_mapset_code = self.product_in_info_ingestion['mapsetcode']
-    #         self.target_mapset = create_mapset(target_mapset_code)
-    #
-    #     if self.datasource is not None:
-    #         self.preproc_type = self.datasource.preproc_type
-    #         native_mapset_code = self.datasource.native_mapset
-    #         self.native_mapset = create_mapset(native_mapset_code)
 
     # Read the raster dataset of the native input file
     def read_Rasterdata_from_file(self, filename, variable=None):
@@ -441,37 +379,3 @@ class IngestionCS():
             rasterDataset.add_offset = self.in_add_offset
         # rasterDataset.band = self.in_var
 
-    # def preprocess(self):
-    #     if self.rasterDataset is None:
-    #         self.read_Rasterdata_from_file(self.in_filename, variable=self.in_var)
-    #
-    #     rasterDataset = self.rasterDataset
-    #
-    #     preproc_type = self.preproc_type
-    #     if preproc_type is None and preproc_type == 'None' and preproc_type == '""' and preproc_type == "''" and preproc_type == '':
-    #         rasterDataset.get_data(band=self.in_var)
-    #
-    #     elif preproc_type == 'NETCDF_IRI_CDS':
-    #         # raster = RasterDataset(filename=input_file)
-    #         # SET CS subproduct parameters into the Raster class
-    #         # raster.set_CS_subproduct_parameter(subproduct, target_mapset_code=mapsetcode)
-    #         # data_numpy_array = raster.get_data() # conversion to physical value by applying nodatavalue
-    #          # conversion to physical value by applying nodatavalue
-    #         native_dataset =  rasterDataset._get_GDAL_dataset()
-    #         # Clip the native dataset to target bbox ? or change resolution
-    #         pre_processed_dataset = do_clip_resample_reproject(native_dataset, target_mapset=self.target_mapset,
-    #                                                            native_mapset=self.native_mapset)
-    #         # pre_proccessed_dataset = self.raster_clip_bbox(self.zc, setSpatialRef=True)
-    #         # Apply input scaling factor offset nodata and get physical value data
-    #         pre_processed_data_array = np.array(pre_processed_dataset.ReadAsArray())
-    #
-    #         # rescale and assign processed array to rasterDataset object
-    #         rasterDataset._process_data(pre_processed_data_array, pre_processed_dataset, already_extracted=True)
-    #
-    #     elif preproc_type == 'NETCDF_IRREGULAR_GRID':
-    #         # self.set_CS_subproduct_parameter(subproduct, mapsetcode)
-    #         rasterDataset._get_netcdf()
-    #
-    #     else:
-    #         print('Preproc_type not recognized:[%s] Check in DB table. Exit' % preproc_type)
-    #         rasterDataset = None
