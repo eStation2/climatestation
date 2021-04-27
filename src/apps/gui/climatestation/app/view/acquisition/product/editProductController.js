@@ -84,7 +84,7 @@ Ext.define('climatestation.view.acquisition.product.editProductController', {
 
         let selectdatasourcetypeWin = Ext.create('Ext.window.Window', {
             title: climatestation.Utils.getTranslation('datasourcetype'),   // 'Data Source Type',
-            id: 'selectdatasourcetypeWin',
+            reference: 'selectdatasourcetypeWin',
             titleAlign: 'center',
             modal: true,
             closable: true,
@@ -97,15 +97,15 @@ Ext.define('climatestation.view.acquisition.product.editProductController', {
             viewConfig: {forceFit: true},
             bbar: ['->', {
                 xtype: 'button',
-                id: 'selectdatasourcebtn',
+                reference: 'selectdatasourcebtn',
                 text: climatestation.Utils.getTranslation('choose'),   // 'Choose',
                 iconCls: 'far fa-thumbs-up',
                 style: {color: 'green'},
                 scale: 'medium',
-                scope: me,
+                // scope: me,
                 handler: function () {
-                    let eumetcastradio = me.lookupReference('eumetcastradio'),
-                        internetradio = me.lookupReference('internetradio');
+                    let eumetcastradio = Ext.getCmp('eumetcastradio'),
+                        internetradio = Ext.getCmp('internetradio');
 
                     if (eumetcastradio.getValue()) {
                         // open EUMETCAST datasource administration window
@@ -155,18 +155,20 @@ Ext.define('climatestation.view.acquisition.product.editProductController', {
 
                 items: [{
                     xtype: 'radiogroup',
-                    id: 'datasourceradiogroup',
+                    reference: 'datasourceradiogroup',
                     columns: 1,
                     vertical: true,
                     items: [{
                         boxLabel: '<b>EUMETCAST</b>',
                         id: 'eumetcastradio',
+                        reference: 'eumetcastradio',
                         name: 'datasourcetype',
                         inputValue: 'eumetcast',
                         checked: true
                     }, {
                         boxLabel: '<b>INTERNET</b>',
                         id: 'internetradio',
+                        reference: 'internetradio',
                         name: 'datasourcetype',
                         inputValue: 'internet',
                         checked: false

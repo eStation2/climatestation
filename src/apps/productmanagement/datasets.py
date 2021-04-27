@@ -400,7 +400,7 @@ class Dataset(object):
     def get_basenames(self, regex='*'):
         # return list(os.path.basename(filename) for filename in self.get_filenames())
         return list(os.path.basename(filename) for filename in self.get_filenames(regex=regex)
-                    if len(os.path.basename(filename).split('_')) == 5 and filename.endswith((FILE_EXTENSIONS.TIF_FILE_EXTENSION, FILE_EXTENSIONS.MISSING_FILE_EXTENSION)))
+                    if len(os.path.basename(filename).split('_')) == 5 and filename.endswith((FILE_EXTENSIONS.TIF_FILE_EXTENSION, FILE_EXTENSIONS.NETCDF_FILE_EXTENSION, FILE_EXTENSIONS.MISSING_FILE_EXTENSION)))
 
     def no_year(self):
         return self._frequency.no_year()
