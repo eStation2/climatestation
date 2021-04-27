@@ -244,3 +244,34 @@ class TestGetEOS(unittest.TestCase):
 
         ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
                                                              datasource_descr, logger, test_mode=True)
+
+    def debug_CDS_2MDW_hour_netcdf(self):
+        internet_id = "CDS:ERA5:REANALYSIS:2MDW:HOUR"
+        product = {"productcode": "era5-hourly-2mdw", "version": "1.0"}
+        downloaded_file = '/data/processing/era5-hourly-2mdw/1.0/archive/202101010000_reanalysis-era5-single-levels_reanalysis_2m_dewpoint_temperature.nc'
+        in_date = '202101010000'
+        # Datasource description
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
+        datasource_descr = datasource_descr[0]
+        # Get list of subproducts
+
+        sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
+
+        ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
+                                                             datasource_descr, logger, test_mode=True)
+
+
+    def debug_CDS_MSLP_hour_netcdf(self):
+        internet_id = "CDS:ERA5:REANALYSIS:MSLP:HOUR"
+        product = {"productcode": "era5-hourly-mslp", "version": "1.0"}
+        downloaded_file = '/data/processing/era5-hourly-mslp/1.0/archive/202101010100_reanalysis-era5-single-levels_reanalysis_mean_sea_level_pressure.nc'
+        in_date = '202101010000'
+        # Datasource description
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
+        datasource_descr = datasource_descr[0]
+        # Get list of subproducts
+
+        sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
+
+        ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, sub_datasource,
+                                                             datasource_descr, logger, test_mode=True)
