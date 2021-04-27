@@ -69,14 +69,15 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
 
     p = Product(product_code=productcode, version=version)
     dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode)
-    dataset.get_filenames()
+    dataset_filenames = dataset.get_filenames()
+    file_extension = '.' + dataset_filenames[0][-4:].split('.')[1]
 
     if date_format == 'YYYYMMDD':
         # Loop over dates
         for date in dataset._frequency.get_dates(start_date, end_date):
             if (date >= start_date) and (date <= end_date):
                 filedate = date.strftime("%Y%m%d")
-                productfilename = functions.set_path_filename(filedate, productcode, subproductcode, mapsetcode, version, '.tif')
+                productfilename = functions.set_path_filename(filedate, productcode, subproductcode, mapsetcode, version, file_extension)
                 productfilepath = dataset.fullpath + productfilename
                 dates_list.append(date)
                 if os.path.isfile(productfilepath):
@@ -95,7 +96,7 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
             for mmdd in dataset.get_mmdd():
                 if mmdd_start <= int(mmdd) <= mmdd_end:
                     # mmdd contains the list of existing 'mmdd' - sorted
-                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, '.tif')
+                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
                     productfilepath = dataset.fullpath + productfilename
                     list_files.append(productfilepath)
                     dates_list.append(datetime.date(start_date.year, int(mmdd[:2]), int(mmdd[2:4])))
@@ -109,7 +110,7 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
             # Put all dates from start_mmdd to end of the year
             for mmdd in list_mmdd:
                 if int(mmdd) >= mmdd_start:
-                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, '.tif')
+                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
                     productfilepath = dataset.fullpath + productfilename
                     list_files.append(productfilepath)
                     dates_list.append(datetime.date(start_date.year, int(mmdd[:2]), int(mmdd[2:4])))
@@ -117,7 +118,7 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
             # Fill the list with 'full' years
             for n_years in range(end_date.year-start_date.year-1):
                 for mmdd in list_mmdd:
-                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, '.tif')
+                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
                     productfilepath = dataset.fullpath + productfilename
                     list_files.append(productfilepath)
                     dates_list.append(datetime.date(start_date.year+1+n_years, int(mmdd[:2]), int(mmdd[2:4])))
@@ -126,7 +127,7 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
             for mmdd in list_mmdd:
                 if int(mmdd) <= mmdd_end:
                     # mmdd contains the list of existing 'mmdd' - sorted
-                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, '.tif')
+                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
                     productfilepath = dataset.fullpath + productfilename
                     list_files.append(productfilepath)
                     dates_list.append(datetime.date(end_date.year, int(mmdd[:2]), int(mmdd[2:4])))

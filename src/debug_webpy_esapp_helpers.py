@@ -1020,7 +1020,7 @@ class TestWebpy(unittest.TestCase):
 
     def test_GetProductLayer(self):
 
-        # date = '20181112'
+        # date = '20181201'
         # params = {
         #     'productcode': 'pml-modis-sst',
         #     'productversion': '3.0',
@@ -1076,7 +1076,7 @@ class TestWebpy(unittest.TestCase):
         # params = {
         #     'productcode': 'vgt-ndvi',
         #     'productversion': 'sv2-pv2.2',
-        #     'subproductcode': 'ndv',
+        #     'subproductcode': 'ndvi-linearx2',
         #     'mapsetcode': 'SPOTV-Africa-1km',
         #     'date': date,
         #     'WIDTH': '1024',

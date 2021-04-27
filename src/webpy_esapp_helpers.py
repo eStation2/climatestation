@@ -4110,7 +4110,9 @@ def getProductLayer(getparams):
     # print dataset.fullpath
 
     # from datetime import datetime as dt
-    dataset.get_filenames()
+    dataset_filenames = dataset.get_filenames()
+    file_extension = '.' + dataset_filenames[0][-4:].split('.')[1]
+
     if 'date' in getparams:
         filedate = getparams['date']
         dates_available = dataset.get_dates()
@@ -4141,7 +4143,7 @@ def getProductLayer(getparams):
     date_format = dataset._db_product.date_format
 
     if frequency_id == 'e1day' and date_format == 'YYYYMMDD':
-        regex = dataset.fullpath + filedate + '*' + '.tif'
+        regex = dataset.fullpath + filedate + '*' + file_extension  # '.tif'
         filename = glob.glob(regex)
         if len(filename) > 0:
             productfile = filename[0]
@@ -4151,7 +4153,7 @@ def getProductLayer(getparams):
                                                    getparams['subproductcode'],
                                                    getparams['mapsetcode'],
                                                    getparams['productversion'],
-                                                   '.tif')
+                                                   file_extension)
             productfile = dataset.fullpath + filename
         # lastdate = lastdate.replace("-", "")
         # mydate=lastdate.strftime("%Y%m%d")
@@ -4161,7 +4163,7 @@ def getProductLayer(getparams):
                                                getparams['subproductcode'],
                                                getparams['mapsetcode'],
                                                getparams['productversion'],
-                                               '.tif')
+                                               file_extension)
         productfile = dataset.fullpath + filename
 
     # if (hasattr(getparams, "outmask") and getparams['outmask'] == 'true'):

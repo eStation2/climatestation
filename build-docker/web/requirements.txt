@@ -39,8 +39,13 @@ netCDF4
 # For C3SF4P
 ###################
 #statsmodels
-#pandas
+pandas
 #Basemap
+#inspect
+psutil
+joblib
+pymannkendall
+netcdf4
 
 ###################
 ## For IMPACT
