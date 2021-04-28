@@ -292,7 +292,7 @@ def process_list_matching_url(datasource_descr, product, subproducts, dates):
     # try:
     parameter_url = build_parameter_http(parameter)
     processed_list = []
-    processed_list_filename = es_constants.get_internet_processed_list_prefix + datasource_descr.datasource_descr_id.replace(":", "_") + '.list'
+    processed_list_filename = es_constants.get_datastore_processed_list_prefix + datasource_descr.datasource_descr_id.replace(":", "_") + '.list'
     processed_list = functions.restore_obj_from_json(processed_list,
                                                        processed_list_filename)
     for date in dates:
