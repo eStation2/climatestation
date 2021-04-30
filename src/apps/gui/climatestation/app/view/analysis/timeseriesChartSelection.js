@@ -20,7 +20,8 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
 
     header: {
         titlePosition: 1,
-        titleAlign: 'center'
+        titleAlign: 'center',
+        padding: '2px 14px 2px 14px'
     },
     constrainHeader: true,
     constrain: false,
@@ -285,34 +286,34 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
                     // compareyears: false,
                     multipleyears: true
                 }]
-            // }, {
-            //     title: climatestation.Utils.getTranslation('SCATTER'),  // 'CUMULATIVE',
-            //     // id: 'ts_cumulative_graph_tab_' + me.id,
-            //     tbar: {
-            //         padding: '0 0 0 0',
-            //         items: [{
-            //             xtype: 'button',
-            //             text: climatestation.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-            //             reference: 'gettimeseries_btn_scatter',
-            //             iconCls: 'chart-curve_medium',
-            //             scale: 'medium',
-            //             disabled: false,
-            //             autoWidth: true,
-            //             margin: '0 0 5 0',
-            //             graphtype: 'scatter',
-            //             handler: 'generateTimeseriesChart'
-            //         }]
-            //     },
-            //     items: [{
-            //         xtype: 'timeseriesproductselection',
-            //         graphtype: 'scatter',
-            //         cumulative: false,
-            //         multiplevariables: true,
-            //         fromto: true,
-            //         year: false,
-            //         // compareyears: false,
-            //         multipleyears: false
-            //     }]
+            }, {
+                title: climatestation.Utils.getTranslation('SCATTER'),  // 'SCATTER',
+                // id: 'ts_cumulative_graph_tab_' + me.id,
+                tbar: {
+                    padding: '0 0 0 0',
+                    items: [{
+                        xtype: 'button',
+                        text: climatestation.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
+                        reference: 'gettimeseries_btn_scatter',
+                        iconCls: 'chart-curve_medium',
+                        scale: 'medium',
+                        disabled: false,
+                        autoWidth: true,
+                        margin: '0 0 5 0',
+                        graphtype: 'scatter',
+                        handler: 'generateTimeseriesChart'
+                    }]
+                },
+                items: [{
+                    xtype: 'timeseriesproductselection',
+                    graphtype: 'scatter',
+                    cumulative: false,
+                    multiplevariables: true,
+                    fromto: false,
+                    year: false,
+                    // compareyears: false,
+                    multipleyears: false
+                }]
             }, {
                 title: 'Debug info',
                 reference: 'debug_info_tab_' + me.id,

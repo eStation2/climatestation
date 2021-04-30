@@ -769,7 +769,6 @@ Ext.define("climatestation.view.analysis.mapView",{
                     }
                 });
 
-
                 me.productlayer = new ol.layer.Tile({       // Image
                     layer_id: 'productlayer',
                     layerorderidx: 100,
@@ -777,7 +776,6 @@ Ext.define("climatestation.view.analysis.mapView",{
                     visible: false
                 });
                 me.map.getLayers().insertAt(0, me.productlayer);
-
 
                 me.drawfeatures = new ol.Collection();
                 me.drawvectorlayer_source = new ol.source.Vector({
@@ -1157,7 +1155,7 @@ Ext.define("climatestation.view.analysis.mapView",{
                             me.productsensor
                         );
                     });
-                    taskAddProductLayer.delay(1000);
+                    taskAddProductLayer.delay(100);
                 }
 
                 if (me.vectorLayers != null && me.vectorLayers.trim() != '') {

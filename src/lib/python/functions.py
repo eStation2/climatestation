@@ -488,8 +488,12 @@ def unix_time(dt):
 
 
 def unix_time_millis(d):
-    dt = datetime.datetime.combine(d, datetime.time.min)
-    return unix_time(dt) * 1000.0
+    # if d contains hour then do not combine!
+    dt = d
+    if type(d) is datetime.date:
+        dt = datetime.datetime.combine(d, datetime.time.min)
+    unix_time_mil = unix_time(dt) * 1000.0
+    return unix_time_mil
 
 
 def isValidRGB(color):

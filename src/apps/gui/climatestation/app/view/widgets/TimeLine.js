@@ -143,7 +143,9 @@ Ext.define("climatestation.view.widgets.TimeLine",{
         me.callParent();
     }
     ,createTimeLineChart: function () {
-        var me = this;
+        let me = this;
+        let rangeButtons = [];
+        let selectedRangeButton = 4;
 
         //console.info(me.product_date_format);
         if (me.product_date_format == 'MMDD'){
@@ -168,11 +170,73 @@ Ext.define("climatestation.view.widgets.TimeLine",{
                 month: '%b \'%y',
                 year: '%Y'
             };
+            var dateformat = '%d %b %Y';
+            if (me.product_date_format == 'YYYYMMDDHHMM'){
+                dateformat = '%d %b %Y %H:%M'
+            }
             me.tooltipFormater = function () {
-                return Highcharts.dateFormat('%d %b %Y', this.x, true);
+                return Highcharts.dateFormat(dateformat, this.x, true);
             }
         }
 
+        if (me.product_date_format == 'YYYYMMDDHHMM'){
+            selectedRangeButton = 1;
+            rangeButtons = [{
+                type: 'day',
+                count: 1,
+                text: '1d'
+            }, {
+                type: 'day',
+                count: 2,
+                text: '2d'
+            }, {
+                type: 'day',
+                count: 3,
+                text: '3d'
+            }, {
+                type: 'week',
+                count: 1,
+                text: '1w'
+            }, {
+                type: 'week',
+                count: 2,
+                text: '2w'
+            }, {
+                type: 'week',
+                count: 3,
+                text: '3w'
+            }, {
+                type: 'month',
+                count: '1',
+                text: '1m'
+            }];
+        }
+        else {
+            rangeButtons = [{
+                type: 'month',
+                count: 1,
+                text: '1m'
+            }, {
+                type: 'month',
+                count: 2,
+                text: '2m'
+            }, {
+                type: 'month',
+                count: 3,
+                text: '3m'
+            }, {
+                type: 'month',
+                count: 6,
+                text: '6m'
+            }, {
+                type: 'year',
+                count: 1,
+                text: '1y'
+            }, {
+                type: 'ytd',
+                text: 'YTD'
+            }];
+        }
         me.timelinechart = new Highcharts.StockChart({
             chart: {
                 renderTo: me.id,
@@ -205,31 +269,8 @@ Ext.define("climatestation.view.widgets.TimeLine",{
             },
             rangeSelector: {
                 // allButtonsEnabled: true,
-                selected: 4,
-                buttons: [{
-                    type: 'month',
-                    count: 1,
-                    text: '1m'
-                }, {
-                    type: 'month',
-                    count: 2,
-                    text: '2m'
-                }, {
-                    type: 'month',
-                    count: 3,
-                    text: '3m'
-                }, {
-                    type: 'month',
-                    count: 6,
-                    text: '6m'
-                }, {
-                    type: 'year',
-                    count: 1,
-                    text: '1y'
-                }, {
-                    type: 'ytd',
-                    text: 'YTD'
-                }],
+                selected: selectedRangeButton,
+                buttons: rangeButtons,
                 buttonTheme: { // styles for the buttons
                     fill: 'none',
                     stroke: 'none',

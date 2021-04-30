@@ -4099,6 +4099,58 @@ def getTimeseriesDrawProperties(params):
     return tsdrawproperties_json
 
 
+def GetTimeLine(getparams):
+    p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
+    dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
+    dataset.get_filenames()
+    all_present_product_dates = dataset.get_dates()
+    # completeness = dataset.get_dataset_normalized_info()
+    timeline = []
+    if len(all_present_product_dates) > 0:
+        firstdate = dataset.get_first_date()
+        lastdate = all_present_product_dates[-1]
+
+        kwargs = {'productcode': getparams['productcode'],
+                  'version': getparams['productversion'],
+                  'subproductcode': getparams['subproductcode'].lower() if getparams['subproductcode'] else None}
+        db_product = querydb.get_product_out_info(**kwargs)
+        if isinstance(db_product, list):
+            db_product = db_product[0]
+
+        frequency = Dataset.get_frequency(db_product.frequency_id, db_product.date_format)
+        # frequency = dataset._frequency # se questo property non era protetto, la query sopra non serve
+        alldates = frequency.get_dates(firstdate, lastdate)
+        productdate_format = '%Y%m%d'
+        if db_product.date_format == 'YYYYMMDDHHMM':
+            productdate_format = '%Y%m%d%H%M'
+
+        timeline = []
+        for productdate in alldates:
+            if productdate in all_present_product_dates:
+                present = "true"
+            else:
+                present = "false"
+            dateinmilisecond = functions.unix_time_millis(productdate)
+            date_dict = {'datetime': dateinmilisecond, 'date': productdate.strftime(productdate_format), 'present': present}
+            timeline.append(date_dict)
+
+    # missingdate = datetime.date(2003, 2, 1)
+    # dateinmilisecond = functions.unix_time_millis(missingdate)
+    # date_dict = {'datetime': dateinmilisecond, 'date': missingdate.strftime("%Y%m%d"), 'present': "false"}
+    # timeline.append(date_dict)
+
+    timeline_json = json.dumps(timeline,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+
+    timeline_json = '{"success":"true", "total":' + str(timeline.__len__()) + ',"timeline":' + timeline_json + '}'
+
+    # print timeline_json
+    return timeline_json
+
+
 def getProductLayer(getparams):
     import mapscript
     # To solve issue with Chla Legends (Tuleap ticket #10905 - see http://trac.osgeo.org/mapserver/ticket/1762)
@@ -4113,6 +4165,13 @@ def getProductLayer(getparams):
     dataset_filenames = dataset.get_filenames()
     file_extension = '.' + dataset_filenames[0][-4:].split('.')[1]
 
+    frequency_id = dataset._db_product.frequency_id
+    date_format = dataset._db_product.date_format
+
+    dateformat = '%Y%m%d'
+    if frequency_id == 'e1hour':
+        dateformat = '%Y%m%d%H%M'
+
     if 'date' in getparams:
         filedate = getparams['date']
         dates_available = dataset.get_dates()
@@ -4122,26 +4181,23 @@ def getProductLayer(getparams):
         # print datetime.datetime.strptime(filedate, "%Y%m%d")
         file_exists = False
         for date in dates_available:
-            if date.strftime("%Y%m%d") == filedate:
+            if date.strftime(dateformat) == filedate:
                 file_exists = True
                 # print date.strftime("%Y%m%d")
 
         # if not datetime.datetime.strptime(filedate, "%Y%m%d") in dates_available:
         if not file_exists:
             # print "NOT FOUND!"
-            lastdate = dataset.get_dates()[-1].strftime("%Y%m%d")
+            lastdate = dataset.get_dates()[-1].strftime(dateformat)
             filedate = lastdate
     else:
-        lastdate = dataset.get_dates()[-1].strftime("%Y%m%d")
+        lastdate = dataset.get_dates()[-1].strftime(dateformat)
         filedate = lastdate
 
     if dataset.no_year():
         filedate = dataset.strip_year(filedate)
 
     # Check the case of daily product, with time/minutes
-    frequency_id = dataset._db_product.frequency_id
-    date_format = dataset._db_product.date_format
-
     if frequency_id == 'e1day' and date_format == 'YYYYMMDD':
         regex = dataset.fullpath + filedate + '*' + file_extension  # '.tif'
         filename = glob.glob(regex)

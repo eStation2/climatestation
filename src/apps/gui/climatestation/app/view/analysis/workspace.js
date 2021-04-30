@@ -532,27 +532,28 @@ Ext.define("climatestation.view.analysis.workspace",{
                         handler: 'setWorkspaceName'
                     }]
                 }
-            }, '->', {
-                xtype: 'button',
-                name: 'togglegridview',
-                tooltip: climatestation.Utils.getTranslation('Grid view'),
-                iconCls: 'fas fa-th',
-                scale: 'small',
-                enableToggle: true,
-                toggleHandler: 'toggleGridView',
-                listeners: {
-                    afterrender: function (btn) {
-                        // Register the new tip with an element's ID
-                        Ext.tip.QuickTipManager.register({
-                            target: btn.btnIconEl.el, // Target button's ID
-                            title: '',
-                            text: climatestation.Utils.getTranslation('Toggle grid view')
-                        });
-                    },
-                    destroy: function(btn) {
-                        Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
-                    }
-                }
+
+            // }, '->', {
+            //     xtype: 'button',
+            //     name: 'togglegridview',
+            //     tooltip: climatestation.Utils.getTranslation('Grid view'),
+            //     iconCls: 'fas fa-th',
+            //     scale: 'small',
+            //     enableToggle: true,
+            //     toggleHandler: 'toggleGridView',
+            //     listeners: {
+            //         afterrender: function (btn) {
+            //             // Register the new tip with an element's ID
+            //             Ext.tip.QuickTipManager.register({
+            //                 target: btn.btnIconEl.el, // Target button's ID
+            //                 title: '',
+            //                 text: climatestation.Utils.getTranslation('Toggle grid view')
+            //             });
+            //         },
+            //         destroy: function(btn) {
+            //             Ext.tip.QuickTipManager.unregister(btn.btnIconEl.el);
+            //         }
+            //     }
             // {
             //     xtype: 'button',
             //     name: 'togglebackgroundlayer',

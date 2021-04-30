@@ -52,7 +52,6 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
             // if (me.tplChartView) {
             //     me.getController().setTemplateSelections();
             // }
-// debugger;
             if (tsDrawPropertiesStore.isLoaded()) {
                 if (user != 'undefined' && user != null) {
                     tsDrawPropertiesStore.proxy.extraParams = {
@@ -954,8 +953,6 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
                 items: [{
                     xtype: 'combobox',
                     store: 'categories',
-                    // fieldLabel: climatestation.Utils.getTranslation('productcategory'),    // TODO add 'Product category',
-                    // labelAlign: 'top',
                     reference: 'categoriesCombo',
                     valueField: 'category_id',
                     displayField: 'descriptive_name',
