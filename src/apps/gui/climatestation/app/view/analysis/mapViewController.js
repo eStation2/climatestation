@@ -407,9 +407,13 @@ Ext.define('climatestation.view.analysis.mapViewController', {
         if (climatestation.Utils.objectExists(me.productdate) && climatestation.Utils.objectExists(me.date_format)) {
             titleObjDate = me.productdate.replace(pattern,'$3-$2-$1');
             if (me.date_format == 'MMDD') {
-                titleObjDate = new Date(me.productdate.replace(pattern, '$2/$3/$1'));
+                titleObjDate = new Date(me.productdate.replace(pattern, '$2-$3-$1'));
                 titleObjDate.setHours(titleObjDate.getHours() + 5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
                 titleObjDate = Highcharts.dateFormat('%d %b', titleObjDate, true);
+            }
+            if (me.date_format == 'YYYYMMDDHHMM') {
+                pattern = /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/;
+                titleObjDate = me.productdate.replace(pattern,'$3-$2-$1 $4:$5');
             }
         }
         if (climatestation.Utils.objectExists(me.selectedarea) && me.selectedarea.trim() != ''){
@@ -431,7 +435,11 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             'product_name': productsensor + productname,
             'product_date': titleObjDate
         });
-
+        mapTitleObj.setTitleData({
+            'selected_area': selectedarea,
+            'product_name': productsensor + productname,
+            'product_date': titleObjDate
+        });
         mapTitleObj.changesmade = true;
 
         // Set the MapView window title to the selected product and date
@@ -456,6 +464,10 @@ Ext.define('climatestation.view.analysis.mapViewController', {
                 var mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
                 mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
                 productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
+            }
+            if (me.date_format == 'YYYYMMDDHHMM') {
+                pattern = /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/;
+                productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + me.productdate.replace(pattern,'$3-$2-$1 $4:$5') + '</b>';
             }
         }
 
@@ -502,7 +514,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
         me.frequency_id = frequency_id;
         me.productsensor = productsensor;
 
-        me.getController().refreshTitleData();
+        // me.getController().refreshTitleData();
 
         Ext.Ajax.request({
             method: 'GET',
@@ -1277,6 +1289,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             logoObj = mapviewwin.lookupReference('logo_obj_' + mapviewwin.id);
 
         if (btn.pressed) {
+            mapviewwin.getController().refreshTitleData();
             titleObj.show();
             disclaimerObj.show();
             logoObj.show();
@@ -1293,6 +1306,7 @@ Ext.define('climatestation.view.analysis.mapViewController', {
             // btn.setStyle({ color: 'black' });
             btn.setIconCls('far fa-object-group black');
         }
+
     }
 
     ,toggleOutmask: function(btn, event) {

@@ -3092,52 +3092,7 @@ class GetTimeLine(object):
 
     def GET(self):
         getparams = web.input()
-        p = Product(product_code=getparams['productcode'], version=getparams['productversion'])
-        dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
-        dataset.get_filenames()
-        all_present_product_dates = dataset.get_dates()
-        # completeness = dataset.get_dataset_normalized_info()
-        timeline = []
-        if len(all_present_product_dates) > 0:
-            firstdate = dataset.get_first_date()
-            lastdate = all_present_product_dates[-1]
-
-            kwargs = {'productcode': getparams['productcode'],
-                      'version': getparams['productversion'],
-                      'subproductcode': getparams['subproductcode'].lower() if getparams['subproductcode'] else None}
-            db_product = querydb.get_product_out_info(**kwargs)
-            if isinstance(db_product, list):
-                db_product = db_product[0]
-
-            frequency = Dataset.get_frequency(db_product.frequency_id, db_product.date_format)
-            # frequency = dataset._frequency # se questo property non era protetto, la query sopra non serve
-            alldates = frequency.get_dates(firstdate, lastdate)
-
-            timeline = []
-            for productdate in alldates:
-                if productdate in all_present_product_dates:
-                    present = "true"
-                else:
-                    present = "false"
-                dateinmilisecond = functions.unix_time_millis(productdate)
-                date_dict = {'datetime': dateinmilisecond, 'date': productdate.strftime("%Y%m%d"), 'present': present}
-                timeline.append(date_dict)
-
-        # missingdate = datetime.date(2003, 2, 1)
-        # dateinmilisecond = functions.unix_time_millis(missingdate)
-        # date_dict = {'datetime': dateinmilisecond, 'date': missingdate.strftime("%Y%m%d"), 'present': "false"}
-        # timeline.append(date_dict)
-
-        timeline_json = json.dumps(timeline,
-                                   ensure_ascii=False,
-                                   sort_keys=True,
-                                   indent=4,
-                                   separators=(', ', ': '))
-
-        timeline_json = '{"success":"true", "total":' + str(timeline.__len__()) + ',"timeline":' + timeline_json + '}'
-
-        # print timeline_json
-        return timeline_json
+        return webpy_esapp_helpers.GetTimeLine(getparams)
 
 
 class GetAllColorSchemes(object):

@@ -56,8 +56,8 @@ Ext.define("climatestation.view.analysis.mapTitleObject",{
     bind:{
         data:'{titleData}'
     },
-    publishes: ['titleData'],
-    bubbleEvents: null,
+    // publishes: ['titleData'],
+    // bubbleEvents: null,
 
     initComponent: function () {
         var me = this;

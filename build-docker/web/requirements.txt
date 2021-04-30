@@ -45,7 +45,6 @@ pandas
 psutil
 joblib
 pymannkendall
-netcdf4
 
 ###################
 ## For IMPACT
