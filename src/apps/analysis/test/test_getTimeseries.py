@@ -19,7 +19,7 @@ class TestGetTimeseries(unittest.TestCase):
 
     def setUp(self):
 
-        es_constants.es2globals['processing_dir'] = es_constants.es2globals['test_data_dir']
+        # es_constants.es2globals['processing_dir'] = es_constants.es2globals['test_data_dir']
 
         # Small square for WBD - see ES2-271/288
         self.x_min = ' -1.875'
@@ -52,6 +52,27 @@ class TestGetTimeseries(unittest.TestCase):
         self.aggregate = {'aggregation_type': 'mean',
                           'aggregation_min': 0.0,
                           'aggregation_max': 0.0}
+
+    # Extract values over wkt_rectangle for 36 decads (TAMSAT-RFE/3.0/10d)
+    def test_product_new_dir_structure(self):
+
+        productcode = "era5-hourly-2mt"
+        subproductcode = "2mt"
+        version = "1.0"
+        mapsetcode = "CDS-Africa-25km"
+
+        from_date = date(2021, 1, 1)
+        to_date = date(2021, 12, 31)
+        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode,
+                                    self.wkt_poly, from_date, to_date, self.aggregate)
+        print(list_values)
+
+        # Check number of values
+        self.assertEqual(len(list_values), 36)
+
+        # Check value for 2019.01.01
+        first_value = list_values[0]
+        self.assertAlmostEqual(85.7455916064186,first_value['meanvalue'])
 
     # Extract values over wkt_rectangle for 36 decads (TAMSAT-RFE/3.0/10d)
     def test_wkt_rectangle(self):
