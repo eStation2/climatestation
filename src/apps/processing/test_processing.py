@@ -46,7 +46,7 @@ def my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
 from apps.processing.processing_merge import *
 def my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False):
 
-    process_id = 51
+    process_id = 235
     input_products = querydb.get_processing_chain_products(process_id,type='input')
     output_products = querydb.get_processing_chain_products(process_id,type='output')
 
@@ -879,7 +879,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 # test_subprocess_vgt_fcover(pipe_run=3, pipe_print=0, touch_files_only=False)
 # test_subprocess_vgt_fapar(pipe_run=0, pipe_print=4, touch_files_only=False)
 # my_proc_std_ndvi(pipe_run=3, pipe_print=0, touch_files_only=False)
-#my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False)
+my_proc_ndvi_merge(pipe_run=3, pipe_print=0, touch_files_only=False)
 # my_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_std_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_chla(pipe_run=0, pipe_print=3, touch_files_only=False)
@@ -888,7 +888,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 #my_proc_std_modis_kd490(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_modis_pp(pipe_run=0, pipe_print=4, touch_files_only=False)
 #my_proc_std_median_filter()
-my_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20201231', touch_files_only=False)
+# my_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20201231', touch_files_only=False)
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
 
 # my_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date='20180101', end_date='20181231', upsert_db=False, touch_files_only=False)

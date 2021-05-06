@@ -42,6 +42,7 @@ python_version = sys.version_info[0]
 def ingestion_netcdf(input_file, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False, test_mode=False):
 #   Manages ingestion of 1 file for a given date
 #   Arguments:
+#       in_date : single date depending on the frequency
 #       input_file: only one input file with full names
 #       product: product description name (for DB insertions)
 #       subproducts: list of subproducts to be ingested. Contains dictionaries such as:
@@ -60,14 +61,14 @@ def ingestion_netcdf(input_file, in_date, product, subproducts, datasource_descr
 #       0 -> ingestion OK; files to be removed/stored
 #       1 -> ingestion wrong; files to be copied to /data/ingest.wrong
 #       None -> some mandatory files are missing: wait and do not touch files
-    data_dir_out = es_constants.processing_dir
+#     data_dir_out = es_constants.processing_dir
     my_logger.info("Entering routine %s for prod: %s and date: %s" % ('ingestion', product['productcode'], in_date))
 
-    preproc_type = datasource_descr.preproc_type
-    native_mapset_code = datasource_descr.native_mapset
-
-    do_preprocess = False
-    composed_file_list = None
+    # preproc_type = datasource_descr.preproc_type
+    # native_mapset_code = datasource_descr.native_mapset
+    #
+    # do_preprocess = False
+    # composed_file_list = None
     # -------------------------------------------------------------------------
     # # Create temp output dir
     # -------------------------------------------------------------------------
@@ -79,20 +80,9 @@ def ingestion_netcdf(input_file, in_date, product, subproducts, datasource_descr
         my_logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
         raise NameError('Error in creating tmpdir')
 
-    # Get the new subproduct tables for post processing:
-    # subproduct_new = querydb.get_subproduct(productcode='', version='undefined', subproductcode='', masked=False)
-    # -------------------------------------------------------------------------
-    # 1&2. Read the netcdf file and check if its type
-    # -------------------------------------------------------------------------
-    # netcdf_type = read_netcdf_file(input_file)
-
     # ----------------------------------------------------------------------------------
     # 4. Get the physical value data by converting native file--> along with subproduct assigned
     # ----------------------------------------------------------------------------------
-    # if preproc_type != None and preproc_type != 'None' and preproc_type != '""' and preproc_type != "''" and preproc_type != '':
-    #     do_preprocess = True
-
-    # 4. Pre-process (get the physical value data by converting native file--> along with subproduct assigned)
     # if do_preprocess:
     composed_file_list = ingestion_pre_process(datasource_descr, subproducts, input_file, tmpdir,
                                                my_logger, product, test_mode)
@@ -112,9 +102,6 @@ def ingestion_netcdf(input_file, in_date, product, subproducts, datasource_descr
 
         shutil.rmtree(tmpdir)
         raise NameError('Detected Error in preprocessing routine')
-    # else:
-    #     composed_file_list = [input_file]
-
     # -------------------------------------------------------------------------
     #  5 & 6 Post processing - Output Rescale, create output, Metadata
     # -------------------------------------------------------------------------
@@ -145,13 +132,6 @@ def ingestion_post_processing(composed_file_list, in_date, product, datasource_d
         for ingest_dataset in composed_file_list:
             # raster_dataset = ingest_dataset.rasterDataset
             subproduct = ingest_dataset.subproduct
-            # subproduct =ingest_dataset['subproduct']
-            # raster_dataset = ingest_dataset['raster_dataset']
-            # file_extension = subproduct['re_extract']
-
-            # Target mapset Initialization
-            # trg_mapset = ingest_dataset.target_mapset
-            # trg_mapset.assigndb(subproduct['mapsetcode'])
 
             # Get output product full filename with product
             output_path_filename = get_output_path_filename(datasource_descr, product, subproduct, in_date)
@@ -165,9 +145,7 @@ def ingestion_post_processing(composed_file_list, in_date, product, datasource_d
 
             # Get the output product info (scaling, ofset, nodata, datatype etc) Cu
             product_out_info = querydb.get_subproduct(productcode=product['productcode'],version=product['version'],subproductcode=subproduct['subproduct'])
-            # write_status = NetCDF_Writer.write_nc(file_name=tmp_output_file, data=[raster_dataset.data], dataset_tag=[product_out_info.subproductcode],
-            #                                       zc=raster_dataset.zc, fill_value=product_out_info.nodata, scale_factor=product_out_info.scale_factor, offset=product_out_info.scale_offset, dtype=product_out_info.data_type_id,
-            #                                       write_CS_metadata=metadata, lats=raster_dataset.ds_lats_out, lons=raster_dataset.ds_lons_out)
+
             write_status = ingest_dataset.write_nc_ingest(tmp_output_file, product_out_info, metadata)
             if os.path.isfile(tmp_output_file):
                 shutil.move(tmp_output_file, output_path_filename)
