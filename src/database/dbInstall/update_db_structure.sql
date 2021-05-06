@@ -54,8 +54,10 @@ ALTER TABLE products.internet_type
  *********************************************************/
 
 ALTER TABLE products.eumetcast_source
-    ADD COLUMN modified_by character varying;
+    ADD COLUMN IF NOT EXISTS modified_by character varying;
 
+ALTER TABLE products.frequency
+    ADD COLUMN IF NOT EXISTS subdir_level character varying;
 
 /***************************************************************************************
   END  ALTER TABLE adding columns, triggers and indexes (always after TABLE CREATION)
@@ -65,6 +67,51 @@ ALTER TABLE products.eumetcast_source
 /**********************************************************
   BEGIN update insert functions
  *********************************************************/
+
+DROP FUNCTION products.update_insert_frequency(character varying, character varying, real, character varying, character varying);
+
+CREATE OR REPLACE FUNCTION products.update_insert_frequency(
+	frequency_id character varying,
+	time_unit character varying,
+	frequency real,
+	frequency_type character varying,
+	description character varying,
+	subdir_level character varying)
+    RETURNS boolean
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+DECLARE
+    _frequency_id ALIAS FOR $1;
+    _time_unit ALIAS FOR $2;
+    _frequency ALIAS FOR $3;
+    _frequency_type ALIAS FOR $4;
+    _description ALIAS FOR $5;
+	_subdir_level ALIAS FOR $5;
+BEGIN
+    PERFORM * FROM products.frequency f WHERE f.frequency_id = TRIM(_frequency_id);
+    IF FOUND THEN
+        UPDATE products.frequency f
+        SET time_unit      = TRIM(_time_unit),
+            frequency      = _frequency,
+            frequency_type = TRIM(_frequency_type),
+            description    = TRIM(_description),
+			subdir_level   = TRIM(_subdir_level)
+        WHERE f.frequency_id = TRIM(_frequency_id);
+    ELSE
+        INSERT INTO products.frequency (frequency_id, time_unit, frequency, frequency_type, description, subdir_level)
+        VALUES (TRIM(_frequency_id), TRIM(_time_unit), _frequency, TRIM(_frequency_type), TRIM(_description), TRIM(_subdir_level));
+    END IF;
+    RETURN TRUE;
+END;
+$BODY$;
+
+ALTER FUNCTION products.update_insert_frequency(character varying, character varying, real, character varying, character varying, character varying)
+    OWNER TO estation;
+
+
+
 CREATE OR REPLACE FUNCTION products.update_insert_preproc_type(
 	preproc_type character varying,
 	preproc_type_descr character varying)
@@ -157,6 +204,7 @@ BEGIN
                             || ', frequency_type := ' || COALESCE('''' || frequency_type || '''', 'NULL')
                             || ', description := ' ||
                         COALESCE('''' || replace(replace(description, '"', ''''), '''', '''''') || '''', 'NULL')
+							|| ', subdir_level := ' || COALESCE('''' || subdir_level || '''', 'NULL')
                             || ' );' as inserts
                  FROM products.frequency;
 
@@ -857,6 +905,10 @@ ALTER FUNCTION products.export_jrc_data(boolean)
     OWNER TO estation;
 
 
+ALTER FUNCTION products.export_jrc_data(boolean)
+    OWNER TO estation;
+
+
 
 CREATE OR REPLACE FUNCTION products.export_all_data(
 	full_copy boolean DEFAULT true)
@@ -890,6 +942,7 @@ BEGIN
                             || ', frequency_type := ' || COALESCE('''' || frequency_type || '''', 'NULL')
                             || ', description := ' ||
                         COALESCE('''' || replace(replace(description, '"', ''''), '''', '''''') || '''', 'NULL')
+							|| ', subdir_level := ' || COALESCE('''' || subdir_level || '''', 'NULL')
                             || ' );' as inserts
                  FROM products.frequency;
 
@@ -1555,6 +1608,10 @@ BEGIN
 
 END;
 $BODY$;
+
+ALTER FUNCTION products.export_all_data(boolean)
+    OWNER TO estation;
+
 
 ALTER FUNCTION products.export_all_data(boolean)
     OWNER TO estation;

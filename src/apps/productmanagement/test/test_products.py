@@ -211,7 +211,7 @@ class TestProducts(unittest.TestCase):
                            u'AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9108"]],'
                            u'AUTHORITY["EPSG","4326"]]',
                 'rotation_factor_lat': 0.0},
-            'subproduct': 'sm',
+            'subproduct': 'ndv',
             'version': 'sv2-pv2.2',
             'from_start': True,
             'mapset': 'SPOTV-Africa-1km'}]

@@ -23,6 +23,7 @@ from config import es_constants
 from lib.python import functions
 from database import crud
 from lib.python import es_logging as log
+from apps.productmanagement.datasets import Dataset
 
 standard_library.install_aliases()
 logger = log.my_logger(__name__)
@@ -1170,4 +1171,19 @@ class TestWebpy(unittest.TestCase):
         }
         result = webpy_esapp_helpers.GetTimeLine(params)
 
+    def test_GetDatasetCompleteness(self):
+        kwargs = {
+            'product_code': 'era5-hourly-2mt',
+            'version': '1.0',
+            'sub_product_code': '2mt',
+            'mapset': 'CDS-Africa-25km'
+        }
+        dataset = Dataset(**kwargs)
+        completeness = webpy_esapp_helpers.getDatasetCompleteness(dataset, False)
+        # params = {
+        #     'productcode': 'vgt-ndvi',
+        #     'productversion': 'sv2-pv2.2',
+        #     'subproductcode': 'ndvi-linearx2',
+        #     'mapsetcode': 'SPOTV-Africa-1km'
+        # }
         self.assertEqual(1, 1)

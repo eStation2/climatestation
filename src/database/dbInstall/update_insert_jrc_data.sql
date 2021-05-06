@@ -56,6 +56,26 @@ where defined_by != 'USER' or defined_by is NULL;
 * Update insert JRC data
 ********************************************************************************************/
 
+SELECT products.update_insert_frequency(frequency_id := '2pday', time_unit := 'day', frequency := 2, frequency_type := 'P', description := 'Twice per day', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'e15minute', time_unit := 'minute', frequency := 15, frequency_type := 'E', description := 'Every 15 minutes (e.g. LSASAF LST)', subdir_level := 'to_day' );
+SELECT products.update_insert_frequency(frequency_id := 'e1cgldekad', time_unit := 'cgl_dekad', frequency := 1, frequency_type := 'E', description := 'Every cgl dekad (e.g three periods per months, the third from the day 21 to last day of month)', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'e1day', time_unit := 'day', frequency := 1, frequency_type := 'E', description := 'Every day', subdir_level := 'to_year' );
+SELECT products.update_insert_frequency(frequency_id := 'e1dekad', time_unit := 'dekad', frequency := 1, frequency_type := 'E', description := 'Every dekad (e.g three periods per months, the third from the day 21 to last day of month)', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'e1hour', time_unit := 'hour', frequency := 1, frequency_type := 'E', description := 'Every 1 hour.', subdir_level := 'to_day' );
+SELECT products.update_insert_frequency(frequency_id := 'e1modis16day', time_unit := '16days', frequency := 1, frequency_type := 'E', description := 'Every 16-day MODIS period (or MODIS 8day week, which begind every year the 1st of January)', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'e1modis8day', time_unit := '8days', frequency := 1, frequency_type := 'E', description := 'Every 8-day MODIS period (or MODIS 8day week, which begind every year the 1st of January)', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'e1month', time_unit := 'month', frequency := 1, frequency_type := 'E', description := 'Every month (e.g. monthly sinthesis of precipitations)', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'e1motu7day', time_unit := '7days', frequency := 1, frequency_type := 'E', description := 'Every 7-day MOTU period (or MOTU 7day week, which behind every year the 1st of January)', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'e1pentad', time_unit := 'pentad', frequency := 1, frequency_type := 'E', description := 'Every pentad (pentad is similar to dekad, over 5 days)', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'e1year', time_unit := 'year', frequency := 1, frequency_type := 'E', description := 'Every 1 year', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'e30minute', time_unit := 'minute', frequency := 30, frequency_type := 'E', description := 'Every 30 minutes (e.g. LSASAF ET)', subdir_level := 'to_day' );
+SELECT products.update_insert_frequency(frequency_id := 'e3hour', time_unit := 'hour', frequency := 3, frequency_type := 'E', description := 'Every 3 hours (e.g. cmes wave every 3hours)', subdir_level := 'to_day' );
+SELECT products.update_insert_frequency(frequency_id := 'e3month', time_unit := 'month', frequency := 3, frequency_type := 'E', description := 'Every 3 months (e.g. quarterly sinthesis of precipitations)', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'e6month', time_unit := 'month', frequency := 6, frequency_type := 'E', description := 'Every 6 months (e.g. quarterly sinthesis of precipitations)', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'singlefile', time_unit := 'none', frequency := 0, frequency_type := 'n', description := 'Single files (e.g. absolute max/min)', subdir_level := 'to_subprod' );
+SELECT products.update_insert_frequency(frequency_id := 'undefined', time_unit := 'none', frequency := 0, frequency_type := 'n', description := 'Undefined', subdir_level := 'to_subprod' );
+
+
 SELECT products.update_insert_preproc_type(preproc_type := 'MSG_MPE', preproc_type_descr := 'MSG MPE' );
 SELECT products.update_insert_preproc_type(preproc_type := 'MPE_UMARF', preproc_type_descr := 'MPE UMARF' );
 SELECT products.update_insert_preproc_type(preproc_type := 'MODIS_HDF4_TILE', preproc_type_descr := 'MODIS HDF4 TILE' );
@@ -99,6 +119,7 @@ SELECT products.update_insert_internet_type(internet_type_id := 'sentinel_sat', 
 SELECT products.update_insert_internet_type(internet_type_id := 'jeodpp', internet_type_name := 'JEODPP API', internet_type_descr := '');
 SELECT products.update_insert_internet_type(internet_type_id := 'local', internet_type_name := 'LOCAL', internet_type_descr := '');
 SELECT products.update_insert_internet_type(internet_type_id := 'offline', internet_type_name := 'OFFLINE ACCESS', internet_type_descr := '');
+
 
 
 SELECT analysis.update_insert_i18n( label := 'CUMULATIVE', eng := 'CUMULATIVE', fra := 'CUMULE', por := 'NULL', lang1 := 'NULL', lang2 := 'NULL', lang3 := 'NULL' );
@@ -690,6 +711,7 @@ SELECT analysis.update_insert_i18n( label := 'product_release', eng := 'Product 
 SELECT analysis.update_insert_i18n( label := 'productactivated', eng := 'Product activated', fra := 'Produit activé', por := 'NULL', lang1 := 'NULL', lang2 := 'NULL', lang3 := 'NULL' );
 SELECT analysis.update_insert_i18n( label := 'productadministration', eng := 'Product Administration', fra := 'Administration des produits', por := 'NULL', lang1 := 'NULL', lang2 := 'NULL', lang3 := 'NULL' );
 SELECT analysis.update_insert_i18n( label := 'productcategories', eng := 'Product categories', fra := 'Catégories de produits', por := 'NULL', lang1 := 'Categoría de productos', lang2 := 'NULL', lang3 := 'NULL' );
+SELECT analysis.update_insert_i18n( label := 'productcategory', eng := 'Product category', fra := 'NULL', por := 'NULL', lang1 := 'NULL', lang2 := 'NULL', lang3 := 'NULL' );
 SELECT analysis.update_insert_i18n( label := 'productcode', eng := 'Product code', fra := 'Code produit', por := 'NULL', lang1 := 'Código del producto', lang2 := 'NULL', lang3 := 'NULL' );
 SELECT analysis.update_insert_i18n( label := 'productdatasourceunassigned', eng := 'Product data source unassigned', fra := 'Source de données des produits non attribués', por := 'NULL', lang1 := 'Fuente de datos del producto no asignada', lang2 := 'NULL', lang3 := 'NULL' );
 SELECT analysis.update_insert_i18n( label := 'productdeactivated', eng := 'Product deactivated', fra := 'Produit désactivé', por := 'NULL', lang1 := 'NULL', lang2 := 'NULL', lang3 := 'NULL' );

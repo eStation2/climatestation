@@ -1124,6 +1124,8 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
             return -1
     except:
         return -1
+
+
 ######################################################################################
 #   conv_yyyydk_2_yyyymmdd
 #   Purpose: Function returns a date (YYYYMMDD) with yyyydk as input.
@@ -1153,6 +1155,7 @@ def conv_yyyydk_2_yyyymmdd(yyyydk):
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
 
+
 ######################################################################################
 #   conv_yyyymmdd_2_dky
 #   Purpose: Function returns a date dky(yearly dekad) using(YYYYMMDD) as input.
@@ -1169,7 +1172,6 @@ def conv_yyyymmdd_2_dky(year_month_day):
     dekad = int((month -1)*3+((day-1)/10)+1)  #(month -1)*3+((day-1)/10)+1
 
     return str(dekad).zfill(2)
-
 
 
 ######################################################################################
@@ -1374,6 +1376,13 @@ def get_modified_time_from_file(file_path):
     return modified_time_sec
 
 
+def get_fullpath_filename(date_str, subdir_level, product_type, product_code, sub_product_code, mapsetcode, version, extension):
+    filename = set_path_filename(date_str, product_code, sub_product_code, mapsetcode, version, extension)
+    fullpath = set_path_sub_directory(product_code, sub_product_code, product_type, version, mapsetcode, date_str, subdir_level)
+
+    return os.path.join(es_constants.es2globals['processing_dir'], fullpath) + filename
+
+
 ######################################################################################
 #                            FILE/DIRECTORY  NAMING and MANAGEMENT
 ######################################################################################
@@ -1430,7 +1439,7 @@ def set_path_filename(date_str, product_code, sub_product_code, mapset_id, versi
 #   Output: subdir, e.g. vgt-ndvi/spot-v1/vgt/derived/10davg/
 #   Description: creates filename
 #
-def set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset):
+def set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset, date_str=None, subdir_level=None):
     type_subdir = dict_subprod_type_2_dir[product_type]
 
     if product_type == 'Native':
@@ -1440,11 +1449,29 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
                         type_subdir + os.path.sep
 
     else:
-        sub_directory = str(product_code) + os.path.sep + \
-                        str(version) + os.path.sep + \
-                        mapset + os.path.sep + \
-                        type_subdir + os.path.sep + \
-                        str(sub_product_code) + os.path.sep
+        if date_str and subdir_level:
+            date_subdir = ''
+            # parse date_str to get year, month and day
+            year = date_str[0:4]
+            month = date_str[4:6]
+            day = date_str[6:8]
+            if subdir_level == 'to_year':
+                date_subdir = year + os.path.sep
+            elif subdir_level == 'to_day':
+                date_subdir = year + os.path.sep + month + os.path.sep + day + os.path.sep
+
+            sub_directory = str(product_code) + os.path.sep + \
+                            str(version) + os.path.sep + \
+                            mapset + os.path.sep + \
+                            type_subdir + os.path.sep + \
+                            str(sub_product_code) + os.path.sep + \
+                            date_subdir
+        else:
+            sub_directory = str(product_code) + os.path.sep + \
+                            str(version) + os.path.sep + \
+                            mapset + os.path.sep + \
+                            type_subdir + os.path.sep + \
+                            str(sub_product_code) + os.path.sep
 
     return sub_directory
 
@@ -1849,6 +1876,7 @@ def dump_obj_to_pickle(obj, filename):
     pickle.dump(obj, dump_file)
     dump_file.close()
 
+
 ######################################################################################
 #  Dump an object info a file as Json
 #
@@ -1880,6 +1908,8 @@ def restore_obj_from_json(obj, filename):
     # open(filename, 'a').close()
 
     return obj
+
+
 ######################################################################################
 #  Restore an object from a file (pickle serialization), if the file exist
 #  If file does not exist, do not alter the passed object
@@ -2552,6 +2582,7 @@ def write_graph_xml_subset(input_file, output_dir, band_name):
         outFile.write('  </applicationData>\n')
         outFile.write('</graph>\n')
 
+
 ######################################################################################
 #   Purpose: write a graph file for band select
 #   Author: Vijay Charan Venkatachalam, JRC, European Commission
@@ -2612,6 +2643,7 @@ def write_graph_xml_bandselect(input_file, output_dir, band_name):
         outFile.write('    </node>\n')
         outFile.write('  </applicationData>\n')
         outFile.write('</graph>\n')
+
 
 ######################################################################################
 #   Purpose: write a graph file for S3 Level 2 products ingestion

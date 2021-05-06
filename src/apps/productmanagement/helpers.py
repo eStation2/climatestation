@@ -7,12 +7,14 @@
 
 from __future__ import absolute_import
 from __future__ import division
-from __future__ import unicode_literals
 from __future__ import print_function
+from __future__ import unicode_literals
 
 from builtins import dict
 from builtins import int
+
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import str
 from builtins import range
@@ -22,7 +24,6 @@ import os
 import re
 import datetime
 import operator
-import collections
 
 from lib.python import functions
 
@@ -57,7 +58,7 @@ def cast_to_int(value):
     try:
         if isinstance(value, float):
             return int(value)
-        if isinstance(value, str) or isinstance(value, unicode):
+        if isinstance(value, str):  # or isinstance(value, unicode):
             return int(value.split(".")[0])
     except ValueError:
         pass
@@ -95,7 +96,7 @@ def add_cgl_dekads(date, dekads=1):
     # Copernicus global data products are obtained from the vito website and the dekad naming format is different from the actual dekad patern.
     # The dekadal dates are 1stDekad - 10th day, 2ndDekad - 20th day and 3rdDekad - last day of the month.
     new_date = date
-    #ES2-502
+    # ES2-502
     isdatetime = isinstance(date, datetime.datetime)
     # ES2-281 Robust way to handle the dates
     if date.day >= 1 and date.day < 10:
@@ -113,17 +114,18 @@ def add_cgl_dekads(date, dekads=1):
     #     tot_days = functions.get_number_days_month(str(date.year)+date.strftime('%m')+date.strftime('%d'))
     #     new_date = datetime.datetime(new_date.year, new_date.month, tot_days)
     else:
-        tot_days = functions.get_number_days_month(str(date.year) + date.strftime('%m') + date.strftime('%d'))  #Last day of the month
+        tot_days = functions.get_number_days_month(
+            str(date.year) + date.strftime('%m') + date.strftime('%d'))  # Last day of the month
         # check if the current day is last date of the month
         if date.day != tot_days:
-            if isdatetime:  #ES2-502
+            if isdatetime:  # ES2-502
                 new_date = datetime.datetime(new_date.year, new_date.month, tot_days)
             else:
                 new_date = datetime.date(new_date.year, new_date.month, tot_days)
         else:
             new_date = add_months(date, 1)
             if new_date.month != date.month:
-                if isdatetime: #ES2-502
+                if isdatetime:  # ES2-502
                     new_date = datetime.datetime(new_date.year, new_date.month, 10)
                 else:
                     new_date = datetime.date(new_date.year, new_date.month, 10)
@@ -152,23 +154,24 @@ def add_days(date, period, days):
 def add_months(date, months=1):
     targetmonth = months + date.month
     try:
-        date = date.replace(year=date.year + int(old_div((targetmonth - 1),12)), month=((targetmonth - 1)%12 + 1))
+        date = date.replace(year=date.year + int(old_div((targetmonth - 1), 12)), month=((targetmonth - 1) % 12 + 1))
     except ValueError:
         # There is an exception if the day of the month we're in does not exist in the target month
         # Go to the FIRST of the month AFTER, then go back one day.
         targetmonth += 1
-        date = date.replace(year=date.year + int(old_div((targetmonth - 1),12)), month=((targetmonth - 1)%12 + 1), day=1)
+        date = date.replace(year=date.year + int(old_div((targetmonth - 1), 12)), month=((targetmonth - 1) % 12 + 1),
+                            day=1)
         date -= datetime.timedelta(days=1)
     return date
 
 
 def add_years(date, years=1):
     try:
-        return date.replace(year = date.year + years)
+        return date.replace(year=date.year + years)
     except ValueError:
         # 29 of february return 28 of february
         return date + (datetime.date(date.year + years, 1, 1)
-                - datetime.date(date.year, 1, 1)) - datetime.timedelta(days=1)
+                       - datetime.date(date.year, 1, 1)) - datetime.timedelta(days=1)
 
 
 SPECIAL_DKM = "%{dkm}"
@@ -176,8 +179,9 @@ SPECIAL_DKM2 = "%{dkm2}"
 SPECIAL_DKY = "%{dky}"
 SPECIAL_ADD = re.compile("(%{)([+-])(\d)([dh])(.+)(})")
 
+
 def manage_date(date, template):
-    #%{dkm}
+    # %{dkm}
     while True:
         pos = template.find(SPECIAL_DKM)
         pos2 = template.find(SPECIAL_DKM2)
@@ -187,14 +191,15 @@ def manage_date(date, template):
             break
         if pos != -1:
             template = template[:pos] + ("3" if date.day > 20
-                    else "2" if date.day > 10 else "1") + template[pos+len(SPECIAL_DKM):]
+                                         else "2" if date.day > 10 else "1") + template[pos + len(SPECIAL_DKM):]
         elif pos2 != -1:
             template = template[:pos2] + ("21" if date.day > 20
-                    else "11" if date.day > 10 else "01") + template[pos2+len(SPECIAL_DKM2):]
+                                          else "11" if date.day > 10 else "01") + template[pos2 + len(SPECIAL_DKM2):]
         elif pos3 != -1:
-            template = template[:pos3] + (functions.conv_yyyymmdd_2_dky(date.strftime('%Y%m%d'))) + template[pos3 + len(SPECIAL_DKY):]
+            template = template[:pos3] + (functions.conv_yyyymmdd_2_dky(date.strftime('%Y%m%d'))) + template[pos3 + len(
+                SPECIAL_DKY):]
 
-    #%{+/-<Nt><strftime>} = +/- N delta days/hours/
+    # %{+/-<Nt><strftime>} = +/- N delta days/hours/
     def manage_add_factory(date):
         def manage_add(matchobj):
             groups = matchobj.groups()
@@ -214,7 +219,9 @@ def manage_date(date, template):
             date_new = date + delta
             strf = "".join(("%" + c) if c.isalpha() else c for c in groups[4])
             return date_new.strftime(strf)
+
         return manage_add
+
     template = re.sub(SPECIAL_ADD, manage_add_factory(date), template)
     return date.strftime(template)
 
@@ -258,7 +265,8 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
             to_date = datetime.datetime.combine(to_date, datetime.time.min)
 
         filenames = sorted(f for f in filenames
-                       if f is not None and frequency.extract_date(f) is not None and frequency.extract_date(f) >= from_date and frequency.extract_date(f) <= to_date)
+                           if f is not None and frequency.extract_date(f) is not None and frequency.extract_date(
+            f) >= from_date and frequency.extract_date(f) <= to_date)
     # Jurvtk: END remove filenames from list where date not between from_date and to_date
 
     # original_filenames = dict((no_ext(f), f) for f in unsorted_filenames if not f is None and get_ext(f) in (FILE_EXTENSIONS.TIF_FILE_EXTENSION, FILE_EXTENSIONS.MISSING_FILE_EXTENSION)) # in (original_ext, MISSING_FILE_EXTENSION))     #
@@ -306,7 +314,8 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
                 # raise WrongSequence(original, current_filename + original_ext)
                 raise WrongSequence(original, current_filename + FILE_EXTENSIONS.TIF_FILE_EXTENSION)
             else:
-                interval_type = INTERVAL_TYPE.PERMANENT_MISSING if original.lower().endswith(FILE_EXTENSIONS.MISSING_FILE_EXTENSION) else INTERVAL_TYPE.PRESENT
+                interval_type = INTERVAL_TYPE.PERMANENT_MISSING if original.lower().endswith(
+                    FILE_EXTENSIONS.MISSING_FILE_EXTENSION) else INTERVAL_TYPE.PRESENT
                 if not current_interval or current_interval[2] != interval_type:
                     current_interval = [date, date, interval_type, 1, 0.0]
                     intervals.append(current_interval)
@@ -318,7 +327,7 @@ def find_gaps(unsorted_filenames, frequency, only_intervals=False, from_date=Non
         total = sum(interval[3] for interval in intervals)
         remainder = 0.0
         for interval in intervals:
-            interval[4] = float(interval[3]*100.0/float(total))
+            interval[4] = float(interval[3] * 100.0 / float(total))
             if interval[4] < 1.0:
                 remainder += 1.0 - interval[4]
                 interval[4] = 1.0

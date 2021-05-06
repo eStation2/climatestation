@@ -66,6 +66,22 @@ class TestFunctions(unittest.TestCase):
                        self.str_type_subdir + self.sep + \
                        self.str_sprod + self.sep
 
+        self.sub_dir_to_day = self.str_prod + self.sep + \
+                              self.str_version + self.sep + \
+                              self.str_mapset + self.sep + \
+                              self.str_type_subdir + self.sep + \
+                              self.str_sprod + self.sep + \
+                              self.str_date[0:4] + self.sep + \
+                              self.str_date[4:6] + self.sep + \
+                              self.str_date[6:8] + self.sep
+
+        self.sub_dir_to_year = self.str_prod + self.sep + \
+                               self.str_version + self.sep + \
+                               self.str_mapset + self.sep + \
+                               self.str_type_subdir + self.sep + \
+                               self.str_sprod + self.sep + \
+                               self.str_date[0:4] + self.sep
+
         self.dir_name = self.sep + 'base' + self.sep + 'dir' + self.sep + 'some' + \
                         self.sep + 'where' + self.sep + self.sub_dir
 
@@ -96,6 +112,31 @@ class TestFunctions(unittest.TestCase):
 
         # File should be there
         self.src_file = self.testdatadir + '/tamsat-rfe/native/rfe2020_01-dk3.v3.nc'
+
+    def test_get_fullpath_filename(self):
+        my_filename = functions.get_fullpath_filename(self.str_date, None, self.product_type, self.str_prod,
+                                                      self.str_sprod, self.str_mapset, self.str_version,
+                                                      self.str_extension)
+
+        logger.info('Filename is: %s' % my_filename)
+        result = os.path.join(es_constants.es2globals['processing_dir'], self.sub_dir) + self.filename
+        self.assertEqual(result, my_filename)
+
+        my_filename = functions.get_fullpath_filename(self.str_date, 'to_day', self.product_type, self.str_prod,
+                                                      self.str_sprod, self.str_mapset, self.str_version,
+                                                      self.str_extension)
+
+        logger.info('Filename is: %s' % my_filename)
+        result = os.path.join(es_constants.es2globals['processing_dir'], self.sub_dir_to_day) + self.filename
+        self.assertEqual(result, my_filename)
+
+        my_filename = functions.get_fullpath_filename(self.str_date, 'to_year', self.product_type, self.str_prod,
+                                                      self.str_sprod, self.str_mapset, self.str_version,
+                                                      self.str_extension)
+
+        logger.info('Filename is: %s' % my_filename)
+        result = os.path.join(es_constants.es2globals['processing_dir'], self.sub_dir_to_year) + self.filename
+        self.assertEqual(result, my_filename)
 
     def test_check_output_dir(self):
         output_dir = '/tmp/eStation2'
@@ -817,8 +858,19 @@ class TestFunctions(unittest.TestCase):
         my_sub_directory = functions.set_path_sub_directory(self.str_prod, self.str_sprod, self.product_type,
                                                             self.str_version, self.str_mapset)
         logger.info('Subdirectory is: %s' % my_sub_directory)
-
         self.assertEqual(self.sub_dir, my_sub_directory)
+
+        my_sub_directory2 = functions.set_path_sub_directory(self.str_prod, self.str_sprod, self.product_type,
+                                                             self.str_version, self.str_mapset, self.str_date,
+                                                             subdir_level='to_day')
+        logger.info('Subdirectory is: %s' % my_sub_directory2)
+        self.assertEqual(self.sub_dir_to_day, my_sub_directory2)
+
+        my_sub_directory3 = functions.set_path_sub_directory(self.str_prod, self.str_sprod, self.product_type,
+                                                             self.str_version, self.str_mapset, self.str_date,
+                                                             subdir_level='to_year')
+        logger.info('Subdirectory is: %s' % my_sub_directory3)
+        self.assertEqual(self.sub_dir_to_year, my_sub_directory3)
 
     def test_getListVersions(self):
         versions = functions.getListVersions()

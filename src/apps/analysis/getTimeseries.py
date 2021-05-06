@@ -70,15 +70,40 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
     p = Product(product_code=productcode, version=version)
     dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode)
     dataset_filenames = dataset.get_filenames()
-    file_extension = '.' + dataset_filenames[0][-4:].split('.')[1]
+    file_extension = ''
+    if len(dataset_filenames) > 0:
+        file_extension = '.' + dataset_filenames[0][-4:].split('.')[1]
+    product_type = dataset._db_product.product_type
+    subdir_level = dataset._frequency.subdir_level
+
+    dateformat_str = "%Y%m%d"
+    if date_format == 'YYYYMMDDHHMM':
+        dateformat_str = "%Y%m%d%H%M"
+        start_date = dataset._frequency.cast_to_frequency(start_date)
+        end_date = dataset._frequency.cast_to_frequency(end_date) + datetime.timedelta(hours=23)
 
     if date_format == 'YYYYMMDD':
+        dateformat_str = "%Y%m%d"
+
+    if date_format == 'YYYY':
+        dateformat_str = "%Y"
+
+    if date_format != 'MMDD':
         # Loop over dates
         for date in dataset._frequency.get_dates(start_date, end_date):
             if (date >= start_date) and (date <= end_date):
-                filedate = date.strftime("%Y%m%d")
-                productfilename = functions.set_path_filename(filedate, productcode, subproductcode, mapsetcode, version, file_extension)
-                productfilepath = dataset.fullpath + productfilename
+                filedate = date.strftime(dateformat_str)
+
+                # productfilename = functions.set_path_filename(filedate, productcode, subproductcode, mapsetcode, version, file_extension)
+                # productfilepath = dataset.fullpath + productfilename
+                productfilepath = functions.get_fullpath_filename(filedate,
+                                                                  subdir_level,
+                                                                  product_type,
+                                                                  productcode,
+                                                                  subproductcode,
+                                                                  mapsetcode,
+                                                                  version,
+                                                                  file_extension)
                 dates_list.append(date)
                 if os.path.isfile(productfilepath):
                     list_files.append(productfilepath)
@@ -86,7 +111,7 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
                 else:
                     list_files.append('')
 
-    if date_format == 'MMDD':
+    else:
         # Extract MMDD
         mmdd_start = start_date.month*100+start_date.day
         mmdd_end = end_date.month*100+end_date.day
@@ -96,8 +121,18 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
             for mmdd in dataset.get_mmdd():
                 if mmdd_start <= int(mmdd) <= mmdd_end:
                     # mmdd contains the list of existing 'mmdd' - sorted
-                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
-                    productfilepath = dataset.fullpath + productfilename
+
+                    # productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
+                    # productfilepath = dataset.fullpath + productfilename
+                    productfilepath = functions.get_fullpath_filename(mmdd,
+                                                                      subdir_level,
+                                                                      product_type,
+                                                                      productcode,
+                                                                      subproductcode,
+                                                                      mapsetcode,
+                                                                      version,
+                                                                      file_extension)
+
                     list_files.append(productfilepath)
                     dates_list.append(datetime.date(start_date.year, int(mmdd[:2]), int(mmdd[2:4])))
             # Debug only
@@ -110,16 +145,33 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
             # Put all dates from start_mmdd to end of the year
             for mmdd in list_mmdd:
                 if int(mmdd) >= mmdd_start:
-                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
-                    productfilepath = dataset.fullpath + productfilename
+                    # productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
+                    # productfilepath = dataset.fullpath + productfilename
+                    productfilepath = functions.get_fullpath_filename(mmdd,
+                                                                      subdir_level,
+                                                                      product_type,
+                                                                      productcode,
+                                                                      subproductcode,
+                                                                      mapsetcode,
+                                                                      version,
+                                                                      file_extension)
                     list_files.append(productfilepath)
                     dates_list.append(datetime.date(start_date.year, int(mmdd[:2]), int(mmdd[2:4])))
 
             # Fill the list with 'full' years
             for n_years in range(end_date.year-start_date.year-1):
                 for mmdd in list_mmdd:
-                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
-                    productfilepath = dataset.fullpath + productfilename
+                    # productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
+                    # productfilepath = dataset.fullpath + productfilename
+                    productfilepath = functions.get_fullpath_filename(mmdd,
+                                                                      subdir_level,
+                                                                      product_type,
+                                                                      productcode,
+                                                                      subproductcode,
+                                                                      mapsetcode,
+                                                                      version,
+                                                                      file_extension)
+
                     list_files.append(productfilepath)
                     dates_list.append(datetime.date(start_date.year+1+n_years, int(mmdd[:2]), int(mmdd[2:4])))
 
@@ -127,8 +179,18 @@ def getFilesList(productcode, subproductcode, version, mapsetcode, date_format, 
             for mmdd in list_mmdd:
                 if int(mmdd) <= mmdd_end:
                     # mmdd contains the list of existing 'mmdd' - sorted
-                    productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
-                    productfilepath = dataset.fullpath + productfilename
+
+                    # productfilename = functions.set_path_filename(mmdd, productcode, subproductcode, mapsetcode, version, file_extension)
+                    # productfilepath = dataset.fullpath + productfilename
+                    productfilepath = functions.get_fullpath_filename(mmdd,
+                                                                      subdir_level,
+                                                                      product_type,
+                                                                      productcode,
+                                                                      subproductcode,
+                                                                      mapsetcode,
+                                                                      version,
+                                                                      file_extension)
+
                     list_files.append(productfilepath)
                     dates_list.append(datetime.date(end_date.year, int(mmdd[:2]), int(mmdd[2:4])))
 

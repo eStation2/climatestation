@@ -21,6 +21,7 @@ import datetime
 import calendar
 import os
 import glob
+import fnmatch
 
 from config import es_constants
 from lib.python import es_logging as log
@@ -225,16 +226,18 @@ class Frequency(object):
         if self.unit == self.UNIT.DEKAD:
             if fromdate.day != 1:
                 fromdate = fromdate.replace(day=1)
-
         elif self.unit == self.UNIT.CGL_DEKAD:
             if fromdate.day != 10 or fromdate.day == 20 or fromdate.day == functions.get_number_days_month(str(fromdate.year) + fromdate.strftime('%m') + fromdate.strftime('%d')):
                 fromdate = fromdate.replace(day=10)
-
+        elif self.unit == self.UNIT.HOUR:
+            # tm = datetime.time(1, 0)
+            fromdate = datetime.datetime(fromdate.year, fromdate.month, fromdate.day, 0, 0)
         return fromdate
 
     def get_dates(self, fromdate, todate):
         # ES2-281 To make the dates robust:
         fromdate = self.cast_to_frequency(fromdate)
+        todate = self.cast_to_frequency(todate)
 
         if fromdate > todate:
             raise Exception("'To date' must be antecedent respect 'From date': %s %s" % (
@@ -256,10 +259,11 @@ class Frequency(object):
         date = self.next_date(self.extract_date(filename))
         return self.format_filename(date, self.get_mapset(filename))
 
-    def __init__(self, value, unit, frequency_type, dateformat=None):
+    def __init__(self, value, unit, frequency_type, dateformat=None, subdir_level=None):
         value = cast_to_int(value)
         unit = unit.lower()
         frequency_type = frequency_type.lower()
+        subdir_level = subdir_level.lower()
         if dateformat:
             dateformat = dateformat.upper()
         if not isinstance(value, int):
@@ -274,6 +278,7 @@ class Frequency(object):
         self.unit = unit
         self.frequency_type = frequency_type
         self.dateformat = dateformat or self.dateformat_default(unit)
+        self.subdir_level = subdir_level
 
 
 # Class to define a temporal interval and logically refers to a fraction of a dataset
@@ -369,7 +374,8 @@ class Dataset(object):
         return Frequency(value=_db_frequency.frequency,
                          unit=_db_frequency.time_unit,
                          frequency_type=_db_frequency.frequency_type,
-                         dateformat=dateformat)
+                         dateformat=dateformat,
+                         subdir_level=_db_frequency.subdir_level)
 
     def next_date(self, date):
         return self._frequency.next_date(date)
@@ -379,13 +385,20 @@ class Dataset(object):
         # self._filenames = glob.glob(os.path.join(self.fullpath, regex))
         filenames = []
         if self.fullpath:
-            filenames = glob.glob(os.path.join(self.fullpath, regex))
+            if self._frequency.subdir_level == 'to_subprod':
+                filenames = glob.glob(os.path.join(self.fullpath, regex))
+            else:
+                filenames = [os.path.join(path, name) for path, subdirs, files in os.walk(self.fullpath) for name in
+                            fnmatch.filter(files, regex)]
         return filenames
 
     def get_filenames_range(self):
         all_files = []
         if self.fullpath:
-            all_files = glob.glob(os.path.join(self.fullpath, "*"))
+            if self._frequency.subdir_level == 'to_subprod':
+                all_files = glob.glob(os.path.join(self.fullpath, "*"))
+            else:
+                all_files = [os.path.join(path, name) for path, subdirs, files in os.walk(self.fullpath) for name in files]
         filenames = []
         for file in all_files:
             str_date = functions.get_date_from_path_full(file)

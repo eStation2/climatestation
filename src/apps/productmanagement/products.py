@@ -138,6 +138,13 @@ class Product(object):
         subproduct = missing['subproduct']
         dataset = self.get_dataset(mapset=mapset, sub_product_code=missing['subproduct'])
 
+        dataset_filenames = dataset.get_filenames()
+        file_extension = ''
+        if len(dataset_filenames) > 0:
+            file_extension = '.' + dataset_filenames[0][-4:].split('.')[1]
+        product_type = dataset._db_product.product_type
+        subdir_level = dataset._frequency.subdir_level
+
         missing_filenames = []
 
         # Manage the mapset: if the required one does not exist, use a 'larger' one (if exists)
@@ -218,8 +225,17 @@ class Product(object):
 
             for date in dates_to_add:
                 date_str = dataset._frequency.format_date(date)
-                filename = dataset.fullpath+functions.set_path_filename(date_str, missing['product'],
-                                                                        subproduct, use_mapset, version,'.tif')
+                # filename = dataset.fullpath+functions.set_path_filename(date_str, missing['product'],
+                #                                                         subproduct, use_mapset, version,'.tif')
+                filename = functions.get_fullpath_filename(date_str,
+                                                           subdir_level,
+                                                           product_type,
+                                                           missing['product'],
+                                                           subproduct,
+                                                           use_mapset,
+                                                           version,
+                                                           file_extension)
+
                 missing_filenames.append(filename)
 
         return missing_filenames

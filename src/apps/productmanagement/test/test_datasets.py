@@ -173,6 +173,22 @@ class TestDatasets(unittest.TestCase):
         self.assertEqual(completeness['totfiles'], 913)
         self.assertEqual(completeness['missingfiles'], 913)
 
+    def test_normalized_info_hour(self):
+        kwargs = self.kwargs.copy()
+
+        kwargs.update({
+            'from_date': datetime.datetime(2021, 1, 1),
+            'to_date': datetime.datetime(2021, 1, 20),
+            'product_code': "era5-hourly-2mt",
+            'version': '1.0',
+            'sub_product_code': "2mt",
+            'mapset': 'CDS-Africa-25km'
+        })
+        dataset = Dataset(**kwargs)
+        completeness = dataset.get_dataset_normalized_info()
+        self.assertEqual(completeness['totfiles'], 457)
+        self.assertEqual(completeness['missingfiles'], 457)
+
     def test_product_only_month_day(self):
         kwargs = self.kwargs.copy()
         kwargs.update({

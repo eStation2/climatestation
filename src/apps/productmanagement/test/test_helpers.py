@@ -12,7 +12,7 @@ import unittest
 import datetime
 
 from apps.productmanagement.datasets import Frequency
-from apps.productmanagement.helpers import find_gaps, add_years, add_months, add_days, add_dekads, add_pentads, cast_to_int, INTERVAL_TYPE
+from apps.productmanagement.helpers import list_all_files_in_subdirs, find_gaps, add_years, add_months, add_days, add_dekads, add_pentads, cast_to_int, INTERVAL_TYPE
 from apps.productmanagement.exceptions import WrongDateParameter
 
 

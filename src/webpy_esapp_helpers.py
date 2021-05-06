@@ -4167,6 +4167,8 @@ def getProductLayer(getparams):
 
     frequency_id = dataset._db_product.frequency_id
     date_format = dataset._db_product.date_format
+    product_type = dataset._db_product.product_type
+    subdir_level = dataset._frequency.subdir_level
 
     dateformat = '%Y%m%d'
     if frequency_id == 'e1hour':
@@ -4197,30 +4199,40 @@ def getProductLayer(getparams):
     if dataset.no_year():
         filedate = dataset.strip_year(filedate)
 
-    # Check the case of daily product, with time/minutes
-    if frequency_id == 'e1day' and date_format == 'YYYYMMDD':
-        regex = dataset.fullpath + filedate + '*' + file_extension  # '.tif'
-        filename = glob.glob(regex)
-        if len(filename) > 0:
-            productfile = filename[0]
-        else:
-            filename = functions.set_path_filename(filedate,
-                                                   getparams['productcode'],
-                                                   getparams['subproductcode'],
-                                                   getparams['mapsetcode'],
-                                                   getparams['productversion'],
-                                                   file_extension)
-            productfile = dataset.fullpath + filename
-        # lastdate = lastdate.replace("-", "")
-        # mydate=lastdate.strftime("%Y%m%d")
-    else:
-        filename = functions.set_path_filename(filedate,
-                                               getparams['productcode'],
-                                               getparams['subproductcode'],
-                                               getparams['mapsetcode'],
-                                               getparams['productversion'],
-                                               file_extension)
-        productfile = dataset.fullpath + filename
+    productfile = functions.get_fullpath_filename(filedate,
+                                                  subdir_level,
+                                                  product_type,
+                                                  getparams['productcode'],
+                                                  getparams['subproductcode'],
+                                                  getparams['mapsetcode'],
+                                                  getparams['productversion'],
+                                                  file_extension)
+
+    # # Check the case of daily product, with time/minutes
+    # if frequency_id == 'e1day' and date_format == 'YYYYMMDD':
+    #     regex = dataset.fullpath + filedate + '*' + file_extension  # '.tif'
+    #     filename = glob.glob(regex)
+    #     if len(filename) > 0:
+    #         productfile = filename[0]
+    #     else:
+    #         filename = functions.set_path_filename(filedate,
+    #                                                getparams['productcode'],
+    #                                                getparams['subproductcode'],
+    #                                                getparams['mapsetcode'],
+    #                                                getparams['productversion'],
+    #                                                file_extension)
+    #         productfile = dataset.fullpath + filename
+    #
+    #     # lastdate = lastdate.replace("-", "")
+    #     # mydate=lastdate.strftime("%Y%m%d")
+    # else:
+    #     filename = functions.set_path_filename(filedate,
+    #                                            getparams['productcode'],
+    #                                            getparams['subproductcode'],
+    #                                            getparams['mapsetcode'],
+    #                                            getparams['productversion'],
+    #                                            file_extension)
+    #     productfile = dataset.fullpath + filename
 
     # if (hasattr(getparams, "outmask") and getparams['outmask'] == 'true'):
     #     # print productfile
