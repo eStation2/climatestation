@@ -132,9 +132,12 @@ def ingestion_post_processing(composed_file_list, in_date, product, datasource_d
         for ingest_dataset in composed_file_list:
             # raster_dataset = ingest_dataset.rasterDataset
             subproduct = ingest_dataset.subproduct
-
+            # Get the output product info (scaling, ofset, nodata, datatype etc) Cu
+            product_out_info = querydb.get_subproduct(productcode=product['productcode'],version=product['version'],subproductcode=subproduct['subproduct'])
+            # Get the frequency
+            sprod_frequency = querydb.get_frequency(frequency_id=product_out_info.frequency_id)
             # Get output product full filename with product
-            output_path_filename = get_output_path_filename(datasource_descr, product, subproduct, in_date)
+            output_path_filename = get_output_path_filename(datasource_descr, product, subproduct, in_date, sprod_frequency.subdir_level)
 
             #5. Create the output based on the file extension format
             tmp_output_file = tmpdir+'/tmp_file.nc' # tmp_file = composed_file_list[0] #create_output_file(output_path_filename, tmpdir, file_extension)
@@ -142,9 +145,6 @@ def ingestion_post_processing(composed_file_list, in_date, product, datasource_d
             # 6. Metadata registration -- here just metadata class is initialized
             metadata = assign_metadata_generic(product, subproduct['subproduct'], subproduct['mapsetcode'], in_date,
                                                os.path.dirname(output_path_filename), [input_file], my_logger)
-
-            # Get the output product info (scaling, ofset, nodata, datatype etc) Cu
-            product_out_info = querydb.get_subproduct(productcode=product['productcode'],version=product['version'],subproductcode=subproduct['subproduct'])
 
             write_status = ingest_dataset.write_nc_ingest(tmp_output_file, product_out_info, metadata)
             if os.path.isfile(tmp_output_file):
@@ -158,7 +158,7 @@ def ingestion_post_processing(composed_file_list, in_date, product, datasource_d
     return ingestion_status
 
 # Get output product full filename with product
-def get_output_path_filename(datasource_descr, product, subproduct, in_date, file_extension='.nc'):
+def get_output_path_filename(datasource_descr, product, subproduct, in_date, subdir_level, file_extension='.nc'):
     try:
         # target mapset
         mapset_id = subproduct['mapsetcode']
@@ -169,17 +169,15 @@ def get_output_path_filename(datasource_descr, product, subproduct, in_date, fil
         out_date_str_final = ingestion_ingest_file.define_output_data_format(datasource_descr, in_date, product_out_info.date_format)
 
         # Define outputfilename, output directory and make sure it exists
-        output_directory, output_path_filename= ingestion_ingest_file.define_output_dir_filename(product,
-                                                                                                     subproductcode,
-                                                                                                     mapset_id,
-                                                                                                     out_date_str_final,
-                                                                                                     logger, file_extension)
+        output_directory, output_path_filename= ingestion_ingest_file.define_output_dir_filename(product, subproductcode,
+                                                                                    mapset_id,
+                                                                                    out_date_str_final,
+                                                                                    logger, subdir_level, file_extension)
 
     except:
         logger.error('Error in retriving file name')
 
     return output_path_filename
-
 
 def ingestion_pre_process(datasource_descr, subproducts, input_file, tmpdir, my_logger, product,
                           test_mode):
