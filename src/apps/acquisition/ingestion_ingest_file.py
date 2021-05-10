@@ -256,8 +256,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         out_data_type_numpy = conv_data_type_to_numpy(product_out_info.data_type_id)
         out_date_str_final = define_output_data_format(datasource_descr, in_date, product_out_info.date_format)
 
+        # Get the frequency
+        sprod_frequency = querydb.get_frequency(frequency_id=product_out_info.frequency_id)
         # Define outputfilename, output directory and make sure it exists
-        output_directory, output_filename = define_output_dir_filename(product, subproduct, mapset_id, out_date_str_final, my_logger)
+        output_directory, output_filename = define_output_dir_filename(product, subproduct, mapset_id, out_date_str_final, my_logger, sprod_frequency.subdir_level)
         # -------------------------------------------------------------------------
         # Manage the geo-referencing associated to input file
         # -------------------------------------------------------------------------
@@ -403,13 +405,13 @@ def get_product_out_info(product, subproduct, my_logger):
     except:
         my_logger.error('Error defining Output product info ')
 
-def define_output_dir_filename(product, subproduct, mapset_id, out_date_str_final, my_logger, file_extension='.tif'):
+def define_output_dir_filename(product, subproduct, mapset_id, out_date_str_final, my_logger, subdir_level, file_extension='.tif'):
     try:
         output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
                                                                            subproduct,
                                                                            'Ingest',
                                                                            product['version'],
-                                                                           mapset_id )
+                                                                           mapset_id, date_str=out_date_str_final, subdir_level=subdir_level )
         my_logger.debug('Output Directory is: %s' % output_directory)
         try:
             if not os.path.exists(output_directory):
