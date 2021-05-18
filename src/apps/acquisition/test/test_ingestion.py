@@ -51,10 +51,11 @@ class TestIngestion(unittest.TestCase):
         # -> the product just ingested in the tmp_dir (see setUp)
         # -> the product in refs_output
         # Assess if the products are equal/equivalent
-
+        sprod = querydb.get_subproduct(productcode=productcode, version=version, subproductcode=subproductcode)
+        sprod_frequency = querydb.get_frequency(frequency_id=sprod.frequency_id)
         result = 0
         filename = functions.set_path_filename(date, productcode, subproductcode, mapsetcode, version, '.tif')
-        sub_directory = functions.set_path_sub_directory(productcode, subproductcode, 'Ingest', version, mapsetcode)
+        sub_directory = functions.set_path_sub_directory(productcode, subproductcode, 'Ingest', version, mapsetcode, date_str=date, subdir_level=sprod_frequency.subdir_level)
 
         ref_file = glob.glob(self.ref_out_dir + '**/*/' + filename)
         if not len(ref_file) > 0:  # os.path.isfile(ref_file[0]):

@@ -221,7 +221,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
                                                    test_mode)
         # TODO alter this area
         # Error occurred and was detected in pre_process routine
-        if str(composed_file_list) == '1':
+        if str(composed_file_list) == '1' or str(composed_file_list) == '-1':
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
             # Move files to 'error/storage' directory
             if not test_mode:
