@@ -88,7 +88,7 @@ DECLARE
     _frequency ALIAS FOR $3;
     _frequency_type ALIAS FOR $4;
     _description ALIAS FOR $5;
-	_subdir_level ALIAS FOR $5;
+	_subdir_level ALIAS FOR $6;
 BEGIN
     PERFORM * FROM products.frequency f WHERE f.frequency_id = TRIM(_frequency_id);
     IF FOUND THEN
