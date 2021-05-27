@@ -25,7 +25,7 @@ RUN conda install conda-forge::gdal
 # Add mapscript from conda
 RUN conda install -c mc_ mapscript
 # Add GEOS and PROJ from apt-get -> needed for mapscript
-RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin
+RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin cdo
 
 # Add Apache2 with mod-wsgi
 RUN apt-get update && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi-py3
@@ -88,12 +88,13 @@ RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
     if getent group www-data ; then groupdel www-data; fi &&\
     groupadd www-data &&\
     useradd -l -u ${USER_ID} -g www-data www-data &&\
-    install -d -m 0755 -o www-data -g www-data /var/www/climatestation &&\
-    install -d -m 0755 -o www-data -g www-data /data/ &&\
-    install -d -m 0755 -o www-data -g www-data /tmp/climatestation &&\
+    install -d -m 0777 -o www-data -g www-data /var/www/climatestation &&\
+    install -d -m 0777 -o www-data -g www-data /data/ &&\
+    install -d -m 0777 -o www-data -g www-data /tmp/climatestation &&\
     mkdir -p /var/log/apache2 &&\
     mkdir -p /home/www-data &&\
     chmod 0777 -R /var/log/apache2 &&\
+    chmod 0777 -R /home/www-data &&\
     touch /var/log/apache2/error.log &&\
     touch /var/log/apache2/access.log &&\
     chmod 0777 -R /var/log/apache2/error.log &&\
@@ -103,6 +104,7 @@ RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
               ${WORKDIR} \
               /data/ \
               /tmp/climatestation/ \
+              /home/www-data/ \
               /var/log/apache2/ \
               /var/log/apache2/error.log \
               /var/log/apache2/access.log \
@@ -122,6 +124,8 @@ RUN sed -i "s/80/8080/g" /etc/apache2/ports.conf
 #    sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
 #    sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' && \
 #    echo "www-data ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers;  su - www-data -c id
+
+# RUN mkdir -p /home/www-data && chown www-data:www-data /home/www-data && chmod 775 -R /home/www-data
 
 USER www-data
 

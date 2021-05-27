@@ -35,6 +35,9 @@ psutil
 scikit-image
 docker-py
 netCDF4
+cdo
+xarray
+
 ###################
 # For C3SF4P
 ###################

@@ -32,7 +32,7 @@ RUN conda install conda-forge::gdal
 # Add mapscript from conda
 RUN conda install -c mc_ mapscript
 # Add GEOS and PROJ from apt-get -> needed for mapscript
-RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin
+RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin cdo
 
 # Add Apache2 with mod-wsgi
 RUN apt-get update && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi-py3
@@ -96,6 +96,7 @@ RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
     mkdir -p /var/log/apache2 &&\
     mkdir -p /home/www-data &&\
     chmod 0777 -R /var/log/apache2 &&\
+    chmod 0777 -R /home/www-data &&\
     touch /var/log/apache2/error.log &&\
     touch /var/log/apache2/access.log &&\
     chmod 0777 -R /var/log/apache2/error.log &&\
@@ -105,6 +106,7 @@ RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
               ${WORKDIR} \
               /data/ \
               /tmp/climatestation/ \
+              /home/www-data/ \
               /var/log/apache2/ \
               /var/log/apache2/error.log \
               /var/log/apache2/access.log \
