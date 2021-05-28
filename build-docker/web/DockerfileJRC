@@ -32,10 +32,17 @@ RUN conda install conda-forge::gdal
 # Add mapscript from conda
 RUN conda install -c mc_ mapscript
 # Add GEOS and PROJ from apt-get -> needed for mapscript
-RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin cdo
+RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin
 
 # Add Apache2 with mod-wsgi
 RUN apt-get update && apt-get install -y apache2 apache2-dev libapache2-mod-wsgi-py3
+
+# Install CDO commandline tool
+# and correct installation error of package libqt5core5a
+# See: https://askubuntu.com/questions/1245160/cdo-error-while-loading-shared-libraries-libqt5core-so-5-cannot-open-shared-o
+
+RUN apt-get update && apt-get install -y cdo
+RUN strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt5Core.so.5
 
 # Install all needed Python packages, listed in the file requirements.txt
 # Some packages depend on setuptools to be installed. the reqiurements.txt does not preserve
@@ -122,10 +129,10 @@ RUN if [ ${USER_ID} -ne 0 ] && [ ${GROUP_ID} -ne 0 ]; then \
 RUN sed -i "s/80/8080/g" /etc/apache2/ports.conf
 
 # Give www-data sudo rights in the container
-#RUN sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
-#    sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
-#    sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' && \
-#    echo "www-data ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers;  su - www-data -c id
+RUN sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
+    sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
+    sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' && \
+    echo "www-data ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers;  su - www-data -c id
 
 USER www-data
 
