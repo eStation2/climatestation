@@ -128,7 +128,7 @@ def post_request_resource(base_url, resourcename_uuid, usr_pwd, https_params, pa
 def get_task_status(base_url, request_id, usr_pwd=None, https_params=None):
     # url and job
     get_jobs_url = base_url + '/tasks/' + request_id
-    response = http_request_cds(get_jobs_url, userpwd=usr_pwd, https_params=https_params)
+    response = http_request_cds(get_jobs_url, userpwd=usr_pwd, https_params=https_params) #If response is one manage here
     status = response.get('state')
     return str(status)
 
@@ -669,14 +669,21 @@ def build_list_matching_files_cds_period(base_url, template, resourcename_uuid):
 ### Ingest Netcdf
 #######################
 def ingest_netcdf_cds(internet_source, downloaded_file, processed_item):
-    product = {"productcode": internet_source.productcode,
-               "version": internet_source.version}
+    ingestion_status = False
+    try:
+        product = {"productcode": internet_source.productcode,
+                   "version": internet_source.version}
 
-    # Datasource description
-    datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_source.internet_id)
-    datasource_descr = datasource_descr[0]
-    # Get list of subproducts
+        # Datasource description
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_source.internet_id)
+        datasource_descr = datasource_descr[0]
+        # Get list of subproducts
 
-    sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
-    ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, processed_item.split(':')[0], product, sub_datasource,
-                                                             datasource_descr, logger)
+        sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
+        ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, processed_item.split(':')[0], product, sub_datasource,
+                                                                 datasource_descr, logger)
+    except Exception as inst:
+        logger.debug("Error in CDS Ingestion: %s" % internet_source)
+        raise
+
+    return ingestion_status

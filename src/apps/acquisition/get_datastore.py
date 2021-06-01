@@ -420,7 +420,14 @@ def cds_api_loop_internet(datastore_source):
             listtodownload = []
             for ongoing in ongoing_list:
                 ongoing_request_id = ongoing.split(':')[-1]
-                job_status = cds_api.get_task_status(datastore_source.url, ongoing_request_id, usr_pwd)
+                try:
+                    job_status = cds_api.get_task_status(datastore_source.url, ongoing_request_id, usr_pwd)
+                except:
+                    logger_spec.error("Problem while getting Job status %s.", str(ongoing))
+                    # Removing the ongoing list since job request maynot removed from the server.
+                    ongoing_list.remove(ongoing)
+                    functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
+                    continue
                 if job_status == 'completed':
                     logger_spec.info("Downloading Product: " + str(ongoing))
                     try:
@@ -437,8 +444,9 @@ def cds_api_loop_internet(datastore_source):
                             processed_item = cds_api.get_cds_current_Item_pattern(ongoing)
                             logger_spec.info("Ingesting : " + str(ongoing))
                             status = cds_api.ingest_netcdf_cds(datastore_source, target_path, processed_item)
-                            processed_list.append(processed_item)  # Add the processed list only with datetime, resourceid_product_type and variable
-                            functions.dump_obj_to_json(processed_list, processed_list_filename)
+                            if status:
+                                processed_list.append(processed_item)  # Add the processed list only with datetime, resourceid_product_type and variable
+                                functions.dump_obj_to_json(processed_list, processed_list_filename)
                             ongoing_list.remove(ongoing)
                             functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
                             deleted = cds_api.delete_cds_task(datastore_source.url, ongoing_request_id, usr_pwd, datastore_source.https_params)
