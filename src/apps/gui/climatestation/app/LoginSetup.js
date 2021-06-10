@@ -53,9 +53,10 @@ Ext.define('climatestation.LoginSetup', {
                     // save received user data
                     exprireDate = Ext.Date.add (new Date(),Ext.Date.DAY,1);
                     user = o.user;
+                    // Ext.util.Cookies.set('webpy_session_id', user.sessionid, exprireDate);
                     Ext.util.Cookies.set('estation2_userid', user.userid, exprireDate);
                     Ext.util.Cookies.set('estation2_username', user.username, exprireDate);
-                    Ext.util.Cookies.set('estation2_useremail', user.email, exprireDate);
+                    // Ext.util.Cookies.set('estation2_useremail', user.email, exprireDate);
                     Ext.util.Cookies.set('estation2_userlevel', user.userlevel, exprireDate);
                     Ext.util.Cookies.set('estation2_userlanguage', user.prefered_language, exprireDate);
                     if (user.prefered_language != climatestation.globals['selectedLanguage']){
@@ -128,12 +129,22 @@ Ext.define('climatestation.LoginSetup', {
                 var exprireDate = Ext.Date.add (new Date(),Ext.Date.DAY,1);
                 user = usr;
 
+                // Ext.util.Cookies.set('webpy_session_id', user.sessionid, exprireDate);
                 Ext.util.Cookies.set('estation2_userid', user.userid, exprireDate);
                 Ext.util.Cookies.set('estation2_username', user.username, exprireDate);
-                Ext.util.Cookies.set('estation2_useremail', user.email, exprireDate);
+                // Ext.util.Cookies.set('estation2_useremail', user.email, exprireDate);
                 Ext.util.Cookies.set('estation2_userlevel', user.userlevel, exprireDate);
                 Ext.util.Cookies.set('estation2_userlanguage', user.prefered_language, exprireDate);
             } // eo function getUser
+
+            // /**
+            //  * Logs in the user
+            //  * @param {Object} data Login name and password
+            //  */
+            // ,loginSession:function() {
+            //     params = {sessionid:Ext.util.Cookies.get('webpy_session_id')};
+            //     me.init();
+            // } // eo function login
 
             /**
              * Logs in the user
@@ -152,9 +163,10 @@ Ext.define('climatestation.LoginSetup', {
              */
             ,logout:function() {
                 user = null;
+                // Ext.util.Cookies.clear('webpy_session_id');
                 Ext.util.Cookies.clear('estation2_userid');
                 Ext.util.Cookies.clear('estation2_username');
-                Ext.util.Cookies.clear('estation2_useremail');
+                // Ext.util.Cookies.clear('estation2_useremail');
                 Ext.util.Cookies.clear('estation2_userlevel');
                 Ext.util.Cookies.clear('estation2_userlanguage');
             } // eo function logout
@@ -190,6 +202,7 @@ Ext.define('climatestation.LoginSetup', {
         ,getUser:me.getUser
         ,setUser:me.setUser
         ,login:me.login
+        // ,loginSession:me.loginSession
         ,logout:me.logout
     });
 

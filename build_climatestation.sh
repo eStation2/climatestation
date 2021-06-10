@@ -45,6 +45,7 @@ mkdir -p ${DATA_VOLUME}/static_data/settings
 mkdir -p ${TMP_VOLUME}
 chmod -R 777 ${TMP_VOLUME}
 mkdir -p ${TMP_VOLUME}/services
+#mkdir -p ${TMP_VOLUME}/user_sessions
 
 chmod -R 777 ${DATA_VOLUME}
 chmod -R 777 ${TMP_VOLUME}

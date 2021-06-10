@@ -17,6 +17,9 @@ import numpy as np
 import os
 import base64
 import unittest
+import web
+import json
+import pickle
 
 import webpy_esapp_helpers
 from config import es_constants
@@ -24,12 +27,78 @@ from lib.python import functions
 from database import crud
 from lib.python import es_logging as log
 from apps.productmanagement.datasets import Dataset
+from database import querydb
 
 standard_library.install_aliases()
 logger = log.my_logger(__name__)
 
 
 class TestWebpy(unittest.TestCase):
+
+    def test_Login(self):
+        urls = (
+            "/pa(.*)", "ProductAcquisition",
+            "/product/update", "UpdateProduct",
+            "/product/delete", "DeleteProduct",
+            "/product/createproduct", "CreateProduct",
+            "/product/updateproductinfo", "UpdateProductInfo",
+            "/product/unassigndatasource", "UnassignProductDataSource",
+
+            "/typeinstallation", "GetInstallationType",
+
+            "/users", "Users",
+            "/login", "Login")
+
+        web.config.debug = False
+        app = web.application(urls, globals(), autoreload=True)
+        application = app.wsgifunc()
+
+        login = {
+            'username': 'adminuser',
+            'password': 'mesadmin'
+        }
+        login = functions.dotdict(login)
+        if 'username' in login:
+            try:
+                userinfo = querydb.checklogin(login)
+
+                if hasattr(userinfo, "__len__") and userinfo.__len__() > 0:
+                    store = web.session.DiskStore(es_constants.es2globals['base_tmp_dir'] + '/user_sessions')
+                    session = web.session.Session(app, store, initializer={'userid': ''})
+                    session.userid = userinfo[0]['userid']
+                    sessionid = session.userid
+                    for row in userinfo:
+                        # row_dict = functions.row2dict(row)
+                        row_dict = row
+                        user_info = {
+                            'sessionid': sessionid,
+                            'username': row_dict['username'],
+                            # 'password': row_dict['password'],
+                            'userid': row_dict['userid'],
+                            'userlevel': row_dict['userlevel'],
+                            # 'email': row_dict['email'],
+                            'prefered_language': row_dict['prefered_language']
+                            # 'timestamp': row_dict['timestamp']
+                        }
+
+                    user_info_json = json.dumps(user_info,
+                                                ensure_ascii=False,
+                                                # encoding='utf-8',
+                                                sort_keys=True,
+                                                indent=4,
+                                                separators=(', ', ': '))
+                    # print user_info_json
+                    login_json = '{"success":true, "user":' + user_info_json + '}'
+                    # print login_json
+                else:
+                    login_json = '{"success":false, "error":"Username or password incorrect!"}'
+
+            except:
+                login_json = '{"success":false, "error":"Error reading login data in DB!"}'
+        else:
+            login_json = '{"success":false, "error":"No user name given!"}'
+
+        self.assertEqual(1, 1)
 
     def test_importJRCRefWorkspaces(self):
         version = 1
@@ -60,14 +129,14 @@ class TestWebpy(unittest.TestCase):
             'task': 'run'
         }
         p = functions.dotdict(params)
-        message = webpy_esapp_helpers.execServiceTask(p)
+        message, status = webpy_esapp_helpers.execServiceTask(p)
 
         params = {
             'service': 'system',
             'task': 'stop'
         }
         p = functions.dotdict(params)
-        message = webpy_esapp_helpers.execServiceTask(p)
+        message, status = webpy_esapp_helpers.execServiceTask(p)
         self.assertEqual(1, 1)
 
     def test_checkCreateSubproductDir(self):

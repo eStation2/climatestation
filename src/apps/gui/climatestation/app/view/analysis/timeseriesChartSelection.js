@@ -287,32 +287,32 @@ Ext.define("climatestation.view.analysis.timeseriesChartSelection",{
                     multipleyears: true
                 }]
             }, {
-                title: climatestation.Utils.getTranslation('SCATTER'),  // 'SCATTER',
+                title: climatestation.Utils.getTranslation('HOWMOLLER'),  // 'SCATTER',
                 // id: 'ts_cumulative_graph_tab_' + me.id,
                 tbar: {
                     padding: '0 0 0 0',
                     items: [{
                         xtype: 'button',
                         text: climatestation.Utils.getTranslation('gettimeseries'),    // 'Get timeseries',
-                        reference: 'gettimeseries_btn_scatter',
+                        reference: 'gettimeseries_btn_howmoller',
                         iconCls: 'chart-curve_medium',
                         scale: 'medium',
                         disabled: false,
                         autoWidth: true,
                         margin: '0 0 5 0',
-                        graphtype: 'scatter',
+                        graphtype: 'howmoller',
                         handler: 'generateTimeseriesChart'
                     }]
                 },
                 items: [{
                     xtype: 'timeseriesproductselection',
-                    graphtype: 'scatter',
+                    graphtype: 'howmoller',
                     cumulative: false,
-                    multiplevariables: true,
+                    matrix: true,
+                    multiplevariables: false,
                     fromto: false,
                     year: false,
-                    // compareyears: false,
-                    multipleyears: false
+                    multipleyears: true
                 }]
             }, {
                 title: 'Debug info',

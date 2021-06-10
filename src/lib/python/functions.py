@@ -257,6 +257,11 @@ def getStatusAllServices():
     ingest_daemon = acquisition.IngestionDaemon(pid_file, dry_run=dry_run)
     ingest = ingest_daemon.status()
 
+    # Get status of the get_datastore service
+    pid_file = es_constants.get_datastore_pid_filename
+    getdatastore_daemon = acquisition.GetDataStoresDaemon(pid_file, dry_run=dry_run)
+    datastore = getdatastore_daemon.status()
+
     # Get status of the get_internet service
     pid_file = es_constants.get_internet_pid_filename
     getinternet_daemon = acquisition.GetInternetDaemon(pid_file, dry_run=dry_run)
@@ -279,6 +284,7 @@ def getStatusAllServices():
 
     services_status = {'eumetcast': str(eumetcast).lower(),
                        'internet': str(internet).lower(),
+                       'datastore': str(datastore).lower(),
                        'ingest': str(ingest).lower(),
                        'process': str(process).lower(),
                        'system': str(system).lower()}

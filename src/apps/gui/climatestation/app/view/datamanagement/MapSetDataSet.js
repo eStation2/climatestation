@@ -68,7 +68,7 @@ Ext.define("climatestation.view.datamanagement.MapSetDataSet",{
                         disabled: false,
                         trackMouse: true,
                         // mouseOffset: [-5, 0],
-                        autoHide: true,
+                        autoHide: false,
                         showDelay: 500,
                         hideDelay: 1000,
                         // dismissDelay: 5000, // auto hide after 5 seconds

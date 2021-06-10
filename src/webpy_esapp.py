@@ -232,9 +232,11 @@ urls = (
 app = web.application(urls, globals(), autoreload=True)
 application = app.wsgifunc()
 
-
-# session = web.session.Session(app, web.session.DiskStore('../logs/mstmp/webpySessions'))
-
+# store = web.session.DiskStore(es_constants.es2globals['base_tmp_dir'] + '/user_sessions')
+# session = web.session.Session(app, store, initializer={'userid': '',
+#                                                        'username': '',
+#                                                        'userlevel': '',
+#                                                        'prefered_language': ''})
 
 class CSApp(object):
     def __init__(self):
@@ -347,15 +349,21 @@ class Login(object):
                 userinfo = querydb.checklogin(login)
 
                 if hasattr(userinfo, "__len__") and userinfo.__len__() > 0:
+                    # session.userid = userinfo[0]['userid']
+                    # session.username = userinfo[0]['username']
+                    # session.userlevel = userinfo[0]['userlevel']
+                    # session.prefered_language = userinfo[0]['prefered_language']
+
                     for row in userinfo:
                         # row_dict = functions.row2dict(row)
                         row_dict = row
                         user_info = {
+                            # 'sessionid': sessionid,
                             'username': row_dict['username'],
-                            'password': row_dict['password'],
+                            # 'password': row_dict['password'],
                             'userid': row_dict['userid'],
                             'userlevel': row_dict['userlevel'],
-                            'email': row_dict['email'],
+                            # 'email': row_dict['email'],
                             'prefered_language': row_dict['prefered_language']
                             # 'timestamp': row_dict['timestamp']
                         }
@@ -374,6 +382,22 @@ class Login(object):
 
             except:
                 login_json = '{"success":false, "error":"Error reading login data in DB!"}'
+        # elif 'sessionid' in login:
+        #     if session.userid:
+        #         user_info = {
+        #             'username': session.username,
+        #             'userid': session.userid,
+        #             'userlevel': session.userlevel,
+        #             'prefered_language': session.prefered_language
+        #         }
+        #         user_info_json = json.dumps(user_info,
+        #                                     ensure_ascii=False,
+        #                                     sort_keys=True,
+        #                                     indent=4,
+        #                                     separators=(', ', ': '))
+        #         login_json = '{"success":true, "user":' + user_info_json + '}'
+        #     else:
+        #         login_json = '{"success":false, "error":"Session expired!"}'
         else:
             login_json = '{"success":false, "error":"No user name given!"}'
 
@@ -3230,6 +3254,8 @@ class GetLogFile(object):
                 logfilename = es_constants.es2globals['log_dir'] + 'apps.acquisition.get_eumetcast.log'
             if getparams['service'] == 'internet':
                 logfilename = es_constants.es2globals['log_dir'] + 'apps.acquisition.get_internet.log'
+            if getparams['service'] == 'datastore':
+                logfilename = es_constants.es2globals['log_dir'] + 'apps.acquisition.get_datastore.log'
             if getparams['service'] == 'ingest':
                 logfilename = es_constants.es2globals['log_dir'] + 'apps.acquisition.ingestion.log'
             if getparams['service'] == 'processing':
@@ -4462,6 +4488,7 @@ class CheckStatusAllServices(object):
 
         servicesstatus_json = '{"success": true, "eumetcast": ' + status_services['eumetcast'] + \
                               ', "internet": ' + status_services['internet'] + \
+                              ', "datastore": ' + status_services['datastore'] + \
                               ', "ingest": ' + status_services['ingest'] + \
                               ', "processing": ' + status_services['process'] + \
                               ', "system": ' + status_services['system'] + \
@@ -4476,15 +4503,16 @@ class ExecuteServiceTask(object):
 
     def POST(self):
         message = ''
+        status = None
         getparams = web.input()
 
         if sys.platform == 'win32':
-            message = webpy_esapp_helpers.execServiceTaskWin(getparams)
+            message, status = webpy_esapp_helpers.execServiceTaskWin(getparams)
         else:
-            message = webpy_esapp_helpers.execServiceTask(getparams)
+            message, status = webpy_esapp_helpers.execServiceTask(getparams)
 
         logger.info(message)
-        servicesstatus_json = '{"success": true, "message": "' + message + '"}'
+        servicesstatus_json = '{"success": true, "message": "' + message + '", "status": ' + str(status).lower() + '}'
         return servicesstatus_json
 
 

@@ -8,7 +8,7 @@ Ext.define('climatestation.view.widgets.ServiceMenuButtonController', {
     ],
 
     execServiceTask: function(menuitem, ev){
-        var me = this;
+        var me = this.getView();
 
         // AJAX call to run/start a specified service (specified through the menuitem name).
         // Ext.Ajax.extraParams = {task: menuitem.name};
@@ -33,7 +33,20 @@ Ext.define('climatestation.view.widgets.ServiceMenuButtonController', {
                         });
                     }
                     // menuitem.up().up().fireEvent('click', this);
-                    menuitem.up().up().up().getController().checkStatusServices(menuitem.up().up());
+                    // menuitem.up().up().up().getController().checkStatusServices(menuitem.up().up());
+                if (runresult.status){
+                    me.setIconCls('green');
+                    me.setGlyph("xf013@'Font Awesome 5 Free'");
+                    me.down('menuitem[name=rundatastore]').setDisabled(true);
+                    me.down('menuitem[name=stopdatastore]').setDisabled(false);
+                    me.down('menuitem[name=restartdatastore]').setDisabled(false);
+                } else {
+                    me.setIconCls('red');
+                    me.setGlyph("xf013@'Font Awesome 5 Free'");
+                    me.down('menuitem[name=rundatastore]').setDisabled(false);
+                    me.down('menuitem[name=stopdatastore]').setDisabled(true);
+                    me.down('menuitem[name=restartdatastore]').setDisabled(true);
+                }
                 }
             },
             failure: function(response, opts) {

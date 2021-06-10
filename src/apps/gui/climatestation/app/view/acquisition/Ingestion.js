@@ -112,7 +112,7 @@ Ext.define("climatestation.view.acquisition.Ingestion", {
                 disabled: false,
                 trackMouse: true,
                 // mouseOffset : [-5,0],
-                autoHide: true,
+                autoHide: false,
                 showDelay: 500,
                 hideDelay: 1000,
                 // dismissDelay: 10000, // auto hide after 10 seconds
