@@ -1239,11 +1239,12 @@ def execServiceTaskWin(getparams):
             os.system('NET START "estation2 - es2system"')
             message = 'System service restarted'
 
-    return message
+    return message, status
 
 
 def execServiceTask(getparams):
     message = ''
+    status = None
     dryrun = False
     if getparams.service == 'eumetcast':
         # Define pid file and create daemon
@@ -1274,6 +1275,35 @@ def execServiceTask(getparams):
             os.system("python " + eumetcast_service_script + " start")
             message = 'Get_eumetcast service restarted'
 
+        status = eumetcast_daemon.status()
+
+    if getparams.service == 'datastore':
+        # Define pid file and create daemon
+        pid_file = es_constants.get_datastore_pid_filename
+        datastore_daemon = acquisition.GetDataStoresDaemon(pid_file, dry_run=dryrun)
+        datastore_service_script = es_constants.es2globals['acq_service_dir'] + os.sep + 'service_get_datastore.py'
+        status = datastore_daemon.status()
+
+        if getparams.task == 'stop':
+            if status:
+                os.system("python " + datastore_service_script + " stop")
+                message = 'Get_Datastore service stopped'
+            else:
+                message = 'Get_Datastore service is already down'
+        elif getparams.task == 'run':
+            if not status:
+                os.system("python " + datastore_service_script + " start")
+                message = 'Get_Datastore service started'
+            else:
+                message = 'Get_Datastore service was already up'
+
+        elif getparams.task == 'restart':
+            os.system("python " + datastore_service_script + " stop")
+            os.system("python " + datastore_service_script + " start")
+            message = 'Get_Datastore service restarted'
+
+        status = datastore_daemon.status()
+
     if getparams.service == 'internet':
         # Define pid file and create daemon
         pid_file = es_constants.get_internet_pid_filename
@@ -1299,6 +1329,8 @@ def execServiceTask(getparams):
             os.system("python " + internet_service_script + " start")
             message = 'Get_internet service restarted'
 
+        status = internet_daemon.status()
+
     if getparams.service == 'ingest':
         # Define pid file and create daemon
         pid_file = es_constants.ingestion_pid_filename
@@ -1323,6 +1355,8 @@ def execServiceTask(getparams):
             os.system("python " + ingest_service_script + " stop")
             os.system("python " + ingest_service_script + " start")
             message = 'ingest service restarted'
+
+        status = ingest_daemon.status()
 
     if getparams.service == 'processing':
         # Define pid file and create daemon
@@ -1350,11 +1384,13 @@ def execServiceTask(getparams):
             os.system("python " + processing_service_script + " start")
             message = 'Processing service restarted'
 
+        status = processing_daemon.status()
+
     if getparams.service == 'system':
         # Define pid file and create daemon
         pid_file = es_constants.system_pid_filename
         system_daemon = es2system.SystemDaemon(pid_file, dry_run=dryrun)
-        #
+
         status = system_daemon.status()
         system_service_script = es_constants.es2globals['system_service_dir'] + os.sep + 'service_system.py'
         if getparams.task == 'stop':
@@ -1377,7 +1413,9 @@ def execServiceTask(getparams):
             os.system("python " + system_service_script + " start")
             message = 'System service restarted'
 
-    return message
+        status = system_daemon.status()
+
+    return message, status
 
 
 def getWorkspaceMaps(workspaceid, userid, withoutmaskfeature=False):

@@ -42,11 +42,15 @@ Ext.define("climatestation.view.widgets.LoginView", {
 
         me.listeners = {
             beforerender: function () {
-                if (Ext.util.Cookies.get('estation2_userid') != null) {
-                    var userinfo = {
+                if (Ext.util.Cookies.get('estation2_username') != null) {
+                    // Get userid from sessionid
+                    // climatestation.loginSession()
+                    // let userid = 'adminuser'
+                    let userinfo = {
                         userid: Ext.util.Cookies.get('estation2_userid'),
+                        // userid: userid,
                         username: Ext.util.Cookies.get('estation2_username'),
-                        email: Ext.util.Cookies.get('estation2_useremail'),
+                        // email: Ext.util.Cookies.get('estation2_useremail'),
                         userlevel: parseInt(Ext.util.Cookies.get('estation2_userlevel')),
                         prefered_language: Ext.util.Cookies.get('estation2_userlanguage')
                     };

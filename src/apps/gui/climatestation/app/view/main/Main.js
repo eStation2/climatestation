@@ -121,7 +121,7 @@ Ext.define('climatestation.view.main.Main', {
                 reference: 'c3sf4pmain',
                 listeners: {
                     activate: function(c3sf4pcard){
-                        me.lookupReference('header-section-title').setText(climatestation.Utils.getTranslation('Fitness For Purpose'));
+                        me.lookupReference('header-section-title').setText(climatestation.Utils.getTranslation('Products Inter-comparison'));
                     }
                 }
             },{
@@ -177,7 +177,7 @@ Ext.define('climatestation.view.main.Main', {
                     itemId: 'header-section-title',
                     text: 'TEST',
                     cls: 'header-section-title-text',
-                    width: 350
+                    width: 450
                 },
                 '->',
                 {
@@ -233,7 +233,7 @@ Ext.define('climatestation.view.main.Main', {
                                    me.impactWindow = res;
                                 }
                             },{
-                                text: 'Fitness For Purpose',
+                                text: 'Products Inter-comparison',
                                 iconCls:'far fa-chart-scatter',
                                 handler: function(){
                                     me.controller.doCardNavigation('c3sf4pmain')

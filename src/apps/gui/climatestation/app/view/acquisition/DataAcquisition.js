@@ -219,6 +219,8 @@ Ext.define("climatestation.view.acquisition.DataAcquisition",{
                     '</br>' +
                     '<b class="smalltext" style="color:darkgrey;">{data_source_id}</b>' +
                     '</br>' +
+                    '<b class="smalltext" style="color:darkgrey;">Source: {type}</b>' +
+                    '</br>' +
                     '<tpl if="time_latest_copy != \'\'">',
                         '<b class="smalltext" style="color:lightgrey;">'+climatestation.Utils.getTranslation('lastcopied')+': {time_latest_copy}</b>' +
                         '</br>' +

@@ -21,6 +21,7 @@ Ext.define('climatestation.view.acquisition.AcquisitionController', {
                 let services = Ext.JSON.decode(response.responseText);
                 let eumetcastbtn = me.down('button[name=eumetcastbtn]');
                 let internetbtn = me.down('button[name=internetbtn]');
+                let datastorebtn = me.down('button[name=datastorebtn]');
                 let ingestbtn = me.down('button[name=ingestbtn]');
 
                 if (services.eumetcast){
@@ -52,6 +53,21 @@ Ext.define('climatestation.view.acquisition.AcquisitionController', {
                     internetbtn.down('menuitem[name=runinternet]').setDisabled(false);
                     internetbtn.down('menuitem[name=stopinternet]').setDisabled(true);
                     internetbtn.down('menuitem[name=restartinternet]').setDisabled(true);
+                }
+                if (services.datastore){
+                    // internetbtn.setStyle('color','green');
+                    datastorebtn.setIconCls('green');
+                    datastorebtn.setGlyph("xf013@'Font Awesome 5 Free'");
+                    datastorebtn.down('menuitem[name=rundatastore]').setDisabled(true);
+                    datastorebtn.down('menuitem[name=stopdatastore]').setDisabled(false);
+                    datastorebtn.down('menuitem[name=restartdatastore]').setDisabled(false);
+                } else {
+                    // internetbtn.setStyle('color','red');
+                    datastorebtn.setIconCls('red');
+                    datastorebtn.setGlyph("xf013@'Font Awesome 5 Free'");
+                    datastorebtn.down('menuitem[name=rundatastore]').setDisabled(false);
+                    datastorebtn.down('menuitem[name=stopdatastore]').setDisabled(true);
+                    datastorebtn.down('menuitem[name=restartdatastore]').setDisabled(true);
                 }
                 if (services.ingest){
                     // ingestbtn.setStyle('color','green');

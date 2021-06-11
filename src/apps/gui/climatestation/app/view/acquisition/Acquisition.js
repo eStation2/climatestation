@@ -144,7 +144,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                     view.refresh();
                     view.updateLayout();
                 });
-                taskRefresh.delay(200);
+                taskRefresh.delay(100);
             },
             // groupclick: function(view, node, group) {
             //     var dataacquisitiongrids = Ext.ComponentQuery.query('dataacquisitiongrid');
@@ -368,6 +368,7 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                            ingestiongrid.updateLayout();
                         });
                     }
+
                     me.getView().updateLayout();
 
                     // me.forceStoreLoad = true;
@@ -431,6 +432,13 @@ Ext.define('climatestation.view.acquisition.Acquisition',{
                 xtype: 'servicemenubutton',
                 service: 'internet',
                 text: climatestation.Utils.getTranslation('internet'),    // 'Internet',
+                handler: 'checkStatusServices'
+            },
+            '-',
+            {
+                xtype: 'servicemenubutton',
+                service: 'datastore',
+                text: climatestation.Utils.getTranslation('Data Store'),    // 'Data Store',
                 handler: 'checkStatusServices'
             },
             '-',
