@@ -58,9 +58,9 @@ if not os.path.isdir(es_constants.ingest_error_dir):
 # tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.base_tmp_dir)
 echo_query = False
 user_def_sleep = es_constants.es2globals['poll_frequency']
-es_constants.processed_list_datastore_dir = '/data/static_data/get_lists/get_datastore'
-es_constants.get_datastore_processed_list_prefix = es_constants.processed_list_datastore_dir+'/get_datastore_processed_list_'
-es_constants.get_datastore_ongoing_list_prefix = es_constants.processed_list_datastore_dir+'/get_datastore_ongoing_list_'
+# es_constants.processed_list_datastore_dir = '/data/static_data/get_lists/get_datastore'
+# es_constants.get_datastore_processed_list_prefix = es_constants.processed_list_datastore_dir+'/get_datastore_processed_list_'
+# es_constants.get_datastore_ongoing_list_prefix = es_constants.processed_list_datastore_dir+'/get_datastore_ongoing_list_'
 
 #   ---------------------------------------------------------------------------
 #   Functions
@@ -447,11 +447,12 @@ def cds_api_loop_internet(datastore_source):
                             if status:
                                 processed_list.append(processed_item)  # Add the processed list only with datetime, resourceid_product_type and variable
                                 functions.dump_obj_to_json(processed_list, processed_list_filename)
-                            ongoing_list.remove(ongoing)
-                            functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
                             deleted = cds_api.delete_cds_task(datastore_source.url, ongoing_request_id, usr_pwd, datastore_source.https_params)
                             if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
                                 logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
+                            else:
+                                ongoing_list.remove(ongoing)
+                                functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
                         else:
                             #Check why download link is not available eventhough the job is completed
                             logger_spec.warning("Download link is not available: %s.", str(ongoing))
