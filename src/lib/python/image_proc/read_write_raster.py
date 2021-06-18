@@ -667,9 +667,9 @@ class RasterDatasetCS(_ImportRasterDataset):
         self.prod_code = metadata_climatstation.get_item('eStation2_subProduct')
         self.version = metadata_climatstation.get_item('eStation2_product_version')
         self.description = metadata_climatstation.get_item('eStation2_description')
-        self.scale_factor = metadata_climatstation.get_item('eStation2_scaling_factor')
-        self.fill_value = metadata_climatstation.get_item('eStation2_nodata')
-        self.add_offset = metadata_climatstation.get_item('eStation2_scaling_offset')
+        self.scale_factor = float(metadata_climatstation.get_item('eStation2_scaling_factor'))
+        self.fill_value = float(metadata_climatstation.get_item('eStation2_nodata'))
+        self.add_offset = float(metadata_climatstation.get_item('eStation2_scaling_offset'))
         self.frequency = metadata_climatstation.get_item('eStation2_frequency')
         self.date = metadata_climatstation.get_item('eStation2_date')
         if self.date is None:
