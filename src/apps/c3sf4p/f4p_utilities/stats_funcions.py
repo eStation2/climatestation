@@ -1,6 +1,6 @@
 """
 # ###############################################################################
-# version:          R1.0.0                                                      #
+# version:          R1.0.1                                                      #
 # created by:       F.Cappucci  --- fabrizio.cappucci@ext.ec.europa.eu          #
 # creation date:    08 Mar 2021                                                 #
 # property of:      JRC                                                         #
@@ -8,11 +8,15 @@
 #             --------------------------------------------------                #
 # last edit:        Under development                                           #
 #  *************************************************************************    #
+Log v-1.0.1
+    June-2021 - Add get_ks and get_ivh for handling hist and cdf calculation
+
 # ###############################################################################
 """
 import numpy as np
 from src.lib.python.image_proc.read_write_raster import RasterDatasetCS
 import os
+from scipy.stats import ks_2samp
 
 
 def get_spatial_consistency(data_in):
@@ -54,6 +58,63 @@ def par_hov(lof, product, k):
     d = np.squeeze(np.nanmean(data_tmp, axis=nax))
     out.append([d, k])
     return out
+
+
+def get_ks(data1, data2, n_bin=200):
+    """
+    @param data1:   first distribution
+    @param data2:   second distribution
+    @param n_bin:   number of bins to calculate cdf for ks
+    @return:        Kolmogorov-Smirnov statistics of the two sample. For each pair of datasets the output will be the
+        kolmogorov statistics coefficient (KS) and the p-value. If the KS statistic is small or the p-value is high,
+        then we cannot reject the hypothesis that the distributions of the two samples are the same.
+
+    """
+    # exclude nan from dataset
+    max1 = np.nanmax(data1)
+    min1 = np.nanmin(data1)
+    max2 = np.nanmax(data2)
+    min2 = np.nanmin(data2)
+
+    max_v = np.nanmin([max1, max2])
+    min_v = np.nanmax([min1, min2])
+
+    data1[data1 > max_v] = np.nan
+    data2[data2 > max_v] = np.nan
+    data1[data1 < min_v] = np.nan
+    data2[data2 < min_v] = np.nan
+
+    d1 = data1[~np.isnan(data1)]
+    d2 = data2[~np.isnan(data2)]
+
+    # calculate normed histogram
+    y1, _ = np.histogram(d2, n_bin, normed=True)
+    y2, _ = np.histogram(d1, n_bin, normed=True)
+
+    # calculate cdf
+    cdf1 = np.cumsum(y1) / np.max(np.cumsum(y1))
+    cdf2 = np.cumsum(y2) / np.max(np.cumsum(y2))
+    # ks
+    ks = ks_2samp(cdf1, cdf2)
+
+    return ks
+
+
+def get_ivh(data):
+    """
+    @param data: numpy matrix array
+    @return: cdf of data
+    """
+    i_max = float(np.nanmax(data))
+    i_min = float(np.nanmin(data))
+    ptot = np.count_nonzero(~np.isnan(data))
+    d = data[~np.isnan(data)]
+    i_range = np.linspace(i_min, i_max, 100)
+    i_vh = []
+    for i in i_range:
+        i_vh.append(100 * np.count_nonzero(d > i) / ptot)
+
+    return i_vh, list(i_range)
 
 
 def log_report(info, tag, logfile):

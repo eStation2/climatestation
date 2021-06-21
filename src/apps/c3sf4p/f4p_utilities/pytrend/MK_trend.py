@@ -115,7 +115,7 @@ import pymannkendall as mk
 
 def par_trend(n, input_param):
     """
-    :param n:               int: parallel index
+    :param n:               int: parallel index number
     :param input_param:     type(dict):
                             {'dt':          time-date array
                              'path2data':   path where to read data series for which calculating the trend
@@ -162,19 +162,24 @@ def par_trend(n, input_param):
         wm = wm[i0:i1]
         ind_good = np.where(wm != 0)
 
-        slopes = np.full_like(wm, fill_value=np.nan)
-        interc = np.full_like(wm, fill_value=np.nan)
-        pvalue = np.full_like(wm, fill_value=np.nan)
+        slopes = np.full_like(wm, fill_value=np.nan, dtype='float')
+        interc = np.full_like(wm, fill_value=np.nan, dtype='float')
+        pvalue = np.full_like(wm, fill_value=np.nan, dtype='float')
 
         for k in ind_good[0]:
             d = data[k, :]
             ts = pd.Series(d, index=pd.to_datetime(dt))
-
-            trend_out = mk.seasonal_test(ts, period=frequency, alpha=threshold)
-
-            slopes[k] = trend_out.slope / frequency
-            interc[k] = trend_out.intercept
-            pvalue[k] = trend_out.p
+            try:
+                trend_out = mk.seasonal_test(ts, period=frequency, alpha=threshold)
+                # TODO CHECK! if is slope * 100 or slope * 100 * freq
+                slopes[k] = trend_out.slope * frequency * 100  # express the slope as %/year
+                interc[k] = trend_out.intercept
+                pvalue[k] = trend_out.p
+            except Exception as extc:
+                if dbg:
+                    fid.writelines('Error in seasonal_test @ loop ' + str(n) + ' position ' + str(k) + ' ' +
+                                   str(extc) + ' available point on the series = ' +
+                                   str(np.count_nonzero(~np.isnan(d))) + '\n')
 
         np.save(sl_name, [slopes, interc, pvalue])
 

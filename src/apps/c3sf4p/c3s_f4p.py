@@ -1,6 +1,6 @@
 """
 # ###############################################################################
-# version:          R1.0.0                                                      #
+# version:          R1.0.1                                                      #
 # created by:       F.Cappucci  --- fabrizio.cappucci@ext.ec.europa.eu          #
 # creation date:    23 Feb 2021                                                 #
 # property of:      JRC                                                         #
@@ -14,6 +14,14 @@
 #  --------------------------------------------------------------------------   #
 #  --------------------------------------------------------------------------   #
 # ###############################################################################
+Log v-1.0.1:
+    - June 2021 added _check_data to ensure that all the data within a timeseries have the same dimension
+    - June 2021 added hist-cdf method to display histograms of data
+    - June 2021 completely re-written version of Trend analysis, hopefully should be faster
+    - June 2021 added some feature to get initial optional parameters (from __init__) in the case that
+                those are not provided
+    - June 2021 implemented a fix for joblib under docker (to be tested)
+
 """
 import os
 from src.lib.python.image_proc.read_write_raster import RasterDatasetCS, write_nc
@@ -46,17 +54,23 @@ class Fitness4Purpose(object):
         @param ecv:                 STRING: ecv type as defined in GCOS it is assumed that every element of the
                                             file_list parameter are all of the same ecv-kind
 
-        @param band_names:          LIST of STRING: band name for each dataset in file_list,
-                                    where len(band_names) equals the number of different datasets
-                                    (i.e. different product providers)
+        @param band_names:          LIST of STRING: band name for each sub-list relative to a dataset timeseries in
+                                    file_list, where len(band_names) equals the number of different datasets
+                                    (i.e. different product providers a.k.a. the number of sublist of file_list)
 
-                                    example: 3 different datasets (same example as for file_list)
+                                    example: 3 different datasets, i.e. 3 sub-lists (same example as for file_list)
 
                                     band_names = [band_name-1, band_name-2, band_name-3]
 
+                                    where band-name-ith olds for all the elements of the sub-list ith
+
 
         @param region_name:         STRING: Ancillary parameter name of the region to which the raster input corresponds
-                                    This parameter is the name associated to region_coordinates parameter
+                                    This parameter is the name associated to region_coordinates parameter. Although this
+                                    parameter is not mandatory, it is anyhow advisable to provide always this
+                                    information especially when the f4p_c3s.py will be put on the operative mode
+                                    in the web-interface, so that if a user require a particular subregion, the
+                                    graphical render of the result always displays the right indicators.
 
         @param region_coordinates:  LIST: Ancillary parameter, represents the boundary coordinates in case the analysis
                                     is foreseen in a sub-region of the original extension. This parameter should be
@@ -69,7 +83,12 @@ class Fitness4Purpose(object):
                                     E = Eastern coordinate in decimal degree with sign  [-180.0,..., 180.0]
 
                                     In this convention the following condition should always be verified: S<N and W<E
-                                    the tools also implements this test, and if wrong it throws an exception
+                                    the tools also implements this test, and if wrong it throws an exception.
+
+                                    Like in the case of region name, although this parameter is not mandatory, it is
+                                    anyhow advisable to provide always this information explicitly.
+                                    In this way all the calculation will be less prone to raise an exception, especially
+                                    in the cases where a subregion is required
 
         @param dbg:                 enables debug mode
 
@@ -81,10 +100,14 @@ class Fitness4Purpose(object):
         self.zc = region_coordinates
         self.dbg = dbg
         self.n_cores = psutil.cpu_count(logical=False)
-        self._check_input()
         self.logfile = None
+        self.tmp_joblib = './tmp_joblib/'
+        self._check_input()
 
     def _check_input(self):
+
+        rd0 = RasterDatasetCS(self.lof[0])
+
         if self.dbg:
             self.logfile = './test/check_input_test_' + str(datetime.today()) + '.log'
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
@@ -103,7 +126,7 @@ class Fitness4Purpose(object):
 
         if self.zn is None:
             # set default value
-            self.zn = 'Africa'
+            self.zn = rd0.nominal_region
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Region name=' + self.zn
@@ -128,6 +151,8 @@ class Fitness4Purpose(object):
                       'than East coordinate (region_coordinate[3]): EXIT!'
                 self._log_report(info, tag)
                 exit()
+        else:
+            self.zc = rd0.native_zc
 
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
@@ -137,11 +162,11 @@ class Fitness4Purpose(object):
 
     def _optimise_trend_parameters(self, chunks, jobs, index):
         """
-        :param chunks   type(int) number of chunks in which the timeseries will be divided for optimising
+        @param chunks   type(int) number of chunks in which the timeseries will be divided for optimising
                         parallel computation
-        :param jobs     type(int) number of jobs parameter to pass to the parallel processor i.e. number of
+        @param jobs     type(int) number of jobs parameter to pass to the parallel processor i.e. number of
                         simultaneous jobs (a.k.a. number of CPU)
-        : param index   type(int) number of index in the general type(list) timeseries formalism
+        @param index    type(int) number of index in the general type(list) timeseries formalism
 
         ***************************************************************************************************************
         This check optimises the wo parameters: 'chunks' and 'jobs' accordingly to the local machine architecture.
@@ -245,7 +270,7 @@ class Fitness4Purpose(object):
         if self.dbg:
             self.logfile = './test/scatter-plot_test_' + str(datetime.today()) + '.log'
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            tag = 'Starting Scatter Plot function' + str(len(self.lof))
+            tag = 'Starting Scatter Plot function' + str(len(self.lof)) + '==2'
             self._log_report(info, tag)
 
         # checking parameters:
@@ -309,82 +334,92 @@ class Fitness4Purpose(object):
         if self.dbg:
             self.logfile = './test/latitudinal-average-plot_test_' + str(datetime.today()) + '.log'
 
-        filelist = list(self.lof[0])
-        band_name = self.bands[0]
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            tag = 'Latitudinal average plot for ' + band_name + ' start function'
+            tag = 'Check that all files share the same pixel dimension'
             self._log_report(info, tag)
+        for i, filelist in enumerate(self.lof):
+            band_name = self.bands[i]
+            filelist = _check_data(filelist, band_name)
 
-        x_tick_labels = []
-        rd0 = RasterDatasetCS(filelist[0])
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                        str(getframeinfo(currentframe()).lineno))
+                tag = 'Latitudinal average plot for ' + band_name + ' start function'
+                self._log_report(info, tag)
 
-        # shape = rd0.get_data(self.bands[0], subsample_coordinates=self.zc).shape
-        sz = rd0.get_data(self.bands[0]).shape[1]
-        x_set = range(len(filelist))
+            x_tick_labels = []
+            rd0 = RasterDatasetCS(filelist[0])
 
-        # initialise data matrix to host hovmoller calculation
-        if self.dbg:
-            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            tag = 'Initialise data matrix to host hovmoller calculation'
-            self._log_report(info, tag)
-        data = np.zeros([sz, len(filelist)])
+            # shape = rd0.get_data(self.bands[0], subsample_coordinates=self.zc).shape
+            sz = rd0.get_data(self.bands[0]).shape[0]
+            x_set = range(len(filelist))
 
-        # notice that if self.n_cores = 1 the parallel statement behave like a normal for loop
-        if self.dbg:
-            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            tag = 'fill data matrix using parallel calculation, number of jobs=' + str(self.n_cores)
-            self._log_report(info, tag)
-        # out = Parallel(n_jobs=self.n_cores)(delayed(sf.par_hov)(filelist, band_name, k) for k in x_set)
-        out = Parallel(n_jobs=1)(delayed(sf.par_hov)(filelist, band_name, k) for k in x_set)
+            # initialise data matrix to host hovmoller calculation
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                        str(getframeinfo(currentframe()).lineno))
+                tag = 'Initialise data matrix to host hovmoller calculation'
+                self._log_report(info, tag)
+            data = np.zeros([sz, len(filelist)])
 
-        if self.dbg:
-            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            tag = 'Parallel calculation ends. Now display the result'
-            self._log_report(info, tag)
+            # notice that if self.n_cores = 1 the parallel statement behave like a normal for loop
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                        str(getframeinfo(currentframe()).lineno))
+                tag = 'fill data matrix using parallel calculation, number of jobs=' + str(self.n_cores)
+                self._log_report(info, tag)
+            # out = Parallel(n_jobs=self.n_cores)(delayed(sf.par_hov)(filelist, band_name, k) for k in x_set)
+            out = Parallel(n_jobs=1, temp_folder=self.tmp_joblib)(delayed(sf.par_hov)(filelist, band_name, k)
+                                                                  for k in x_set)
 
-        # unrol the output of parallel computation
-        for j in x_set:
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                        str(getframeinfo(currentframe()).lineno))
+                tag = 'Parallel calculation ends. Now display the result'
+                self._log_report(info, tag)
 
-            ii = int(out[j][0][1])
-            d = out[j][0][0]
-            data[:, ii] = d
-            rd = RasterDatasetCS(filelist[j])
-            x_tick_labels.append(rd.date)
+            # unrol the output of parallel computation
+            for j in x_set:
+                ii = int(out[j][0][1])
+                d = out[j][0][0]
+                data[:, ii] = d
+                rd = RasterDatasetCS(filelist[j])
+                x_tick_labels.append(rd.date)
 
-        hov_matrix = np.array(data)
+            hov_matrix = np.array(data)
 
-        y_tick_spaces = [np.linspace(self.zc[0], self.zc[1], 10)]
+            y_tick_spaces = [np.linspace(self.zc[0], self.zc[1], 10)]
 
-        y_tick_labels = []
-        for tick in y_tick_spaces:
-            if tick < 0:
-                card = 'S'
-            else:
-                card = 'N'
+            y_tick_labels = []
+            for tick in y_tick_spaces:
+                if tick < 0:
+                    card = 'S'
+                else:
+                    card = 'N'
 
-            y_tick_labels.append(str("{:.1f}".format(tick)) + '$^\circ$' + card)
+                y_tick_labels.append(str("{:.1f}".format(tick)) + '$^\circ$' + card)
 
-        sens_name = RasterDatasetCS(filelist[0]).sensor_code
+            sens_name = RasterDatasetCS(filelist[0]).mapset
 
-        """from here one must call a routine to render the plot, to be seen with Jurriaan"""
+            """from here one must call a routine to render the plot, to be seen with Jurriaan"""
 
-        # for testing the function call a matplotlib function to plot data
-        if self.dbg:
-            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            tag = 'Generating latitudinal average plot using matplotlib.show() for testing purposes'
-            self._log_report(info, tag)
-            from src.apps.c3sf4p.f4p_plot_functions.plot_hovmoller import graphical_render
+            # for testing the function call a matplotlib function to plot data
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+                tag = 'Generating latitudinal average plot using matplotlib.show() for testing purposes'
+                self._log_report(info, tag)
+                from src.apps.c3sf4p.f4p_plot_functions.plot_hovmoller import graphical_render
 
-            graphical_render(hov_matrix, band_name, sensor_name=sens_name, x_tick_labels=x_tick_labels,
-                             y_tick_labels=y_tick_labels)
+                graphical_render(hov_matrix, band_name, sensor_name=sens_name, x_tick_labels=x_tick_labels,
+                                 y_tick_labels=y_tick_labels)
 
-        if self.dbg:
-            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
-            tag = 'Latitudinal average methods ended without errors.'
-            self._log_report(info, tag)
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+                tag = 'Latitudinal average methods ended without errors.'
+                self._log_report(info, tag)
 
-    def trend_analysis(self, num_jobs=10, num_partitions=10, only_significant=True, threshold=0.05):
+    def trend_analysis(self, num_jobs=10, num_partitions=10, only_significant=True, threshold=0.05, fast=False):
         """
                 this function implements the analysis of trend given a timeseries of data. The Analysis is performed in
                 compliance with the Seasonal MK Test (seasonal_test): For seasonal time series data
@@ -399,6 +434,7 @@ class Fitness4Purpose(object):
                                         the input timeseries will be splitted. As an example if the default values
                                         holds, the total number of chunks will be 100, i.e. in general holds the rule:
                                                 number-of-chunks = num_jobs * num_partitions
+
                 @param only_significant:Bool: if true, only the significant (statistically speaking) trend will be
                                         filtered, i.e. all the p-values below a certain threshold (0.05 is used here)
 
@@ -411,6 +447,19 @@ class Fitness4Purpose(object):
                                         that the null hypothesis is False (i.e. the data have a trend)
                                         Any p-value > threshold (common factor is 0.05) is considered NOT statistically
                                         significant, i.e. the evidence against the null hypothesis is weak.
+
+                @param fast:            Bool: if true enables the FAST calculation. In some cases the time series for
+                                        calculation the trend can consists in several years of data and at the same
+                                        time the spatial resolution of the product can be very large. The result is a
+                                        heavy computational task that can take several hours (or even days depending
+                                        on the  machine architecture) to be completed.
+                                        Enabling the fast calculation means then resampling on the fly the spatial
+                                        resolution using a NOT accurate but very fast method (scipy.ndimage.zoom)
+                                        In this way the calculation can be enormously reduced (and as well the
+                                        computational time) at the cost, however, of its accuracy. This method can be
+                                        used only for having a first overview of what can be the overall trend of the
+                                        series, it is always advisable to use the more rigorous (and slow) method in
+                                        order to have trustworthy output.
 
 
                 ********************************************************************************************************
@@ -457,20 +506,21 @@ class Fitness4Purpose(object):
         freq2number correlates the frequency string with a integer number which express the number of 
         observation in one year. The numbers answer the question: How many files in one year?  
         '''
+
         # TODO decide which frequency is meaningful for trend calc. my suggestion: > 8days
         freq2number = {'2pday': 730,
-                       'e15minute': 4*24*365,
-                       'e1cgldekad': 3*12,
+                       'e15minute': 4 * 24 * 365,
+                       'e1cgldekad': 3 * 12,
                        'e1day': 365,
-                       'e1decad': 3*12,
+                       'e1decad': 3 * 12,
                        'e1modis16day': 23,  # TODO double-check with Marco
-                       'e1modis8day': 46,   # TODO double-check with Marco
+                       'e1modis8day': 46,  # TODO double-check with Marco
                        'e1month': 12,
-                       'e1motu7day': 4*12,
-                       'e1pentad': 6*12,
+                       'e1motu7day': 4 * 12,
+                       'e1pentad': 6 * 12,
                        'e1year': 1,
-                       'e30minute': 24*2*365,
-                       'e3hour': 24/3 * 365,
+                       'e30minute': 24 * 2 * 365,
+                       'e3hour': 24 / 3 * 365,
                        'e3month': 4,
                        'e6month': 2}
 
@@ -493,9 +543,7 @@ class Fitness4Purpose(object):
                         getframeinfo(currentframe()).lineno))
                     tag = msg + ': ' + str(frequency) + ' function forced to exit'
                     self._log_report(info, tag)
-
-                print(msg)
-                exit()
+                    exit()
 
             trend_flag = 'Mann-Kendall-Trend'
             dates = rd0.year + '-' + RasterDatasetCS(self.lof[nd][-1]).year
@@ -511,17 +559,10 @@ class Fitness4Purpose(object):
 
             tmp_path = save_path + 'TMP' + os.sep
 
-            # TODO: this parameter triggers the calc of trend in a sub-region of the nominal geographical coverage of
-            #       the product
-            try_reshape = False
-
             #  this parameter triggers the actual calculation, if it is already run once i.e. trend_name exists, then
-            #  do cal is set to False
+            #  the "do_calc" parameter is set to False
             do_calc = True
 
-            if try_reshape:
-                if os.path.exists(trend_name):
-                    do_calc = False
             if os.path.exists(trend_name):
                 do_calc = False
 
@@ -550,9 +591,9 @@ class Fitness4Purpose(object):
                     tag = 'Starting the parallel calculation'
                     self._log_report(info, tag)
 
-                tc = Ts.TrendClass(self.lof[nd], self.bands[nd], tmp_path, coordinates=self.zc, njobs=num_jobs,
-                                   partitions=num_partitions, freq=frequency, dbg=self.dbg, logfile=self.logfile,
-                                   threshold=threshold)
+                tc = Ts.TrendClass(self.lof[nd], self.bands[nd], tmp_path, self.tmp_joblib, coordinates=self.zc,
+                                   njobs=num_jobs, partitions=num_partitions, freq=frequency, dbg=self.dbg,
+                                   logfile=self.logfile, threshold=threshold, is_fast=fast)
 
                 slopes, intercepts, pvalues = tc.start_loop()
 
@@ -566,7 +607,6 @@ class Fitness4Purpose(object):
             else:
                 # calculaion already performed once. Trend file already exists.
                 rd = RasterDatasetCS(trend_name)
-
                 slopes = rd.get_data('slopes', subsample_coordinates=self.zc)
                 pvalues = rd.get_data('pvalues', subsample_coordinates=self.zc)
 
@@ -581,8 +621,112 @@ class Fitness4Purpose(object):
                 self._log_report(info, tag)
                 from src.apps.c3sf4p.f4p_plot_functions.plot_trend import graphical_render
 
-                graphical_render(slopes, title='Significant Slope ', threshold=np.percentile(slopes, 90), dbg=True,
+                graphical_render(slopes, title='Significant Slopes ', threshold=np.percentile(slopes, 90), dbg=True,
                                  logfile=self.logfile)
+
+    def histogram_and_cdf(self, reference=None):
+        """
+        This function is the entry point for generating the histogram and Cumulative Distribution Function (CDF) of
+        one or more distribution.
+        @param reference:   dtype=int: in the case of two or more distribution are involved, the user can decide a
+                                       particular
+                            distribution to be the "REFERENCE", automatically the other will be assumed as distributions
+                            to be tested against the reference one in terms of Kolmogorov-Smirnov (KS) statistics of the
+                            two sample. For each pair of datasets, the output of the test will be the kolmogorov
+                            statistics coefficient (ks) and the p-value. If the ks coefficient is small (close to 0) or
+                            the p-value is high (close to 1), then the hypothesis that the distributions of the two
+                            samples are the same cannot be rejected.
+
+            ref: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ks_2samp.html
+        @return:
+        """
+
+        if self.dbg:
+            self.logfile = './test/histCdf_test_' + str(datetime.today()) + '.log'
+
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Starting Hist and CDF function. Each hist will have ' + str(len(self.lof)) + ' distributions'
+            self._log_report(info, tag)
+
+        n_dataset = len(self.lof)
+        shapes = []
+
+        for i in range(len(self.lof[0])):
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = '' + str(len(self.lof))
+                self._log_report(info, tag)
+            rd00 = RasterDatasetCS(self.lof[0][i])
+            date_time = rd00.date
+            sens_names = []
+
+            _data = []
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Getting data for graph n. ' + str(i)
+                self._log_report(info, tag)
+            for nd in range(n_dataset):
+                rd = RasterDatasetCS(self.lof[nd][i])
+                sens_names.append(rd.sensor_code)
+                _d = rd.get_data(self.bands[nd], subsample_coordinates=self.zc)
+                shapes.append(str(_d.shape[0]) + str(_d.shape[1]))
+                _data.append(_d)
+
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Checking spatial cosistency:'
+                self._log_report(info, tag)
+            # check if all the datasets have the same dimension then apply spatial consistency
+            # (i.e. consider only common px)
+
+            if len(set(shapes)) == 1:  # i.e. all the datasets have the same dimension
+                _data = sf.get_spatial_consistency(_data)
+                if self.dbg:
+                    info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                        getframeinfo(currentframe()).lineno))
+                    tag = 'Data are consistent, spatial consistency applied'
+                    self._log_report(info, tag)
+            else:
+                if self.dbg:
+                    info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                        getframeinfo(currentframe()).lineno))
+                    tag = 'Data are not consistent, spatial consistency not applied'
+                    self._log_report(info, tag)
+
+            if reference is not None:
+                if self.dbg:
+                    info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                        getframeinfo(currentframe()).lineno))
+                    tag = 'Reference dataset provided as ' + sens_names[reference] + \
+                          ' calculating Kolmogorov-Smirnov statistics'
+                    self._log_report(info, tag)
+                ks = np.zeros([n_dataset, 2])
+                x_set = [item for item in range(n_dataset) if item not in [reference]]
+                for ids in x_set:
+                    out_ks = sf.get_ks(_data[reference].copy(), _data[ids].copy())
+                    ks[ids, 0] = out_ks[0]
+                    ks[ids, 1] = out_ks[1]
+            else:
+                ks = None
+
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Generating the histogram graphic (using matplotlib.show) for testing purposes'
+                self._log_report(info, tag)
+                from src.apps.c3sf4p.f4p_plot_functions.plot_hist_cdf import graphical_render
+
+                graphical_render(_data, sensor_name=sens_names, prod_name=self.bands, date_time=date_time,
+                                 zone_name=self.zn, zone_coord=self.zc, ks_value=ks, i_ref=reference)
+
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'End of hist-CDF function, no problem found'
+                self._log_report(info, tag)
 
     def _log_report(self, info, tag):
         if not os.path.exists(self.logfile):
@@ -593,3 +737,18 @@ class Fitness4Purpose(object):
         msg = info + ': ' + tag + '\n'
         fid.writelines(msg)
         fid.close()
+
+
+def _check_data(fl, band):
+    """
+    chech that the true dimension of each element of fl (filelist) w.r.t. the band under axamination, match the
+    expected dimension as stored in the database. If not, remove the file from the list
+    """
+    fl = list(fl)
+    default_dimension = RasterDatasetCS(fl[0]).pixel_dimension
+    for f in fl:
+        if default_dimension != list(RasterDatasetCS(f).get_data(band).shape):
+            fl.remove(f)
+    return fl
+
+

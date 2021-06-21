@@ -27,8 +27,8 @@ class TestC3S(unittest.TestCase):
         dataset_filenames = dataset.get_filenames_range()
 
         self.lof = [dataset_filenames]
-        self.bands = [None] * len(self.lof)
-        self.f4p = Fitness4Purpose(self.lof, self.bands)
+        self.bands = [None] #* len(self.lof)
+        self.f4p = Fitness4Purpose(self.lof, self.bands, dbg=True)
         howmuller = self.f4p.latitudinal_average_plot()
         self.assertEqual(1, 1)
 
