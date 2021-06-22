@@ -323,7 +323,7 @@ def loop_get_datastore(dry_run=False, test_one_source=False, my_source=None):
         return b_error
 
 def cds_api_loop_internet(datastore_source):
-    logger_spec = log.my_logger('apps.get_datastore.' + datastore_source.internet_id)
+    logger_spec = log.my_logger('apps.get_internet.' + datastore_source.internet_id)
 
     if datastore_source.user_name is None:
         user_name = "anonymous"
@@ -344,15 +344,15 @@ def cds_api_loop_internet(datastore_source):
     parameter = cds_api.read_cds_parameter_file(datastore_source.internet_id)
 
     if datastore_source.productcode is None or datastore_source.version is None:
-        logger.error("Product is not passed")
-        return
+        logger_spec.warning("Product is not passed for %s.", datastore_source.internet_id)
+        return []
 
     if parameter is not None:
         resourcename_uuid = parameter.get('resourcename_uuid')
         template_paramater = parameter.get('template')
     else:
-        resourcename_uuid = datastore_source.files_filter_expression
-        template_paramater = datastore_source.include_files_expression
+        logger_spec.warning("Parameters are not passed for %s.", datastore_source.internet_id)
+        return []
 
     ongoing_list = []
     ongoing_list_filename = es_constants.get_datastore_ongoing_list_prefix + str(
@@ -406,7 +406,7 @@ def cds_api_loop_internet(datastore_source):
                             ongoing_list.append(filename+":"+created_ongoing_request_id)
                             functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
                     except:
-                        logger_spec.warning(
+                        logger_spec.error(
                             "Problem while creating Job request to CDS: %s.", filename)
                         b_error = True
         # functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
@@ -447,9 +447,10 @@ def cds_api_loop_internet(datastore_source):
                             if status:
                                 processed_list.append(processed_item)  # Add the processed list only with datetime, resourceid_product_type and variable
                                 functions.dump_obj_to_json(processed_list, processed_list_filename)
+                                logger_spec.info("Ingesting Done" )
                             deleted = cds_api.delete_cds_task(datastore_source.url, ongoing_request_id, usr_pwd, datastore_source.https_params)
                             if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
-                                logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
+                                logger_spec.error("Problem while deleting Product job id: %s.", str(ongoing))
                             else:
                                 ongoing_list.remove(ongoing)
                                 functions.dump_obj_to_json(ongoing_list, ongoing_list_filename)
@@ -457,12 +458,12 @@ def cds_api_loop_internet(datastore_source):
                             #Check why download link is not available eventhough the job is completed
                             logger_spec.warning("Download link is not available: %s.", str(ongoing))
                     except:
-                        logger_spec.warning("Problem while Downloading Product: %s.", str(ongoing))
+                        logger_spec.error("Problem while Downloading Product: %s.", str(ongoing))
                         b_error = True
                 elif job_status == 'failed':
                     # Check if the request failed and remove the job
                     # Check if the created request is failed then remove the job(task)
-                    logger_spec.warning("Problem with created job so deleteing it: %s.", str(ongoing))
+                    logger_spec.warning("Job failed so deleteing it: %s.", str(ongoing))
                     deleted = cds_api.delete_cds_task(datastore_source.url, ongoing_request_id, usr_pwd, datastore_source.https_params)
                     if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
                         logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
@@ -484,7 +485,7 @@ def cds_api_loop_internet(datastore_source):
 
 def iri_api_loop_internet(internet_source):
 
-    logger_spec = log.my_logger('apps.get_datastore.' + internet_source.internet_id)
+    logger_spec = log.my_logger('apps.get_internet.' + internet_source.internet_id)
 
     if internet_source.user_name is None:
         user_name = "anonymous"
@@ -501,19 +502,10 @@ def iri_api_loop_internet(internet_source):
     # Create the full filename from a 'template' which contains
     internet_url = str(internet_source.url)
 
-    # processed_list = []
-    # processed_list_filename = es_constants.get_datastore_processed_list_prefix + internet_source.internet_id.replace(":", "_") + '.list'
-    # processed_list = functions.restore_obj_from_json(processed_list,
-    # processed_list_filename)
     try:
-        # Check if template is dict or string them create resources_parameters
-        # if type(template_paramater) is dict:
-        # resources_parameters = template_paramater
-        # else:
-        # resources_parameters = json.loads(template_paramater)
         if internet_source.productcode is None or internet_source.version is None:
-            logger.error("Product is not passed")
-            return
+            logger_spec.error("Product is not passed")
+            return []
 
         product = {"productcode": internet_source.productcode,
         "version": internet_source.version}
@@ -524,9 +516,9 @@ def iri_api_loop_internet(internet_source):
         # Get list of subproducts
 
         subproducts = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
-        dates = build_list_dates_generic(from_date=internet_source.start_date, to_date=internet_source.end_date, frequency_id=str(internet_source.frequency_id))
+        dates = build_list_dates_generic(from_date=internet_source.start_date, to_date=internet_source.end_date, frequency_id=str(internet_source.frequency_id), logger_spec=logger_spec)
         # Dates defined are dynamic not based on the configuration file
-        iri_api.process_list_matching_url(datasource_descr, product, subproducts, dates)
+        iri_api.process_list_matching_url(datasource_descr, product, subproducts, dates, logger_spec)
 
         # functions.dump_obj_to_json(processed_list, processed_list_filename)
 
@@ -540,12 +532,12 @@ def iri_api_loop_internet(internet_source):
         return current_list
 
 
-def build_list_dates_generic(from_date, to_date, frequency_id):
+def build_list_dates_generic(from_date, to_date, frequency_id, logger_spec):
     # Add a check on frequency
     try:
         frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
     except Exception as inst:
-        logger.debug("Error in datasets.Dataset.get_frequency: %s" % inst.args[0])
+        logger_spec.debug("Error in datasets.Dataset.get_frequency: %s" % inst.args[0])
         raise
 
     # Manage the start_date (mandatory).
@@ -559,7 +551,7 @@ def build_list_dates_generic(from_date, to_date, frequency_id):
                 if from_date < 0:
                     datetime_start = datetime.datetime.today() - datetime.timedelta(days=-from_date)
             else:
-                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                logger_spec.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
                 raise Exception("Start Date not valid")
     except:
         raise Exception("Start Date not valid")
@@ -582,7 +574,7 @@ def build_list_dates_generic(from_date, to_date, frequency_id):
     try:
         dates = frequency.get_dates(datetime_start, datetime_end)
     except Exception as inst:
-        logger.debug("Error in frequency.get_dates: %s" % inst.args[0])
+        logger_spec.debug("Error in frequency.get_dates: %s" % inst.args[0])
         raise
 
     return dates
