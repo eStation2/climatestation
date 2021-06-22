@@ -678,10 +678,10 @@ def ingest_netcdf_cds(internet_source, downloaded_file, processed_item):
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_source.internet_id)
         datasource_descr = datasource_descr[0]
         # Get list of subproducts
-
+        logger_spec = log.my_logger('apps.ingestion.' + internet_source.productcode + '.' + internet_source.version)
         sub_datasource = ingestion.get_subrproducts_from_ingestion(product, datasource_descr.datasource_descr_id)
         ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, processed_item.split(':')[0], product, sub_datasource,
-                                                                 datasource_descr, logger)
+                                                                 datasource_descr, logger_spec)
     except Exception as inst:
         logger.debug("Error in CDS Ingestion: %s" % internet_source)
         raise

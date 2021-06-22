@@ -282,7 +282,7 @@ def build_parameter_http(parameters_file):
         return None
     return url
 
-def process_list_matching_url(datasource_descr, product, subproducts, dates):
+def process_list_matching_url(datasource_descr, product, subproducts, dates, logger_spec):
     #Read the IRI parameters from the file and build http url
     # Read the CDS parameters from the file.
     tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + datasource_descr.datasource_descr_id,
@@ -309,14 +309,19 @@ def process_list_matching_url(datasource_descr, product, subproducts, dates):
         # downloaded_file =
         file_downloaded = get_file(download_url=internet_url+parameter_url+urllib.parse.quote(time_url)+'/data.nc', target_path=downloaded_file)
         if not file_downloaded:
-            logger.error('Error in downloading the file')
+            logger_spec.error('Error in downloading the file: '+in_date+'_'+product['productcode']+'.nc')
             continue
+        else:
+            logger_spec.info('Downloaded the file: '+in_date+'_'+product['productcode']+'.nc')
         # Move the file to cs folder
         # ingestion_status = ingestion_iri(datasource_descr, product, subproducts[0], in_date, downloaded_file, logger)
+        logger_ingestion = log.my_logger('apps.ingestion.' + product['productcode'] + '.' + product['version'])
+        ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, subproducts, datasource_descr, logger_ingestion)
+        if ingestion_status:
+            processed_list.append(parameter_url + time_url)
+            functions.dump_obj_to_json(processed_list, processed_list_filename)
+            logger_spec.info("Ingesting Done")
 
-        ingestion_status = ingestion_netcdf.ingestion_netcdf(downloaded_file, in_date, product, subproducts, datasource_descr, logger)
-        processed_list.append(parameter_url+time_url)
-        functions.dump_obj_to_json(processed_list, processed_list_filename)
     shutil.rmtree(tmpdir)
     # except:
     #     logger.error('Error in processing IRIDL URL')
