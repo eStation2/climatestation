@@ -653,11 +653,14 @@ class RasterDatasetCS(_ImportRasterDataset):
         self.day = None
         self.hour = None
         self.prod_code = None
+        self.mapset = None
         self.sensor_code = None
         self.date_long = None
         self.frequency = None
         self.description = None
         self.version = None
+        self.nominal_region = None
+        self.pixel_dimension = [None, None]
 
         self.get_cs_metadata()  # This work only with ClimateStation where metadata is already written
 
@@ -670,13 +673,21 @@ class RasterDatasetCS(_ImportRasterDataset):
         metadata_climatstation = SdsMetadata()
         metadata_climatstation.read_from_file(self.filename)
 
-        self.sensor_code = metadata_climatstation.get_item('eStation2_product')
-        self.prod_code = metadata_climatstation.get_item('eStation2_subProduct')
+        self.mapset = metadata_climatstation.get_item('eStation2_mapset')
+        mps = mapset.MapSet().assigndb(self.mapset)
+        self.pixel_dimension = [int(mps.size_y), int(mps.size_x)]
+
+        self.sensor_code = self.mapset.aplit('-')[0]
+        try:
+            self.nominal_region = self.mapset.split('-')[1]
+        except IndexError:
+            self.nominal_region = ''
+        self.prod_code = metadata_climatstation.get_item('eStation2_product')
         self.version = metadata_climatstation.get_item('eStation2_product_version')
         self.description = metadata_climatstation.get_item('eStation2_description')
-        self.scale_factor = metadata_climatstation.get_item('eStation2_scaling_factor')
-        self.fill_value = metadata_climatstation.get_item('eStation2_nodata')
-        self.add_offset = metadata_climatstation.get_item('eStation2_scaling_offset')
+        self.scale_factor = float(metadata_climatstation.get_item('eStation2_scaling_factor'))
+        self.fill_value = float(metadata_climatstation.get_item('eStation2_nodata'))
+        self.add_offset = float(metadata_climatstation.get_item('eStation2_scaling_offset'))
         self.frequency = metadata_climatstation.get_item('eStation2_frequency')
         self.date = metadata_climatstation.get_item('eStation2_date')
         if self.date is None:

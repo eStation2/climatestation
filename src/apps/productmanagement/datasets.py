@@ -399,6 +399,8 @@ class Dataset(object):
                 all_files = glob.glob(os.path.join(self.fullpath, "*"))
             else:
                 all_files = [os.path.join(path, name) for path, subdirs, files in os.walk(self.fullpath) for name in files]
+
+        all_files = list(filename for filename in all_files if len(os.path.basename(filename).split('_')) == 5 and filename.endswith((FILE_EXTENSIONS.TIF_FILE_EXTENSION, FILE_EXTENSIONS.NETCDF_FILE_EXTENSION, FILE_EXTENSIONS.MISSING_FILE_EXTENSION)))
         filenames = []
         for file in all_files:
             str_date = functions.get_date_from_path_full(file)
