@@ -23,7 +23,8 @@ class TestC3S(unittest.TestCase):
         to_date = datetime.date(2021, 1, 1)
 
         p = Product(product_code=productcode, version=version)
-        dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode, from_date=from_date, to_date=to_date)
+        dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode,
+                                from_date=from_date, to_date=to_date)
         dataset_filenames = dataset.get_filenames_range()
 
         self.lof = [dataset_filenames]

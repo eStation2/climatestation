@@ -370,7 +370,7 @@ class Fitness4Purpose(object):
                 tag = 'fill data matrix using parallel calculation, number of jobs=' + str(self.n_cores)
                 self._log_report(info, tag)
             # out = Parallel(n_jobs=self.n_cores)(delayed(sf.par_hov)(filelist, band_name, k) for k in x_set)
-            out = Parallel(n_jobs=1, temp_folder=self.tmp_joblib)(delayed(sf.par_hov)(filelist, band_name, k)
+            out = Parallel(n_jobs=self.n_cores, temp_folder=self.tmp_joblib)(delayed(sf.par_hov)(filelist, band_name, k)
                                                                   for k in x_set)
 
             if self.dbg:
