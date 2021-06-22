@@ -17,18 +17,19 @@ class TestC3S(unittest.TestCase):
         version = '2.0'
         subproductcode = '10d'
         mapsetcode = 'CHIRP-Africa-5km'
-        from_date = '20000101'
-        to_date = '20210101'
-        from_date = datetime.date(2000, 1, 1)
-        to_date = datetime.date(2021, 1, 1)
+        from_date = '20210101'
+        to_date = '20210201'
+        from_date = datetime.date(2020, 1, 1)
+        to_date = datetime.date(2020, 3, 1)
 
         p = Product(product_code=productcode, version=version)
-        dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode, from_date=from_date, to_date=to_date)
+        dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode,
+                                from_date=from_date, to_date=to_date)
         dataset_filenames = dataset.get_filenames_range()
 
         self.lof = [dataset_filenames]
-        self.bands = [None] #* len(self.lof)
-        self.f4p = Fitness4Purpose(self.lof, self.bands, dbg=True)
+        self.bands = [None]     # * len(self.lof)
+        self.f4p = Fitness4Purpose(self.lof, self.bands, ecv=None, region_name=None, region_coordinates=None, dbg=True)
         howmuller = self.f4p.latitudinal_average_plot()
         self.assertEqual(1, 1)
 
