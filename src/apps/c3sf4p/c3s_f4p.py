@@ -32,6 +32,7 @@ import src.apps.c3sf4p.f4p_utilities.stats_funcions as sf
 import psutil
 from joblib import Parallel, delayed
 from datetime import datetime
+from config import es_constants
 
 
 class Fitness4Purpose(object):
@@ -101,15 +102,15 @@ class Fitness4Purpose(object):
         self.dbg = dbg
         self.n_cores = psutil.cpu_count(logical=False)
         self.logfile = None
-        self.tmp_joblib = './tmp_joblib/'
+        self.tmp_joblib = es_constants.es2globals['base_tmp_dir'] + '/tmp_joblib/'
         self._check_input()
 
     def _check_input(self):
 
-        rd0 = RasterDatasetCS(self.lof[0])
+        rd0 = RasterDatasetCS(self.lof[0][0])
 
         if self.dbg:
-            self.logfile = './test/check_input_test_' + str(datetime.today()) + '.log'
+            self.logfile = es_constants.es2globals['log_dir'] + '/check_input_test_' + str(datetime.today()) + '.log'
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'start check-input function'
             self._log_report(info, tag)
@@ -268,7 +269,7 @@ class Fitness4Purpose(object):
         n_dataset = len(self.lof)
 
         if self.dbg:
-            self.logfile = './test/scatter-plot_test_' + str(datetime.today()) + '.log'
+            self.logfile = es_constants.es2globals['log_dir'] + '/scatter-plot_test_' + str(datetime.today()) + '.log'
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Starting Scatter Plot function' + str(len(self.lof)) + '==2'
             self._log_report(info, tag)
@@ -332,7 +333,7 @@ class Fitness4Purpose(object):
         """
 
         if self.dbg:
-            self.logfile = './test/latitudinal-average-plot_test_' + str(datetime.today()) + '.log'
+            self.logfile = es_constants.es2globals['log_dir'] + '/latitudinal-average-plot_test_' + str(datetime.today()) + '.log'
 
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
@@ -345,7 +346,7 @@ class Fitness4Purpose(object):
             if self.dbg:
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
                         str(getframeinfo(currentframe()).lineno))
-                tag = 'Latitudinal average plot for ' + band_name + ' start function'
+                tag = 'Latitudinal average plot for ' + str(band_name) + ' start function'
                 self._log_report(info, tag)
 
             x_tick_labels = []
@@ -389,7 +390,8 @@ class Fitness4Purpose(object):
 
             hov_matrix = np.array(data)
 
-            y_tick_spaces = [np.linspace(self.zc[0], self.zc[1], 10)]
+            # y_tick_spaces = [np.linspace(self.zc[0], self.zc[1], 10)]
+            y_tick_spaces = np.linspace(self.zc[0], self.zc[1], 10)
 
             y_tick_labels = []
             for tick in y_tick_spaces:
@@ -495,7 +497,7 @@ class Fitness4Purpose(object):
 
                 """
         if self.dbg:
-            self.logfile = './test/trend_test_' + str(datetime.today()) + '.log'
+            self.logfile = es_constants.es2globals['log_dir'] + '/trend_test_' + str(datetime.today()) + '.log'
 
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
@@ -642,7 +644,7 @@ class Fitness4Purpose(object):
         """
 
         if self.dbg:
-            self.logfile = './test/histCdf_test_' + str(datetime.today()) + '.log'
+            self.logfile = es_constants.es2globals['log_dir'] + '/histCdf_test_' + str(datetime.today()) + '.log'
 
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))

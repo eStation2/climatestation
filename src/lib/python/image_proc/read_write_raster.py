@@ -670,7 +670,7 @@ class RasterDatasetCS(_ImportRasterDataset):
         mps = mapset.MapSet().assigndb(self.mapset)
         self.pixel_dimension = [int(mps.size_y), int(mps.size_x)]
 
-        self.sensor_code = self.mapset.aplit('-')[0]
+        self.sensor_code = self.mapset.split('-')[0]
         try:
             self.nominal_region = self.mapset.split('-')[1]
         except IndexError:

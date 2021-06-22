@@ -61,7 +61,8 @@ class MapSet(object):
         self.size_x = int(mapset.pixel_size_x)
         self.size_y = int(mapset.pixel_size_y)
         self.short_name = mapset.mapsetcode
-        self.bbox =self.get_bbox(mapset)
+        self.bbox = self.get_bbox(mapset)
+        return self
 
     def assign(self, spatial_ref_wkt, geo_transform, size_x, size_y, short_name):
         # Assign to passed arguments
