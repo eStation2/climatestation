@@ -32,7 +32,7 @@ import src.apps.c3sf4p.f4p_utilities.stats_funcions as sf
 import psutil
 from joblib import Parallel, delayed
 from datetime import datetime
-from config import es_constants
+from src.config import es_constants
 
 
 class Fitness4Purpose(object):
@@ -110,7 +110,8 @@ class Fitness4Purpose(object):
         rd0 = RasterDatasetCS(self.lof[0][0])
 
         if self.dbg:
-            self.logfile = es_constants.es2globals['log_dir'] + '/check_input_test_' + str(datetime.today()) + '.log'
+            self.logfile = es_constants.es2globals['log_dir'] + '/check_input_test_' + \
+                           str(datetime.today()).replace(' ', '') + '.log'
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'start check-input function'
             self._log_report(info, tag)
@@ -269,7 +270,8 @@ class Fitness4Purpose(object):
         n_dataset = len(self.lof)
 
         if self.dbg:
-            self.logfile = es_constants.es2globals['log_dir'] + '/scatter-plot_test_' + str(datetime.today()) + '.log'
+            self.logfile = es_constants.es2globals['log_dir'] + '/scatter-plot_test_' + \
+                           str(datetime.today()).replace(' ', '') + '.log'
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Starting Scatter Plot function' + str(len(self.lof)) + '==2'
             self._log_report(info, tag)
@@ -296,7 +298,10 @@ class Fitness4Purpose(object):
             for fname in self.lof[nd]:
                 rd = RasterDatasetCS(fname)
                 sensor_name = rd.sensor_code
-                data_labels.append(sensor_name + '  ' + self.bands[nd])
+                if self.bands[nd] is None:
+                    data_labels.append(sensor_name)
+                else:
+                    data_labels.append(sensor_name + '  ' + self.bands[nd])
                 dates.append(rd.date)
                 fig_title = 'Region: ' + self.zn + '; Date: ' + rd.date
                 _d = rd.get_data(self.bands[nd])
@@ -318,7 +323,8 @@ class Fitness4Purpose(object):
             self._log_report(info, tag)
             from src.apps.c3sf4p.f4p_plot_functions.plot_scatter import graphical_render
 
-            graphical_render(data[0], data[1], x_label=data_labels[0], y_label=data_labels[1], figure_title=fig_title)
+            graphical_render(data[0], data[1], x_label=data_labels[0], y_label=data_labels[1], figure_title=fig_title,
+                             logfile=self.logfile)
 
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'End of scatter plot function, no problem found'
@@ -333,7 +339,8 @@ class Fitness4Purpose(object):
         """
 
         if self.dbg:
-            self.logfile = es_constants.es2globals['log_dir'] + '/latitudinal-average-plot_test_' + str(datetime.today()) + '.log'
+            self.logfile = es_constants.es2globals['log_dir'] + '/latitudinal-average-plot_test_' + \
+                           str(datetime.today()).replace(' ', '') + '.log'
 
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
@@ -341,8 +348,7 @@ class Fitness4Purpose(object):
             self._log_report(info, tag)
         for i, filelist in enumerate(self.lof):
             band_name = self.bands[i]
-            filelist = _check_data(filelist, band_name)
-
+            # filelist = _check_data(filelist, band_name)
             if self.dbg:
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
                         str(getframeinfo(currentframe()).lineno))
@@ -371,8 +377,8 @@ class Fitness4Purpose(object):
                 tag = 'fill data matrix using parallel calculation, number of jobs=' + str(self.n_cores)
                 self._log_report(info, tag)
             # out = Parallel(n_jobs=self.n_cores)(delayed(sf.par_hov)(filelist, band_name, k) for k in x_set)
-            out = Parallel(n_jobs=self.n_cores, temp_folder=self.tmp_joblib)(delayed(sf.par_hov)(filelist, band_name, k)
-                                                                  for k in x_set)
+            out = Parallel(n_jobs=self.n_cores, temp_folder=self.tmp_joblib)(
+                delayed(sf.par_hov)(filelist, band_name, k) for k in x_set)
 
             if self.dbg:
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
@@ -399,25 +405,26 @@ class Fitness4Purpose(object):
                     card = 'S'
                 else:
                     card = 'N'
-
                 y_tick_labels.append(str("{:.1f}".format(tick)) + '$^\circ$' + card)
 
-            sens_name = RasterDatasetCS(filelist[0]).mapset
+            sens_name = RasterDatasetCS(filelist[0]).sensor_code
 
             """from here one must call a routine to render the plot, to be seen with Jurriaan"""
 
             # for testing the function call a matplotlib function to plot data
             if self.dbg:
-                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                        str(getframeinfo(currentframe()).lineno))
                 tag = 'Generating latitudinal average plot using matplotlib.show() for testing purposes'
                 self._log_report(info, tag)
                 from src.apps.c3sf4p.f4p_plot_functions.plot_hovmoller import graphical_render
 
-                graphical_render(hov_matrix, band_name, sensor_name=sens_name, x_tick_labels=x_tick_labels,
-                                 y_tick_labels=y_tick_labels)
+                graphical_render(hov_matrix, band_name, sensor_name=sens_name, x_tick_labels=np.array(x_tick_labels),
+                                 y_tick_labels=np.array(y_tick_labels), dbg=False)
 
             if self.dbg:
-                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                        str(getframeinfo(currentframe()).lineno))
                 tag = 'Latitudinal average methods ended without errors.'
                 self._log_report(info, tag)
 
@@ -497,7 +504,8 @@ class Fitness4Purpose(object):
 
                 """
         if self.dbg:
-            self.logfile = es_constants.es2globals['log_dir'] + '/trend_test_' + str(datetime.today()) + '.log'
+            self.logfile = es_constants.es2globals['log_dir'] + '/trend_test_' + \
+                           str(datetime.today()).replace(' ', '') + '.log'
 
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
@@ -514,7 +522,7 @@ class Fitness4Purpose(object):
                        'e15minute': 4 * 24 * 365,
                        'e1cgldekad': 3 * 12,
                        'e1day': 365,
-                       'e1decad': 3 * 12,
+                       'e1dekad': 3 * 12,
                        'e1modis16day': 23,  # TODO double-check with Marco
                        'e1modis8day': 46,  # TODO double-check with Marco
                        'e1month': 12,
@@ -527,13 +535,16 @@ class Fitness4Purpose(object):
                        'e6month': 2}
 
         for nd in range(len(self.lof)):
+            band_str = ''
+            if self.bands[nd] is not None:
+                band_str = str(self.bands[nd])
             num_partitions, num_jobs = self._optimise_trend_parameters(chunks=num_partitions, jobs=num_jobs, index=nd)
             rd0 = RasterDatasetCS(self.lof[nd][0])
             sn = rd0.sensor_code
             if self.dbg:
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
                     getframeinfo(currentframe()).lineno))
-                tag = 'Trend analysis starts for ' + sn + ' ' + self.bands[nd]
+                tag = 'Trend analysis starts for ' + sn + ' ' + band_str
                 self._log_report(info, tag)
             try:
                 frequency = freq2number[rd0.frequency]
@@ -554,12 +565,12 @@ class Fitness4Purpose(object):
             # TODO: define a trend name to be saved in a predefined folder-structure to not repeat the full calculation
             #       when it is already done once
             #
-            save_path = './'
-            trend_name = save_path + sn + '_' + self.bands[nd] + '_' + trend_flag + '_' + dates + '.nc'
+            save_path = es_constants.es2globals['base_tmp_dir'] + os.sep
+            trend_name = save_path + sn + '_' + band_str + '_' + trend_flag + '_' + dates + '.nc'
             #
             # **********************************************************************************************************
 
-            tmp_path = save_path + 'TMP' + os.sep
+            tmp_path = save_path + 'TMP-TREND' + os.sep
 
             #  this parameter triggers the actual calculation, if it is already run once i.e. trend_name exists, then
             #  the "do_calc" parameter is set to False
@@ -600,8 +611,10 @@ class Fitness4Purpose(object):
                 slopes, intercepts, pvalues = tc.start_loop()
 
                 if os.path.exists(tmp_path):
-                    # clean the temporal folder
-                    os.removedirs(tmp_path)
+                    #  clean the temporal folder
+                    rm_cmd = 'rm -rf ' + tmp_path
+                    os.system(rm_cmd)
+                    # os.removedirs(tmp_path)
 
                 write_nc(trend_name, [slopes, intercepts, pvalues], ['slopes', 'intercepts', 'pvalues'],
                          fill_value=np.nan, scale_factor=1, offset=0, dtype='float', zc=self.zc, mode='w')
@@ -626,6 +639,11 @@ class Fitness4Purpose(object):
                 graphical_render(slopes, title='Significant Slopes ', threshold=np.percentile(slopes, 90), dbg=True,
                                  logfile=self.logfile)
 
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'End of Trend function, no problem found'
+                self._log_report(info, tag)
+
     def histogram_and_cdf(self, reference=None):
         """
         This function is the entry point for generating the histogram and Cumulative Distribution Function (CDF) of
@@ -644,7 +662,8 @@ class Fitness4Purpose(object):
         """
 
         if self.dbg:
-            self.logfile = es_constants.es2globals['log_dir'] + '/histCdf_test_' + str(datetime.today()) + '.log'
+            self.logfile = es_constants.es2globals['log_dir'] + '/histCdf_test_' + \
+                           str(datetime.today()).replace(' ', '') + '.log'
 
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
@@ -734,7 +753,7 @@ class Fitness4Purpose(object):
         if not os.path.exists(self.logfile):
             fid = open(self.logfile, 'w')
         else:
-            fid = open(self.logfile, 'r+')
+            fid = open(self.logfile, 'a')
 
         msg = info + ': ' + tag + '\n'
         fid.writelines(msg)

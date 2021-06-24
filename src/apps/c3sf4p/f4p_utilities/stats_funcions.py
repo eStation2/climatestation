@@ -127,7 +127,7 @@ def log_report(info, tag, logfile):
     if not os.path.exists(logfile):
         fid = open(logfile, 'w')
     else:
-        fid = open(logfile, 'r+')
+        fid = open(logfile, 'a')
 
     msg = info + ': ' + tag + '\n'
     fid.writelines(msg)

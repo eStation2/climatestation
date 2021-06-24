@@ -17,6 +17,9 @@ def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=No
     @param logfile:             -> STRING; file for write the debug results
     :return:
     """
+    if logfile is None:
+        dbg = False
+
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
         tag = 'Start graphical render for Scatter Plot TEST'
@@ -59,12 +62,12 @@ def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=No
     itc = np.full_like(xx, fill_value=intercept)
     trend_line = slp * xx + itc
 
-    rmsd = np.sqrt(np.nansum(np.square(np.array(data_1).flatten() - np.array(data_2).flatten())) /
-                   np.count_nonzero(~np.isnan((np.array(data_1) - np.array(data_2)))))
+    rmsd = np.sqrt(np.nansum(np.square(np.array(d1).flatten() - np.array(d2).flatten())) /
+                   np.count_nonzero(~np.isnan((np.array(d1) - np.array(d2)))))
 
     nbins = 101
     thr = 1
-    h, x_edges, y_edges = np.histogram2d(data_1, data_2, bins=nbins)
+    h, x_edges, y_edges = np.histogram2d(d1, d2, bins=nbins)
     h = np.rot90(h)
     h = np.flipud(h)
     h_mask = np.ma.masked_where(h <= 0, h)  # Mask pixels with a value <= zero

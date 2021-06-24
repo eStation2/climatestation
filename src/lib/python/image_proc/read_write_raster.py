@@ -654,8 +654,10 @@ class RasterDatasetCS(_ImportRasterDataset):
         self.version = None
         self.nominal_region = None
         self.pixel_dimension = [None, None]
-
-        self.get_cs_metadata()  # This work only with ClimateStation where metadata is already written
+        try:
+            self.get_cs_metadata()  # This work only with ClimateStation where metadata is already written
+        except AttributeError:
+            pass
 
     # Get the ClimateStation metadata information from the file using cs metadata
     def get_cs_metadata(self):
@@ -669,12 +671,12 @@ class RasterDatasetCS(_ImportRasterDataset):
         self.mapset = metadata_climatstation.get_item('eStation2_mapset')
         mps = mapset.MapSet().assigndb(self.mapset)
         self.pixel_dimension = [int(mps.size_y), int(mps.size_x)]
-
         self.sensor_code = self.mapset.split('-')[0]
         try:
             self.nominal_region = self.mapset.split('-')[1]
         except IndexError:
             self.nominal_region = ''
+
         self.prod_code = metadata_climatstation.get_item('eStation2_product')
         self.version = metadata_climatstation.get_item('eStation2_product_version')
         self.description = metadata_climatstation.get_item('eStation2_description')

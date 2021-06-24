@@ -106,11 +106,14 @@ class TrendClass(object):
         self.step = self.size // np.square(self.p)
 
         if self.size % float(np.square(self.p)) == 0:
-            self.num_loops = self.size / self.step
+            self.num_loops = int(self.size / self.step)
         else:
-            self.num_loops = (self.size // self.step) + 1
+            self.num_loops = int((self.size // self.step) + 1)
 
-        self.head = rd.sensor_code + '-' + self.prod
+        if self.prod is not None:
+            self.head = rd.sensor_code + '-' + self.prod
+        else:
+            self.head = rd.sensor_code
         # self.slopes = None
         self.count = len(self.fl)
         self.dt = []
@@ -235,7 +238,7 @@ class TrendClass(object):
         :return:
         """
 
-        self.mask = np.zeros(self.shape, dtype='uint8')
+        self.mask = np.zeros(self.size, dtype='uint8')
 
         if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
@@ -271,6 +274,7 @@ class TrendClass(object):
                 self.mask += mask_element.flatten()
 
             # split whole data array in chunks and save them
+
             for n in range(self.num_loops):
                 dec_name = self.path_data + self.head + '-' + str(n).zfill(2) + '.npy'
                 if not os.path.exists(dec_name):

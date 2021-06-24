@@ -5,8 +5,8 @@ from inspect import currentframe, getframeinfo
 from src.apps.c3sf4p.f4p_utilities.stats_funcions import log_report
 
 
-def graphical_render(data, product, sensor_name=None, zone_name=None, x_tick_labels=None, y_tick_labels=None,
-                     figure_title=None, min_v=None, max_v=None, dbg=True, logfile=None):
+def graphical_render(data, product='', sensor_name='', zone_name='', x_tick_labels=None, y_tick_labels=None,
+                     figure_title='', min_v=None, max_v=None, dbg=True, logfile=None):
     """
     @param data:            ->  np.array;   data
     @param product:         ->  STRING;     product name
@@ -21,6 +21,8 @@ def graphical_render(data, product, sensor_name=None, zone_name=None, x_tick_lab
     @param logfile          ->  STRING; file for write the debug results
     :return:
     """
+    if logfile is None:
+        dbg = False
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
         tag = 'Start graphical render for Longitudinal average Plot TEST'
@@ -67,7 +69,7 @@ def graphical_render(data, product, sensor_name=None, zone_name=None, x_tick_lab
 
     cb_labels = np.linspace(min_v, max_v, nc, endpoint=True)
     bounds = list(cb_labels)
-    step = bounds[-1] - bounds[-2]
+    step = int(bounds[-1] - bounds[-2])
 
     cb_tick_labels = []
     for i in cb_labels[::2]:

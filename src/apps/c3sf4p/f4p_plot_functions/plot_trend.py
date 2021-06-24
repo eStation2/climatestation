@@ -29,6 +29,9 @@ def graphical_render(data, title=None, threshold=1.5, fmt="{:3.2f}", dbg=True, l
 
     c_map = colors.ListedColormap(np.flipud(rain) / 254.)
 
+    if logfile is None:
+        dbg = False
+
     if dbg:
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
             getframeinfo(currentframe()).lineno))
@@ -51,7 +54,7 @@ def graphical_render(data, title=None, threshold=1.5, fmt="{:3.2f}", dbg=True, l
 
     plt.figure()
     plt.imshow(data, interpolation='none', vmin=min_v, vmax=max_v, cmap=c_map)
-    cb = plt.colorbar(size=0.25, ticks=cb_labels + off)
+    cb = plt.colorbar(ticks=cb_labels + off)
     cb.ax.set_yticklabels(cb_tick_labels)
     if title is not None:
         plt.title(title + '\n', fontsize=14)
