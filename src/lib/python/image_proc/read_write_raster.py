@@ -460,6 +460,13 @@ class _ImportRasterDataset(object):
     # Get the Basic metadata information( nodata, scaling_factor, offset) from the file using GDAL
     def _get_metadata_basic(self):
         dataset = self._get_GDAL_dataset()
+        if dataset is None:
+            return
+
+        self.raster_count = dataset.RasterCount
+        self.raster_shape_x = dataset.RasterXSize
+        self.raster_shape_y = dataset.RasterYSize
+
         metadata = dataset.GetMetadata()
 
         for el in metadata.keys():

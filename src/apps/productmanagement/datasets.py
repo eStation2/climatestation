@@ -540,6 +540,23 @@ class Dataset(object):
     def _clean_cache(self):
         setattr(self, "_intervals", None)
 
+    def consistency_check(self):
+    #     Step1: Get all the files
+        filenames = self.get_filenames()
+        consistence = True
+        from apps.productmanagement.mapsets import Mapset
+        from lib.python.image_proc.read_write_raster import _ImportRasterDataset
+        mapset = Mapset(mapset_code=self.mapset)
+        dataset_array_shape_x = mapset._mapset.pixel_size_x
+        dataset_array_shape_y = mapset._mapset.pixel_size_y
+        for file in filenames:
+
+            raster_dataset = _ImportRasterDataset(file)
+            if str(raster_dataset.raster_xsize) != dataset_array_shape_x or str(raster_dataset.raster_ysize) != dataset_array_shape_y:
+                consistence = False
+
+        return consistence
+
     @property
     def intervals(self):
         _intervals = getattr(self, "_intervals", None)

@@ -339,6 +339,19 @@ class TestDatasets(unittest.TestCase):
         self.assertEqual(completeness['totfiles'], 46)
         self.assertEqual(completeness['missingfiles'], 46)
 
+    def test_check_consistency(self):
+        check = 0
+        kwargs = {
+            'product_code': "chirps-dekad",
+            'version': "2.0",
+            'sub_product_code': "1monavg",
+            'mapset': 'CHIRP-Africa-5km'
+        }
+        dataset = Dataset(**kwargs)
+        consistency = dataset.consistency_check()
+        if consistency:
+            check = 1
+        self.assertEqual(check, 1)
 
 suite_datasets = unittest.TestLoader().loadTestsFromTestCase(TestDatasets)
 if __name__ == '__main__':
