@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 from inspect import currentframe, getframeinfo
-from src.apps.c3sf4p.f4p_utilities.stats_funcions import log_report
+from apps.c3sf4p.f4p_utilities.stats_funcions import log_report
 
 
 def graphical_render(data, product='', sensor_name='', zone_name='', x_tick_labels=None, y_tick_labels=None,

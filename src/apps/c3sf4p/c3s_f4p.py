@@ -24,22 +24,22 @@ Log v-1.0.1:
 
 """
 import os
-from src.lib.python.image_proc.read_write_raster import RasterDatasetCS, write_nc
+from lib.python.image_proc.read_write_raster import RasterDatasetCS, write_nc
 import numpy as np
-from src.apps.c3sf4p.f4p_utilities.pytrend import TrendStarter as Ts
+from apps.c3sf4p.f4p_utilities.pytrend import TrendStarter as Ts
 from inspect import currentframe, getframeinfo
-import src.apps.c3sf4p.f4p_utilities.stats_funcions as sf
+import apps.c3sf4p.f4p_utilities.stats_funcions as sf
 import psutil
 from joblib import Parallel, delayed
 from datetime import datetime
-from src.config import es_constants
+from config import es_constants
 
 
 class Fitness4Purpose(object):
     """
     Entry point to trigger the c3sf4p capabilities
     """
-    def __init__(self, file_list, band_names, ecv=None, region_name='', region_coordinates=None, dbg=False):
+    def __init__(self, file_list, band_names, ecv=None, region_name='', region_coordinates=None, njobs=None, dbg=False):
         """
         @param file_list:           LIST of Strings: file or list of files to analyse,
                                     this parameter should be specified as a list-of-lists, where len(file_list)
@@ -91,6 +91,10 @@ class Fitness4Purpose(object):
                                     In this way all the calculation will be less prone to raise an exception, especially
                                     in the cases where a subregion is required
 
+        @param njobs:               INT: allows to force the number of jobs for the parallel computation, if the default
+                                    (None) holds, this number is decided dynamically by the program. For debugging
+                                    purposes it is strongly suggested to set this parameter as 1
+
         @param dbg:                 enables debug mode
 
         """
@@ -100,7 +104,19 @@ class Fitness4Purpose(object):
         self.zn = region_name
         self.zc = region_coordinates
         self.dbg = dbg
-        self.n_cores = psutil.cpu_count(logical=False)
+        if self.dbg:
+            njobs = 1
+
+        if njobs is None:
+            self.n_cores = psutil.cpu_count(logical=False)
+            if self.n_cores <= 2:
+                self.n_cores = 1
+        else:
+            try:
+                self.n_cores = int(njobs)
+            except ValueError:
+                self.n_cores = 1
+
         self.logfile = None
         self.tmp_joblib = es_constants.es2globals['base_tmp_dir'] + '/tmp_joblib/'
         self._check_input()
@@ -321,7 +337,7 @@ class Fitness4Purpose(object):
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Generating the scatter graphic (using matplotlib.show) for testing purposes'
             self._log_report(info, tag)
-            from src.apps.c3sf4p.f4p_plot_functions.plot_scatter import graphical_render
+            from apps.c3sf4p.f4p_plot_functions.plot_scatter import graphical_render
 
             graphical_render(data[0], data[1], x_label=data_labels[0], y_label=data_labels[1], figure_title=fig_title,
                              logfile=self.logfile)
@@ -417,7 +433,7 @@ class Fitness4Purpose(object):
                         str(getframeinfo(currentframe()).lineno))
                 tag = 'Generating latitudinal average plot using matplotlib.show() for testing purposes'
                 self._log_report(info, tag)
-                from src.apps.c3sf4p.f4p_plot_functions.plot_hovmoller import graphical_render
+                from apps.c3sf4p.f4p_plot_functions.plot_hovmoller import graphical_render
 
                 graphical_render(hov_matrix, band_name, sensor_name=sens_name, x_tick_labels=np.array(x_tick_labels),
                                  y_tick_labels=np.array(y_tick_labels), dbg=False)
@@ -480,7 +496,7 @@ class Fitness4Purpose(object):
                                         during the full process.
 
                                         The entry point is represented by the TrendClass, member of
-                                        src.apps.c3sf4p.f4p_utilities.pytrend.TrendStarter.py.
+                                        apps.c3sf4p.f4p_utilities.pytrend.TrendStarter.py.
                                         The method that trigger the beginning of the calculation is 'start_loop'
                                         which is in charge of performing data acquisition, subdivision in chunks and
                                         start the parallel computation.
@@ -488,14 +504,14 @@ class Fitness4Purpose(object):
                                         The parallel computation will run the function
                                         'par_trend' (parallel-trend) located in
 
-                                        src.apps.c3sf4p.f4p_utilities.pytrend.utilities
+                                        apps.c3sf4p.f4p_utilities.pytrend.utilities
 
                                         num-jobs times, assigning a different chunk to any job.
                                         This process is repeated until the total chunks are processed.
 
                                         The par_trend function is ultimately also the entry point of the real core of
                                         the processor, represented by the TrendAnalyser class belonging to
-                                        src.apps.c3sf4p.f4p_utilities.pytrend.MK_trend.py
+                                        apps.c3sf4p.f4p_utilities.pytrend.MK_trend.py
 
                                         This last piece of code is responsible to the the signal de-seasonal and
                                         the implementation of the Mann-Kendall method for trend calculation.
@@ -634,7 +650,7 @@ class Fitness4Purpose(object):
                     getframeinfo(currentframe()).lineno))
                 tag = 'Generating trend plot using matplotlib.show() for testing purposes'
                 self._log_report(info, tag)
-                from src.apps.c3sf4p.f4p_plot_functions.plot_trend import graphical_render
+                from apps.c3sf4p.f4p_plot_functions.plot_trend import graphical_render
 
                 graphical_render(slopes, title='Significant Slopes ', threshold=np.percentile(slopes, 90), dbg=True,
                                  logfile=self.logfile)
@@ -739,7 +755,7 @@ class Fitness4Purpose(object):
                     getframeinfo(currentframe()).lineno))
                 tag = 'Generating the histogram graphic (using matplotlib.show) for testing purposes'
                 self._log_report(info, tag)
-                from src.apps.c3sf4p.f4p_plot_functions.plot_hist_cdf import graphical_render
+                from apps.c3sf4p.f4p_plot_functions.plot_hist_cdf import graphical_render
 
                 graphical_render(_data, sensor_name=sens_names, prod_name=self.bands, date_time=date_time,
                                  zone_name=self.zn, zone_coord=self.zc, ks_value=ks, i_ref=reference)

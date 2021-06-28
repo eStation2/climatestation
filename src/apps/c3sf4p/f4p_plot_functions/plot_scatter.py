@@ -3,7 +3,7 @@ import matplotlib.cm as cm
 import numpy as np
 from scipy.stats import stats
 from inspect import currentframe, getframeinfo
-from src.apps.c3sf4p.f4p_utilities.stats_funcions import log_report
+from apps.c3sf4p.f4p_utilities.stats_funcions import log_report
 
 
 def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=None, dbg=True, logfile=None):

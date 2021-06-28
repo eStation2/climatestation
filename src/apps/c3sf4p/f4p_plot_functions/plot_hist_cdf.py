@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 from inspect import currentframe, getframeinfo
 import numpy as np
-from src.apps.c3sf4p.f4p_utilities.stats_funcions import log_report
-import src.apps.c3sf4p.f4p_utilities.stats_funcions as sf
+from apps.c3sf4p.f4p_utilities.stats_funcions import log_report
+import apps.c3sf4p.f4p_utilities.stats_funcions as sf
 
 
 def graphical_render(data_set, n_bin=101, x_label=None, y_label=None, sensor_name=None, prod_name=None, date_time=None,
