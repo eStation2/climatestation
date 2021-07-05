@@ -35,6 +35,9 @@ class TestC3S(unittest.TestCase):
         self.bands = [None]     # * len(self.lof)
         self.f4p = Fitness4Purpose(self.lof, self.bands, ecv=None, region_name=None, region_coordinates=None, dbg=True)
         ts, x_tick_labels, y_tick_labels = self.f4p.latitudinal_average_plot(plotimage=False, timeseries=True)
+        self.f4p = Fitness4Purpose(self.lof, self.bands, ecv=None, region_name=None, region_coordinates=None, njobs=1,
+                                   dbg=True)
+        self.f4p.latitudinal_average_plot()
         self.assertEqual(1, 1)
 
     def test_scatter(self):
@@ -48,5 +51,5 @@ class TestC3S(unittest.TestCase):
         self.lof = [self.dataset_filenames]
         self.bands = [None]  # * len(self.lof)
         self.f4p = Fitness4Purpose(self.lof, self.bands, ecv=None, region_name=None, region_coordinates=None, dbg=True)
-        self.f4p.trend_analysis(fast=True)
+        self.f4p.trend_analysis(fast=True, num_jobs=1)
         self.assertEqual(1, 1)

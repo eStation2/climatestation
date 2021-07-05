@@ -39,7 +39,7 @@ class Fitness4Purpose(object):
     """
     Entry point to trigger the c3sf4p capabilities
     """
-    def __init__(self, file_list, band_names, ecv=None, region_name='', region_coordinates=None, dbg=False):
+    def __init__(self, file_list, band_names, ecv=None, region_name='', region_coordinates=None, njobs=None, dbg=False):
         """
         @param file_list:           LIST of Strings: file or list of files to analyse,
                                     this parameter should be specified as a list-of-lists, where len(file_list)
@@ -91,6 +91,10 @@ class Fitness4Purpose(object):
                                     In this way all the calculation will be less prone to raise an exception, especially
                                     in the cases where a subregion is required
 
+        @param njobs:               INT: allows to force the number of jobs for the parallel computation, if the default
+                                    (None) holds, this number is decided dynamically by the program. For debugging
+                                    purposes it is strongly suggested to set this parameter as 1
+
         @param dbg:                 enables debug mode
 
         """
@@ -100,7 +104,19 @@ class Fitness4Purpose(object):
         self.zn = region_name
         self.zc = region_coordinates
         self.dbg = dbg
-        self.n_cores = psutil.cpu_count(logical=False)
+        if self.dbg:
+            njobs = 1
+
+        if njobs is None:
+            self.n_cores = psutil.cpu_count(logical=False)
+            if self.n_cores <= 2:
+                self.n_cores = 1
+        else:
+            try:
+                self.n_cores = int(njobs)
+            except ValueError:
+                self.n_cores = 1
+
         self.logfile = None
         self.tmp_joblib = es_constants.es2globals['base_tmp_dir'] + '/tmp_joblib/'
         functions.check_output_dir(self.tmp_joblib)
@@ -503,7 +519,7 @@ class Fitness4Purpose(object):
                                         during the full process.
 
                                         The entry point is represented by the TrendClass, member of
-                                        src.apps.c3sf4p.f4p_utilities.pytrend.TrendStarter.py.
+                                        apps.c3sf4p.f4p_utilities.pytrend.TrendStarter.py.
                                         The method that trigger the beginning of the calculation is 'start_loop'
                                         which is in charge of performing data acquisition, subdivision in chunks and
                                         start the parallel computation.
@@ -511,14 +527,14 @@ class Fitness4Purpose(object):
                                         The parallel computation will run the function
                                         'par_trend' (parallel-trend) located in
 
-                                        src.apps.c3sf4p.f4p_utilities.pytrend.utilities
+                                        apps.c3sf4p.f4p_utilities.pytrend.utilities
 
                                         num-jobs times, assigning a different chunk to any job.
                                         This process is repeated until the total chunks are processed.
 
                                         The par_trend function is ultimately also the entry point of the real core of
                                         the processor, represented by the TrendAnalyser class belonging to
-                                        src.apps.c3sf4p.f4p_utilities.pytrend.MK_trend.py
+                                        apps.c3sf4p.f4p_utilities.pytrend.MK_trend.py
 
                                         This last piece of code is responsible to the the signal de-seasonal and
                                         the implementation of the Mann-Kendall method for trend calculation.
