@@ -15,7 +15,7 @@ Ext.define('climatestation.view.analysis.timeseriesProductSelectionController', 
         me.updateLayout();
 
         gridSelectedTS.updateLayout();
-        if (me.graphtype == 'matrix'){
+        if (me.graphtype == 'matrix' || me.graphtype == 'hovmuller'){
            colorschemesMatrixTS.updateLayout();
         }
 
@@ -354,7 +354,7 @@ Ext.define('climatestation.view.analysis.timeseriesProductSelectionController', 
             legend_id = null,
             tsdrawprops = [];
 
-        if (me.graphtype == 'matrix'){
+        if (me.graphtype == 'matrix' || me.graphtype == 'hovmuller'){
             me.lookupReference("colorschemesMatrixTSProductGrid_"+me.idpostfix).getStore().each(function(rec){
                 if (rec.get('default_legend')) {
                     legend_id = rec.get('legend_id');
@@ -883,7 +883,7 @@ Ext.define('climatestation.view.analysis.timeseriesProductSelectionController', 
             //Ext.getCmp('ts_timeframe').show();
             //Ext.getCmp('gettimeseries_btn').setDisabled(false);
             //console.info(me.graphtype);
-            if (me.graphtype == 'matrix'){
+            if (me.graphtype == 'matrix' || me.graphtype == 'hovmuller'){
                 this.getColorSchemes(record);
             }
 

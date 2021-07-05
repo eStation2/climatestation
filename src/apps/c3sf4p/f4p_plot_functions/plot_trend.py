@@ -2,7 +2,12 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 from inspect import currentframe, getframeinfo
 import numpy as np
-from src.apps.c3sf4p.f4p_utilities.stats_funcions import log_report
+from apps.c3sf4p.f4p_utilities.stats_funcions import log_report
+
+# It is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory,
+# in particular to speed up the import of Matplotlib and to better support multiprocessing.
+import os
+os.environ['MPLCONFIGDIR'] = '/tmp/matplotlib/'
 
 
 def graphical_render(data, title=None, threshold=1.5, fmt="{:3.2f}", dbg=True, logfile=None):

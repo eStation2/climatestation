@@ -24,16 +24,16 @@ Log v-1.0.1:
 
 """
 import os
-from src.lib.python.image_proc.read_write_raster import RasterDatasetCS, write_nc
+from lib.python.image_proc.read_write_raster import RasterDatasetCS, write_nc
 import numpy as np
-from src.apps.c3sf4p.f4p_utilities.pytrend import TrendStarter as Ts
+from apps.c3sf4p.f4p_utilities.pytrend import TrendStarter as Ts
 from inspect import currentframe, getframeinfo
-import src.apps.c3sf4p.f4p_utilities.stats_funcions as sf
+import apps.c3sf4p.f4p_utilities.stats_funcions as sf
 import psutil
 from joblib import Parallel, delayed
 from datetime import datetime
-from src.config import es_constants
-
+from config import es_constants
+from lib.python import functions
 
 class Fitness4Purpose(object):
     """
@@ -103,6 +103,7 @@ class Fitness4Purpose(object):
         self.n_cores = psutil.cpu_count(logical=False)
         self.logfile = None
         self.tmp_joblib = es_constants.es2globals['base_tmp_dir'] + '/tmp_joblib/'
+        functions.check_output_dir(self.tmp_joblib)
         self._check_input()
 
     def _check_input(self):
@@ -321,7 +322,7 @@ class Fitness4Purpose(object):
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Generating the scatter graphic (using matplotlib.show) for testing purposes'
             self._log_report(info, tag)
-            from src.apps.c3sf4p.f4p_plot_functions.plot_scatter import graphical_render
+            from apps.c3sf4p.f4p_plot_functions.plot_scatter import graphical_render
 
             graphical_render(data[0], data[1], x_label=data_labels[0], y_label=data_labels[1], figure_title=fig_title,
                              logfile=self.logfile)
@@ -330,7 +331,7 @@ class Fitness4Purpose(object):
             tag = 'End of scatter plot function, no problem found'
             self._log_report(info, tag)
 
-    def latitudinal_average_plot(self):
+    def latitudinal_average_plot(self, plotimage=False, timeseries=True):
         """
         This function is the entry point for generating the latitudinal average diagram (also known as howmoller plot).
         In general this function expects a full timeseries for a single dataset, however the function can also be
@@ -346,6 +347,7 @@ class Fitness4Purpose(object):
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Check that all files share the same pixel dimension'
             self._log_report(info, tag)
+
         for i, filelist in enumerate(self.lof):
             band_name = self.bands[i]
             # filelist = _check_data(filelist, band_name)
@@ -396,8 +398,10 @@ class Fitness4Purpose(object):
 
             hov_matrix = np.array(data)
 
-            # y_tick_spaces = [np.linspace(self.zc[0], self.zc[1], 10)]
+            # For matplotlib.pyplot plotting
             y_tick_spaces = np.linspace(self.zc[0], self.zc[1], 10)
+            # For GUI plotting (Highcharts or D3)
+            y_tick_spaces_all = np.linspace(self.zc[0], self.zc[1], data.shape[0])
 
             y_tick_labels = []
             for tick in y_tick_spaces:
@@ -412,21 +416,40 @@ class Fitness4Purpose(object):
             """from here one must call a routine to render the plot, to be seen with Jurriaan"""
 
             # for testing the function call a matplotlib function to plot data
-            if self.dbg:
-                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
-                        str(getframeinfo(currentframe()).lineno))
-                tag = 'Generating latitudinal average plot using matplotlib.show() for testing purposes'
-                self._log_report(info, tag)
-                from src.apps.c3sf4p.f4p_plot_functions.plot_hovmoller import graphical_render
+            if plotimage:
+                if self.dbg:
+                    info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
+                            str(getframeinfo(currentframe()).lineno))
+                    tag = 'Generating latitudinal average plot using matplotlib.show() for testing purposes'
+                    self._log_report(info, tag)
+                from apps.c3sf4p.f4p_plot_functions.plot_hovmoller import graphical_render
 
                 graphical_render(hov_matrix, band_name, sensor_name=sens_name, x_tick_labels=np.array(x_tick_labels),
                                  y_tick_labels=np.array(y_tick_labels), dbg=False)
+                # TODO: Get the image and convert to Base10 to attach in return json
 
             if self.dbg:
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
                         str(getframeinfo(currentframe()).lineno))
                 tag = 'Latitudinal average methods ended without errors.'
                 self._log_report(info, tag)
+
+            if timeseries:
+                # column x_tick_labels[n] + y_tick_spaces_all + column hov_matrix[n][m]
+                row = 0
+                col = 0
+                ts = []
+                for x_tick in x_tick_labels:
+                    for y_tick in y_tick_spaces_all:
+                        value = hov_matrix[row][col]
+                        if np.isnan(value):
+                            value = None
+                        ts.append([x_tick, y_tick, value])
+                        row += 1
+                    col += 1
+                    row = 0
+
+                return ts, x_tick_labels, y_tick_labels
 
     def trend_analysis(self, num_jobs=10, num_partitions=10, only_significant=True, threshold=0.05, fast=False):
         """
@@ -634,7 +657,7 @@ class Fitness4Purpose(object):
                     getframeinfo(currentframe()).lineno))
                 tag = 'Generating trend plot using matplotlib.show() for testing purposes'
                 self._log_report(info, tag)
-                from src.apps.c3sf4p.f4p_plot_functions.plot_trend import graphical_render
+                from apps.c3sf4p.f4p_plot_functions.plot_trend import graphical_render
 
                 graphical_render(slopes, title='Significant Slopes ', threshold=np.percentile(slopes, 90), dbg=True,
                                  logfile=self.logfile)
@@ -739,7 +762,7 @@ class Fitness4Purpose(object):
                     getframeinfo(currentframe()).lineno))
                 tag = 'Generating the histogram graphic (using matplotlib.show) for testing purposes'
                 self._log_report(info, tag)
-                from src.apps.c3sf4p.f4p_plot_functions.plot_hist_cdf import graphical_render
+                from apps.c3sf4p.f4p_plot_functions.plot_hist_cdf import graphical_render
 
                 graphical_render(_data, sensor_name=sens_names, prod_name=self.bands, date_time=date_time,
                                  zone_name=self.zn, zone_coord=self.zc, ks_value=ks, i_ref=reference)

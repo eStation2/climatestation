@@ -1,7 +1,7 @@
 import unittest
-from src.apps.c3sf4p.c3s_f4p import Fitness4Purpose
+from apps.c3sf4p.c3s_f4p import Fitness4Purpose
 # from apps.productmanagement.datasets import Dataset
-from src.apps.productmanagement.products import Product
+from apps.productmanagement.products import Product
 import datetime
 
 
@@ -10,9 +10,13 @@ class TestC3S(unittest.TestCase):
     version = '2.0'
     subproductcode = '10d'
     mapsetcode = 'CHIRP-Africa-5km'
-    # from_date = '20210101'
-    # to_date = '20210201'
-    from_date = datetime.date(2007, 1, 1)
+
+    # productcode = 'vgt-dmp'
+    # version = 'V2.0'
+    # subproductcode = 'dmp'
+    # mapsetcode = 'SPOTV-Africa-1km'
+
+    from_date = datetime.date(2017, 1, 1)
     to_date = datetime.date(2017, 3, 1)
 
     p = Product(product_code=productcode, version=version)
@@ -30,7 +34,7 @@ class TestC3S(unittest.TestCase):
         self.lof = [self.dataset_filenames]
         self.bands = [None]     # * len(self.lof)
         self.f4p = Fitness4Purpose(self.lof, self.bands, ecv=None, region_name=None, region_coordinates=None, dbg=True)
-        self.f4p.latitudinal_average_plot()
+        ts, x_tick_labels, y_tick_labels = self.f4p.latitudinal_average_plot(plotimage=False, timeseries=True)
         self.assertEqual(1, 1)
 
     def test_scatter(self):

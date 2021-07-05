@@ -16,9 +16,6 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
     },
     xtype: 'timeseriesproductselection',
 
-    // layout: 'fit',
-
-    // scrollable: 'vertical',
     scrollable: true,
     reserveScrollbar: true,
 
@@ -42,7 +39,6 @@ Ext.define("climatestation.view.analysis.timeseriesProductSelection",{
     multipleyears: false,
 
     listeners: {
-        // afterrender: 'setTemplateSelections'
         afterrender: function(){
             var me = this;
             var user = climatestation.getUser();

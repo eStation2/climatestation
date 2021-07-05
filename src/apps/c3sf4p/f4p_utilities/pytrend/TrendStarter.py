@@ -13,11 +13,11 @@ Log v-1.0.1:
     - June 2021 implemented a fix for joblib under docker (to be tested)
     - June 2021 rewritten self._get_data method (should be faster now)
 """
-from src.lib.python.image_proc.read_write_raster import RasterDatasetCS
+from lib.python.image_proc.read_write_raster import RasterDatasetCS
 import os
 import numpy as np
 from joblib import Parallel, delayed
-from src.apps.c3sf4p.f4p_utilities.pytrend.MK_trend import par_trend
+from apps.c3sf4p.f4p_utilities.pytrend.MK_trend import par_trend
 from inspect import currentframe, getframeinfo
 import psutil
 from scipy.ndimage import zoom

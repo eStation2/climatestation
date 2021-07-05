@@ -14,7 +14,7 @@ Log v-1.0.1
 # ###############################################################################
 """
 import numpy as np
-from src.lib.python.image_proc.read_write_raster import RasterDatasetCS
+from lib.python.image_proc.read_write_raster import RasterDatasetCS
 import os
 from scipy.stats import ks_2samp
 
