@@ -6,7 +6,7 @@ from apps.c3sf4p.f4p_utilities.stats_funcions import log_report
 
 
 def graphical_render(data, product='', sensor_name='', zone_name='', x_tick_labels=None, y_tick_labels=None,
-                     figure_title='', min_v=None, max_v=None, dbg=True, logfile=None):
+                     figure_title='', min_v=None, max_v=None, dbg=True, logfile=None, sname=None):
     """
     @param data:            ->  np.array;   data
     @param product:         ->  STRING;     product name
@@ -112,3 +112,6 @@ def graphical_render(data, product='', sensor_name='', zone_name='', x_tick_labe
     cb.ax.tick_params(labelsize=16)
     plt.title(figure_title + '\n', fontsize=16)
     plt.tight_layout()
+
+    if sname:
+        plt.savefig(sname)

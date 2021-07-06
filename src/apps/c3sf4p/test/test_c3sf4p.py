@@ -26,7 +26,6 @@ class TestC3S(unittest.TestCase):
         self.f4p = Fitness4Purpose(self.lof, self.band)
 
     def test_hovmuller(self):
-
         self.lof = [self.dataset_filenames]
         self.bands = [None]     # * len(self.lof)
         self.f4p = Fitness4Purpose(self.lof, self.bands, ecv=None, region_name=None, region_coordinates=None, njobs=1,
@@ -46,4 +45,11 @@ class TestC3S(unittest.TestCase):
         self.bands = [None]  # * len(self.lof)
         self.f4p = Fitness4Purpose(self.lof, self.bands, ecv=None, region_name=None, region_coordinates=None, dbg=True)
         self.f4p.trend_analysis(fast=True, num_jobs=1)
+        self.assertEqual(1, 1)
+
+    def test_hist_cdf(self):
+        self.lof = [[self.dataset_filenames[0]], [self.dataset_filenames[1]]]
+        self.bands = [None, None]  # * len(self.lof)
+        self.f4p = Fitness4Purpose(self.lof, self.bands, ecv=None, region_name=None, region_coordinates=None, dbg=True)
+        self.f4p.histogram_and_cdf(reference=0)
         self.assertEqual(1, 1)

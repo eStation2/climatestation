@@ -5,7 +5,7 @@ import numpy as np
 from apps.c3sf4p.f4p_utilities.stats_funcions import log_report
 
 
-def graphical_render(data, title=None, threshold=1.5, fmt="{:3.2f}", dbg=True, logfile=None):
+def graphical_render(data, title=None, threshold=1.5, fmt="{:3.2f}", dbg=True, logfile=None, sname=None):
     """
     @param data:        np.array: slope-matrix to plot
     @param title:       STRING: title of the figure
@@ -58,4 +58,6 @@ def graphical_render(data, title=None, threshold=1.5, fmt="{:3.2f}", dbg=True, l
     cb.ax.set_yticklabels(cb_tick_labels)
     if title is not None:
         plt.title(title + '\n', fontsize=14)
-    plt.show()
+
+    if sname:
+        plt.savefig(sname)

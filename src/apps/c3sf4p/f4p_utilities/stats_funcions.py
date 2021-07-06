@@ -117,6 +117,54 @@ def get_ivh(data):
     return i_vh, list(i_range)
 
 
+def gamma2d(d_ref, d_test, pid=5):
+    """
+    :param d_ref:       reference data
+    :param d_test:      data to be compared with ref
+    :param pid:         pixel intensity difference (%) default = 5%
+    :return:            gamma index matrix, gamma test is passed if gamma <=1
+
+    ============
+    Description:
+    ============
+    The gamma-index concept was introduced by Low in 1998 [1]. The test is routinely used in medical physics in order to
+    compare two distributions. The gamma-index can however extended to different physical concepts.
+    The index takes into account the relative shift both in terms of intensity and in terms of position, combining
+    together the pixel intensity difference (PID) and the distance to agreement (DTA) methods.
+    The PID is the difference between the physical value in a "reference" data point and the physical value in a point
+    of the distribution to test which has the same coordinates. The DTA is the distance between a reference data point
+    and the nearest point in the distribution to test that has the same value. By definition, when the gamma index
+    results >1, the two distributions are considered to be NOT in good agreement. GI test is instead considered passed
+    if the calculated value results <=1.
+
+    [1] Low D A, Harms W B, Mutic S and Purdy J A 1998 A technique for the quantitative evaluation of dose
+            distributions. Medical Physics 25 656-61
+
+    This code represent a simplified version of the original gamma index formulation. In this version only the
+    intensity difference is taken into account, and the spatial tolerance term is set to 0 by default. In this way
+    the reference and test distributions are queried only on the punctual (on pixel basis) intensity differences. T
+    he main advantage is speed calculation.
+
+
+    -------------------------------------------------
+    """
+    output = []
+    import warnings
+    warnings.filterwarnings("ignore")
+
+    sq = np.square
+    sz1 = d_ref.shape
+    sz2 = d_test.shape
+
+    if sz1 != sz2:
+        raise Exception("Gamma Index can not be computed for matrices of different sizes.")
+    else:
+        gamma = np.sqrt((sq((d_ref - d_test)) / sq(pid * d_ref)))
+
+    output.append(gamma)
+    return output
+
+
 def log_report(info, tag, logfile):
     """
     @param info:    STRING: carrying on the information about name of .py file and relative line of debug

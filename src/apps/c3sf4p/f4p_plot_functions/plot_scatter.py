@@ -6,7 +6,7 @@ from inspect import currentframe, getframeinfo
 from apps.c3sf4p.f4p_utilities.stats_funcions import log_report
 
 
-def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=None, dbg=True, logfile=None):
+def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=None, dbg=True, logfile=None, sname=None):
     """
     @param data_1:              -> np.array dataset 1
     @param data_2:              -> np.array dataset 2
@@ -65,16 +65,13 @@ def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=No
     rmsd = np.sqrt(np.nansum(np.square(np.array(d1).flatten() - np.array(d2).flatten())) /
                    np.count_nonzero(~np.isnan((np.array(d1) - np.array(d2)))))
 
-    nbins = 101
-    thr = 1
+    nbins = 201
     h, x_edges, y_edges = np.histogram2d(d1, d2, bins=nbins)
     h = np.rot90(h)
     h = np.flipud(h)
-    h_mask = np.ma.masked_where(h <= 0, h)  # Mask pixels with a value <= zero
+    thr = np.round(np.percentile(h, 90))
 
-    # Log transformation
-    h_mask = np.log10(h_mask)
-    h_mask = np.ma.masked_where(h_mask <= thr, h_mask)  # Mask pixels with a density value <= 10^thr
+    h_mask = np.ma.masked_where(h <= thr, h)  # Mask pixels with a value of zero
 
     bias = np.nanmean(d1) - np.nanmean(d2)
 
@@ -135,5 +132,7 @@ def graphical_render(data_1, data_2, x_label=None, y_label=None, figure_title=No
         info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
         tag = 'show the figure'
         log_report(info, tag, logfile)
-
-    plt.show()
+    if sname:
+        plt.savefig(sname)
+    else:
+        plt.show()

@@ -127,14 +127,14 @@ def graphical_render(data_set, n_bin=101, x_label=None, y_label=None, sensor_nam
         d = data_set[i]
         d = d[~np.isnan(d)]
 
-        p1.hist(d, n_bin, color=kolors[i], histtype='stepfilled', alpha=0.5, label=lb1)
-        p2.plot(x[i], y[i], lw=2, color=kolors[i], label=lb2)
+        p1.hist(d, n_bin, color=kolors(i), histtype='stepfilled', alpha=0.5, label=lb1)
+        p2.plot(x[i], y[i], lw=2, color=kolors(i), label=lb2)
 
     p1.grid()
     p2.grid()
     p1.set_xticks([])
-    p2.set_yticks([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110],
-                  ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'])
+    p2.set_yticks([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])#,
+                  # ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100', ''])
     p2.set_ylim([0, 110])
     plt.minorticks_on()
     p2.set_xlabel(xl, fontsize=12)
@@ -151,5 +151,5 @@ def graphical_render(data_set, n_bin=101, x_label=None, y_label=None, sensor_nam
     plt.tight_layout()
     plt.subplots_adjust(wspace=0, hspace=0)
 
-    plt.show()
-    # plt.savefig(str_output_fname)
+    # plt.show()
+    plt.savefig(str_output_fname)

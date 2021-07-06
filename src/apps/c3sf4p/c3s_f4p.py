@@ -119,6 +119,7 @@ class Fitness4Purpose(object):
 
         self.logfile = None
         self.tmp_joblib = es_constants.es2globals['base_tmp_dir'] + '/tmp_joblib/'
+        self.save_path = es_constants.es2globals['base_tmp_dir'] + os.sep
         self._check_input()
 
     def _check_input(self):
@@ -338,9 +339,9 @@ class Fitness4Purpose(object):
             tag = 'Generating the scatter graphic (using matplotlib.show) for testing purposes'
             self._log_report(info, tag)
             from apps.c3sf4p.f4p_plot_functions.plot_scatter import graphical_render
-
+            save_name = self.save_path + 'test_scatter.png'
             graphical_render(data[0], data[1], x_label=data_labels[0], y_label=data_labels[1], figure_title=fig_title,
-                             logfile=self.logfile)
+                             logfile=self.logfile, sname=save_name)
 
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'End of scatter plot function, no problem found'
@@ -358,7 +359,6 @@ class Fitness4Purpose(object):
             self.logfile = es_constants.es2globals['log_dir'] + '/latitudinal-average-plot_test_' + \
                            str(datetime.today()).replace(' ', '') + '.log'
 
-        if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Check that all files share the same pixel dimension'
             self._log_report(info, tag)
@@ -374,8 +374,7 @@ class Fitness4Purpose(object):
             x_tick_labels = []
             rd0 = RasterDatasetCS(filelist[0])
 
-            # shape = rd0.get_data(self.bands[0], subsample_coordinates=self.zc).shape
-            sz = rd0.get_data(self.bands[0]).shape[0]
+            sz = rd0.get_data(self.bands[0], subsample_coordinates=self.zc).shape[0]
             x_set = range(len(filelist))
 
             # initialise data matrix to host hovmoller calculation
@@ -402,7 +401,7 @@ class Fitness4Purpose(object):
                 tag = 'Parallel calculation ends. Now display the result'
                 self._log_report(info, tag)
 
-            # unrol the output of parallel computation
+            # unroll the output of parallel computation
             for j in x_set:
                 ii = int(out[j][0][1])
                 d = out[j][0][0]
@@ -435,8 +434,10 @@ class Fitness4Purpose(object):
                 self._log_report(info, tag)
                 from apps.c3sf4p.f4p_plot_functions.plot_hovmoller import graphical_render
 
+                save_name = self.save_path + 'Test_howmoller.png'
+
                 graphical_render(hov_matrix, band_name, sensor_name=sens_name, x_tick_labels=np.array(x_tick_labels),
-                                 y_tick_labels=np.array(y_tick_labels), dbg=False)
+                                 y_tick_labels=np.array(y_tick_labels), dbg=False, sname=save_name)
 
             if self.dbg:
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' +
@@ -522,8 +523,6 @@ class Fitness4Purpose(object):
         if self.dbg:
             self.logfile = es_constants.es2globals['log_dir'] + '/trend_test_' + \
                            str(datetime.today()).replace(' ', '') + '.log'
-
-        if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Checking if the system is able to handle default chunks and size '
             self._log_report(info, tag)
@@ -651,9 +650,9 @@ class Fitness4Purpose(object):
                 tag = 'Generating trend plot using matplotlib.show() for testing purposes'
                 self._log_report(info, tag)
                 from apps.c3sf4p.f4p_plot_functions.plot_trend import graphical_render
-
+                save_name = self.save_path + 'test_trend.png'
                 graphical_render(slopes, title='Significant Slopes ', threshold=np.percentile(slopes, 90), dbg=True,
-                                 logfile=self.logfile)
+                                 logfile=self.logfile, sname=save_name)
 
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
                     getframeinfo(currentframe()).lineno))
@@ -680,8 +679,6 @@ class Fitness4Purpose(object):
         if self.dbg:
             self.logfile = es_constants.es2globals['log_dir'] + '/histCdf_test_' + \
                            str(datetime.today()).replace(' ', '') + '.log'
-
-        if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Starting Hist and CDF function. Each hist will have ' + str(len(self.lof)) + ' distributions'
             self._log_report(info, tag)
@@ -756,14 +753,151 @@ class Fitness4Purpose(object):
                 tag = 'Generating the histogram graphic (using matplotlib.show) for testing purposes'
                 self._log_report(info, tag)
                 from apps.c3sf4p.f4p_plot_functions.plot_hist_cdf import graphical_render
-
+                save_name = self.save_path + 'test_hist.png'
                 graphical_render(_data, sensor_name=sens_names, prod_name=self.bands, date_time=date_time,
-                                 zone_name=self.zn, zone_coord=self.zc, ks_value=ks, i_ref=reference)
+                                 zone_name=self.zn, zone_coord=self.zc, ks_value=ks, i_ref=reference,
+                                 str_output_fname=save_name)
 
                 info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
                     getframeinfo(currentframe()).lineno))
                 tag = 'End of hist-CDF function, no problem found'
                 self._log_report(info, tag)
+
+    def gamma_index(self, pid=0.05, index_ref=None):
+        """
+        :param pid:             pixel intensity difference in %
+        :param index_ref:       index of the reference dataset
+        :return:
+        """
+        if self.dbg:
+            self.logfile = es_constants.es2globals['log_dir'] + '/gamma-index_test_' + \
+                           str(datetime.today()).replace(' ', '') + '.log'
+
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'GammaIndex function'
+            self._log_report(info, tag)
+
+        # true_zc = None
+
+        n_dataset = len(self.lof)
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = str(n_dataset) + ' datasets'
+            self._log_report(info, tag)
+        if index_ref is not None:
+            x_set = [item for item in range(n_dataset) if item not in [index_ref]]
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Reference index==' + str(index_ref)
+                self._log_report(info, tag)
+        else:
+            x_set = [item for item in range(n_dataset)]
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Reference index not provided, the reference is taken as the average distribution'
+                self._log_report(info, tag)
+
+        gi_dataset = []
+        gi_product = []
+        iteration = 0
+
+        for nf in range(len(self.lof[0])):
+            iteration += 1
+            rd0 = RasterDatasetCS(self.lof[0][nf])
+            date_time = rd0.date_long
+            _data = []
+            sensor_name = []
+
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Getting data matrices'
+                self._log_report(info, tag)
+
+            for nd in range(n_dataset):
+                sensor_name.append([])
+                fname = self.lof[nd][nf]
+                rd = RasterDatasetCS(fname)
+                sensor_name[nd].append(rd.sensor_code)  # get sensor name
+                prod_name = self.bands[nd]
+                d_tmp = rd.get_data(prod_name, subsample_coordinates=self.zc)  # load data matrix
+                _data.append(d_tmp)
+                if nd == 0:
+                    true_zc = rd.native_zc
+
+            data = np.array(_data)
+            if index_ref is not None:
+                # assign the tag of reference to the data index ref_index
+                ref = data[index_ref]
+                ref_name = sensor_name[index_ref]
+            else:
+                # take as reference the average value among all the available distributions
+                ref = np.nanmean(data, axis=0)
+                ref_name = 'Average Distribution'
+
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Compute the simplified gamma index considering a distance to agreement dta == 0 and an ' \
+                      'intensity threshold pid == ' + str(pid) + '% using joblib.Parallel '
+                self._log_report(info, tag)
+            out = Parallel(n_jobs=self.n_cores, temp_folder=self.tmp_joblib)(delayed(sf.gamma2d)
+                                                                             (ref, data[i], pid) for i in x_set)
+
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'End of Parallel loop'
+                self._log_report(info, tag)
+
+            g_index = []
+            delta = []
+            for i, _ in enumerate(x_set):
+                g_index.append(out[i][0])
+                delta.append(out[i][1])
+
+            for i, k in enumerate(x_set):
+                test_name = sensor_name[k][0]
+                g_matrix = np.array(g_index[i])
+                # delta4plot = np.array(delta[i])
+                delta4plot = np.array(delta[i])
+                if iteration == 1:
+                    lbl = str(sensor_name[k][0])
+                    gi_dataset.append(lbl)
+                    gi_product.append(self.bands[k])
+
+                n_tot = np.count_nonzero(~np.isnan(g_index[i]))  # number of valid px on gi (eq on ref)
+                n_gi = np.count_nonzero(g_matrix <= 1)  # number of px for which gi <= 1
+
+                prod_name = self.bands[k]
+                try:
+                    norm_gi = np.round(100. * n_gi / n_tot)  # normalized gi: % of VALID px with gi<=1
+                except ZeroDivisionError:
+                    norm_gi = np.nan
+                gamma4plot = g_matrix
+
+
+                if self.dbg:
+                    info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                        getframeinfo(currentframe()).lineno))
+                    tag = 'Generating the plot'
+                    self._log_report(info, tag)
+
+                    from apps.c3sf4p.f4p_plot_functions.plot_gamma_index import graphical_render
+                    sname = self.save_path + 'test_gammaIndex.png'
+
+                    ttl = str(sensor_name[i]) + ': ' + self.bands[i] + ' ' + self.zn + ' ' + date_time +\
+                        ' \n I_$_{tol}$ = ' + str(pid) + '%; Reference: ' + ref_name
+
+                    graphical_render(gamma4plot, self.zc, norm_gi, sname, title=ttl)
+
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                getframeinfo(currentframe()).lineno))
+            tag = '********End of gamma-index function, no error found***********'
+            self._log_report(info, tag)
 
     def _log_report(self, info, tag):
         if not os.path.exists(self.logfile):
