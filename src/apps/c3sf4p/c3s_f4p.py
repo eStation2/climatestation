@@ -360,8 +360,6 @@ class Fitness4Purpose(object):
         if self.dbg:
             self.logfile = es_constants.es2globals['log_dir'] + '/latitudinal-average-plot_test_' + \
                            str(datetime.today()).replace(' ', '') + '.log'
-
-        if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Check that all files share the same pixel dimension'
             self._log_report(info, tag)
@@ -548,7 +546,6 @@ class Fitness4Purpose(object):
             self.logfile = es_constants.es2globals['log_dir'] + '/trend_test_' + \
                            str(datetime.today()).replace(' ', '') + '.log'
 
-        if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Checking if the system is able to handle default chunks and size '
             self._log_report(info, tag)
@@ -705,8 +702,6 @@ class Fitness4Purpose(object):
         if self.dbg:
             self.logfile = es_constants.es2globals['log_dir'] + '/histCdf_test_' + \
                            str(datetime.today()).replace(' ', '') + '.log'
-
-        if self.dbg:
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'Starting Hist and CDF function. Each hist will have ' + str(len(self.lof)) + ' distributions'
             self._log_report(info, tag)
@@ -807,12 +802,24 @@ class Fitness4Purpose(object):
 
         @return:
         """
+        if self.dbg:
+            self.logfile = es_constants.es2globals['log_dir'] + '/GammaIndex_test_' + \
+                           str(datetime.today()).replace(' ', '') + '.log'
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Starting GammaIndex function. reference distribution = ' + str(reference)
+            self._log_report(info, tag)
 
         n_dataset = len(self.lof)
 
-        x_set = list(range(n_dataset))
         if reference is not None:
-            x_set = x_set.remove(reference)
+            x_set = [item for item in range(n_dataset) if item not in [reference]]
+        else:
+            x_set = [item for item in range(n_dataset)]
+
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
+            tag = 'Calculating GammaIndex for ' + str(len(x_set)) + ' distributions'
+            self._log_report(info, tag)
 
         # build sensor names
         sensor_name = []
@@ -838,10 +845,28 @@ class Fitness4Purpose(object):
                 data_ref = np.nanmean(data, axis=0)
                 sens_ref = 'Average Distribution'
 
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Reference distribution is ' + sens_ref
+                self._log_report(info, tag)
+
             # compute the gamma index in parallel
+
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'Starting Parallel computation'
+                self._log_report(info, tag)
             out = Parallel(n_jobs=self.n_cores,
                            temp_folder=self.tmp_joblib)(delayed(sf.gamma2d)(data_ref, data[i], itol)
                                                         for i in x_set)
+
+            if self.dbg:
+                info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                    getframeinfo(currentframe()).lineno))
+                tag = 'End of Parallel computation'
+                self._log_report(info, tag)
 
             for i, k in enumerate(x_set):
                 g_matrix = np.array(out[i][0])
@@ -856,14 +881,28 @@ class Fitness4Purpose(object):
 
                 from apps.c3sf4p.f4p_plot_functions.plot_gamma_index import graphical_render
 
-                sname = self.save_path + 'test_gammaindex.png'
-                title = sensor_name[i] + ': ' + self.bands[i] + ' ' + self.zn + ' ' + date + \
+                sname = self.save_path + os.sep + 'test_gammaindex.png'
+
+                band_name = self.bands[i]
+                if band_name is None:
+                    band_name = ''
+
+                title = sensor_name[i] + ': ' + band_name + ' ' + self.zn + ' ' + date + \
                     '\n $I_{tol}$=' + str(itol) + '%; Reference: ' + sens_ref
+
+                if self.dbg:
+                    info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                        getframeinfo(currentframe()).lineno))
+                    tag = 'Render plot title: ' + title.replace('\n', ' ')
+                    self._log_report(info, tag)
 
                 graphical_render(g_matrix, self.zc, norm_gi, sname, title=title)
 
-
-
+        if self.dbg:
+            info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(
+                getframeinfo(currentframe()).lineno))
+            tag = 'End of GammaIndex function, no problem found'
+            self._log_report(info, tag)
 
     def _log_report(self, info, tag):
         if not os.path.exists(self.logfile):

@@ -59,3 +59,11 @@ class TestC3S(unittest.TestCase):
         self.f4p = Fitness4Purpose(self.lof, self.bands, ecv=None, region_name=None, region_coordinates=None, dbg=True)
         self.f4p.histogram_and_cdf(reference=0)
         self.assertEqual(1, 1)
+
+    def test_gamma_index(self):
+        self.lof = [[self.dataset_filenames[0]], [self.dataset_filenames[1]]]
+        self.bands = [None, None]  # * len(self.lof)
+        self.f4p = Fitness4Purpose(self.lof, self.bands, ecv=None, region_name=None, region_coordinates=None, dbg=True)
+        self.f4p.gamma_index(itol=10, reference=0)
+        # self.f4p.gamma_index(itol=10, reference=None)
+        self.assertEqual(1, 1)

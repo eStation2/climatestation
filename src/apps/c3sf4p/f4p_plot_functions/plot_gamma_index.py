@@ -317,13 +317,14 @@ def graphical_render(data, zone_coord, ngi, save_name, title=None):
     lon2 = zone_coord[3] + step / 2.  # east
 
     c_map = hide_gi(11, 1)
-    cb_ticks = np.linspace(0., 1.1, 13)
+    cb_ticks = np.linspace(0., 1.1, 12)
     cb_tick_labels = ['0.', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.', '$\gamma$ > 1']
+
     val_max = 1.1
     val_min = 0.
 
     plt.figure()
-    plt.imshow(data, cmap=c_map, interpolation='none', vmax=val_min, vmin=val_min)
+    plt.imshow(data, cmap=c_map, interpolation='none', vmax=val_max, vmin=val_min)
     cb = plt.colorbar(ticks=cb_ticks)
     cb.ax.set_yticklabels(cb_tick_labels)
     cb.set_label('Gamma Index', fontsize=12)
@@ -333,8 +334,11 @@ def graphical_render(data, zone_coord, ngi, save_name, title=None):
     props = dict(boxstyle='square', facecolor=[1, 0.96, 0.89], alpha=0.8)
     gi_txt = 'NGI = ' + str(ngi) + '%'
 
-    ix = lon1 + (lon2 - lon1) / 72
-    iy = lat1 + (lat2 - lat1) / 7.2
+    # ix = lon1 + (lon2 - lon1) / 72
+    # iy = lat1 + (lat2 - lat1) / 1
+    ix = 50
+    iy = data.shape[0]-100
     plt.text(ix, iy, gi_txt, fontsize=12, verticalalignment='top', bbox=props)
 
+    plt.legend()
     plt.savefig(save_name)
