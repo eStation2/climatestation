@@ -4,6 +4,8 @@ import numpy as np
 # from apps.c3sf4p.f4p_utilities.stats_funcions import log_report
 from matplotlib.colors import ListedColormap
 from scipy import interpolate
+import os
+os.environ['MPLCONFIGDIR'] = '/tmp/matplotlib/'
 
 
 def _reshape_cmap(data, n):

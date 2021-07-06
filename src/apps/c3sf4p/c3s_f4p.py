@@ -35,6 +35,7 @@ from datetime import datetime
 from config import es_constants
 from lib.python import functions
 
+
 class Fitness4Purpose(object):
     """
     Entry point to trigger the c3sf4p capabilities
@@ -119,6 +120,7 @@ class Fitness4Purpose(object):
 
         self.logfile = None
         self.tmp_joblib = es_constants.es2globals['base_tmp_dir'] + '/tmp_joblib/'
+        self.save_path = es_constants.es2globals['base_tmp_dir']
         functions.check_output_dir(self.tmp_joblib)
         self._check_input()
 
@@ -787,6 +789,81 @@ class Fitness4Purpose(object):
                     getframeinfo(currentframe()).lineno))
                 tag = 'End of hist-CDF function, no problem found'
                 self._log_report(info, tag)
+
+    def gamma_index(self, itol=5, reference=None):
+        """
+        This function implements a light version of the gamma index metrics.
+        In particular in this version all the part regarding the Distance To Agreement (dta) which require a heavy
+        computation of the geodetic distances between pixels has been drop, in favour of the solely Intensity Tolerance.
+        Hereafter the dta term is always set to 0 and thus the gamma index map represents just the punctual (same pixel)
+        agreement between the reference distribution and the one to test against.
+
+        @param reference:   dtype=int: is the index of the distribution designated as the "REFERENCE".
+                                       all the others will be tested against this.
+                                       If no index is provided, i.e. reference=None, the reference item will be
+                                       then calculated as the simple average among all the provided distributions
+
+        @param itol:       dtype=int:  intensity tolerance term given in %
+
+        @return:
+        """
+
+        n_dataset = len(self.lof)
+
+        x_set = list(range(n_dataset))
+        if reference is not None:
+            x_set = x_set.remove(reference)
+
+        # build sensor names
+        sensor_name = []
+        for nd in range(n_dataset):
+            fname = self.lof[nd][0]
+            rd = RasterDatasetCS(fname)
+            sensor_name.append(rd.sensor_code)
+
+        for nf in range(len(self.lof[0])):
+            data = []
+            date = RasterDatasetCS(self.lof[0][nf]).date_long
+            for nd in range(n_dataset):
+                fname = self.lof[nd][nf]
+                rd = RasterDatasetCS(fname)
+                prod_name = self.bands[nd]
+                d_tmp = rd.get_data(prod_name, subsample_coordinates=self.zc)  # load data matrix
+                data.append(d_tmp)
+
+            if reference is not None:
+                data_ref = data[reference]
+                sens_ref = sensor_name[reference]
+            else:
+                data_ref = np.nanmean(data, axis=0)
+                sens_ref = 'Average Distribution'
+
+            # compute the gamma index in parallel
+            out = Parallel(n_jobs=self.n_cores,
+                           temp_folder=self.tmp_joblib)(delayed(sf.gamma2d)(data_ref, data[i], itol)
+                                                        for i in x_set)
+
+            for i, k in enumerate(x_set):
+                g_matrix = np.array(out[i][0])
+                n_tot = np.count_nonzero(~np.isnan(g_matrix))  # number of valid px on gi (eq on ref)
+                n_gi = np.count_nonzero(g_matrix <= 1)  # number of px for which gi <= 1
+                try:
+                    norm_gi = np.round(100. * n_gi / n_tot)  # normalized gi: % of VALID px with gi<=1
+                except ZeroDivisionError:
+                    norm_gi = np.nan
+
+                g_matrix[g_matrix > 1.] = 2.
+
+                from apps.c3sf4p.f4p_plot_functions.plot_gamma_index import graphical_render
+
+                sname = self.save_path + 'test_gammaindex.png'
+                title = sensor_name[i] + ': ' + self.bands[i] + ' ' + self.zn + ' ' + date + \
+                    '\n $I_{tol}$=' + str(itol) + '%; Reference: ' + sens_ref
+
+                graphical_render(g_matrix, self.zc, norm_gi, sname, title=title)
+
+
+
 
     def _log_report(self, info, tag):
         if not os.path.exists(self.logfile):
