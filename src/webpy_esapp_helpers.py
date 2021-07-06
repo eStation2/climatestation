@@ -2420,8 +2420,8 @@ def getGraphTimeseries(params):
         return rankTimeseries(params)
     if params['graphtype'] == 'matrix':
         return matrixTimeseries(params)
-    # if params['graphtype'] == 'scatter':
-    #     return scatterTimeseries(params)
+    if params['graphtype'] == 'hovmuller':
+        return hovmullerTimeseries(params)
     else:
         return classicTimeseries(params)
 
@@ -3270,6 +3270,389 @@ def matrixTimeseries(params):
                     'opposite': yaxe.opposite,
                     'min': min,
                     'max': max,
+                    # 'productcategory': yaxe.productcategory,
+                    'aggregation_type': yaxe.aggregation_type,
+                    'aggregation_min': yaxe.aggregation_min,
+                    'aggregation_max': yaxe.aggregation_max
+                    }
+            yaxes.append(yaxe)
+
+    ts_json = {"data_available": data_available,
+               "showYearInTicks": False,
+               "showYearInToolTip": "true",
+               "colorAxis": colorAxis,
+               'colors': colors,
+               "yaxes": yaxes,
+               "timeseries": timeseries}
+
+    ts_json = json.dumps(ts_json,
+                         ensure_ascii=False,
+                         sort_keys=True,
+                         separators=(', ', ': '))
+    return ts_json
+
+
+def hovmullerTimeseries(params):
+    from apps.c3sf4p.c3s_f4p import Fitness4Purpose
+
+    wkt = params['WKT']
+    requestedtimeseries = json.loads(params.selectedTimeseries)
+    passedyaxes = None
+    if params['yAxes']:
+        passedyaxes = json.loads(params['yAxes'])
+    passedtsdrawprops = None
+    if params['tsdrawprops']:
+        passedtsdrawprops = json.loads(params['tsdrawprops'])
+    yearsToCompare = sorted(json.loads(params.yearsToCompare))
+    tsFromSeason = params.tsFromSeason
+    tsToSeason = params.tsToSeason
+    data_available = False
+    colorramp = True
+    legend_id = None
+    overTwoYears = False
+
+    userid = params.userid
+    istemplate = params.istemplate
+    graphtype = params.graphtype
+    graph_tpl_id = params.graph_tpl_id
+    graph_tpl_name = params.graph_tpl_name
+
+    # if hasattr(params, "userid") and params.userid != '':
+    #     user = params.userid
+    #     graph_tpl_name = params.graph_tpl_name
+
+    timeseries = []
+    for timeserie in requestedtimeseries:
+        productcode = timeserie['productcode']
+        subproductcode = timeserie['subproductcode']
+        version = timeserie['version']
+        mapsetcode = timeserie['mapsetcode']
+        date_format = timeserie['date_format']
+        frequency_id = timeserie['frequency_id']
+        colorramp = timeserie['colorramp']
+        legend_id = timeserie['legend_id']
+
+        product = {"productcode": productcode,
+                   "subproductcode": subproductcode,
+                   "version": version}
+
+        # Set defaults in case no entry exists in the DB
+        aggregate = {'aggregation_type': 'mean',
+                     'aggregation_min': None,
+                     'aggregation_max': None}
+
+        product_yaxe = querydb.get_product_yaxe(product, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+        for yaxe_info in product_yaxe:
+            if passedyaxes is not None:
+                for passedyaxe in passedyaxes:
+                    if passedyaxe['id'] == yaxe_info.yaxe_id:
+                        aggregate = {'aggregation_type': passedyaxe['aggregation_type'],
+                                     'aggregation_min': passedyaxe['aggregation_min'],
+                                     'aggregation_max': passedyaxe['aggregation_max']}
+            else:
+                aggregate = {'aggregation_type': yaxe_info.aggregation_type,
+                             'aggregation_min': yaxe_info.aggregation_min,
+                             'aggregation_max': yaxe_info.aggregation_max}
+
+        ts_drawprops = None
+        if passedtsdrawprops is not None:
+            for passedtsdrawprop in passedtsdrawprops:
+                if passedtsdrawprop['productcode'] == product['productcode'] and \
+                        passedtsdrawprop['subproductcode'] == product['subproductcode'] and \
+                        passedtsdrawprop['version'] == product['version']:
+                    ts_drawprops = passedtsdrawprop
+        else:
+            product_ts_drawproperties = querydb.get_product_timeseries_drawproperties(product, userid, istemplate,
+                                                                                      graphtype, graph_tpl_id,
+                                                                                      graph_tpl_name)
+            for ts_drawprop in product_ts_drawproperties:
+                ts_drawprops = ts_drawprop
+
+        nodata = None
+        subproductinfo = querydb.get_subproduct(productcode, version, subproductcode)
+        if subproductinfo:
+            subproductinfo_rec = functions.row2dict(subproductinfo)
+            nodata = subproductinfo_rec['nodata']
+
+        if len(yearsToCompare) > 0:
+            data = []
+            y = 0
+
+            xAxesYear = yearsToCompare[-1]
+            # Handle Leap year date 29 February. If exists in data then change the year of all data to the leap year.
+            for year in yearsToCompare:
+                if calendar.isleap(year):
+                    xAxesYear = year
+
+            for year in yearsToCompare:
+                from_date = datetime.date(int(year), 1, 1)
+                to_date = datetime.date(int(year), 12, 31)
+
+                if tsFromSeason != '' and tsToSeason != '':
+                    from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
+                    to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
+                        to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                        overTwoYears = True
+
+                p = Product(product_code=productcode, version=version)
+                dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode,
+                                        from_date=from_date, to_date=to_date)
+                dataset_filenames = dataset.get_filenames_range()
+
+                lof = [dataset_filenames]
+                bands = [None]  # * len(lof)
+                f4p = Fitness4Purpose(lof, bands, ecv=None, region_name=None, region_coordinates=None, dbg=True)
+                list_values, x_tick_labels, y_tick_labels = f4p.latitudinal_average_plot(plotimage=False, timeseries=True)
+
+                # list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                #                             aggregate)
+
+                if len(list_values) > 0 and not data_available:
+                    data_available = True
+
+                # x = 0
+                for val in list_values:
+                    value = []
+                    year = int(val[0][0:4])
+                    month = int(val[0][4:6])
+                    day = int(val[0][6:8])
+                    date = datetime.date(year, month, day)
+                    # date = datetime.date(xAxesYear, val['date'].month, val['date'].day)
+                    valdate = functions.unix_time_millis(date)
+                    val[0] = valdate
+                    #
+                    # value.append(valdate)  # Date for xAxe
+                    # # if overTwoYears:
+                    # #     value.append(str(year) + '-' + str(year+1))  # Year for yAxe
+                    # # else:
+                    # value.append(val['date'].year)  # Year for yAxe
+                    #
+                    # if val['meanvalue'] == float(nodata):
+                    #     value.append(None)
+                    # else:
+                    #     value.append(val['meanvalue'])
+                    # data.append(value)
+                #     x += 1
+                # y += 1
+                data = list_values
+
+            if ts_drawprops is None:
+                # Set defaults in case no entry exists in the DB
+                ts = {
+                    'name': productcode + '-' + version + '-' + subproductcode,
+                    'frequency_id': frequency_id,
+                    # 'type': 'heatmap',
+                    'yAxis': productcode + ' - ' + version,
+                    'data': data
+                    # 'visible': True,
+                    # 'borderWidth': 1,
+                    # 'dataLabels': {
+                    #     'enabled': True,
+                    #     'color': '#000000'
+                    # }
+                }
+            else:
+                # for ts_drawprops in product_ts_drawproperties:
+                # print ts_drawprops
+                ts = {
+                    'name': ts_drawprops['tsname_in_legend'],
+                    'frequency_id': frequency_id,
+                    # 'type': 'heatmap',
+                    'yAxis': ts_drawprops['yaxe_id'],
+                    'data': data
+                }
+            timeseries.append(ts)
+
+    legend_info = querydb.get_legend_info(legendid=legend_id)
+    step_type = 'linear'
+    if hasattr(legend_info, "__len__") and legend_info.__len__() > 0:
+        for row in legend_info:
+            step_type = row.step_type
+
+        if step_type != 'logarithmic':
+            step_type = 'linear'
+
+    legend_steps = querydb.get_legend_steps(legendid=legend_id)
+    if hasattr(legend_steps, "__len__") and legend_steps.__len__() > 0:
+        minimizeSteps = False
+        if legend_steps.__len__() > 35:
+            colorramp = True
+            minimizeSteps = True
+
+        firstStep = 0.01
+        roundTo = 2
+        if legend_steps.__len__() >= 100:
+            firstStep = 0.001
+            roundTo = 3
+
+        # min = float((legend_steps[0].from_step - legend_steps[0].scale_offset)/legend_steps[0].scale_factor)
+        # max = float((legend_steps[legend_steps.__len__()-1].to_step
+        #    - legend_steps[legend_steps.__len__()-1].scale_offset)/legend_steps[legend_steps.__len__()-1].scale_factor)
+
+        if step_type == 'logarithmic':
+            if legend_steps[0].from_step <= 0:
+                min = legend_steps[0].to_step
+                minColorSecondRow = True
+            else:
+                min = legend_steps[0].from_step
+                minColorSecondRow = False
+        else:
+            min = legend_steps[0].from_step
+
+        max = legend_steps[legend_steps.__len__() - 1].to_step
+
+        stops = []
+        colors = []
+        dataClasses = []
+        rownr = 0
+        for step in legend_steps:
+            stop = []
+            rownr += 1
+            # from_step = float((step.from_step - step.scale_offset)/step.scale_factor)
+            # to_step = float((step.to_step - step.scale_offset)/step.scale_factor)
+            from_step = step.from_step
+            to_step = step.to_step
+
+            colorRGB = list(map(int, (color.strip() for color in step.color_rgb.split(' ') if color.strip())))
+            colorHex = functions.rgb2html(colorRGB)
+
+            if step_type == 'logarithmic':
+                if rownr == 1 and not minColorSecondRow:
+                    mincolor = colorHex
+                    if step.color_label is None or (step.color_label is not None and step.color_label.strip() == ''):
+                        # stop.append(firstStep)
+                        stop.append(round(rownr / float(legend_steps.__len__()), roundTo))
+                        stop.append(colorHex)
+                        stops.append(stop)
+
+                if rownr == 2 and minColorSecondRow:
+                    mincolor = colorHex
+                    if step.color_label is None or (step.color_label is not None and step.color_label.strip() == ''):
+                        # stop.append(firstStep)
+                        stop.append(round(rownr / float(legend_steps.__len__()), roundTo))
+                        stop.append(colorHex)
+                        stops.append(stop)
+            else:
+                if rownr == 1:
+                    mincolor = colorHex
+                    if step.color_label is None or (step.color_label is not None and step.color_label.strip() == ''):
+                        # stop.append(firstStep)
+                        stop.append(round(rownr / float(legend_steps.__len__()), roundTo))
+                        stop.append(colorHex)
+                        stops.append(stop)
+
+            if rownr == legend_steps.__len__():
+                maxcolor = colorHex
+
+            if minimizeSteps:
+                if step.color_label is not None and step.color_label.strip() != '':
+                    # stop.append(round(to_step / max, roundTo))
+                    # stop.append(round((from_step-min)/(max-min), roundTo))
+                    stop.append(round(rownr / float(legend_steps.__len__()), roundTo))
+                    # stop.append(round(rownr * firstStep, 3))
+                    # stop.append(round(rownr/max, 2))
+                    stop.append(colorHex)
+                    stops.append(stop)
+            else:
+                colors.append(colorHex)
+                # stop.append((from_step-min)/(max-min))
+                stop.append(round(rownr / float(legend_steps.__len__()), roundTo))
+                # stop.append(round(rownr * firstStep, 3))
+                stop.append(colorHex)
+                stops.append(stop)
+
+            dataClass = {
+                'from': from_step,
+                'to': to_step,
+                'color': colorHex,
+                'name': step.color_label
+            }
+            dataClasses.append(dataClass)
+
+    if colorramp:
+        if minimizeSteps:
+            tickPixelInterval = int(old_div(legend_steps.__len__(), len(stops)))
+            # tickInterval = legend_steps.__len__()
+        else:
+            tickPixelInterval = 72
+            # tickPixelInterval = int(legend_steps.__len__()/len(stops))
+            # tickPixelInterval = legend_steps.__len__()
+            # tickInterval = tickPixelInterval
+
+        colorAxis = {
+            'min': min,
+            'max': max,
+            # 'floor': min,
+            'ceiling': max,
+            'stops': stops,
+            # 'colors': colors,
+            'maxColor': maxcolor,
+            'minColor': mincolor,
+            # 'minPadding': 0.05,
+            # 'maxPadding': 0.5,
+            'startOnTick': True,
+            'endOnTick': True,
+            'tickWidth': 2,
+            'tickmarkPlacement': 'on',
+            # 'tickInterval': None,
+            # 'tickPixelInterval': tickPixelInterval,
+            # 'tickLength': tickInterval,
+            'gridLineWidth': 0,
+            # 'gridLineColor': 'white',
+            # 'minorTickInterval': 0.1,
+            # 'minorGridLineColor': 'white',
+            'type': step_type  # 'logarithmic'  'linear'  #
+        }
+    else:
+        colorAxis = {
+            'dataClasses': dataClasses,
+            # 'dataClassColor': 'category',
+            'startOnTick': False,
+            'endOnTick': False
+        }
+
+    if overTwoYears:
+        yearsToCompare.append(yearsToCompare[-1] + 1)  # Add extra year
+        # for year in yearsToCompare:
+        #     categories.append(str(year) + '-' + str(year+1))
+    categories = yearsToCompare
+    min = yearsToCompare[0]  # yaxe.min
+    max = yearsToCompare[-1]  # yaxe.max
+
+    yaxes = []
+    if passedyaxes is not None:
+        for passedyaxe in passedyaxes:
+            yaxe = {'id': passedyaxe['id'],
+                    # 'categories': categories,
+                    'title': passedyaxe['title'],
+                    'title_color': passedyaxe['title_color'].replace("  ", " "),
+                    'title_font_size': passedyaxe['title_font_size'],
+                    'unit': passedyaxe['unit'], 'unit_orig': passedyaxe['unit_orig'],
+                    'opposite': passedyaxe['opposite'],
+                    'min': -40,     # min,
+                    'max': 40,  # max,
+                    # 'productcategory': passedyaxe['productcategory'],
+                    'aggregation_type': passedyaxe['aggregation_type'],
+                    'aggregation_min': passedyaxe['aggregation_min'],
+                    'aggregation_max': passedyaxe['aggregation_max']}
+            yaxes.append(yaxe)
+    else:
+        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, userid, istemplate, graphtype,
+                                                        graph_tpl_id, graph_tpl_name)
+        for yaxe in timeseries_yaxes:
+            # min = yearsToCompare[0]    # yaxe.min
+            # max = yearsToCompare[-1]    # yaxe.max
+
+            yaxe = {'id': yaxe.yaxe_id,
+                    # 'categories': categories,
+                    'title': 'Latitude',    # yaxe.title,
+                    'title_color': yaxe.title_color.replace("  ", " "),
+                    'title_font_size': yaxe.title_font_size,
+                    'unit': yaxe.unit, 'unit_orig': yaxe.unit,
+                    'opposite': yaxe.opposite,
+                    'min': -40,
+                    'max': 40,
                     # 'productcategory': yaxe.productcategory,
                     'aggregation_type': yaxe.aggregation_type,
                     'aggregation_min': yaxe.aggregation_min,

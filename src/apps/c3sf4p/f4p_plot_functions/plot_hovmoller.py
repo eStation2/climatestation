@@ -3,10 +3,16 @@ import matplotlib.cm as cm
 import numpy as np
 from inspect import currentframe, getframeinfo
 from apps.c3sf4p.f4p_utilities.stats_funcions import log_report
+from config import es_constants
+
+# It is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory,
+# in particular to speed up the import of Matplotlib and to better support multiprocessing.
+import os
+os.environ['MPLCONFIGDIR'] = '/tmp/matplotlib/'
 
 
 def graphical_render(data, product='', sensor_name='', zone_name='', x_tick_labels=None, y_tick_labels=None,
-                     figure_title='', min_v=None, max_v=None, dbg=True, logfile=None, sname=None):
+                     figure_title='', min_v=None, max_v=None, dbg=True, logfile=None):
     """
     @param data:            ->  np.array;   data
     @param product:         ->  STRING;     product name
@@ -48,7 +54,7 @@ def graphical_render(data, product='', sensor_name='', zone_name='', x_tick_labe
     x_tick = np.linspace(0, sz[1] - 1, sz[1])
 
     if figure_title is None:
-        figure_title = 'Latitudinal Average Diagram ' + sn + '\n ' + product + ' ' + zn
+        figure_title = 'Latitudinal Average Diagram ' + sn + '\n ' + str(product) + ' ' + zn
     if x_tick_labels is None:
         x_tick_labels = x_tick
 
@@ -113,5 +119,9 @@ def graphical_render(data, product='', sensor_name='', zone_name='', x_tick_labe
     plt.title(figure_title + '\n', fontsize=16)
     plt.tight_layout()
 
-    if sname:
-        plt.savefig(sname)
+    plt.savefig(es_constants.es2globals['base_tmp_dir'] + '/hovmoller_test.jpg', format='jpg')
+    # plt.draw()
+    plt.show()
+    x = 1
+
+

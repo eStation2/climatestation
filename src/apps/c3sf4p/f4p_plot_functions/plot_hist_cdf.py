@@ -4,6 +4,11 @@ import numpy as np
 from apps.c3sf4p.f4p_utilities.stats_funcions import log_report
 import apps.c3sf4p.f4p_utilities.stats_funcions as sf
 
+# It is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory,
+# in particular to speed up the import of Matplotlib and to better support multiprocessing.
+import os
+os.environ['MPLCONFIGDIR'] = '/tmp/matplotlib/'
+
 
 def graphical_render(data_set, n_bin=101, x_label=None, y_label=None, sensor_name=None, prod_name=None, date_time=None,
                      zone_name=None, ks_value=None, i_ref=None, zone_coord=None, is_spc=False, x_lim=None,

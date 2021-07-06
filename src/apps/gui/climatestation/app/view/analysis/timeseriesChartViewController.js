@@ -90,7 +90,7 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
             disclaimerObj.show();
             logoObj.show();
             btn.setStyle({ color: 'green' });
-            if (graphviewwin.graphtype === 'matrix'){
+            if (graphviewwin.graphtype === 'matrix' || graphviewwin.graphtype === 'hovmuller'){
                 graphviewwin.tsgraph.options.chart.spacingBottom = 75;
             }
             else {
@@ -228,8 +228,8 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
                 graphtype: me.graphtype,
                 cumulative: me.graphtype === 'cumulative' ? true : false,
                 ranking: me.graphtype === 'ranking' ? true : false,
-                matrix: me.graphtype === 'matrix' ? true : false,
-                multiplevariables: (me.graphtype === 'xy' || me.graphtype === 'cumulative') ? true : false,
+                matrix: (me.graphtype === 'matrix' || me.graphtype === 'hovmuller') ? true : false,
+                multiplevariables: (me.graphtype === 'xy' || me.graphtype === 'cumulative' || me.graphtype === 'hovmuller' ) ? true : false,
                 fromto: (me.graphtype === 'xy' || me.graphtype === 'cumulative') ? true : false,
                 year: me.graphtype === 'cumulative' ? true : false,
                 multipleyears: me.graphtype !== 'cumulative' ? true : false
@@ -314,6 +314,9 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
                 }
                 else if (me.getView().graphtype === 'matrix'){
                     newGraphTemplateName = climatestation.Utils.getTranslation('MATRIX') + ' - ';
+                }
+                else if (me.getView().graphtype === 'hovmuller'){
+                    newGraphTemplateName = climatestation.Utils.getTranslation('HOVMULLER') + ' - ';
                 }
                 else {
                     newGraphTemplateName = climatestation.Utils.getTranslation('PROFILE') + ' - ';
@@ -2086,11 +2089,8 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
                                                                 // + ' ' + climatestation.Utils.getTranslation('GRAPH');
                                                                 // me.selectedregionname;
         }
-        else if (me.graphtype === 'scatter'){
-            // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('SCATTER')+ ' ' + climatestation.Utils.getTranslation('GRAPH')+ ' - ' + Ext.getCmp('selectedregionname').getValue() +'</span>');
-            Ext.fly('graphview_title_' + me.id).dom.innerHTML = climatestation.Utils.getTranslation('SCATTER');
-                                                                // + ' ' + climatestation.Utils.getTranslation('GRAPH');
-                                                                // me.selectedregionname;
+        else if (me.graphtype === 'hovmuller'){
+            Ext.fly('graphview_title_' + me.id).dom.innerHTML = climatestation.Utils.getTranslation('HOVMULLER');
         }
         else {
             // me.setTitle('<span class="panel-title-style">' + climatestation.Utils.getTranslation('PROFILE')+ ' ' + climatestation.Utils.getTranslation('GRAPH')+ ' - ' + Ext.getCmp('selectedregionname').getValue() +'</span>');
@@ -2127,6 +2127,9 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
                         me.getController().getTimeseries(me.getController().createRankingChart);
                     }
                     else if (me.graphtype === 'matrix'){
+                        me.getController().getTimeseries(me.getController().createMatrixChart);
+                    }
+                    else if (me.graphtype === 'hovmuller'){
                         me.getController().getTimeseries(me.getController().createMatrixChart);
                     }
                     else {
@@ -2173,16 +2176,16 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
         me.getController().setGraphProperties();
         me.graphProperties.localRefresh = false;
         if (me.graphtype === 'ranking') {
-            // me.getController().createRankingChart(me);
             me.getController().getTimeseries(me.getController().createRankingChart);
 
         }
         else if (me.graphtype === 'matrix') {
-            // me.getController().createMatrixChart(me);
+            me.getController().getTimeseries(me.getController().createMatrixChart);
+        }
+        else if (me.graphtype === 'hovmuller') {
             me.getController().getTimeseries(me.getController().createMatrixChart);
         }
         else {
-            // me.getController().createDefaultChart(me);
             me.getController().getTimeseries(me.getController().createDefaultChart);
         }
         // this.generateChart();
@@ -3089,6 +3092,9 @@ Ext.define('climatestation.view.analysis.timeseriesChartViewController', {
                                             me.getController().createRankingChart(me);
                                         }
                                         else if (me.graphtype === 'matrix') {
+                                            me.getController().createMatrixChart(me);
+                                        }
+                                        else if (me.graphtype === 'hovmuller') {
                                             me.getController().createMatrixChart(me);
                                         }
                                         else {
