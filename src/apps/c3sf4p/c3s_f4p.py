@@ -342,8 +342,9 @@ class Fitness4Purpose(object):
             self._log_report(info, tag)
             from apps.c3sf4p.f4p_plot_functions.plot_scatter import graphical_render
 
+            sname = self.save_path + os.sep + 'test_scatter.png'
             graphical_render(data[0], data[1], x_label=data_labels[0], y_label=data_labels[1], figure_title=fig_title,
-                             logfile=self.logfile)
+                             logfile=self.logfile, sname=sname)
 
             info = (str(getframeinfo(currentframe()).filename) + ' --line: ' + str(getframeinfo(currentframe()).lineno))
             tag = 'End of scatter plot function, no problem found'
@@ -354,6 +355,8 @@ class Fitness4Purpose(object):
         This function is the entry point for generating the latitudinal average diagram (also known as howmoller plot).
         In general this function expects a full timeseries for a single dataset, however the function can also be
         extended to multiple dataset.
+        @param plotimage
+        @param timeseries
         :return:
         """
 
